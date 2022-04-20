@@ -145,10 +145,18 @@ function initializeBrwAbfrageModel () {
          * @returns {string} the name
          */
         createModelName (year, appendix) {
-            if (parseInt(year, 10) > 2009 || parseInt(year, 10) === 1994) {
-                return "31.12." + year + appendix;
+            let modelName;
+
+            if (parseInt(year, 10) >= 2022) {
+                modelName = "01.01." + year + appendix;
             }
-            return "01.01." + year + appendix;
+            else if (parseInt(year, 10) > 2009 || parseInt(year, 10) === 1994) {
+                modelName = "31.12." + year + appendix;
+            }
+            else {
+                modelName = "01.01." + year + appendix;
+            }
+            return modelName;
         },
         /**
          * Returns the year in layers like "lgv_brw_zonen_2018,lgv_brw_zonen_brw_grdstk_2018".
