@@ -3,7 +3,7 @@
         "controls": {
             "oblique": {
                 "title": "Oblique aerial photos",
-                "messageRedirect":"We are currently working on being able to display the current oblique aerial images in this portal again.</br>For the meantime, they will now be redirected to another application in which they can use the oblique aerial images with the 2020 status.</br></br>The oblique aerial images open in a new browser tab in a few seconds!</br></br></br>",
+                "messageRedirect": "We are currently working on being able to display the current oblique aerial images in this portal again.</br>For the meantime, they will now be redirected to another application in which they can use the oblique aerial images with the 2020 status.</br></br>The oblique aerial images open in a new browser tab in a few seconds!<br>If the oblique aerial images do not open automatically, click <u><b><a href='https://geofos.fhhnet.stadt.hamburg.de/FHH-Schraegluftbilder/#/' title='Oblique aerial images 2020' target='_blank'>here</a></b></u>.</br></br>",
                 "markAsRead":"mark as read"
             }
         }

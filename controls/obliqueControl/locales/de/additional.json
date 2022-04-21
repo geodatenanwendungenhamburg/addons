@@ -3,7 +3,7 @@
         "controls": {
             "oblique": {
                 "title": "Schrägluftbilder",
-                "messageRedirect":"Wir arbeiten momentan daran, die aktuellen Schrägluftbilder wieder in diesem Portal darstellen zu können. </br>Für die Zwischenzeit werden sie nun auf eine andere Anwendung weitergeleitet in der sie die Schrägluftbilder mit dem Stand 2020 nutzen können.</br></br> Die Schrägluftbilder öffnen sich in wenigen Sekunden in einem neuen Browser-Tab!</br></br></br>",
+                "messageRedirect": "Wir arbeiten momentan daran, die aktuellen Schrägluftbilder wieder in diesem Portal darstellen zu können. </br>Für die Zwischenzeit werden sie nun auf eine andere Anwendung weitergeleitet in der sie die Schrägluftbilder mit dem Stand 2020 nutzen können.</br></br> Die Schrägluftbilder öffnen sich in wenigen Sekunden in einem neuen Browser-Tab!<br>Falls sich die Schrägluftbilder nicht automatisch öffnen, klicken Sie <u><b><a href='https://geofos.fhhnet.stadt.hamburg.de/FHH-Schraegluftbilder/#/' title='Schrägluftbilder 2020' target='_blank'>hier</a></b></u>.</br></br>",
                 "markAsRead":"als gelesen markieren"
             }
         }
