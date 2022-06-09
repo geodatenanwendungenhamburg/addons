@@ -74,11 +74,24 @@ export class CommuterOL {
 
         this.ol = Object.assign(this.getOpenlayersConnectors(), olMock);
         this.layers = {
-            beams: this.ol.createLayerIfNotExists("CommuterOL_layerBeams"),
-            bubbles: this.ol.createLayerIfNotExists("CommuterOL_layerBubbles"),
-            animation: this.ol.createLayerIfNotExists("CommuterOL_layerAnimation"),
-            captions: this.ol.createLayerIfNotExists("CommuterOL_layerCaptions")
+            beams: null,
+            bubbles: null,
+            animation: null,
+            captions: null
         };
+        this.ol.createLayerIfNotExists("CommuterOL_layerBeams", layer => {
+            this.layers.beams = layer;
+        });
+        this.ol.createLayerIfNotExists("CommuterOL_layerBubbles", layer => {
+            this.layers.bubbles = layer;
+        });
+        this.ol.createLayerIfNotExists("CommuterOL_layerAnimation", layer => {
+            this.layers.animation = layer;
+        });
+        this.ol.createLayerIfNotExists("CommuterOL_layerCaptions", layer => {
+            this.layers.captions = layer;
+        });
+
         this.animation = null;
     }
 
@@ -88,8 +101,17 @@ export class CommuterOL {
      */
     getOpenlayersConnectors () {
         return {
-            createLayerIfNotExists: labelname => {
-                return Radio.request("Map", "createLayerIfNotExists", labelname);
+            createLayerIfNotExists: (labelname, onsuccess) => {
+                const promise = Radio.request("Map", "createLayerIfNotExists", labelname);
+
+                if (promise instanceof VectorLayer) {
+                    onsuccess(promise);
+                }
+                else if (promise instanceof Promise) {
+                    promise.then(layer => {
+                        onsuccess(layer);
+                    });
+                }
             },
             getFeatures: layer => {
                 if (layer instanceof VectorLayer) {
@@ -108,7 +130,7 @@ export class CommuterOL {
                 }
             },
             zoomToExtent: extent => {
-                Radio.trigger("Map", "zoomToExtent", extent, this.options.zoomOptions);
+                Radio.trigger("Map", "zoomToExtent", {extent, options: this.options.zoomOptions});
             },
             showLayer: layer => {
                 if (layer instanceof VectorLayer) {
