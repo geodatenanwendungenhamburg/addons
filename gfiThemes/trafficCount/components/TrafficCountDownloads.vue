@@ -285,6 +285,7 @@ export default {
             :url="downloadUrl"
             :filename="downloadFilename"
             :handler="false"
+            :use-semicolon="true"
             :title="$t('additional:modules.tools.gfi.themes.trafficCount.downloadsAll')"
         />
     </div>
@@ -293,24 +294,28 @@ export default {
             :url="downloadUrl"
             :filename="downloadFilename + ' ' + minInterval"
             :handler="downloadHandlerMin"
+            :use-semicolon="true"
             :title="$t('additional:modules.tools.gfi.themes.trafficCount.downloadsMin')"
         />
         <ExportButtonCSV
             :url="downloadUrl"
             :filename="downloadFilename + ' ' + hourInterval"
             :handler="downloadHandlerHour"
+            :use-semicolon="true"
             :title="$t('additional:modules.tools.gfi.themes.trafficCount.downloadsHour')"
         />
         <ExportButtonCSV
             :url="downloadUrl"
             :filename="downloadFilename + ' ' + dayInterval"
             :handler="downloadHandlerDay"
+            :use-semicolon="true"
             :title="$t('additional:modules.tools.gfi.themes.trafficCount.downloadsDay')"
         />
         <ExportButtonCSV
             :url="downloadUrl"
             :filename="downloadFilename + ' ' + weekInterval"
             :handler="downloadHandlerWeek"
+            :use-semicolon="true"
             :title="$t('additional:modules.tools.gfi.themes.trafficCount.downloadsWeek')"
         />
     </div>
