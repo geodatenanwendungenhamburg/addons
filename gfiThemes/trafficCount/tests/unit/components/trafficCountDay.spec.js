@@ -62,14 +62,6 @@ describe("addons/trafficCount/components/TraffiCountInfo.vue", () => {
         });
     });
 
-    describe("setDayDatepicker", () => {
-        it("should initialize the datepicker", () => {
-            wrapper.vm.setDayDatepicker();
-
-            expect(wrapper.vm.dayDatepicker.attributes.multidate).to.equal(5);
-        });
-    });
-
     describe("dayDatepickerValueChanged", () => {
         it("should get the parsed api data", () => {
             const dates = [

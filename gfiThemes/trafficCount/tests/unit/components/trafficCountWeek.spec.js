@@ -61,14 +61,6 @@ describe("addons/trafficCount/components/TrafficCountWeek.vue", () => {
         });
     });
 
-    describe("setDayDatepicker", () => {
-        it("should initialize the datepicker", () => {
-            wrapper.vm.setWeekdatepicker();
-
-            expect(wrapper.vm.weekDatepicker.attributes.calendarWeeks).to.be.true;
-        });
-    });
-
     describe("weekDatepickerValueChanged", () => {
         it("should get the parsed api data", () => {
             const dates = [

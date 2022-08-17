@@ -1,22 +1,21 @@
 <script>
-import TrafficCountCalendarButtonGroup from "./TrafficCountCalendarButtonGroup.vue";
 import TrafficCountCompDiagram from "./TrafficCountCompDiagram.vue";
 import TrafficCountCompTable from "./TrafficCountCompTable.vue";
 import TrafficCountCheckbox from "./TrafficCountCheckbox.vue";
 import thousandsSeparator from "../../../../src/utils/thousandsSeparator.js";
 import moment from "moment";
-import DatepickerModel from "../../../../modules/snippets/datepicker/model";
-import DatepickerView from "../../../../modules/snippets/datepicker/view";
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
 import {addMissingDataWeek} from "../utils/addMissingData.js";
 import {getPublicHoliday} from "../../../../src/utils/calendar.js";
 
 export default {
     name: "TrafficCountWeek",
     components: {
-        TrafficCountCalendarButtonGroup,
         TrafficCountCompDiagram,
         TrafficCountCompTable,
-        TrafficCountCheckbox
+        TrafficCountCheckbox,
+        DatePicker
     },
     props: {
         api: {
@@ -43,8 +42,8 @@ export default {
     data () {
         return {
             tab: "week",
-            weekDatepicker: null,
             apiData: [],
+            dates: null,
             showPreviousWeekUntilThisWeekday: 1,
 
             // props for diagram
@@ -135,71 +134,26 @@ export default {
         }
     },
     watch: {
-        reset () {
-            this.weekDatepicker = null;
-            this.setWeekdatepicker();
+        dates (value) {
+            if (value) {
+                this.weekDatepickerValueChanged([value]);
+            }
+            else {
+                this.weekDatepickerValueChanged([]);
+            }
         }
     },
     mounted () {
         moment.locale(i18next.language);
-        this.setWeekdatepicker();
+
+        if (moment().isoWeekday() <= this.showPreviousWeekUntilThisWeekday) {
+            this.dates = moment().subtract(7, "days").toDate();
+        }
+        else {
+            this.dates = moment().toDate();
+        }
     },
     methods: {
-        setWeekdatepicker: function () {
-            const startDate = moment("2020-01-01") > moment().subtract(1, "year") ? moment("2020-01-01") : moment().subtract(1, "year"),
-                preselectedValue = moment().isoWeekday() <= this.showPreviousWeekUntilThisWeekday ? moment().subtract(7, "days").toDate() : moment().toDate();
-
-            if (!this.weekDatepicker) {
-                this.weekDatepicker = new DatepickerModel({
-                    preselectedValue: preselectedValue,
-                    multidate: 5,
-                    startDate: startDate.toDate(),
-                    endDate: moment().toDate(),
-                    type: "datepicker",
-                    selectWeek: true,
-                    inputs: $(document.getElementById("weekDateInput")),
-                    calendarWeeks: true,
-                    format: {
-                        toDisplay: function (date) {
-                            return moment(date).startOf("isoWeek").format("DD.MM.YYYY") + "-" + moment(date).endOf("isoWeek").format("DD.MM.YYYY");
-                        },
-                        toValue: function (date) {
-                            return moment.utc(date, "DD.MM.YYYY").toDate();
-                        }
-                    },
-                    todayHighlight: false,
-                    language: i18next.language,
-                    beforeShowDay: date => {
-                        const holiday = getPublicHoliday(date, this.holidays);
-
-                        if (holiday?.translationKey) {
-                            return {classes: "holiday", tooltip: i18next.t(holiday.translationKey)};
-                        }
-
-                        return true;
-                    }
-                });
-
-                this.weekDatepicker.on("valuesChanged", function (evt) {
-                    let date = evt.attributes.date;
-
-                    if (date && !Array.isArray(date)) {
-                        date = [date];
-                    }
-                    this.weekDatepickerValueChanged(date);
-                }.bind(this));
-
-                if (document.querySelector("#weekDateSelector")) {
-                    document.querySelector("#weekDateSelector").appendChild(new DatepickerView({model: this.weekDatepicker}).render().el);
-                }
-
-                this.weekDatepicker.updateValues(moment().isoWeekday() <= this.showPreviousWeekUntilThisWeekday ? moment().subtract(7, "days").toDate() : moment().toDate());
-            }
-            else if (document.querySelector("#weekDateSelector")) {
-                document.querySelector("#weekDateSelector").appendChild(new DatepickerView({model: this.weekDatepicker}).render().el);
-            }
-        },
-
         /**
          * Function is initially triggered and on update
          * @param   {Date[]} dates an unsorted array of selected dates of weekday
@@ -212,11 +166,11 @@ export default {
                 meansOfTransport = this.meansOfTransport,
                 timeSettings = [];
 
-            if (dates.length === 0) {
+            if (!Array.isArray(dates) || dates.length === 0) {
                 this.apiData = [];
             }
             else {
-                dates.sort((earlyDate, lateDate) => {
+                [...dates].sort((earlyDate, lateDate) => {
                     // Showing earlier date first
                     return earlyDate - lateDate;
                 }).forEach(date => {
@@ -252,13 +206,29 @@ export default {
         },
 
         /**
-         * opens the calender
-         * @returns {Void}  -
+         * Checks if the a date should be disabled.
+         * @param {Date} date The date in question.
+         * @param {Date[]} currentDates The list of selected dates.
+         * @returns {Boolean} true if disabled, false if enabled.
          */
-        toggleCalendar: function () {
-            const input = this.$el.querySelector("input");
+        isDateDisabled (date, currentDates) {
+            if (!(date instanceof Date)) {
+                return true;
+            }
+            const endDate = this.checkGurlittInsel ? moment().subtract(1, "days") : moment(),
+                startDate = moment("2020-01-01") > moment().subtract(1, "year") ? moment("2020-01-01") : moment().subtract(1, "year"),
+                question = moment(date);
 
-            input.focus();
+            if (Array.isArray(currentDates) && currentDates.length >= 5) {
+                for (let i = 0; i < 5; i++) {
+                    if (question.isSame(moment(currentDates[i]))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            return question.isSameOrBefore(startDate) || question.isSameOrAfter(endDate);
         }
     }
 };
@@ -270,16 +240,18 @@ export default {
             id="weekDateSelector"
             class="dateSelector"
         >
-            <div class="input-group">
-                <input
-                    id="weekDateInput"
-                    aria-label="Datum"
-                    type="text"
-                    class="form-control dpinput"
-                    placeholder="Datum"
-                >
-                <TrafficCountCalendarButtonGroup id-prefix="week" />
-            </div>
+            <DatePicker
+                v-model="dates"
+                aria-label="Datum"
+                placeholder="Datum"
+                type="week"
+                format="KW ww"
+                :multiple="true"
+                :show-week-number="true"
+                :disabled-date="isDateDisabled"
+                title-format="DD.MM.YYYY"
+                :lang="$t('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
+            />
         </div>
         <TrafficCountCheckbox
             :table-diagram-id="diagramWeek"
@@ -314,8 +286,10 @@ export default {
     </div>
 </template>
 
-<style lang="scss" scoped>
-#weekDateInputButton{
-    padding: 6px 12px 5px 12px
+<style lang="scss">
+#weekDateSelector {
+    .mx-input {
+        border-radius: 0px;
+    }
 }
 </style>

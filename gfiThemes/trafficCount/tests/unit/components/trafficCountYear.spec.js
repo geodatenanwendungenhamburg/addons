@@ -55,14 +55,6 @@ describe("addons/trafficCount/components/TrafficCountYear.vue", () => {
         });
     });
 
-    describe("setYearDatepicker", () => {
-        it("should initialize the datepicker", () => {
-            wrapper.vm.setYearDatepicker();
-
-            expect(wrapper.vm.yearDatepicker.attributes.multidate).to.equal(5);
-        });
-    });
-
     describe("yearDatepickerValueChanged", () => {
         it("should get the parsed api data", () => {
             const dates = [

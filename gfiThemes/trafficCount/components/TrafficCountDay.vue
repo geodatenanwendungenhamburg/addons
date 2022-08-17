@@ -1,12 +1,11 @@
 <script>
-import TrafficCountCalendarButtonGroup from "./TrafficCountCalendarButtonGroup.vue";
 import TrafficCountCompDiagram from "./TrafficCountCompDiagram.vue";
 import TrafficCountCompTable from "./TrafficCountCompTable.vue";
 import TrafficCountCheckbox from "./TrafficCountCheckbox.vue";
 import thousandsSeparator from "../../../../src/utils/thousandsSeparator.js";
 import moment from "moment";
-import DatepickerModel from "../../../../modules/snippets/datepicker/model";
-import DatepickerView from "../../../../modules/snippets/datepicker/view";
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
 import {addMissingDataDay} from "../utils/addMissingData.js";
 import {getPublicHoliday} from "../../../../src/utils/calendar.js";
 import {DauerzaehlstellenRadApi} from "../utils/dauerzaehlstellenRadApi";
@@ -14,10 +13,10 @@ import {DauerzaehlstellenRadApi} from "../utils/dauerzaehlstellenRadApi";
 export default {
     name: "TrafficCountDay",
     components: {
-        TrafficCountCalendarButtonGroup,
         TrafficCountCompDiagram,
         TrafficCountCompTable,
-        TrafficCountCheckbox
+        TrafficCountCheckbox,
+        DatePicker
     },
     props: {
         api: {
@@ -48,8 +47,8 @@ export default {
     data () {
         return {
             tab: "day",
-            dayDatepicker: null,
             apiData: [],
+            dates: [],
 
             // props for diagram
             setTooltipValue: (tooltipItem) => {
@@ -127,61 +126,15 @@ export default {
         };
     },
     watch: {
-        reset () {
-            this.dayDatepicker = null;
-            this.setDayDatepicker();
+        dates (value) {
+            this.dayDatepickerValueChanged(value);
         }
     },
     mounted () {
         moment.locale(i18next.language);
-        this.setDayDatepicker();
+        this.dates.push(this.checkGurlittInsel ? moment().subtract(1, "days").toDate() : moment().toDate());
     },
     methods: {
-        setDayDatepicker: function () {
-            const startDate = moment().subtract(7, "days");
-
-            if (!this.dayDatepicker) {
-                this.dayDatepicker = new DatepickerModel({
-                    displayName: "Tag",
-                    multidate: 5,
-                    preselectedValue: this.checkGurlittInsel ? moment().subtract(1, "days") : moment().toDate(),
-                    startDate: startDate.toDate(),
-                    endDate: moment().toDate(),
-                    type: "datepicker",
-                    inputs: $(document.getElementById("dayDateInput")),
-                    todayHighlight: false,
-                    language: i18next.language,
-                    beforeShowDay: date => {
-                        const holiday = getPublicHoliday(date, this.holidays);
-
-                        if (holiday?.translationKey) {
-                            return {classes: "holiday", tooltip: i18next.t(holiday.translationKey)};
-                        }
-
-                        return true;
-                    }
-                });
-
-                this.dayDatepicker.on("valuesChanged", function (evt) {
-                    let date = evt.attributes.date;
-
-                    if (date && !Array.isArray(date)) {
-                        date = [date];
-                    }
-                    this.dayDatepickerValueChanged(date);
-                }.bind(this));
-
-                if (document.querySelector("#dayDateSelector")) {
-                    document.querySelector("#dayDateSelector").appendChild(new DatepickerView({model: this.dayDatepicker}).render().el);
-                }
-
-                this.dayDatepicker.updateValues(this.checkGurlittInsel ? moment().subtract(1, "days") : moment().toDate());
-            }
-            else if (document.querySelector("#dayDateSelector")) {
-                document.querySelector("#dayDateSelector").appendChild(new DatepickerView({model: this.dayDatepicker}).render().el);
-            }
-        },
-
         /**
          * Function is initially triggered and on update
          * @param   {Date[]} dates an unsorted array of selected dates of weekday
@@ -195,11 +148,11 @@ export default {
                 timeSettings = [],
                 minutesForMissingData = api instanceof DauerzaehlstellenRadApi ? 60 : 15;
 
-            if (dates.length === 0) {
+            if (!Array.isArray(dates) || dates.length === 0) {
                 this.apiData = [];
             }
             else {
-                dates.sort((earlyDate, lateDate) => {
+                [...dates].sort((earlyDate, lateDate) => {
                     // Showing earlier date first
                     return earlyDate - lateDate;
                 }).forEach(date => {
@@ -237,13 +190,31 @@ export default {
         },
 
         /**
-         * opens the calender
-         * @returns {Void}  -
+         * Checks if the a date should be disabled.
+         * @param {Date} date The date in question.
+         * @param {Date[]} currentDates The list of selected dates.
+         * @returns {Boolean} true if disabled, false if enabled.
          */
-        toggleCalendar: function () {
-            const input = this.$el.querySelector("input");
+        isDateDisabled (date, currentDates) {
+            if (!(date instanceof Date)) {
+                return true;
+            }
+            const endDate = this.checkGurlittInsel ? moment().subtract(1, "days") : moment(),
+                startDate = moment().subtract(7, "days"),
+                question = moment(date);
 
-            input.focus();
+            if (Array.isArray(currentDates) && currentDates.length >= 5) {
+                for (let i = 0; i < 5; i++) {
+                    if (question.isSame(moment(currentDates[i]))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            startDate.subtract(1, "days");
+
+            return question.isSameOrBefore(startDate) || question.isSameOrAfter(endDate);
         }
     }
 };
@@ -255,16 +226,18 @@ export default {
             id="dayDateSelector"
             class="dateSelector"
         >
-            <div class="input-group">
-                <input
-                    id="dayDateInput"
-                    aria-label="Datum"
-                    type="text"
-                    class="form-control dpinput"
-                    placeholder="Datum"
-                >
-                <TrafficCountCalendarButtonGroup id-prefix="day" />
-            </div>
+            <DatePicker
+                v-model="dates"
+                aria-label="Datum"
+                placeholder="Datum"
+                type="date"
+                format="DD.MM.YYYY"
+                :multiple="true"
+                :show-week-number="true"
+                :disabled-date="isDateDisabled"
+                title-format="DD.MM.YYYY"
+                :lang="$t('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
+            />
         </div>
         <TrafficCountCheckbox
             :table-diagram-id="diagramDay"
@@ -300,9 +273,10 @@ export default {
     </div>
 </template>
 
-<style lang="scss" scoped>
-#dayDateInputButton{
-    padding: 6px 12px 5px 12px
+<style lang="scss">
+#dayDateSelector {
+    .mx-input {
+        border-radius: 0px;
+    }
 }
-
 </style>

@@ -1,22 +1,21 @@
 <script>
-import TrafficCountCalendarButtonGroup from "./TrafficCountCalendarButtonGroup.vue";
 import TrafficCountCompDiagram from "./TrafficCountCompDiagram.vue";
 import TrafficCountCompTable from "./TrafficCountCompTable.vue";
 import TrafficCountCheckbox from "./TrafficCountCheckbox.vue";
 import thousandsSeparator from "../../../../src/utils/thousandsSeparator.js";
 import moment from "moment";
-import DatepickerModel from "../../../../modules/snippets/datepicker/model";
-import DatepickerView from "../../../../modules/snippets/datepicker/view";
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
 import {addMissingDataYear} from "../utils/addMissingData.js";
 import {hasHolidayInWeek} from "../../../../src/utils/calendar.js";
 
 export default {
     name: "TrafficCountYear",
     components: {
-        TrafficCountCalendarButtonGroup,
         TrafficCountCompDiagram,
         TrafficCountCompTable,
-        TrafficCountCheckbox
+        TrafficCountCheckbox,
+        DatePicker
     },
     props: {
         api: {
@@ -47,8 +46,8 @@ export default {
     data () {
         return {
             tab: "year",
-            yearDatepicker: null,
             apiData: [],
+            dates: [],
 
             // props for diagram
             setTooltipValue: (tooltipItem) => {
@@ -132,70 +131,15 @@ export default {
         };
     },
     watch: {
-        reset () {
-            this.yearDatepicker = null;
-            this.setYearDatepicker();
+        dates (value) {
+            this.yearDatepickerValueChanged(value);
         }
     },
     mounted () {
         moment.locale(i18next.language);
-        this.setYearDatepicker();
+        this.dates.push(this.checkGurlittInsel ? moment().subtract(1, "days").toDate() : moment().toDate());
     },
     methods: {
-        /**
-         * Setup of the year tab.
-         * This methode creates a datepicker model and triggers the view for rendering. Snippets must be added after view.render.
-         * @listens Snippets#ValuesChanged
-         * @returns {void}
-         */
-        setYearDatepicker: function () {
-            const startMoment = moment().startOf("year").subtract(10, "years"),
-                startYear = parseInt(startMoment.format("YYYY"), 10);
-
-            if (this.checkGurlittInsel) {
-                if (startYear < 2014) {
-                    startMoment.add(2014 - startYear, "years");
-                }
-            }
-            else if (startYear < 2020) {
-                startMoment.add(2020 - startYear, "years");
-            }
-
-            // create datepicker only on first enter of tab
-            if (!this.yearDatepicker) {
-                this.yearDatepicker = new DatepickerModel({
-                    displayName: "Tag",
-                    preselectedValue: moment().startOf("year").toDate(),
-                    multidate: 5,
-                    startDate: startMoment.toDate(),
-                    endDate: moment().startOf("year").toDate(),
-                    type: "datepicker",
-                    minViewMode: "years",
-                    maxViewMode: "years",
-                    inputs: $(document.getElementById("yearDateInput")),
-                    format: "yyyy",
-                    language: i18next.language
-                });
-
-                this.yearDatepicker.on("valuesChanged", function (evt) {
-                    let date = evt.attributes.date;
-
-                    if (date && !Array.isArray(date)) {
-                        date = [date];
-                    }
-                    this.yearDatepickerValueChanged(date);
-                }.bind(this));
-
-                if (document.querySelector("#yearDateSelector")) {
-                    document.querySelector("#yearDateSelector").appendChild(new DatepickerView({model: this.yearDatepicker}).render().el);
-                }
-                this.yearDatepicker.updateValues(moment().toDate());
-            }
-            else if (document.querySelector("#yearDateSelector")) {
-                document.querySelector("#yearDateSelector").appendChild(new DatepickerView({model: this.yearDatepicker}).render().el);
-            }
-        },
-
         /** Function is initially triggered and on update
          * @param   {Date} dates an unsorted array of first day date of selected year
          * @fires   Alerting#RadioTriggerAlertAlert
@@ -207,11 +151,11 @@ export default {
                 meansOfTransport = this.meansOfTransport,
                 timeSettings = [];
 
-            if (dates.length === 0) {
+            if (!Array.isArray(dates) || dates.length === 0) {
                 this.apiData = [];
             }
             else {
-                dates.sort((earlyDate, lateDate) => {
+                [...dates].sort((earlyDate, lateDate) => {
                     // Showing earlier date first
                     return earlyDate - lateDate;
                 }).forEach(date => {
@@ -250,13 +194,41 @@ export default {
         },
 
         /**
-         * opens the calender
-         * @returns {void}
+         * Checks if the a date should be disabled.
+         * @param {Date} date The date in question.
+         * @param {Date[]} currentDates The list of selected dates.
+         * @returns {Boolean} true if disabled, false if enabled.
          */
-        toggleCalendar: function () {
-            const input = this.$el.querySelector("input");
+        isDateDisabled (date, currentDates) {
+            if (!(date instanceof Date)) {
+                return true;
+            }
+            const endDate = this.checkGurlittInsel ? moment().subtract(1, "days") : moment(),
+                startMoment = moment().startOf("year").subtract(10, "years"),
+                startYear = parseInt(startMoment.format("YYYY"), 10),
+                question = moment(date);
 
-            input.focus();
+            if (this.checkGurlittInsel) {
+                if (startYear < 2014) {
+                    startMoment.add(2014 - startYear, "years");
+                }
+            }
+            else if (startYear < 2020) {
+                startMoment.add(2020 - startYear, "years");
+            }
+
+            startMoment.subtract(1, "year");
+
+            if (Array.isArray(currentDates) && currentDates.length >= 5) {
+                for (let i = 0; i < 5; i++) {
+                    if (question.isSame(moment(currentDates[i]))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            return question.isSameOrBefore(startMoment) || question.isSameOrAfter(endDate);
         }
     }
 };
@@ -268,16 +240,17 @@ export default {
             id="yearDateSelector"
             class="dateSelector"
         >
-            <div class="input-group">
-                <input
-                    id="yearDateInput"
-                    aria-label="Datum"
-                    type="text"
-                    class="form-control dpinput"
-                    placeholder="Datum"
-                >
-                <TrafficCountCalendarButtonGroup id-prefix="year" />
-            </div>
+            <DatePicker
+                v-model="dates"
+                aria-label="Datum"
+                placeholder="Datum"
+                type="year"
+                format="YYYY"
+                :multiple="true"
+                :disabled-date="isDateDisabled"
+                title-format="YYYY"
+                :lang="$t('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
+            />
         </div>
         <TrafficCountCheckbox
             :table-diagram-id="diagramYear"
@@ -312,8 +285,10 @@ export default {
     </div>
 </template>
 
-<style lang="scss" scoped>
-#yearDateInputButton{
-    padding: 6px 12px 5px 12px
+<style lang="scss">
+#yearDateSelector {
+    .mx-input {
+        border-radius: 0px;
+    }
 }
 </style>
