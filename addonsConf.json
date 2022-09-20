@@ -2,6 +2,9 @@
   "bauforum": "changeGUI/loader.js",
   "formular": "view.js",
   "showParcelGFI": "showParcelGFI.js",
+  "gfiOnAddress": {
+    "type": "javascript"
+  },
   "verkehrsfunctions": {
     "type": "javascript"
   },
@@ -95,6 +98,10 @@
   },
   "quickResponseCode": {
     "type": "tool"
+  },
+  "address": {
+    "path":"gfiThemes/address",
+    "type": "gfiTheme"
   },
   "bildungsatlas": {
     "path":"gfiThemes/bildungsatlas",
