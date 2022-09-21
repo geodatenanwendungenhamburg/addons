@@ -1,3 +1,5 @@
+import {search} from "@masterportal/masterportalapi/src/searchAddress";
+
 import store from "../../src/app-store";
 import {createGfiFeature} from "../../src/api/gfi/getWmsFeaturesByMimeType";
 
@@ -7,14 +9,16 @@ Backbone.Events.listenTo(Radio.channel("Searchbar"), {
 
 /**
  * Starts the gfi with hit type properties.
- * Note: only for hits with type === "Adresse" (Gazetteer).
+ * Note: only for gazetteer addresses.
  * @param {Object} hit The clicked search hit.
  * @returns {void}
  */
-function startGfi (hit) {
-    if (hit?.type === "Adresse") {
-        const gfiOnClickConfig = store.getters?.portalConfig?.searchBar?.gazetteer?.gfiOnClick,
-            feature = createFeature(hit, gfiOnClickConfig);
+async function startGfi (hit) {
+    const gazetteerConfig = store.getters?.portalConfig?.searchBar?.gazetteer;
+
+    if (gazetteerConfig?.gfiOnClick === true && hit?.type === i18next.t("common:modules.searchbar.type.address")) {
+        const searchResult = hit.storedQuery === "houseNumbersForStreet" ? startSearch(hit) : hit,
+            feature = createFeature(await searchResult, gazetteerConfig);
 
         store.commit("Maps/setClickCoordinate", [hit.coordinate[0], hit.coordinate[1]]);
         store.commit("Tools/Gfi/setGfiFeatures", [feature]);
@@ -22,17 +26,38 @@ function startGfi (hit) {
 }
 
 /**
- * Create feature to use it for the gfi.
+ * Starts the search for an address.
  * @param {Object} hit The clicked search hit.
- * @param {Object} gfiOnClickConfig The config of gazetter gfiOnClick.
+ * @returns {Object} The search result.
+ */
+async function startSearch (hit) {
+    let searchResults = [];
+
+    try {
+        searchResults = await search(hit.name, {
+            map: mapCollection.getMap("2D"),
+            searchAddress: true
+        }, false);
+    }
+    catch (e) {
+        console.error(e);
+    }
+
+    return searchResults.length > 0 ? searchResults[0] : searchResults;
+}
+
+/**
+ * Create feature to use it for the gfi.
+ * @param {Object} searchResult The clicked search result.
+ * @param {Object} gazetteerConfig The config of gazetter.
  * @returns {Object} The feature.
  */
-function createFeature (hit, gfiOnClickConfig) {
+export function createFeature (searchResult, gazetteerConfig) {
     const feature = createGfiFeature(
-        createLayer(hit, gfiOnClickConfig),
+        createLayer(searchResult, gazetteerConfig),
         null, // for url
         {
-            getProperties: () => prepareProperties(hit.properties)
+            getProperties: () => prepareProperties(searchResult.properties)
         }
     );
 
@@ -41,25 +66,26 @@ function createFeature (hit, gfiOnClickConfig) {
 
 /**
  * Creates an layer object to use it for the gfi.
- * @param {Object} hit The clicked search hit.
- * @param {Object} gfiOnClickConfig The config of gazetter gfiOnClick.
+ * @param {Object} searchResult The clicked search result.
+ * @param {Object} gazetteerConfig The config of gazetter.
  * @returns {Object} The layer.
  */
-function createLayer (hit, gfiOnClickConfig) {
-    const layer = {
-        get: (key) => {
-            if (key === "name") {
-                return i18next.t("additional:modules.gfiOnAddress.title", {hitName: hit.name});
+export function createLayer (searchResult, gazetteerConfig) {
+    const service = store?.getters?.getRestServiceById(gazetteerConfig.serviceId),
+        layer = {
+            get: (key) => {
+                if (key === "name") {
+                    return i18next.t("additional:modules.gfiOnAddress.title", {searchResultName: searchResult.name});
+                }
+                else if (key === "gfiTheme") {
+                    return gazetteerConfig.gfiTheme || service?.gfiTheme || "default";
+                }
+                else if (key === "gfiAttributes") {
+                    return gazetteerConfig.gfiAttributes || service?.gfiAttributes || "showAll";
+                }
+                return null;
             }
-            else if (key === "gfiTheme") {
-                return gfiOnClickConfig.gfiTheme;
-            }
-            else if (key === "gfiAttributes") {
-                return gfiOnClickConfig.gfiAttributes;
-            }
-            return null;
-        }
-    };
+        };
 
     return layer;
 }
@@ -69,7 +95,7 @@ function createLayer (hit, gfiOnClickConfig) {
  * @param {Object} properties The gfi properties
  * @returns {Object} prepared properties
  */
-function prepareProperties (properties) {
+export function prepareProperties (properties) {
     const preparedProperties = {};
 
     Object.keys(properties).forEach(key => {
