@@ -43,7 +43,7 @@ const actions = {
     setPosition ({state, commit, dispatch, rootGetters}, evt) {
         if (state.active && evt) {
             const projection = rootGetters["Maps/getView"].getProjection().getCode(),
-                coordinates = [evt[0], evt[1]];
+                coordinates = !evt[0] || !evt[1] ? evt.coordinate : [evt[0], evt[1]];
 
             try {
                 dispatch("MapMarker/placingPointMarker", coordinates, {root: true});
