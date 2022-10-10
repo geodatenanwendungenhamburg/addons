@@ -99,10 +99,6 @@
   "quickResponseCode": {
     "type": "tool"
   },
-  "address": {
-    "path":"gfiThemes/address",
-    "type": "gfiTheme"
-  },
   "bildungsatlas": {
     "path":"gfiThemes/bildungsatlas",
     "type": "gfiTheme"
