@@ -3,9 +3,14 @@ import getProxyUrl from "../../../src/utils/getProxyUrl";
 
 const actions = {
     /**
-    * initObliqueView creates a click listener at the map. Creates a listener at the olMap in the oblique application when the oblique aerial images have been moved in the sidebar.
+    * InitObliqueView creates a click listener at the map. Creates a listener at the olMap in the oblique application when the oblique aerial images have been moved in the sidebar.
     * Removes unwanted html elements once the iframe content has been loaded.
     * Sets the special MapMarker style for the oblique map
+    * @param {Object} param store context
+    * @param {Object} param.commit the commit
+    * @param {Object} param.dispatch the dispatch
+    * @param {Object} param.getters the getters
+    * @param {Object} param.rootGetters the rootGetters
     * @returns {void}
     */
     initObliqueView ({commit, dispatch, getters, rootGetters}) {
@@ -21,14 +26,6 @@ const actions = {
                     map = vcs.vcm.Framework.getInstance().getActiveMap(),
                     pixelCoordinate = mapCollection.getMap("2D").getPixelFromCoordinate(rootGetters["Maps/initialCenter"]);
 
-                // mapCollection.getMap("2D").on("moveend", function () {
-                //     mapCollection.getMap("2D").getLayers().forEach((layer) => {
-                //         if (layer.getProperties().id === "marker_point_layer") {
-                //             pixelCoordinate = mapCollection.getMap("2D").getPixelFromCoordinate(rootGetters["Maps/clickCoordinate"]);
-                //             commit("Maps/setClickCartesianCoordinate", pixelCoordinate, {root: true});
-                //         }
-                //     });
-                // });
                 commit("Maps/setClickCartesianCoordinate", pixelCoordinate, {root: true});
 
                 if (map) {
@@ -80,7 +77,11 @@ const actions = {
     },
 
     /**
-    * unregister the map listener. Resets the mapMarker style. Removes the MapMarker.
+    * Unregister the map listener. Resets the mapMarker style. Removes the MapMarker.
+    * @param {Object} param store context
+    * @param {Object} param.commit the commit
+    * @param {Object} param.dispatch the dispatch
+    * @param {Object} param.getters the getters
     * @returns {void}
     */
     resetObliqueViewer ({commit, dispatch, getters}) {
@@ -90,7 +91,11 @@ const actions = {
     },
 
     /**
-    * setObliqueView moves the map marker to the click position and centers the oblique aerial images at the point in the sidebar
+    * SetObliqueView moves the map marker to the click position and centers the oblique aerial images at the point in the sidebar.
+    * @param {Object} param store context
+    * @param {Object} param.commit the commit
+    * @param {Object} param.dispatch the dispatch
+    * @param {Object} param.getters the getters
     * @param {Array} coordinate the click/center coordinate
     * @returns {void}
     */
@@ -125,24 +130,78 @@ const actions = {
         }
     },
     /**
-    * setObliqueViewerURL gets the initaialCenter coordinate and creates the URL for the Oblique Map
-    * @param {Array} initialCenter the initial center coordinate
+    * SetObliqueViewerURL gets the initaialCenter coordinate and creates the URL for the Oblique Map.
+    * @param {Object} param store context
+    * @param {Object} param.commit the commit
+    * @param {Object} param.dispatch the dispatch
+    * @param {Object} param.getters the getters
+    * @param {Object} param.rootGetters the rootGetters
+    * @param {Number[]} initialCenter the initial center coordinate
     * @returns {void}
     */
-    setObliqueViewerURL ({commit, getters, rootGetters}, initialCenter) {
+    setObliqueViewerURL ({commit, dispatch, getters, rootGetters}, initialCenter) {
         if (initialCenter && Array.isArray(initialCenter) && initialCenter.length > 1) {
-            const transformedCoordinates = transform(mapCollection.getMapView("2D").getProjection().getCode(), "EPSG:4326", initialCenter);
-            let startCoordinates = "";
+            const transformedCoordinates = transform(mapCollection.getMapView("2D").getProjection().getCode(), "EPSG:4326", initialCenter),
+                startCoordinates = transformedCoordinates[0] + ", " + transformedCoordinates[1];
 
-            startCoordinates = transformedCoordinates[0] + ", " + transformedCoordinates[1];
             if (document.location.hostname === "localhost") {
                 commit("setObliqueViewerURL", getProxyUrl(rootGetters.getRestServiceById(getters.serviceId).url) + "?groundPosition=" + startCoordinates);
             }
             else {
-                commit("setObliqueViewerURL", rootGetters.getRestServiceById(getters.serviceId).url + "?groundPosition=" + startCoordinates);
+                dispatch("setObliqueViewerURLWithSameHostname", startCoordinates);
             }
         }
+    },
+
+    /**
+     * Checks if the oblique viewer url and called website have the same host and sets the url in the state.
+     * Difference only in `www.` is handled separately.
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {Object} param.dispatch the dispatch
+     * @param {Object} param.getters the getters
+     * @param {Object} param.rootGetters the rootGetters
+     * @param {String} startCoordinates The start coordinates
+     * @returns {void}
+     */
+    setObliqueViewerURLWithSameHostname ({commit, dispatch, getters, rootGetters}, startCoordinates) {
+        const urlParts = rootGetters.getRestServiceById(getters.serviceId).url.split("https://")[1].split("/");
+
+        if (document.location.hostname === urlParts[0]) {
+            commit("setObliqueViewerURL", rootGetters.getRestServiceById(getters.serviceId).url + "?groundPosition=" + startCoordinates);
+        }
+        else if (document.location.hostname.startsWith("www.") && document.location.hostname.split("www.")[1] === urlParts[0]) {
+            dispatch("setObliqueViewerURLWithReplacedHostname", {urlParts, startCoordinates});
+        }
+        else {
+            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.tools.obliqueViewer.sameOrigin"), {root: true});
+        }
+    },
+
+    /**
+     * Replaces the hostname of the oblique viewer url with the one of the called portal and sets it in state.
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {String} payload The payload
+     * @param {String[]} payload.urlParts The parts of the url.
+     * @param {String} payload.startCoordinates The start coordinates
+     * @returns {void}
+     */
+    setObliqueViewerURLWithReplacedHostname ({commit}, {urlParts, startCoordinates}) {
+        let changedUrl = "https:/";
+
+        urlParts.forEach((part, index) => {
+            if (index === 0) {
+                changedUrl = changedUrl + "/" + document.location.hostname;
+            }
+            else {
+                changedUrl = changedUrl + "/" + part;
+            }
+        });
+
+        commit("setObliqueViewerURL", changedUrl + "?groundPosition=" + startCoordinates);
     }
+
 };
 
 export default actions;
