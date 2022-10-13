@@ -54,33 +54,12 @@ describe("ADDONS: addons/ObliqueViewer/store/actionsObliqueViewer", () => {
         sinon.restore();
     });
 
-    describe("initObliqueView", () => {
-        it("initObliqueView shall dispatch once", () => {
-            const callback = {
-                type: "click",
-                listener: "setClickCoordinate",
-                listenerType: "commit"};
-
-            actions.initObliqueView({commit, dispatch, getters, rootGetters});
-
-            expect(dispatch.calledOnce).to.be.true;
-            expect(dispatch.args[0][0]).to.equal("Maps/registerListener");
-            expect(dispatch.args[0][1]).to.deep.equal(callback);
-        });
-    });
     describe("resetObliqueViewer", () => {
-        it("resetObliqueViewer shall unregister the map listener, reset the mapMarker style and remove the mapMarker", () => {
-            const callback = {
-                type: "click",
-                listener: "setClickCoordinate",
-                listenerType: "commit"};
-
+        it("resetObliqueViewer shall reset the mapMarker style and remove the mapMarker", () => {
             actions.resetObliqueViewer({commit, dispatch, getters});
 
-            expect(dispatch.calledTwice).to.be.true;
-            expect(dispatch.args[0][0]).to.equal("Maps/unregisterListener");
-            expect(dispatch.args[0][1]).to.deep.equal(callback);
-            expect(dispatch.args[1][0]).to.equal("MapMarker/removePointMarker");
+            expect(dispatch.calledOnce).to.be.true;
+            expect(dispatch.args[0][0]).to.equal("MapMarker/removePointMarker");
             expect(commit.calledOnce).to.be.true;
             expect(commit.args[0][0]).to.equal("MapMarker/setPointStyleId");
         });

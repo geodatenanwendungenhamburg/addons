@@ -16,7 +16,6 @@ const actions = {
     initObliqueView ({commit, dispatch, getters, rootGetters}) {
         const iframe = document.getElementById("obliqueIframe");
 
-        dispatch("Maps/registerListener", {type: "click", listener: "setClickCoordinate", listenerType: "commit"}, {root: true});
         iframe?.addEventListener("load", () => {
             const observer = new MutationObserver(() => {
                 const header = iframe.contentWindow.document.getElementById("header"),
@@ -92,7 +91,6 @@ const actions = {
     * @returns {void}
     */
     resetObliqueViewer ({commit, dispatch, getters}) {
-        dispatch("Maps/unregisterListener", {type: "click", listener: "setClickCoordinate", listenerType: "commit"}, {root: true});
         commit("MapMarker/setPointStyleId", getters.defaultMapMarkerStyleId, {root: true});
         dispatch("MapMarker/removePointMarker", null, {root: true});
     },

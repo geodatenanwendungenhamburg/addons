@@ -41,6 +41,7 @@ export default {
         active (value) {
             if (value) {
                 this.$nextTick(() => {
+                    this.setObliqueViewerURL(this.initialCenter);
                     this.initObliqueView();
                 });
             }
@@ -50,7 +51,7 @@ export default {
         },
         clickCoordinate (value) {
             if (this.active === true) {
-                this.setObliqueView(value.coordinate ? value.coordinate : value);
+                this.setObliqueView(value);
             }
         },
         isMobile (value) {
@@ -59,15 +60,6 @@ export default {
     },
     created () {
         this.$on("close", this.close);
-    },
-    mounted () {
-        this.$nextTick(() => {
-            this.setObliqueViewerURL(this.initialCenter);
-            this.initObliqueView();
-            if (this.isMobile) {
-                this.setRenderToWindow(this.isMobile);
-            }
-        });
     },
     methods: {
         ...mapMutations("Tools/ObliqueViewer", Object.keys(mutationsObliqueViewer)),

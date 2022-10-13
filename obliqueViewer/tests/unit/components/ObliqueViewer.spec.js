@@ -108,7 +108,7 @@ describe("ADDONS: addons/obliqueViewer/components/ObliqueViewer.vue", () => {
         });
         it("test watch on active should call action setObliqueView", async () => {
             expect(wrapper.find("#obliqueIframe").exists()).to.be.true;
-            wrapper.vm.$options.watch.active.call(wrapper.vm, true);
+            await wrapper.vm.$options.watch.active.call(wrapper.vm, true);
             expect(ObliqueViewer.actions.initObliqueView.calledOnce).to.be.true;
             expect(ObliqueViewer.actions.resetObliqueViewer.calledOnce).to.be.false;
         });
