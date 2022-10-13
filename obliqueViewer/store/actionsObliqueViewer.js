@@ -24,7 +24,9 @@ const actions = {
                     overviewMap = iframe.contentWindow.document.getElementsByClassName("overview-map-wrap")[0],
                     vcs = document.getElementById("obliqueIframe").contentWindow.vcs,
                     map = vcs.vcm.Framework.getInstance().getActiveMap(),
-                    pixelCoordinate = mapCollection.getMap("2D").getPixelFromCoordinate(rootGetters["Maps/initialCenter"]);
+                    pixelCoordinate = mapCollection.getMap("2D").getPixelFromCoordinate(rootGetters["Maps/initialCenter"]),
+                    mapElements = iframe.contentWindow.document.getElementsByClassName("mapElement vcm-map-top");
+
 
                 commit("Maps/setClickCartesianCoordinate", pixelCoordinate, {root: true});
 
@@ -54,6 +56,11 @@ const actions = {
                 if (header) {
                     header.style.display = "none";
                     header.parentElement.style.display = "none";
+
+                    for (const element of mapElements) {
+                        element.style.top = 0;
+                    }
+
                     commit("setDefaultMapMarkerStyleId", rootGetters["MapMarker/pointStyleId"]);
                     if (getters.styleId) {
                         commit("MapMarker/setPointStyleId", getters.styleId, {root: true});
