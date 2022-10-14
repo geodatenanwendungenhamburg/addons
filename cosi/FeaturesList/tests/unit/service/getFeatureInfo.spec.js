@@ -4,7 +4,7 @@ import {expect} from "chai";
 import {initializeLayerList} from "../../../../utils/initializeLayerList";
 import {registerProjections} from "@masterportal/masterportalapi/src/crs";
 
-describe("getFeatureInfos", () => {
+describe.skip("getFeatureInfos", () => {
     before(async function () {
         await initializeLayerList();
         registerProjections();
