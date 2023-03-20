@@ -1,5 +1,9 @@
 <script>
+<<<<<<< HEAD
 import {mapMutations} from "vuex";
+=======
+import {mapActions, mapMutations} from "vuex";
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
 import mutations from "../store/mutationsBoris";
 
 export default {
@@ -47,6 +51,10 @@ export default {
         }
     },
     methods: {
+<<<<<<< HEAD
+=======
+        ...mapActions("Tools/Boris", ["updateSelectedBrwFeature"]),
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
         ...mapMutations("Tools/Boris", Object.keys(mutations)),
         /**
          * Check if 'Einzelhäuser' or 'Doppelhäuser' are selected to change the option name to singular
@@ -56,7 +64,10 @@ export default {
         checkForBuildingMatch (option) {
 
             let zBauweise = this.selectedBrwFeature.get("zBauweise");
+<<<<<<< HEAD
             const zStrassenLage = this.selectedBrwFeature.get("zStrassenLage");
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
 
             if (this.selectedBrwFeature.get("zBauweise") === "eh Einzelhäuser") {
                 zBauweise = "eh Einzelhaus (freistehend)";
@@ -64,8 +75,12 @@ export default {
             else if (this.selectedBrwFeature.get("zBauweise") === "dh Doppelhaushälften") {
                 zBauweise = "dh Doppelhaushälfte";
             }
+<<<<<<< HEAD
 
             return option === zBauweise || option === zStrassenLage;
+=======
+            return option === zBauweise;
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
         }
     }
 
@@ -82,7 +97,10 @@ export default {
                 <span> {{ title }}</span>
                 <span
                     class="bootstrap-icon bi-question-circle-fill"
+<<<<<<< HEAD
                     role="button"
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
                     tabindex="0"
                     @click="toggleInfoText(textId)"
                     @keydown.enter="toggleInfoText(textId)"
@@ -119,7 +137,10 @@ export default {
                 <span>{{ title }}</span>
                 <span
                     class="bootstrap-icon bi-question-circle-fill"
+<<<<<<< HEAD
                     role="button"
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
                     tabindex="0"
                     @click="toggleInfoText(textId)"
                     @keydown.enter="toggleInfoText(textId)"

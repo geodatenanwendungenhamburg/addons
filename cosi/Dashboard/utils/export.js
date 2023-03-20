@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import {replaceValues} from "../../utils/modifyObject.js";
 import renameKeys from "../../../../src/utils/renameKeys.js";
+=======
+import {renameKeys, replaceValues} from "../../utils/modifyObject.js";
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
 
 const
     keyMap = {
@@ -9,14 +13,22 @@ const
         timestamp: "Jahr",
         hamburg_gesamt: "Hamburg gesamt",
         total: "Gesamt",
+<<<<<<< HEAD
         average: "Durchschnitt",
         orientationValue: "Orientierungswert"
+=======
+        average: "Durchschnitt"
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
     },
     valuesMap = {
         absolute: "absolut",
         relative: "relativ"
+<<<<<<< HEAD
     },
     keysToIgnore = ["id"];
+=======
+    };
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
 
 /**
  * Prepares the table data for an XLSX export, just the table as displayed
@@ -32,11 +44,16 @@ export function prepareTableExport (data, districtNames, timestamp, timestampPre
         return null;
     }
     const exportData = data.map(item => {
+<<<<<<< HEAD
         const _item = replaceValues(renameKeys(keyMap, item), valuesMap);
 
         keysToIgnore.forEach(keyToIgnore => {
             delete _item[keyToIgnore];
         });
+=======
+        const _item = replaceValues(renameKeys(item, keyMap), valuesMap);
+
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
         for (const col in _item) {
             if (typeof _item[col] === "object") {
                 const val = parseFloat(_item[col][timestampPrefix + timestamp]);
@@ -75,6 +92,7 @@ export function prepareTableExportWithTimeline (data, districtNames, timestamps,
     const
         ctimestamps = timestamps.slice().reverse(),
         exportData = data.reduce((items, item) => {
+<<<<<<< HEAD
             const _item = replaceValues(renameKeys(keyMap, item), valuesMap),
                 categoryRows = ctimestamps.map(timestamp => {
                     const el = {..._item};
@@ -83,6 +101,12 @@ export function prepareTableExportWithTimeline (data, districtNames, timestamps,
                         delete el[keyToIgnore];
                     });
 
+=======
+            const _item = replaceValues(renameKeys(item, keyMap), valuesMap),
+                categoryRows = ctimestamps.map(timestamp => {
+                    const el = {..._item};
+
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
                     for (const col in el) {
                         if (typeof _item[col] === "object") {
                             const val = parseFloat(el[col][timestampPrefix + timestamp]);

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import isObject from "../../../../src/utils/isObject";
 import mathutils from "../../utils/math";
 
@@ -17,10 +18,24 @@ export function getValue (item, header, timestamp, items) {
         return "-";
     }
 
+=======
+
+/**
+ * Returns the value for the cell
+ * @param {*} item - item
+ * @param {*} header - header
+ * @param {*} timestamp - year
+ * @returns {String} the text val for the cell
+ */
+export function getValue (item, header, timestamp) {
+    let val;
+
+>>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
     if (header?.value && item[header.value]) {
         val = parseFloat(item[header.value][String(this.timestampPrefix) + timestamp]);
     }
 
+<<<<<<< HEAD
     if (isNaN(val) && isObject(item.calculation) && item.valueType === "relative") {
         const field_A = items.find(_item => _item.category === item.calculation.category_A),
             field_B = items.find(_item => _item.category === item.calculation.category_B);
@@ -35,6 +50,8 @@ export function getValue (item, header, timestamp, items) {
             item[header.value].isCalculated = true;
         }
     }
+=======
+>>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
     return val ? val.toLocaleString(this.currentLocale) : "-";
 }
 
@@ -46,7 +63,11 @@ export function getValue (item, header, timestamp, items) {
  * @returns {String} the class
  */
 export function getValueClass (item, header, timestamp) {
+<<<<<<< HEAD
     return item[header.value]?.isModified <= timestamp || item[header.value]?.isCalculated ? "modified" : "";
+=======
+    return item[header.value]?.isModified <= timestamp ? "modified" : "";
+>>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
 }
 
 /**

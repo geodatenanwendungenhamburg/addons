@@ -423,6 +423,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
             expect(spyUpdateDistricts.callCount).to.equal(1);
         });
     });
+<<<<<<< HEAD
 
     describe("Methods", () => {
         describe("getSelectedDistrictsLabels", async () => {
@@ -458,4 +459,6 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
 
         });
     });
+=======
+>>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
 });

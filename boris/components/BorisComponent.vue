@@ -19,7 +19,11 @@ export default {
         FloorComponent
     },
     computed: {
+<<<<<<< HEAD
         ...mapGetters("Tools/BorisComponent", ["active", "id", "icon", "renderToWindow", "resizableWindow", "initialWidth", "initialWidthMobile", "keepOpen", "filteredLayerList", "isAreaLayer", "isStripesLayer", "textIds", "selectedPolygon", "selectedLayerName", "selectedLanduse", "selectedBrwFeature", "convertedBrw", "buttonValue", "buildingDesigns", "positionsToStreet", "selectedOption", "isProcessFromParametricUrl", "paramUrlParams"]),
+=======
+        ...mapGetters("Tools/BorisComponent", ["active", "id", "icon", "renderToWindow", "resizableWindow", "initialWidth", "initialWidthMobile", "keepOpen", "filteredLayerList", "isAreaLayer", "isStripesLayer", "textIds", "selectedPolygon", "selectedLayerName", "selectedLanduse", "selectedBrwFeature", "convertedBrw", "buttonValue", "buildingDesigns", "positionsToStreet", "options", "isProcessFromParametricUrl", "paramUrlParams"]),
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
         ...mapGetters("Tools/Print", ["printFileReady", "fileDownloadUrl", "filename", "printStarted", "progressWidth"]),
         /**
          * Gets a list of layers without the stripes-layers
@@ -126,10 +130,13 @@ export default {
                 link.href = this.fileDownloadUrl;
                 link.click();
             }
+<<<<<<< HEAD
         },
         selectedLayerName () {
             this.setBuildingDesigns(["eh Einzelhaus (freistehend)", "dh Doppelhaushälfte", " dd Doppelhaus (ganzes Doppelhaus)", "rm Reihenmittelhaus", "rm Reihenmittelhäuser", "re Reihenendhaus", "g geschlossene Bauweise", "a abweichende Bauweise (Gartenhofhaus)"]);
             this.setPositionsToStreet(["F Frontlage", "E Ecklage", "P Pfeifenstielgrundstück", "H Hinterlage (in 2. Reihe durch Wegerecht erschlossen)"]);
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
         }
     },
     created () {
@@ -284,7 +291,10 @@ export default {
                     </label>
                     <span
                         class="bootstrap-icon bi-question-circle-fill"
+<<<<<<< HEAD
                         role="button"
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
                         tabindex="0"
                         @click="toggleInfoText('1')"
                         @keydown.enter="toggleInfoText('1')"
@@ -462,7 +472,10 @@ export default {
                                 <span>{{ $t('additional:modules.tools.boris.landCalculation.calculatedLandValue') }}</span>
                                 <span
                                     class="bootstrap-icon bi-question-circle-fill"
+<<<<<<< HEAD
                                     role="button"
+=======
+>>>>>>> cd4746c6 (add new addons_3_0_0 structure-add missing addons)
                                     tabindex="0"
                                     @click="toggleInfoText('6')"
                                     @keydown.enter="toggleInfoText('6')"
