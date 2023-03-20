@@ -1,0 +1,21 @@
+{
+    "modules": {
+        "tools": {
+            "cosi": {
+                "templateManager": {
+                    "title": "Templates",
+                    "loadFromTemplate": "Load templates",
+                    "infoLoadFromTemplates": "Load basic thematic configurations for specific types of analyses. You can find the data which will be loaded in the templates' overview. Some templates include the selection of areas, some require you to select areas yourself in beforehand.",
+                    "noInfo": "No description available.",
+                    "created": "Created",
+                    "info": "Description",
+                    "layers": "Topics",
+                    "districtLevel": "District Level",
+                    "selectedDistricts": "Selected Districts",
+                    "activeTool": "Active Tool",
+                    "categories": "Statistical Data"
+                }
+            }
+        }
+    }
+}

@@ -1,10 +1,19 @@
 import requestIsochrones from "./requestIsochrones";
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
 import {transformFeatures} from "../../utils/features/transform";
 import {transformCoordinate} from "./transformCoordinates";
+=======
+import {readFeatures} from "../components/util.js";
+import {transformFeatures} from "../../utils/features/transform";
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
 import {polygon as turfPolygon} from "@turf/helpers";
 import {default as turfUnion} from "@turf/union";
 import {default as turfBooleanPointInPolygon} from "@turf/boolean-point-in-polygon";
 import axios from "axios";
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
+=======
+import * as Proj from "ol/proj.js";
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
 import GeoJSON from "ol/format/GeoJSON";
 
 let abortController,
@@ -33,16 +42,28 @@ export function setFilterPoly (coords) {
 /**
  * create isochrones features
  * @export
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
  * @param {*} {transportType, coordinates, scaleUnit, distance, maxDistance, batchSize, baseUrl} parameters
  * @param {*} progress progress callback
  * @return {*} features
  */
 export async function createIsochrones ({transportType, coordinates, scaleUnit, distance, maxDistance, batchSize, baseUrl, projectionCode}, progress) {
+=======
+ * @param {*} {transportType, coordinates, scaleUnit, distance, maxDistance, minDistance batchSize, baseUrl} parameters
+ * @param {*} progress progress callback
+ * @return {*} features
+ */
+export async function createIsochrones ({transportType, coordinates, scaleUnit, distance, maxDistance, minDistance, batchSize, baseUrl, projectionCode}, progress) {
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
     let ret;
 
     if (coordinates.length === 1) {
         progress(50);
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
         ret = await createIsochronesPoint(transportType, coordinates[0], scaleUnit, distance, maxDistance, baseUrl, projectionCode);
+=======
+        ret = await createIsochronesPoint(transportType, coordinates[0], scaleUnit, distance, maxDistance, minDistance, baseUrl, projectionCode);
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
         progress(100);
         return ret;
     }
@@ -56,11 +77,19 @@ export async function createIsochrones ({transportType, coordinates, scaleUnit, 
  * @param {*} scaleUnit scaleUnit
  * @param {*} distance distance
  * @param {*} maxDistance maxDistance
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
+=======
+ * @param {*} minDistance minDistance
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
  * @param {*} baseUrl baseUrl
  * @param {*} projectionCode projectionCode
  * @return {*} steps and features
  */
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
 async function createIsochronesPoint (transportType, coordinate, scaleUnit, distance, maxDistance, baseUrl, projectionCode) {
+=======
+async function createIsochronesPoint (transportType, coordinate, scaleUnit, distance, maxDistance, minDistance, baseUrl, projectionCode) {
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
     if (abortController) {
         abortController.cancel();
     }
@@ -132,7 +161,12 @@ async function createIsochronesPoints (args) {
         coordinatesList = [],
         groupedFeaturesList = [],
         filteredCoordinates = filterPoly === undefined ? args.coordinates :
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
             args.coordinates.filter(c => turfBooleanPointInPolygon(transformCoordinate(c, "EPSG:4326", args.projectionCode), filterPoly));
+=======
+            args.coordinates.filter(c => turfBooleanPointInPolygon(
+                Proj.transform(c, "EPSG:4326", args.projectionCode), filterPoly));
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
 
     for (let i = 0; i < filteredCoordinates.length; i += args.batchSize) {
         const arrayItem = filteredCoordinates.slice(i, i + args.batchSize);
@@ -203,7 +237,11 @@ async function createIsochronesPoints (args) {
                 }
             }
             // readGeometries
+<<<<<<< HEAD:cosi/AccessibilityAnalysis/utils/createIsochrones.js
             layerUnionFeatures = new GeoJSON().readFeatures(JSON.stringify(layerUnion));
+=======
+            layerUnionFeatures = readFeatures(JSON.stringify(layerUnion));
+>>>>>>> 39389637 (add new addons_3_0_0 structure-add missing addons):cosi/AccessibilityAnalysis/service/createIsochrones.js
 
             // TODO: get projections via arguments and/or store
             layerUnionFeatures = transformFeatures(layerUnionFeatures, "EPSG:4326", args.projectionCode);
