@@ -22,6 +22,7 @@ const state = {
     geometry: null,
     readmeUrl: {
 <<<<<<< HEAD
+<<<<<<< HEAD
         "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018gebietsauswahl.en.md",
         "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018gebietsauswahl.md"
 =======
@@ -33,6 +34,10 @@ const state = {
         "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/areaselector.md"
 >>>>>>> dd718441 (add new addons_3_0_0 structure-add missing addons)
 >>>>>>> a3a39d38 (add new addons_3_0_0 structure-add missing addons)
+=======
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/gebietsauswahl.en.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/gebietsauswahl.md"
+>>>>>>> 149927fa (resolve rebase conflicts)
     }
 };
 
