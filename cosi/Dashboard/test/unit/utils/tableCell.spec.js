@@ -54,11 +54,7 @@ describe("Dashboard/utils/tableCells", () => {
         });
 
         it("should return the parsed value", () => {
-<<<<<<< HEAD
             expect(getValue.call({currentLocale: "de-DE"}, item, header, timestamp)).to.be.equal("2.266");
-=======
-            expect(getValue(item, header, timestamp)).to.be.equal("2.266");
->>>>>>> 4c00faf3 (add new addons_3_0_0 structure-add missing addons)
         });
 
         it("should return the calculated value", () => {
