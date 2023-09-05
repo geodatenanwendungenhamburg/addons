@@ -23,13 +23,8 @@ const state = {
         "Erhaltungsmanagement_Spielplaetze"
     ],
     readmeUrl: {
-<<<<<<< HEAD
         "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015templates.md",
         "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015vorlagen.md"
-=======
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/templates.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/vorlagen.md"
->>>>>>> a3a39d38 (add new addons_3_0_0 structure-add missing addons)
     }
 };
 
