@@ -59,16 +59,12 @@ function convertObject (data) {
 export function parseJsonToXlsx (json, options, conversionType = "json_to_sheet") {
     const sheetname = options.sheetname.substring(0, 31) || "Neues Arbeitsblatt", // no names longer than 31 chars allowed
 
-<<<<<<< HEAD
         iniHeader = conversionType === "json_to_sheet" ? Object.keys(json[0]) : undefined,
         fixedHeaderStart = ["Kategorie", "Gruppe", "Datentyp"],
         fixedHeaderEnd = iniHeader.includes("Orientierungswert") ? ["Orientierungswert", "Gesamt", "Durchschnitt", "Jahr"] : ["Gesamt", "Durchschnitt", "Jahr"],
         header = fixedHeaderStart.concat(iniHeader.filter((value) => {
             return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
         }), fixedHeaderEnd),
-=======
-        header = conversionType === "json_to_sheet" ? Object.keys(json[0]) : undefined,
->>>>>>> 53f86fb2 (add new addons_3_0_0 structure-add missing addons)
         colOptions = options.colOptions || header ? generateColOptions(header, options.multiplyColWidth) : undefined,
         rowOptions = options.rowOptions,
         workbook = XLSX.utils.book_new(),
