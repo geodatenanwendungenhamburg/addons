@@ -31,13 +31,10 @@ export default {
         tooltipOffset: {
             type: Number,
             default: 0
-<<<<<<< HEAD
         },
         items: {
             type: Array,
             required: true
-=======
->>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
         }
     },
     methods: {
@@ -63,11 +60,7 @@ export default {
                 v-on="on"
             >
                 <StatsTrend
-<<<<<<< HEAD
                     v-if="getValue(item, header, currentTimestamp, items) !== '-'"
-=======
-                    v-if="getValue(item, header, currentTimestamp) !== '-'"
->>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
                     :item="item"
                     :header="header"
                     :current-timestamp="currentTimestamp"
@@ -85,11 +78,7 @@ export default {
                                 :title="getValueTooltip(item, header, year)"
                                 :class="getValueClass(item, header, year)"
                             >
-<<<<<<< HEAD
                                 {{ getValue(item, header, year, items) }}
-=======
-                                {{ getValue(item, header, year) }}
->>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
                             </span>
                         </li>
                     </ul>
@@ -99,11 +88,7 @@ export default {
                         :title="getValueTooltip(item, header, currentTimestamp)"
                         :class="getValueClass(item, header, currentTimestamp)"
                     >
-<<<<<<< HEAD
                         {{ getValue(item, header, currentTimestamp, items) }}
-=======
-                        {{ getValue(item, header, currentTimestamp) }}
->>>>>>> 7437b27c (add new addons_3_0_0 structure-add missing addons)
                     </span>
                 </template>
             </div>
