@@ -1,5 +1,5 @@
 <script>
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import thousandsSeparator from "../../../../src/utils/thousandsSeparator.js";
 
 export default {
@@ -37,8 +37,11 @@ export default {
         }
     },
     watch: {
-        dataset () {
-            this.drawChart();
+        dataset: {
+            handler () {
+                this.drawChart();
+            },
+            deep: true
         }
     },
     mounted () {
@@ -81,16 +84,19 @@ export default {
                 this.chart.destroy();
             }
 
+            Chart.defaults.font.family = this.defaultFontFamily;
+            Chart.defaults.color = this.defaultFontColor;
+
             this.chart = new Chart(ctx, {
                 type: this.chartType,
                 data: this.createChartData(this.dataset, this.category),
                 options: {
                     responsive: true,
-                    legend: this.createChartLegend(),
-                    tooltips: this.createChartTooltip(),
                     scales: this.createChartScales(),
-                    defaultFontFamily: this.defaultFontFamily,
-                    defaultFontColor: this.defaultFontColor
+                    plugins: {
+                        legend: this.createChartLegend(),
+                        tooltip: this.createChartTooltip()
+                    }
                 },
                 plugins: [{
                     beforeInit: chart => {
@@ -138,7 +144,6 @@ export default {
                         pointStyle: this.chartPointStyleRect
                     });
             }
-
             return chartData;
         },
 
@@ -245,20 +250,14 @@ export default {
          */
         createChartTooltip: function () {
             return {
-                bodyFontColor: this.toolTipBodyFontColor,
                 backgroundColor: this.toolTipBackgroundColor,
+                bodyColor: this.toolTipBodyFontColor,
+                displayColors: false,
                 yAlign: "bottom",
                 titleAlign: "center",
                 bodyAlign: "center",
-                custom: (tooltip) => {
-                    if (!tooltip) {
-                        return;
-                    }
-                    // disable displaying the color box;
-                    tooltip.displayColors = false;
-                },
                 callbacks: {
-                    label: (tooltipItem) => thousandsSeparator(tooltipItem.value),
+                    label: (tooltipItem) => thousandsSeparator(tooltipItem.raw),
                     title: () => false
                 }
             };
@@ -271,29 +270,27 @@ export default {
          */
         createChartScales: function () {
             return {
-                xAxes: [{
-                    scaleLabel: {
+                x: {
+                    title: {
                         display: true,
-                        labelString: this.$t("additional:modules.tools.gfi.themes.verkehrsstaerken.year")
+                        text: this.$t("additional:modules.tools.gfi.themes.verkehrsstaerken.year")
                     },
-                    ticks: {
-                        min: this.dataset[0].year,
-                        max: this.dataset[this.dataset.length - 1].year
-                    },
+                    min: this.dataset[0].year,
+                    max: this.dataset[this.dataset.length - 1].year,
                     gridLines: this.createGridLines()
-                }],
-                yAxes: [{
-                    scaleLabel: {
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
                         display: true,
-                        labelString: this.createDatasetLabel(this.category)
+                        text: this.createDatasetLabel(this.category)
                     },
                     ticks: {
-                        beginAtZero: true,
                         precision: 0,
                         callback: value => thousandsSeparator(value)
                     },
                     gridLines: this.createGridLines()
-                }]
+                }
             };
         },
 
@@ -366,8 +363,14 @@ export default {
     margin: 6px;
 
     button {
-        color: $secondary_contrast;
+        color: $black;
         border: 1px solid #adadad;
+        &.active {
+            color: $white;
+        }
+        &:hover {
+            color: $white;
+        }
     }
     .btn-group {
         padding: 8px;

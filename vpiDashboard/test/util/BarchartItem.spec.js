@@ -11,10 +11,10 @@ localVue.use(Vuex);
 describe("src/share-components/charts/components/BarchartItem.vue", () => {
     let wrapper;
     const givenScaleParameters = {
-        xAxes: [{
+        x: [{
             stacked: true
         }],
-        yAxes: [{
+        y: [{
             stacked: true
         }]
     };

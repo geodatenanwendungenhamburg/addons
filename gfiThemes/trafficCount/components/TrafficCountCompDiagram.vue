@@ -1,5 +1,5 @@
 <script>
-import ChartJs from "chart.js";
+import ChartJs from "chart.js/auto";
 
 export default {
     name: "TrafficCountCompDiagram",
@@ -265,79 +265,81 @@ export default {
                 type: "line",
                 data,
                 options: {
-                    title: {
-                        display: false
-                    },
                     elements: {
                         line: {
                             tension: 0
                         }
                     },
-                    legend: {
-                        display: true,
-                        onClick: (e) => e.stopPropagation(),
-                        labels: {
-                            usePointStyle: true,
-                            generateLabels: chart => {
-                                const chartData = chart.data,
-                                    legends = Array.isArray(chartData.datasets) ? chartData.datasets.map((dataset, i) => {
-                                        return {
-                                            text: dataset.label,
-                                            backgroundColor: dataset.backgroundColor,
-                                            borderColor: dataset.borderColor,
-                                            borderWidth: dataset.borderWidth,
-                                            pointStyle: dataset.pointStyle,
-                                            pointRadius: dataset.pointRadius,
-                                            pointHoverRadius: dataset.pointHoverRadius,
-                                            strokeStyle: dataset.borderColor,
-                                            fillStyle: dataset.borderColor,
-                                            spanGaps: dataset.spanGaps,
-                                            hidden: !chart.isDatasetVisible(i),
-                                            datasetIndex: i
-                                        };
-                                    }, this) : [];
-
-                                return legends;
-                            },
-                            fontSize: options.fontSizeLegend,
-                            fontColorLegend: options.fontColorLegend
+                    plugins: {
+                        title: {
+                            display: false
                         },
-                        align: "start"
-                    },
-                    tooltips: {
-                        bodyFontColor: options.colorTooltipFont,
-                        backgroundColor: options.colorTooltipBack,
-                        yAlign: "bottom",
-                        titleAlign: "center",
-                        bodyAlign: "center",
-                        custom: (tooltip) => {
-                            if (!tooltip) {
-                                return;
-                            }
-                            // disable displaying the color box;
-                            tooltip.displayColors = false;
-                        },
-                        callbacks: {
-                            // use label callback to return the desired label
-                            label: (tooltipItem, chartJsData) => {
-                                if (
-                                    typeof chartJsData === "object"
-                                    && Array.isArray(chartJsData.datasets)
-                                    && typeof chartJsData.datasets[tooltipItem.datasetIndex] === "object"
-                                    && Array.isArray(chartJsData.datasets[tooltipItem.datasetIndex].datetimes)
-                                    && chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index]
-                                ) {
-                                    tooltipItem.datetime = chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index];
-                                }
-                                else if (typeof tooltipItem === "object") {
-                                    tooltipItem.datetime = tooltipItem.label;
-                                }
+                        legend: {
+                            display: true,
+                            onClick: (e) => e.stopPropagation(),
+                            labels: {
+                                usePointStyle: true,
+                                generateLabels: chart => {
+                                    const chartData = chart.data,
+                                        legends = Array.isArray(chartData.datasets) ? chartData.datasets.map((dataset, i) => {
+                                            return {
+                                                text: dataset.label,
+                                                backgroundColor: dataset.backgroundColor,
+                                                borderColor: dataset.borderColor,
+                                                borderWidth: dataset.borderWidth,
+                                                pointStyle: dataset.pointStyle,
+                                                pointRadius: dataset.pointRadius,
+                                                pointHoverRadius: dataset.pointHoverRadius,
+                                                strokeStyle: dataset.borderColor,
+                                                fillStyle: dataset.borderColor,
+                                                spanGaps: dataset.spanGaps,
+                                                hidden: !chart.isDatasetVisible(i),
+                                                datasetIndex: i
+                                            };
+                                        }, this) : [];
 
-                                return options.setTooltipValue(tooltipItem);
+                                    return legends;
+                                },
+                                fontSize: options.fontSizeLegend,
+                                fontColorLegend: options.fontColorLegend
                             },
-                            // remove title
-                            title: () => {
-                                return false;
+                            align: "start"
+                        },
+                        tooltip: {
+                            bodyColor: options.colorTooltipFont,
+                            backgroundColor: options.colorTooltipBack,
+                            yAlign: "bottom",
+                            titleAlign: "center",
+                            bodyAlign: "center",
+                            external: (tooltip) => {
+                                if (!tooltip) {
+                                    return;
+                                }
+                                // disable displaying the color box;
+                                tooltip.displayColors = false;
+                            },
+                            callbacks: {
+                                // use label callback to return the desired label
+                                label: (tooltipItem, chartJsData) => {
+                                    if (
+                                        typeof chartJsData === "object"
+                                        && Array.isArray(chartJsData.datasets)
+                                        && typeof chartJsData.datasets[tooltipItem.datasetIndex] === "object"
+                                        && Array.isArray(chartJsData.datasets[tooltipItem.datasetIndex].datetimes)
+                                        && chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index]
+                                    ) {
+                                        tooltipItem.datetime = chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index];
+                                    }
+                                    else if (typeof tooltipItem === "object") {
+                                        tooltipItem.datetime = tooltipItem.label;
+                                    }
+
+                                    return options.setTooltipValue(tooltipItem);
+                                },
+                                // remove title
+                                title: () => {
+                                    return false;
+                                }
                             }
                         }
                     },
@@ -356,52 +358,53 @@ export default {
                         }
                     },
                     scales: {
-                        xAxes: [{
+                        x: {
                             display: true,
+                            beginAtZero: true,
                             ticks: {
                                 fontSize: options.fontSizeGraph,
                                 fontColor: options.fontColorGraph,
-                                beginAtZero: true,
                                 autoSkip: true,
                                 maxTicksLimit: options.xAxisTicks,
                                 callback: (xValue) => {
-                                    return options.renderLabelXAxis(xValue);
+                                    return options.renderLabelXAxis(data.labels[xValue]);
                                 }
                             },
-                            gridLines: {
+                            grid: {
                                 color: options.gridLinesColor,
                                 display: true,
-                                drawBorder: true,
+                                border: {
+                                    display: true
+                                },
                                 drawOnChartArea: false
                             },
-                            scaleLabel: {
+                            title: {
                                 display: Boolean(options.descriptionXAxis),
-                                labelString: options.descriptionXAxis
+                                text: options.descriptionXAxis
                             }
-                        }],
-                        yAxes: [{
+                        },
+                        y: {
                             display: true,
+                            beginAtZero: true,
                             ticks: {
-                                beginAtZero: true,
                                 fontSize: options.fontSizeGraph,
                                 fontColor: options.fontColorGraph,
                                 maxTicksLimit: options.yAxisTicks,
                                 callback: (yValue) => {
                                     return options.renderLabelYAxis(yValue);
-                                },
-                                stepSize: 1
+                                }
                             },
-                            gridLines: {
+                            grid: {
                                 color: options.gridLinesColor,
                                 display: true,
                                 drawBorder: true,
                                 drawOnChartArea: false
                             },
-                            scaleLabel: {
+                            title: {
                                 display: Boolean(options.descriptionYAxis),
-                                labelString: options.descriptionYAxis
+                                text: options.descriptionYAxis
                             }
-                        }]
+                        }
                     }
                 }
             };
