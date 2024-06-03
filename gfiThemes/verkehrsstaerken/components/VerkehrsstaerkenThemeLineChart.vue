@@ -299,7 +299,6 @@ export default {
          * @returns {Object} The gridLines.
          */
         createGridLines: function () {
-            console.log('###');
             return {
                 color: this.scaleGridLinesColor,
                 display: true,
