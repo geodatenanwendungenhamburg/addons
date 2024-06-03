@@ -249,6 +249,7 @@ export default {
          * @returns {Object} The chart tooltip.
          */
         createChartTooltip: function () {
+
             return {
                 backgroundColor: this.toolTipBackgroundColor,
                 bodyColor: this.toolTipBodyFontColor,
@@ -262,7 +263,6 @@ export default {
                 }
             };
         },
-
         /**
          * Creates the scales for the chart.
          * @param {Number} maxValue The max value for the y-axis.
@@ -299,6 +299,7 @@ export default {
          * @returns {Object} The gridLines.
          */
         createGridLines: function () {
+            console.log('###');
             return {
                 color: this.scaleGridLinesColor,
                 display: true,

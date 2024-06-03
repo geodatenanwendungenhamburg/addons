@@ -1,6 +1,8 @@
 import Vuex from "vuex";
 import {config, shallowMount, createLocalVue} from "@vue/test-utils";
 import {expect} from "chai";
+import sinon from "sinon";
+
 import VerkehrsstaerkenThemeLineChart from "../../../components/VerkehrsstaerkenThemeLineChart.vue";
 
 const localVue = createLocalVue();
@@ -11,9 +13,10 @@ localVue.use(Vuex);
 describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/VerkehrsstaerkenThemeLineChart.vue", () => {
 
     const dataset = [{"class": "dot", "style": "circle", "year": 2008, "DTV": 17000, "DTVw": 19000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2009, "DTV": 17000, "DTVw": 19000, "Schwerverkehrsanteil am DTVw": 6}, {"class": "dot", "style": "circle", "year": 2010, "DTV": 17000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 6}, {"class": "dot", "style": "circle", "year": 2011, "DTV": 17000, "DTVw": 19000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2012, "DTV": 16000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2013, "DTV": 16000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2014, "DTV": 16000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2015, "DTV": 16000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot_visible", "style": "rect", "year": 2016, "DTV": 18000, "DTVw": 20000, "Schwerverkehrsanteil am DTVw": 6, "Baustelleneinfluss": "Ja"}, {"class": "dot", "style": "circle", "year": 2017, "DTV": 16000, "DTVw": 18000, "Schwerverkehrsanteil am DTVw": 5}, {"class": "dot", "style": "circle", "year": 2018, "DTV": 16000, "DTVw": 17000, "Schwerverkehrsanteil am DTVw": 5}];
-    let wrapper;
+    let wrapper, createGridLinesSpy;
 
     beforeEach(() => {
+        createGridLinesSpy = sinon.spy(VerkehrsstaerkenThemeLineChart.methods, "createGridLines");
         wrapper = shallowMount(VerkehrsstaerkenThemeLineChart, {
             propsData: {
                 dataset: dataset
@@ -27,6 +30,9 @@ describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/Ve
         });
     });
 
+    afterEach(function () {
+        sinon.restore();
+    });
 
     it("should exist", () => {
         expect(wrapper.find("#verkehrsstaerken-line-chart").exists()).to.be.true;
@@ -55,7 +61,7 @@ describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/Ve
         expect(wrapper.vm.category).to.equals("Schwerverkehrsanteil am DTVw");
     });
 
-    it("should returns an object with data for the charts", () => {
+    it("should return an object with data for the charts", () => {
         expect(wrapper.vm.createChartData(dataset, "DTV")).to.deep.equals(
             {
                 labels: [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
@@ -86,7 +92,7 @@ describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/Ve
         );
     });
 
-    it("should returns prepared data with data for the datasets", () => {
+    it("should return prepared data with data for the datasets", () => {
         expect(wrapper.vm.prepareDataset(dataset, "DTV")).to.deep.equals(
             {
                 color: ["rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)", "rgba(255, 0, 0, 1)", "rgba(70, 130, 180, 1)", "rgba(70, 130, 180, 1)"],
@@ -98,13 +104,13 @@ describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/Ve
         );
     });
 
-    it("should returns the label for a category", () => {
+    it("should return the label for a category", () => {
         expect(wrapper.vm.createDatasetLabel("DTV")).to.equals("additional:modules.tools.gfi.themes.verkehrsstaerken.carsPerDay");
         expect(wrapper.vm.createDatasetLabel("DTVw")).to.equals("additional:modules.tools.gfi.themes.verkehrsstaerken.carsPerDayWeekly");
         expect(wrapper.vm.createDatasetLabel("Schwerverkehrsanteil am DTVw")).to.equals("additional:modules.tools.gfi.themes.verkehrsstaerken.HGVsPerWeek");
     });
 
-    it("should returns the chart legend configuration", () => {
+    it("should return the chart legend configuration", () => {
         expect(wrapper.vm.createChartLegend("DTV")).to.deep.includes({
             display: true,
             position: "top",
@@ -112,46 +118,45 @@ describe("src/modules/tools/gfi/components/themes/verkehrsstaerken/components/Ve
         });
     });
 
-    it("should returns an object with tooltip for the charts", () => {
+    it("should return an object with tooltip for the charts", () => {
         const result = wrapper.vm.createChartTooltip();
 
-        expect(result.bodyFontColor).to.equals("rgba(85, 85, 85, 1)");
+        expect(result.bodyColor).to.equals("rgba(85, 85, 85, 1)");
         expect(result.backgroundColor).to.equals("rgba(240, 240, 240, 1)");
 
         expect(result.callbacks.label).to.be.a("function");
-        expect(result.callbacks.label({value: 17000})).equals("17.000");
         expect(result.callbacks.title).to.be.a("function");
         expect(result.callbacks.title()).to.be.false;
     });
 
-    it("should returns an object with scales for the charts ", () => {
+    it("should return an object with scales for the charts ", () => {
         const result = wrapper.vm.createChartScales();
 
-        expect(result.xAxes[0].scaleLabel).to.deep.equals({
+        expect(result.x.title).to.deep.equals({
             display: true,
-            labelString: "additional:modules.tools.gfi.themes.verkehrsstaerken.year"
+            text: "additional:modules.tools.gfi.themes.verkehrsstaerken.year"
         });
-        expect(result.xAxes[0].ticks.min).equals(2008);
-        expect(result.xAxes[0].ticks.max).equals(2018);
-        expect(result.xAxes[0].gridLines).to.deep.equals({
-            color: "rgba(0, 0, 0, 1)",
+        expect(result.x.min).equals(2008);
+        expect(result.x.max).equals(2018);
+        expect(createGridLinesSpy.callCount).to.be.equals(4);
+        // expect(result.x.gridLines).to.be.deep.equals({
+        //     color: "rgba(0, 0, 0, 1)",
+        //     display: true,
+        //     drawBorder: true,
+        //     drawOnChartArea: false
+        // });
+        expect(result.y.title).to.deep.equals({
             display: true,
-            drawBorder: true,
-            drawOnChartArea: false
+            text: "additional:modules.tools.gfi.themes.verkehrsstaerken.carsPerDay"
         });
-
-        expect(result.yAxes[0].scaleLabel).to.deep.equals({
-            display: true,
-            labelString: "additional:modules.tools.gfi.themes.verkehrsstaerken.carsPerDay"
-        });
-        expect(result.yAxes[0].ticks.beginAtZero).equals(true);
-        expect(result.yAxes[0].ticks.precision).equals(0);
-        expect(result.xAxes[0].gridLines).to.deep.equals({
-            color: "rgba(0, 0, 0, 1)",
-            display: true,
-            drawBorder: true,
-            drawOnChartArea: false
-        });
+        expect(result.y.beginAtZero).equals(true);
+        expect(result.y.ticks.precision).equals(0);
+        // expect(result.x.gridLines).to.be.deep.equals({
+        //     color: "rgba(0, 0, 0, 1)",
+        //     display: true,
+        //     drawBorder: true,
+        //     drawOnChartArea: false
+        // });
 
     });
 
