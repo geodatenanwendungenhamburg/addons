@@ -282,7 +282,6 @@ export default {
             }
 
             // in the end...
-            // eslint-disable-next-line require-jsdoc
             const outputCallback = (output)=>{
                 const itemID = templateItemsIndex;
 

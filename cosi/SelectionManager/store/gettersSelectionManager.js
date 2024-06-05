@@ -6,7 +6,6 @@ import selectionManagerState from "./stateSelectionManager";
 const getters = {
     ...generateSimpleGetters(selectionManagerState),
     // needs getter argument to reach rootGetters in fourth argument, so allow this in eslint
-    // eslint-disable-next-line no-shadow
     /**
      *
      * @param {*} state vuex state

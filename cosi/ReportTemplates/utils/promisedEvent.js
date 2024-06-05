@@ -9,7 +9,7 @@ export default function promisedEvent (eventName, timeOut = 1500) {
         throw new Error("$root not available; use promisedEvent.call(parameters..., this)");
     }
     return new Promise((resolve, reject) => {
-        // eslint-disable-next-line require-jsdoc
+        // eslint-disable-next-line jsdoc/require-jsdoc
         function listener () {
             this.$root.$off(eventName);
             resolve();
