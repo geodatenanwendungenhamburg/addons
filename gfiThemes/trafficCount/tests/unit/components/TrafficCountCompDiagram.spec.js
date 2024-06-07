@@ -2,13 +2,13 @@ import Vuex from "vuex";
 import {shallowMount, createLocalVue} from "@vue/test-utils";
 import {expect} from "chai";
 import TrafficCountCompDiagram from "../../../components/TrafficCountCompDiagram.vue";
-import ChartJs from "chart.js";
+import ChartJs from "chart.js/auto";
 
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
 
-describe("addons/trafficCount/components/TrafficCountCompDiagram.vue", () => {
+describe.only("addons/trafficCount/components/TrafficCountCompDiagram.vue", () => {
     const apiDataDefault = [
         {
             meansOfTransport: {

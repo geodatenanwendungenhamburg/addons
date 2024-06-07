@@ -1,5 +1,7 @@
 <script>
 import ChartJs from "chart.js/auto";
+import {mapGetters} from "vuex";
+import {shallowRef} from "vue";
 
 export default {
     name: "TrafficCountCompDiagram",
@@ -123,32 +125,36 @@ export default {
             chart: null
         };
     },
+    computed: {
+        ...mapGetters(
+            "gfiThemes/TrafficCount", [
+                "activeTabId"])
+    },
     watch: {
-        apiData (newData, oldValue) {
-            if (!oldValue.length) {
-                this.chartData = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-                this.createChart(this.chartData, this.ctx);
-            }
-            else if (Array.isArray(newData) && newData.length) {
-                this.chart.data = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-                this.chart.update(this.updateAnimation);
-            }
-            else {
-                this.chart.destroy();
-            }
+        apiData: {
+            handler (newData, oldValue) {
+                if (!oldValue.length) {
+                    this.destroyChart();
+                    this.chartData = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
+                    this.createChart(this.chartData, this.ctx);
+                }
+                else if (Array.isArray(newData) && newData.length) {
+                    this.chart.data = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
+                    this.chart.update(this.updateAnimation);
+                }
+                else {
+                    this.destroyChart();
+                }
+            },
+            deep: true
+        },
+        activeTabId () {
+            this.destroyChart();
         }
     },
     mounted () {
         this.chartData = this.createDataForDiagram(this.apiData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-        this.ctx = this.$el.getElementsByTagName("canvas")[0].getContext("2d");
-
-        /**
-         * @see afterFit https://www.chartjs.org/docs/latest/axes/?h=afterfit
-         * @returns {Void}  -
-         */
-        ChartJs.Legend.prototype.afterFit = function () {
-            this.height = this.height + 10;
-        };
+        this.ctx = this.$refs[`trafficCountChart_${this.activeTabId}`];
 
         this.createChart(this.chartData, this.ctx);
     },
@@ -157,12 +163,12 @@ export default {
          * Creating the diagram from chart js
          * @param {Object[]} data parsed for chartjs format
          * @param {html} ctx the canvas container for diagram
-         * @returns {Void}  -
+         * @returns {Void} -
          */
         createChart (data, ctx) {
-            this.chart = new ChartJs(ctx, this.getChartJsConfig(data, {
-                colorTooltipFont: this.colorTooltipFont,
-                colorTooltipBack: this.colorTooltipBack,
+            this.chart = shallowRef(new ChartJs(ctx, this.getChartJsConfig(data, {
+                titleColor: this.colorTooltipFont,
+                backgroundColor: this.colorTooltipBack,
                 setTooltipValue: this.setTooltipValue,
                 fontSizeGraph: this.fontSizeGraph,
                 fontSizeLegend: this.fontSizeLegend,
@@ -175,7 +181,17 @@ export default {
                 renderLabelYAxis: this.renderLabelYAxis,
                 descriptionXAxis: this.descriptionXAxis,
                 descriptionYAxis: this.descriptionYAxis
-            }));
+            })));
+        },
+        /**
+         * Destroys the current chart if exists.
+         * @returns {void}
+         */
+        destroyChart () {
+            if (this.chart instanceof ChartJs) {
+                this.chart.destroy();
+                this.chart = null;
+            }
         },
         /**
          * creates the datasets for chartjs
@@ -415,7 +431,10 @@ export default {
 
 <template>
     <div class="graph">
-        <canvas />
+        <canvas
+            :id="`trafficCountChart_${activeTabId}`"
+            :ref="`trafficCountChart_${activeTabId}`"
+        />
     </div>
 </template>
 
@@ -435,11 +454,8 @@ export default {
 
 <style lang="scss">
     .trafficCount-gfi .dateSelector {
-        width: 230px;
-        height: 35px;
-        float: right;
-        margin-right: 10px;
-        margin-top: -3.7em;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 
     @media (max-width: 580px) {

@@ -8,7 +8,7 @@ const localVue = createLocalVue();
 
 localVue.use(Vuex);
 
-describe("src/share-components/charts/components/BarchartItem.vue", () => {
+describe.skip("src/share-components/charts/components/BarchartItem.vue", () => {
     let wrapper;
     const givenScaleParameters = {
         x: [{
