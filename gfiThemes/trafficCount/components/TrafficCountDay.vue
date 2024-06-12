@@ -258,6 +258,7 @@ export default {
         />
         <div id="diagramDay">
             <TrafficCountCompDiagram
+                :current-tab-id="tab"
                 :api-data="apiData"
                 :set-tooltip-value="setTooltipValue"
                 :x-axis-ticks="xAxisTicks"

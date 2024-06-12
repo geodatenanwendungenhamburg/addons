@@ -16,7 +16,10 @@ export default {
             type: Array,
             required: true
         },
-
+        currentTabId: {
+            type: String,
+            required: true
+        },
         /**
          * sets the tooltip if the mouse hovers over a point
          * @param {Object} tooltipItem the tooltipItem from chartjs (see https://www.chartjs.org/docs/latest/configuration/tooltip.html?h=tooltipitem)
@@ -127,8 +130,7 @@ export default {
     },
     computed: {
         ...mapGetters(
-            "gfiThemes/TrafficCount", [
-                "activeTabId"])
+            ["gfiThemes/TrafficCount"])
     },
     watch: {
         apiData: {
@@ -148,13 +150,15 @@ export default {
             },
             deep: true
         },
-        activeTabId () {
-            this.destroyChart();
+        currentTabId: {
+            handler () {
+                this.destroyChart();
+            }
         }
     },
     mounted () {
         this.chartData = this.createDataForDiagram(this.apiData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-        this.ctx = this.$refs[`trafficCountChart_${this.activeTabId}`];
+        this.ctx = this.$refs[`trafficCountChart_${this.currentTabId}`];
 
         this.createChart(this.chartData, this.ctx);
     },
@@ -430,10 +434,10 @@ export default {
 </script>
 
 <template>
-    <div class="graph">
+    <div class="graph tool-window-vue">
         <canvas
-            :id="`trafficCountChart_${activeTabId}`"
-            :ref="`trafficCountChart_${activeTabId}`"
+            :id="`trafficCountChart_${currentTabId}`"
+            :ref="`trafficCountChart_${currentTabId}`"
         />
     </div>
 </template>

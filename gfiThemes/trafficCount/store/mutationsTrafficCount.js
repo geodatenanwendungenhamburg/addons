@@ -1,4 +1,4 @@
-import {generateSimpleMutations} from "../../../../src/utils/generators";
+import {generateSimpleMutations} from "../../../../src/app-store/utils/generators";
 import statePopulationRequest from "./stateTrafficCount";
 
 const mutations = {

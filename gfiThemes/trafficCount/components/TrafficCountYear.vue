@@ -275,6 +275,7 @@ export default {
         />
         <div id="diagramYear">
             <TrafficCountCompDiagram
+                :current-tab-id="tab"
                 :api-data="apiData"
                 :set-tooltip-value="setTooltipValue"
                 :y-axis-ticks="yAxisTicks"

@@ -310,6 +310,7 @@ export default {
         <div id="diagramWeek">
             <TrafficCountCompDiagram
                 :api-data="apiData"
+                :current-tab-id="tab"
                 :set-tooltip-value="setTooltipValue"
                 :y-axis-ticks="yAxisTicks"
                 :render-label-x-axis="renderLabelXAxis"
