@@ -458,8 +458,10 @@ export default {
 
 <style lang="scss">
     .trafficCount-gfi .dateSelector {
-        margin-top: 1rem;
+        margin-top: -3rem;
+        margin-right: 1rem;
         margin-bottom: 1rem;
+        align-self: flex-end;
     }
 
     @media (max-width: 580px) {

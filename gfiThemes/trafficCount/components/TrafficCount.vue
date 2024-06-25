@@ -624,5 +624,9 @@ export default {
         width: 100%;
         padding-bottom: 5px;
     }
+    .active {
+        display: flex;
+        flex-direction: column;
+    }
 }
 </style>

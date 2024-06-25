@@ -8,7 +8,7 @@ const localVue = createLocalVue();
 
 localVue.use(Vuex);
 
-describe.only("addons/trafficCount/components/TrafficCountCompDiagram.vue", () => {
+describe("addons/trafficCount/components/TrafficCountCompDiagram.vue", () => {
     const apiDataDefault = [
         {
             meansOfTransport: {
