@@ -1,5 +1,5 @@
 <script>
-import ChartJs from "chart.js";
+import ChartJs from "chart.js/auto";
 import deepAssign from "../../../src/utils/deepAssign";
 import thousandsSeparator from "../../../src/utils/thousandsSeparator";
 
@@ -37,25 +37,27 @@ export default {
         return {
             defaultOptions: {
                 responsive: true,
-                legend: {
-                    align: "start"
+                plugins: {
+                    legend: {
+                        align: "start"
+                    },
+                    tooltips: {
+                        callbacks: {
+                        // use label callback to return the desired label
+                            label: (tooltipItem, data) => {
+                                return data.datasets[tooltipItem.datasetIndex].label + ": " + thousandsSeparator(tooltipItem.value);
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    yAxes: [{
+                    y: {
                         ticks: {
                             precision: 0,
                             beginAtZero: true,
                             callback: (value) => {
                                 return thousandsSeparator(value);
                             }
-                        }
-                    }]
-                },
-                tooltips: {
-                    callbacks: {
-                        // use label callback to return the desired label
-                        label: (tooltipItem, data) => {
-                            return data.datasets[tooltipItem.datasetIndex].label + ": " + thousandsSeparator(tooltipItem.value);
                         }
                     }
                 }
@@ -74,10 +76,6 @@ export default {
              * @see afterFit https://www.chartjs.org/docs/latest/axes/?h=afterfit
              * @returns {void}  -
              */
-            ChartJs.Legend.prototype.afterFit = function () {
-                this.height += 10;
-            };
-
             this.resetChart(this.data);
         });
     },
@@ -90,12 +88,6 @@ export default {
          * @returns {void}  -
          */
         resetChart (data) {
-            // getChartJsOptions does not allow to overwrite scales
-            // this workaround allows to overwrite the scales completely
-            if (this.givenScales) {
-                this.defaultOptions.scales = this.givenScales;
-            }
-
             const ctx = this.$el.getContext("2d"),
                 config = {
                     type: "bar",
@@ -104,12 +96,18 @@ export default {
                 };
 
             if (this.chart instanceof ChartJs) {
-                this.chart.destroy();
+                this.destroyChart();
             }
 
             this.chart = new ChartJs(ctx, config);
         },
-
+        /**
+         * destroys the old charts
+         * @returns {void}  -
+         */
+        destroyChart () {
+            this.chart.destroy();
+        },
         /**
          * replace default options with given options on hand deepAssign method and returns the options for chart js
          * @param {Object} defaultOptions an object with the default options following chartJS options (see https://www.chartjs.org/docs/latest/general/options.html)
