@@ -1,6 +1,5 @@
 <script>
 import ChartJs from "chart.js/auto";
-import {mapGetters} from "vuex";
 import {shallowRef} from "vue";
 
 export default {
@@ -127,10 +126,6 @@ export default {
 
             chart: null
         };
-    },
-    computed: {
-        ...mapGetters(
-            ["gfiThemes/TrafficCount"])
     },
     watch: {
         apiData: {
