@@ -13,7 +13,7 @@ export function parseFeatures (olFeatures, district, districtLevel) {
      * parse LTF
      * @todo refactor
      */
-    if (olFeatures.every(feature => feature.get("jahr") && feature.get("jahr_timestamp"))) {
+    if (olFeatures.every(feature => feature.get("jahr"))) {
         if (district.statFeatures.length > 0) {
             updateStatFeaturesFromLTF(olFeatures, district.statFeatures);
         }
