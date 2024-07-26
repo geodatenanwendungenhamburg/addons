@@ -61,7 +61,7 @@ export default {
                 // add 3 days to match thursdays
                 const objMoment = dayjs(tooltipItem.datetime, "YYYY-MM-DD HH:mm:ss").add(3, "day");
 
-                return this.$t("additional:modules.tools.gfi.themes.trafficCount.calendarweek") + " " + objMoment.format("WW") + " / " + objMoment.format("YYYY") + ": " + thousandsSeparator(tooltipItem.value);
+                return this.$t("additional:modules.tools.gfi.themes.trafficCount.calendarweek") + " " + objMoment.format("WW") + " / " + objMoment.format("YYYY") + ": " + thousandsSeparator(tooltipItem.raw);
             },
             yAxisTicks: 8,
             renderLabelXAxis: (datetime) => {
@@ -275,6 +275,7 @@ export default {
         />
         <div id="diagramYear">
             <TrafficCountCompDiagram
+                :current-tab-id="tab"
                 :api-data="apiData"
                 :set-tooltip-value="setTooltipValue"
                 :y-axis-ticks="yAxisTicks"

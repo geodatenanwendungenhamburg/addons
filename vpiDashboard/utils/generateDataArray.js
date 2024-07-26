@@ -39,7 +39,6 @@ const generateDataArray = {
             dataKey = "sum_num_visitors";
         }
 
-        // eslint-disable-next-line
         const sum_num_visitors = [];
 
         // eslint-disable-next-line

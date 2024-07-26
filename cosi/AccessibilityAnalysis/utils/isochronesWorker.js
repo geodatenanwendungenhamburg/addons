@@ -50,12 +50,12 @@ self.addEventListener("message", function (e) {
  **/
 export class Worker {
 
-    // eslint-disable-next-line require-jsdoc
+    // eslint-disable-next-line jsdoc/require-jsdoc
     constructor () {
         this.listeners = [];
     }
 
-    // eslint-disable-next-line require-jsdoc
+    // eslint-disable-next-line jsdoc/require-jsdoc
     async postMessage (args) {
         await onmessage({
             postMessage: (data) => {
@@ -72,19 +72,19 @@ export class Worker {
         }, {data: args});
     }
 
-    // eslint-disable-next-line require-jsdoc
+    // eslint-disable-next-line jsdoc/require-jsdoc
     terminate () {
         this.status = "terminated";
     }
 
-    // eslint-disable-next-line require-jsdoc
+    // eslint-disable-next-line jsdoc/require-jsdoc
     addEventListener (type, l) {
         if (type === "message") {
             this.listeners.push(l);
         }
     }
 
-    // eslint-disable-next-line require-jsdoc
+    // eslint-disable-next-line jsdoc/require-jsdoc
     removeEventListener (type, l) {
         if (type === "message") {
             const index = this.listeners.indexOf(l);

@@ -26,7 +26,6 @@ export default {
             throw new Error(updateInterfaceOnly + " must be a boolean or undefined");
         }
 
-        // eslint-disable-next-line one-var
         const toolPath = "Tools/" + toolName + "/setToolBridgeIn",
             request = {
                 settings: settings,

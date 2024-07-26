@@ -1,5 +1,6 @@
 <script>
-import ChartJs from "chart.js";
+import ChartJs from "chart.js/auto";
+import {shallowRef} from "vue";
 
 export default {
     name: "TrafficCountCompDiagram",
@@ -14,7 +15,10 @@ export default {
             type: Array,
             required: true
         },
-
+        currentTabId: {
+            type: String,
+            required: true
+        },
         /**
          * sets the tooltip if the mouse hovers over a point
          * @param {Object} tooltipItem the tooltipItem from chartjs (see https://www.chartjs.org/docs/latest/configuration/tooltip.html?h=tooltipitem)
@@ -124,31 +128,32 @@ export default {
         };
     },
     watch: {
-        apiData (newData, oldValue) {
-            if (!oldValue.length) {
-                this.chartData = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-                this.createChart(this.chartData, this.ctx);
-            }
-            else if (Array.isArray(newData) && newData.length) {
-                this.chart.data = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-                this.chart.update(this.updateAnimation);
-            }
-            else {
-                this.chart.destroy();
+        apiData: {
+            handler (newData, oldValue) {
+                if (!oldValue.length) {
+                    this.destroyChart();
+                    this.chartData = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
+                    this.createChart(this.chartData, this.ctx);
+                }
+                else if (Array.isArray(newData) && newData.length) {
+                    this.chart.data = this.createDataForDiagram(newData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
+                    this.chart.update(this.updateAnimation);
+                }
+                else {
+                    this.destroyChart();
+                }
+            },
+            deep: true
+        },
+        currentTabId: {
+            handler () {
+                this.destroyChart();
             }
         }
     },
     mounted () {
         this.chartData = this.createDataForDiagram(this.apiData, this.colors, this.renderLabelLegend, this.renderPointStyle, this.renderPointSize);
-        this.ctx = this.$el.getElementsByTagName("canvas")[0].getContext("2d");
-
-        /**
-         * @see afterFit https://www.chartjs.org/docs/latest/axes/?h=afterfit
-         * @returns {Void}  -
-         */
-        ChartJs.Legend.prototype.afterFit = function () {
-            this.height = this.height + 10;
-        };
+        this.ctx = this.$refs[`trafficCountChart_${this.currentTabId}`];
 
         this.createChart(this.chartData, this.ctx);
     },
@@ -157,12 +162,12 @@ export default {
          * Creating the diagram from chart js
          * @param {Object[]} data parsed for chartjs format
          * @param {html} ctx the canvas container for diagram
-         * @returns {Void}  -
+         * @returns {Void} -
          */
         createChart (data, ctx) {
-            this.chart = new ChartJs(ctx, this.getChartJsConfig(data, {
-                colorTooltipFont: this.colorTooltipFont,
-                colorTooltipBack: this.colorTooltipBack,
+            this.chart = shallowRef(new ChartJs(ctx, this.getChartJsConfig(data, {
+                titleColor: this.colorTooltipFont,
+                backgroundColor: this.colorTooltipBack,
                 setTooltipValue: this.setTooltipValue,
                 fontSizeGraph: this.fontSizeGraph,
                 fontSizeLegend: this.fontSizeLegend,
@@ -175,7 +180,17 @@ export default {
                 renderLabelYAxis: this.renderLabelYAxis,
                 descriptionXAxis: this.descriptionXAxis,
                 descriptionYAxis: this.descriptionYAxis
-            }));
+            })));
+        },
+        /**
+         * Destroys the current chart if exists.
+         * @returns {void}
+         */
+        destroyChart () {
+            if (this.chart instanceof ChartJs) {
+                this.chart.destroy();
+                this.chart = null;
+            }
         },
         /**
          * creates the datasets for chartjs
@@ -265,79 +280,81 @@ export default {
                 type: "line",
                 data,
                 options: {
-                    title: {
-                        display: false
-                    },
                     elements: {
                         line: {
                             tension: 0
                         }
                     },
-                    legend: {
-                        display: true,
-                        onClick: (e) => e.stopPropagation(),
-                        labels: {
-                            usePointStyle: true,
-                            generateLabels: chart => {
-                                const chartData = chart.data,
-                                    legends = Array.isArray(chartData.datasets) ? chartData.datasets.map((dataset, i) => {
-                                        return {
-                                            text: dataset.label,
-                                            backgroundColor: dataset.backgroundColor,
-                                            borderColor: dataset.borderColor,
-                                            borderWidth: dataset.borderWidth,
-                                            pointStyle: dataset.pointStyle,
-                                            pointRadius: dataset.pointRadius,
-                                            pointHoverRadius: dataset.pointHoverRadius,
-                                            strokeStyle: dataset.borderColor,
-                                            fillStyle: dataset.borderColor,
-                                            spanGaps: dataset.spanGaps,
-                                            hidden: !chart.isDatasetVisible(i),
-                                            datasetIndex: i
-                                        };
-                                    }, this) : [];
-
-                                return legends;
-                            },
-                            fontSize: options.fontSizeLegend,
-                            fontColorLegend: options.fontColorLegend
+                    plugins: {
+                        title: {
+                            display: false
                         },
-                        align: "start"
-                    },
-                    tooltips: {
-                        bodyFontColor: options.colorTooltipFont,
-                        backgroundColor: options.colorTooltipBack,
-                        yAlign: "bottom",
-                        titleAlign: "center",
-                        bodyAlign: "center",
-                        custom: (tooltip) => {
-                            if (!tooltip) {
-                                return;
-                            }
-                            // disable displaying the color box;
-                            tooltip.displayColors = false;
-                        },
-                        callbacks: {
-                            // use label callback to return the desired label
-                            label: (tooltipItem, chartJsData) => {
-                                if (
-                                    typeof chartJsData === "object"
-                                    && Array.isArray(chartJsData.datasets)
-                                    && typeof chartJsData.datasets[tooltipItem.datasetIndex] === "object"
-                                    && Array.isArray(chartJsData.datasets[tooltipItem.datasetIndex].datetimes)
-                                    && chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index]
-                                ) {
-                                    tooltipItem.datetime = chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index];
-                                }
-                                else if (typeof tooltipItem === "object") {
-                                    tooltipItem.datetime = tooltipItem.label;
-                                }
+                        legend: {
+                            display: true,
+                            onClick: (e) => e.stopPropagation(),
+                            labels: {
+                                usePointStyle: true,
+                                generateLabels: chart => {
+                                    const chartData = chart.data,
+                                        legends = Array.isArray(chartData.datasets) ? chartData.datasets.map((dataset, i) => {
+                                            return {
+                                                text: dataset.label,
+                                                backgroundColor: dataset.backgroundColor,
+                                                borderColor: dataset.borderColor,
+                                                borderWidth: dataset.borderWidth,
+                                                pointStyle: dataset.pointStyle,
+                                                pointRadius: dataset.pointRadius,
+                                                pointHoverRadius: dataset.pointHoverRadius,
+                                                strokeStyle: dataset.borderColor,
+                                                fillStyle: dataset.borderColor,
+                                                spanGaps: dataset.spanGaps,
+                                                hidden: !chart.isDatasetVisible(i),
+                                                datasetIndex: i
+                                            };
+                                        }, this) : [];
 
-                                return options.setTooltipValue(tooltipItem);
+                                    return legends;
+                                },
+                                fontSize: options.fontSizeLegend,
+                                fontColorLegend: options.fontColorLegend
                             },
-                            // remove title
-                            title: () => {
-                                return false;
+                            align: "start"
+                        },
+                        tooltip: {
+                            bodyColor: options.colorTooltipFont,
+                            backgroundColor: options.colorTooltipBack,
+                            yAlign: "bottom",
+                            titleAlign: "center",
+                            bodyAlign: "center",
+                            external: (tooltip) => {
+                                if (!tooltip) {
+                                    return;
+                                }
+                                // disable displaying the color box;
+                                tooltip.displayColors = false;
+                            },
+                            callbacks: {
+                                // use label callback to return the desired label
+                                label: (tooltipItem, chartJsData) => {
+                                    if (
+                                        typeof chartJsData === "object"
+                                        && Array.isArray(chartJsData.datasets)
+                                        && typeof chartJsData.datasets[tooltipItem.datasetIndex] === "object"
+                                        && Array.isArray(chartJsData.datasets[tooltipItem.datasetIndex].datetimes)
+                                        && chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index]
+                                    ) {
+                                        tooltipItem.datetime = chartJsData.datasets[tooltipItem.datasetIndex].datetimes[tooltipItem.index];
+                                    }
+                                    else if (typeof tooltipItem === "object") {
+                                        tooltipItem.datetime = tooltipItem.label;
+                                    }
+
+                                    return options.setTooltipValue(tooltipItem);
+                                },
+                                // remove title
+                                title: () => {
+                                    return false;
+                                }
                             }
                         }
                     },
@@ -356,52 +373,53 @@ export default {
                         }
                     },
                     scales: {
-                        xAxes: [{
+                        x: {
                             display: true,
+                            beginAtZero: true,
                             ticks: {
                                 fontSize: options.fontSizeGraph,
                                 fontColor: options.fontColorGraph,
-                                beginAtZero: true,
                                 autoSkip: true,
                                 maxTicksLimit: options.xAxisTicks,
                                 callback: (xValue) => {
-                                    return options.renderLabelXAxis(xValue);
+                                    return options.renderLabelXAxis(data.labels[xValue]);
                                 }
                             },
-                            gridLines: {
+                            grid: {
                                 color: options.gridLinesColor,
                                 display: true,
-                                drawBorder: true,
+                                border: {
+                                    display: true
+                                },
                                 drawOnChartArea: false
                             },
-                            scaleLabel: {
+                            title: {
                                 display: Boolean(options.descriptionXAxis),
-                                labelString: options.descriptionXAxis
+                                text: options.descriptionXAxis
                             }
-                        }],
-                        yAxes: [{
+                        },
+                        y: {
                             display: true,
+                            beginAtZero: true,
                             ticks: {
-                                beginAtZero: true,
                                 fontSize: options.fontSizeGraph,
                                 fontColor: options.fontColorGraph,
                                 maxTicksLimit: options.yAxisTicks,
                                 callback: (yValue) => {
                                     return options.renderLabelYAxis(yValue);
-                                },
-                                stepSize: 1
+                                }
                             },
-                            gridLines: {
+                            grid: {
                                 color: options.gridLinesColor,
                                 display: true,
                                 drawBorder: true,
                                 drawOnChartArea: false
                             },
-                            scaleLabel: {
+                            title: {
                                 display: Boolean(options.descriptionYAxis),
-                                labelString: options.descriptionYAxis
+                                text: options.descriptionYAxis
                             }
-                        }]
+                        }
                     }
                 }
             };
@@ -411,8 +429,11 @@ export default {
 </script>
 
 <template>
-    <div class="graph">
-        <canvas />
+    <div class="graph tool-window-vue">
+        <canvas
+            :id="`trafficCountChart_${currentTabId}`"
+            :ref="`trafficCountChart_${currentTabId}`"
+        />
     </div>
 </template>
 
@@ -432,11 +453,10 @@ export default {
 
 <style lang="scss">
     .trafficCount-gfi .dateSelector {
-        width: 230px;
-        height: 35px;
-        float: right;
-        margin-right: 10px;
-        margin-top: -3.7em;
+        margin-top: -3rem;
+        margin-right: 1rem;
+        margin-bottom: 1rem;
+        align-self: flex-end;
     }
 
     @media (max-width: 580px) {

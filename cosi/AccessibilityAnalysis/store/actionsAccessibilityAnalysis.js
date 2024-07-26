@@ -3,7 +3,7 @@ import {WFS, GeoJSON} from "ol/format.js";
 import {getFeatureGET} from "../../../../src/api/wfs/getFeature.js";
 
 let worker,
-    // eslint-disable-next-line func-style, require-jsdoc
+    // eslint-disable-next-line func-style
     workerFactory = () => new Worker();
 
 /**

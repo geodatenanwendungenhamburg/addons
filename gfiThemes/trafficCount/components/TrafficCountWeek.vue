@@ -55,7 +55,7 @@ export default {
 
             // props for diagram
             setTooltipValue: (tooltipItem) => {
-                return dayjs(tooltipItem.datetime, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY") + ": " + thousandsSeparator(tooltipItem.value);
+                return dayjs(tooltipItem.datetime, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY") + ": " + thousandsSeparator(tooltipItem.raw);
             },
             yAxisTicks: 8,
             renderLabelXAxis: (datetime) => {
@@ -310,6 +310,7 @@ export default {
         <div id="diagramWeek">
             <TrafficCountCompDiagram
                 :api-data="apiData"
+                :current-tab-id="tab"
                 :set-tooltip-value="setTooltipValue"
                 :y-axis-ticks="yAxisTicks"
                 :render-label-x-axis="renderLabelXAxis"

@@ -423,6 +423,42 @@ describe("addons/mietenspiegelFormular/components/MietenspiegelFormular.vue", ()
                 expect(wrapper.vm.getUniqueValuesByAttributes(item, 1234)).to.deep.equal(expected);
                 expect(wrapper.vm.getUniqueValuesByAttributes(item, {})).to.deep.equal(expected);
             });
+            it("should return an array with a fixed last element", () => {
+                const wrapper = factory.getShallowMount({}, true),
+                    calc = [
+                        {
+                            "Baualtersklasse/Bezugsfertigkeit": "2016 bis 2022"
+                        },
+                        {
+                            "Baualtersklasse/Bezugsfertigkeit": "bis 31.12.1918"
+                        },
+                        {
+                            "Baualtersklasse/Bezugsfertigkeit": "bis 31.11.1918"
+                        },
+                        {
+                            "Baualtersklasse/Bezugsfertigkeit": "bis 31.12.1918"
+                        },
+                        {
+                            "Baualtersklasse/Bezugsfertigkeit": "bis 31.12.1918"
+                        }
+                    ],
+                    item = "Baualtersklasse/Bezugsfertigkeit",
+                    expected = ["bis 31.12.1918", "bis 31.11.1918", "2016 bis 2022"];
+
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, calc)).to.deep.equal(expected);
+            });
+            it("should return an empty array, if calculationData is not an array", () => {
+                const wrapper = factory.getShallowMount({}, true),
+                    item = "Baualtersklasse/Bezugsfertigkeit",
+                    expected = [];
+
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, undefined)).to.deep.equal(expected);
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, null)).to.deep.equal(expected);
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, true)).to.deep.equal(expected);
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, false)).to.deep.equal(expected);
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, 1234)).to.deep.equal(expected);
+                expect(wrapper.vm.getUniqueValuesByAttributes(item, {})).to.deep.equal(expected);
+            });
         });
         describe("convertDateFormat", () => {
             it("should return false if param is not a string", () => {

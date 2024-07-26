@@ -164,7 +164,6 @@ export default {
          * @returns {void}
          */
         showLoader (val) {
-            // eslint-disable-next-line chai-friendly/no-unused-expressions
             val ? LoaderOverlay.show() : LoaderOverlay.hide();
         },
         /**

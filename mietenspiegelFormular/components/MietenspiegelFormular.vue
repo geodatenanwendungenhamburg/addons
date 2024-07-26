@@ -32,7 +32,31 @@ export default {
     },
     computed: {
         ...mapGetters("Tools/MietenspiegelFormular", Object.keys(getters)),
-        ...mapGetters("Maps", ["clickCoordinate", "projection", "getLayerById", "resolution", "getView"])
+        ...mapGetters("Maps", ["clickCoordinate", "projection", "getLayerById", "resolution", "getView"]),
+
+        /**
+         * Returns the average value text.
+         * @returns {String} the average value text.
+         */
+        averageValueText () {
+            return typeof this.averageValue === "undefined" ? i18next.t("additional:modules.tools.mietenspiegelFormular.noData") : "---";
+        },
+
+        /**
+         * Returns the rangeMin text.
+         * @returns {String} the rangeMin text.
+         */
+        rangeMinText () {
+            return typeof this.rangeMin === "undefined" ? i18next.t("additional:modules.tools.mietenspiegelFormular.noData") : "---";
+        },
+
+        /**
+         * Returns the rangeMax text.
+         * @returns {String} the rangeMax text.
+         */
+        rangeMaxText () {
+            return typeof this.rangeMax === "undefined" ? i18next.t("additional:modules.tools.mietenspiegelFormular.noData") : "---";
+        }
     },
     watch: {
         residentialInformation: {
@@ -122,15 +146,9 @@ export default {
          * @returns {void}
          */
         setRentPrice (calculatedRent) {
-            this.rangeMin = "";
-            this.rangeMax = "";
-            this.averageValue = "";
-
-            if (typeof calculatedRent?.rangeMin !== "undefined" && calculatedRent?.rangeMax !== "undefined" && calculatedRent?.averageValue !== "undefined") {
-                this.rangeMin = calculatedRent.rangeMin;
-                this.rangeMax = calculatedRent.rangeMax;
-                this.averageValue = calculatedRent.averageValue;
-            }
+            this.rangeMin = calculatedRent?.rangeMin;
+            this.rangeMax = calculatedRent?.rangeMax;
+            this.averageValue = calculatedRent?.averageValue;
         },
 
         /**
@@ -309,14 +327,25 @@ export default {
                 return false;
             }
             const filtered = [];
+            let lastElement = "";
 
             if (Array.isArray(calculationData)) {
                 for (let i = 0; i < calculationData?.length; i++) {
                     if (filtered.indexOf(calculationData[i][attr]) === -1) {
-                        filtered.push(calculationData[i][attr]);
+                        if (calculationData[i][attr] !== "2016 bis 2022") {
+                            filtered.push(calculationData[i][attr]);
+                        }
+                        else {
+                            lastElement = calculationData[i][attr];
+                        }
                     }
                 }
+
+                if (lastElement !== "") {
+                    filtered.push(lastElement);
+                }
             }
+
             return filtered;
         },
         /**
@@ -498,7 +527,7 @@ export default {
                                         {{ averageValue }}
                                     </span>
                                     <span v-else>
-                                        ---
+                                        {{ averageValueText }}
                                     </span>
                                 </div>
                                 <div>
@@ -509,7 +538,7 @@ export default {
                                         {{ rangeMin }}
                                     </span>
                                     <span v-else>
-                                        ---
+                                        {{ rangeMinText }}
                                     </span>
                                 </div>
                                 <div>
@@ -520,7 +549,7 @@ export default {
                                         {{ rangeMax }}
                                     </span>
                                     <span v-else>
-                                        ---
+                                        {{ rangeMaxText }}
                                     </span>
                                 </div>
                             </div>
