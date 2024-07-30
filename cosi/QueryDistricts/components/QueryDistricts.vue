@@ -8,7 +8,7 @@ import rawLayerList from "@masterportal/masterportalapi/src/rawLayerList";
 import compareFeatures from "./compareFeatures.js";
 import LayerFilter from "./LayerFilter.vue";
 import {Fill, Stroke, Style} from "ol/style.js";
-import {getAllFeaturesByLayerId as _getAllFeatures} from "../../utils/features/getAllFeaturesByLayerId";
+import {getAllFeaturesByLayerId as _getAllFeatures} from "../../utils/features/getFeatures";
 import exportXlsx from "../../utils/exportXlsx";
 import * as Extent from "ol/extent";
 import {
