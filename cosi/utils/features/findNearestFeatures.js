@@ -1,6 +1,6 @@
 import calculateExtent from "./calculateExtent";
 import Feature from "ol/Feature";
-import {getAllFeaturesByLayerId} from "./getAllFeaturesByLayerId";
+import utils from "./getFeatures";
 import isObject from "../../../../src/utils/isObject";
 
 /**
@@ -14,7 +14,7 @@ import isObject from "../../../../src/utils/isObject";
  * @param {String} [srsName=EPSG:25832] - The SRS to be used for returned features.
  * @return {ol/Feature[]|false} An array of ol features. False if something fails.
  */
-async function findNearestFeatures (layerId, feature, initialBuffer, bufferIncrement, maxIter = 10, srsName = "EPSG:25832") {
+export async function findNearestFeatures (layerId, feature, initialBuffer, bufferIncrement, maxIter = 10, srsName = "EPSG:25832") {
     if (typeof layerId !== "string") {
         console.error(`utils/features/findNearestFeatures: The first parameter must be a string. Got ${typeof layerId} instead.`);
         return false;
@@ -47,7 +47,7 @@ async function findNearestFeatures (layerId, feature, initialBuffer, bufferIncre
     while (++iter < maxIter) {
         const extent = calculateExtent([feature], parseInt(buffer, 10));
 
-        features = await getAllFeaturesByLayerId(layerId, formatBbox(extent, srsName), srsName);
+        features = await utils.getAllFeaturesByLayerId(layerId, extent, srsName);
 
         if (features.length) {
             return features;
@@ -58,27 +58,3 @@ async function findNearestFeatures (layerId, feature, initialBuffer, bufferIncre
 
     return features;
 }
-
-/**
- * Converts the passed bbox to a string and adds the name of the SRS to the bbox.
- * @param {Number[]} bbox - The bbox to add the SRS name to.
- * @param {String} [srsName=EPSG:25832] - The name of the passed SRS.
- * @returns {String} The bbox with the name of the SRS or an empty string.
- */
-function formatBbox (bbox, srsName = "EPSG:25832") {
-    if (!Array.isArray(bbox) || Array.isArray(bbox) && bbox.length !== 4) {
-        console.error(`utils/features/findNearestFeatures: The first parameter must be an array of length 4. Got ${typeof bbox} and ${bbox?.length}.`);
-        return "";
-    }
-    if (typeof srsName !== "string") {
-        console.error(`utils/features/findNearestFeatures: The second parameter must be a string. Got ${typeof srsName} instead.`);
-        return "";
-    }
-
-    return bbox.join(",") + "," + srsName;
-}
-
-module.exports = {
-    findNearestFeatures,
-    formatBbox
-};
