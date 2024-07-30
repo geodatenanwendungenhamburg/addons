@@ -1,14 +1,36 @@
 
 <script>
-import {Scatter} from "vue-chartjs";
+import {Scatter as ScatterChartGenerator} from "vue-chartjs";
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    CategoryScale,
+    PointElement,
+    LinearScale
+} from "chart.js";
 import beautifyKey from "../../../../../src/utils/beautifyKey";
-import {color as d3Color, rgb} from "d3-color";
+import {color as rgb} from "d3-color";
 import deepAssign from "../../../../../src/utils/deepAssign";
 import fixColor from "../../utils/fixColor";
 
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    CategoryScale,
+    PointElement,
+    LinearScale
+);
+
 export default {
     name: "ScatterChart",
-    extends: Scatter,
+    components: {
+        ScatterChartGenerator
+    },
     props: {
         datasets: {
             type: Object,
@@ -20,61 +42,66 @@ export default {
             default: () => ({})
         }
     },
-    data: () => ({
-        defaultOptions: {
-            responsive: true,
-            maintainAspectRatio: false,
-            title: {
-                display: true,
-                text: "",
-                position: "top"
-            },
-            scales: {
-                xAxes: [{
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
+    data () {
+        return {
+            defaultOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
                         display: true,
-                        labelString: ""
+                        text: "",
+                        position: "top"
                     }
-                }],
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
+                },
+                scales: {
+                    x: {
                         display: true,
-                        labelString: ""
-                    }
-                }]
-            },
-            tooltips: {
-                callbacks: {
-                    title: (item, data) => {
-                        const dataset = data.datasets[item[0].datasetIndex],
-                            d = dataset.data[item[0].index];
-                        let title = dataset.label;
-
-                        if (dataset.type !== "line") {
-                            title += ` (${d.timestamp})`;
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
                         }
-
-                        return title;
                     },
-                    footer: (item, data) => {
-                        const dataset = data.datasets[item[0].datasetIndex],
-                            d = dataset.data[item[0].index],
-                            stdDev = Math.round((d.stdDev + Number.EPSILON) * 1000) / 1000,
-                            corr = Math.round((dataset.correlation + Number.EPSILON) * 1000) / 1000,
-                            footer = dataset.type === "line" ? `Korrelation: ${corr}` : `Abweichung: ${stdDev}`;
+                    y: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        title: (item, data) => {
+                            const dataset = data.datasets[item[0].datasetIndex],
+                                d = dataset.data[item[0].index];
+                            let title = dataset.label;
 
-                        return footer;
+                            if (dataset.type !== "line") {
+                                title += ` (${d.timestamp})`;
+                            }
+
+                            return title;
+                        },
+                        footer: (item, data) => {
+                            const dataset = data.datasets[item[0].datasetIndex],
+                                d = dataset.data[item[0].index],
+                                stdDev = Math.round((d.stdDev + Number.EPSILON) * 1000) / 1000,
+                                corr = Math.round((dataset.correlation + Number.EPSILON) * 1000) / 1000,
+                                footer = dataset.type === "line" ? `Korrelation: ${corr}` : `Abweichung: ${stdDev}`;
+
+                            return footer;
+                        }
                     }
                 }
-            }
-        }
-    }),
+            },
+            key: ""
+        };
+    },
     computed: {
         chartData () {
             if (!this.datasets) {
@@ -104,25 +131,28 @@ export default {
         this.prepareRendering();
     },
     methods: {
+        /**
+         * Preparing the rendering data.
+         * @returns {void}
+         */
         prepareRendering () {
             if (!this.chartData) {
                 return;
             }
 
-            this._options.scales.yAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[0];
-            this._options.scales.xAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[1];
-            this._options.title.text = beautifyKey(this.chartData.name);
+            this._options.scales.y.title.text = this.chartData.scaleLabels?.[0];
+            this._options.scales.x.title.text = this.chartData.scaleLabels?.[1];
 
-            this.renderChart(this.chartData.data, this._options);
-        },
-        invertColor (color) {
-            const currColor = d3Color(color),
-                r = 255 - currColor.r,
-                g = 255 - currColor.g,
-                b = 255 - currColor.b;
-
-            return rgb(r, g, b, currColor.opacity);
+            this._options.plugins.title.text = beautifyKey(this.chartData.name);
+            this.key = this.chartData?.scaleLabels?.[0];
         }
     }
 };
 </script>
+
+<ScatterChartGenerator
+    v-if="chartData?.data"
+    :key="key"
+    :options="_options"
+    :data="chartData?.data"
+/>

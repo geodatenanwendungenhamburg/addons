@@ -21,7 +21,8 @@
                     "prevChart": "Vorherigen Graphen auswählen",
                     "yToZero": "Y-Achse skalieren",
                     "yToZeroTooltip": "Y-Achse bei 0 oder beim niedrigstem Wert des Datensatzes starten.",
-                    "yStacked": "Y-Achse stapeln"
+                    "yStacked": "Y-Achse stapeln",
+                    "noData": "Das Graphenvisualisierungswerkzeug erstellt Graphen aus Datensätzen und verwaltet diese. Darüber hinaus ermöglicht es Ihnen den Export dieser Graphen als PNG oder ZIP. Zuvor erstellte Graphen können Sie hier im Lauf Ihrer Session jederzeit wieder aufrufen, anpassen und exportieren."
                 }
             }
         }

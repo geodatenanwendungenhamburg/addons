@@ -1,13 +1,25 @@
 
 <script>
-import {Pie} from "vue-chartjs";
+import {Pie as PieChartGenerator} from "vue-chartjs";
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    CategoryScale
+} from "chart.js";
 import beautifyKey from "../../../../../src/utils/beautifyKey";
 import deepAssign from "../../../../../src/utils/deepAssign";
 import fixColor from "../../utils/fixColor";
 
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
+
 export default {
     name: "PieChart",
-    extends: Pie,
+    components: {
+        PieChartGenerator
+    },
     props: {
         datasets: {
             type: Object,
@@ -19,17 +31,64 @@ export default {
             default: () => ({})
         }
     },
-    data: () => ({
-        defaultOptions: {
-            title: {
-                display: true,
-                text: "",
-                position: "top"
+    data () {
+        return {
+            defaultOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "",
+                        position: "top"
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    },
+                    y: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        footer: (item, data) => {
+                            const dataset = data.datasets[item[0].datasetIndex],
+                                footer = dataset.tooltip;
+
+                            return footer;
+                        }
+                    }
+                }
             },
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    }),
+            chartData1: {
+                labels: ["VueJs", "EmberJs", "ReactJs", "AngularJs"],
+                datasets: [
+                    {
+                        backgroundColor: ["#41B883", "#E46651", "#00D8FF", "#DD1B16"],
+                        data: [40, 20, 80, 10]
+                    }
+                ]
+            },
+            chartOptions: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        };
+    },
     computed: {
         chartData () {
             if (!this.datasets) {
@@ -57,14 +116,25 @@ export default {
         this.prepareRendering();
     },
     methods: {
+        /**
+         * Preparing the rendering data.
+         * @returns {void}
+         */
         prepareRendering () {
             if (!this.chartData) {
                 return;
             }
 
-            this._options.title.text = beautifyKey(this.chartData.name);
-            this.renderChart(this.chartData, this._options);
+            this._options.plugins.title.text = beautifyKey(this.chartData.name);
         }
     }
 };
 </script>
+
+<template>
+    <PieChartGenerator
+        v-if="chartData"
+        :options="_options"
+        :data="chartData"
+    />
+</template>

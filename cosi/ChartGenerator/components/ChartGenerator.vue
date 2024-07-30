@@ -186,14 +186,11 @@ export default {
         downloadGraph () {
             const chartBox = this.$el.querySelectorAll(".current_graph");
 
-            chartBox.forEach(graph => {
-                graph.querySelectorAll("canvas").forEach(canvas => {
-                    const canvasPNG = canvas.toDataURL("image/png");
+            chartBox.forEach(canvas => {
+                const canvasPNG = canvas.toDataURL("image/png");
 
-                    this.downloadFile(canvasPNG);
-                });
+                this.downloadFile(canvasPNG);
             });
-
         },
         /**
          * @description Triggers Download function for every Chart Canvas available.
@@ -293,6 +290,14 @@ export default {
                     :locale="currentLocale"
                 />
                 <div
+                    v-if="!Array.isArray(datasets) || !datasets.length"
+                    id="chart_panel"
+                    class="wrapper"
+                >
+                    {{ $t('additional:modules.tools.cosi.chartGenerator.noData') }}
+                </div>
+                <div
+                    v-else
                     id="chart_panel"
                     class="wrapper"
                 >
@@ -590,6 +595,7 @@ export default {
                                 left:0;
                                 width:100%;
                                 height:100%;
+                                max-height: 400px;
                             }
                         }
 

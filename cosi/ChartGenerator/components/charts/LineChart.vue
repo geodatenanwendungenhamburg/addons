@@ -1,14 +1,35 @@
 
 <script>
-import {Line} from "vue-chartjs";
+import {Line as LineChartGenerator} from "vue-chartjs";
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    LinearScale,
+    CategoryScale,
+    PointElement
+} from "chart.js";
 import {rgb} from "d3-color";
 import beautifyKey from "../../../../../src/utils/beautifyKey";
 import deepAssign from "../../../../../src/utils/deepAssign";
 import fixColor from "../../utils/fixColor";
 
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    LinearScale,
+    CategoryScale,
+    PointElement
+);
 export default {
     name: "LineChart",
-    extends: Line,
+    components: {
+        LineChartGenerator
+    },
     props: {
         datasets: {
             type: Object,
@@ -20,38 +41,52 @@ export default {
             default: () => ({})
         }
     },
-    data: () => ({
-        defaultOptions: {
-            responsive: true,
-            maintainAspectRatio: false,
-            title: {
-                display: true,
-                text: "",
-                position: "top"
+    data () {
+        return {
+            defaultOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "",
+                        position: "top"
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    },
+                    y: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        footer: (item, data) => {
+                            const dataset = data.datasets[item[0].datasetIndex],
+                                footer = dataset.tooltip;
+
+                            return footer;
+                        }
+                    }
+                }
             },
-            scales: {
-                xAxes: [{
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
-                        display: true,
-                        labelString: ""
-                    }
-                }],
-                yAxes: [{
-                    stacked: false,
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
-                        display: true,
-                        labelString: ""
-                    }
-                }]
-            }
-        }
-    }),
+            key: ""
+        };
+    },
     computed: {
         chartData () {
             if (!this.datasets) {
@@ -77,20 +112,34 @@ export default {
         this.prepareRendering();
     },
     methods: {
+        /**
+         * Preparing the rendering data.
+         * @returns {void}
+         */
         prepareRendering () {
             if (!this.chartData) {
                 return;
             }
 
-            this._options.scales.yAxes[0].stacked = this.chartData.stacked || false;
-            this._options.scales.yAxes[0].ticks.beginAtZero = this.chartData.beginAtZero || false;
+            this._options.scales.y.beginAtZero = this.chartData.beginAtZero || false;
 
-            this._options.scales.yAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[0];
-            this._options.scales.xAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[1];
-            this._options.title.text = beautifyKey(this.chartData.name);
+            this._options.scales.y.title.text = this.chartData.scaleLabels?.[0];
+            this._options.scales.x.title.text = this.chartData.scaleLabels?.[1];
+            this._options.scales.x.stacked = this.chartData.stacked;
+            this._options.scales.y.stacked = this.chartData.stacked;
 
-            this.renderChart(this.chartData.data, this._options);
+            this._options.plugins.title.text = beautifyKey(this.chartData.name);
+            this.key = this.chartData?.scaleLabels?.[0] + this.chartData?.stacked;
         }
     }
 };
 </script>
+
+<template>
+    <LineChartGenerator
+        v-if="chartData?.data"
+        :key="key"
+        :options="_options"
+        :data="chartData?.data"
+    />
+</template>
