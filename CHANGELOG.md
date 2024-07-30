@@ -7,7 +7,7 @@
 ### __Breaking Changes__
 
 ### Added
-
+- CoSI: `getFeatures` utils function to retrieve features from various APIs via `layerId`
 ### Changed
 
 ### Deprecated
