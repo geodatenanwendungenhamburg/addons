@@ -43,6 +43,7 @@ function addDatasets ({commit, getters}, newDatasets) {
         chartConfigs.push(chartConfig);
         datasets.push(dataset);
     }
+
     commit("setChartConfigs", chartConfigs);
     commit("setDatasets", datasets);
 }

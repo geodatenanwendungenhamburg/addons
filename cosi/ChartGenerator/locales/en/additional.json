@@ -21,7 +21,8 @@
                     "prevChart": "Previous chart",
                     "yToZero": "Scale Y-Axis",
                     "yToZeroTooltip": "Start Y-Axis at 0 or resp. at the lowest possible value",
-                    "yStacked": "Stack Y-Axis"
+                    "yStacked": "Stack Y-Axis",
+                    "noData": "The graph visualization tool creates graphs from data sets and manages them. It also allows you to export these graphs as PNG or ZIP. You can call up, adapt and export previously created graphs at any time during your session."
                 }
             }
         }

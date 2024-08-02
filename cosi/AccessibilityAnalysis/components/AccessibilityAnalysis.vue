@@ -76,10 +76,6 @@ export default {
                 {
                     type: "wheelchair",
                     name: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.transportTypes.wheelchair")
-                },
-                {
-                    type: "public-transport",
-                    name: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.transportTypes.public-transport")
                 }
             ],
             scaleUnits: [

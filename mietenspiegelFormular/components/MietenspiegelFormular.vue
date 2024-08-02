@@ -4,7 +4,7 @@ import {mapGetters, mapMutations, mapActions} from "vuex";
 import getters from "../store/gettersMietenspiegelFormular";
 import mutations from "../store/mutationsMietenspiegelFormular";
 import rawLayerList from "@masterportal/masterportalapi/src/rawLayerList";
-import {getFeatureGET} from "../../../src/api/wfs/getFeature";
+import wfsRequest from "../../../src/api/wfs/getFeature";
 import {WFS} from "ol/format.js";
 import {onSearchbar} from "../utils/radioBridge.js";
 import {requestGfi} from "../../../src/api/wmsGetFeatureInfo";
@@ -206,7 +206,7 @@ export default {
                 return false;
             }
             const rawLayer = rawLayerList.getLayerWhere({id: layerId}),
-                response = await getFeatureGET(rawLayer.url, {version: rawLayer.version, featureType: rawLayer.featureType}),
+                response = await wfsRequest.getFeatureGET(rawLayer.url, {version: rawLayer.version, featureType: rawLayer.featureType}),
                 wfsReader = new WFS({version: rawLayer.version}),
                 features = wfsReader.readFeatures(response);
 

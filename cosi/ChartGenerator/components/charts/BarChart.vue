@@ -1,12 +1,25 @@
 <script>
-import {Bar} from "vue-chartjs";
+import {Bar as BarChartGenerator} from "vue-chartjs";
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale
+} from "chart.js";
 import beautifyKey from "../../../../../src/utils/beautifyKey";
 import deepAssign from "../../../../../src/utils/deepAssign";
 import fixColor from "../../utils/fixColor";
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
 export default {
     name: "BarChart",
-    extends: Bar,
+    components: {
+        BarChartGenerator
+    },
     props: {
         datasets: {
             type: Object,
@@ -18,47 +31,52 @@ export default {
             default: () => ({})
         }
     },
-    data: () => ({
-        defaultOptions: {
-            responsive: true,
-            maintainAspectRatio: false,
-            title: {
-                display: true,
-                text: "",
-                position: "top"
-            },
-            scales: {
-                xAxes: [{
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
+    data () {
+        return {
+            defaultOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
                         display: true,
-                        labelString: ""
+                        text: "Custom Chart Title",
+                        position: "top"
                     }
-                }],
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: false
-                    },
-                    scaleLabel: {
+                },
+                scales: {
+                    x: {
                         display: true,
-                        labelString: ""
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    },
+                    y: {
+                        display: true,
+                        beginAtZero: false,
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: ""
+                        }
                     }
-                }]
-            },
-            tooltips: {
-                callbacks: {
-                    footer: (item, data) => {
-                        const dataset = data.datasets[item[0].datasetIndex],
-                            footer = dataset.tooltip;
+                },
+                tooltips: {
+                    callbacks: {
+                        footer: (item, data) => {
+                            const dataset = data.datasets[item[0].datasetIndex],
+                                footer = dataset.tooltip;
 
-                        return footer;
+                            return footer;
+                        }
                     }
                 }
-            }
-        }
-    }),
+            },
+            key: ""
+        };
+    },
     computed: {
         chartData () {
             if (!this.datasets) {
@@ -80,16 +98,30 @@ export default {
         this.prepareRendering();
     },
     methods: {
+        /**
+         * Preparing the rendering data.
+         * @returns {void}
+         */
         prepareRendering () {
-            this._options.scales.yAxes[0].stacked = this.chartData.stacked || false;
-            this._options.scales.xAxes[0].stacked = this.chartData.stacked || false;
-            this._options.scales.yAxes[0].ticks.beginAtZero = this.chartData.beginAtZero || false;
+            this._options.scales.y.beginAtZero = this.chartData.beginAtZero || false;
 
-            this._options.scales.yAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[0];
-            this._options.scales.xAxes[0].scaleLabel.labelString = this.chartData.scaleLabels?.[1];
-            this._options.title.text = beautifyKey(this.chartData.name);
-            this.renderChart(this.chartData.data, this._options);
+            this._options.scales.y.title.text = this.chartData.scaleLabels?.[0];
+            this._options.scales.x.title.text = this.chartData.scaleLabels?.[1];
+            this._options.scales.x.stacked = this.chartData.stacked;
+            this._options.scales.y.stacked = this.chartData.stacked;
+
+            this._options.plugins.title.text = beautifyKey(this.chartData.name);
+            this.key = this.chartData?.scaleLabels?.[0] + this.chartData?.stacked;
         }
     }
 };
 </script>
+
+<template>
+    <BarChartGenerator
+        v-if="chartData?.data"
+        :key="key"
+        :data="chartData?.data"
+        :options="_options"
+    />
+</template>
