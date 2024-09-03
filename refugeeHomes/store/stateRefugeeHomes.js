@@ -27,18 +27,28 @@ const state = {
     isVisibleInMenu: true,
     deactivateGFI: true,
     initialWidth: 600,
-    layerIds: ["4553", "4554", "10964", "10965", "4556", "4557", "9097", "23737"],
-    featureAttributes: ["bemerkung", "bezirk", "platzzahl", "stadtteil", "bezeichnung", "geplante_inbetriebnahme", "pfad", "geom"],
+    layerIds: ["33606", "33607", "33608", "33610", "33611", "33609", "33612", "33613"],
+    featureAttributes: ["besonderheit", "bezirk", "platzzahl", "stadtteil", "bezeichnung", "geplante_inbetriebnahme", "pfad", "geom", "kategorie", "status"],
+    featureImages: {
+        ZEA: "fluechtlinge_best_zea_bl.png",
+        EA: "fluechtlinge_ea_bl.png",
+        INT: "fluechtlinge_int.png",
+        IZW: "fluechtlinge_izw.png",
+        NOT: "fluechtlinge_not.png",
+        UPW: "fluechtlinge_upw.png",
+        WUK: "fluechtlinge_wuk.png"
+    },
     features: [],
     filteredFeatures: [],
     ranking: [
-        "zea_bestehend",
-        "nur_ea_bestehend",
-        "oeru_bestehend",
-        "oeru_geplant",
-        "perspektive_wohnen_bestehend",
-        "perspektive_wohnen_geplant",
-        "standorte_schutzsuchende_ukraine"]
+        "ankunftszentrum",
+        "einrichtungen_der_erstaufnahme",
+        "in_zukunft_wohnen",
+        "interimsstandorte",
+        "notstandorte",
+        "standorte_in_planung",
+        "unterkuenfte_perspektive_wohnen",
+        "wohnunterkuenfte"]
 };
 
 export default state;

@@ -8,13 +8,13 @@
         "tools": {
             "refugeehomes": {
                 "title": "Flüchtlingsunterkünfte",
-                "existingAccommodations": "Bestehende Standorte",
+                "existingAccommodations": "Standorte in Betrieb",
                 "plannedAccommodations": "Geplante Standorte",
                 "symbol": "Symbol",
                 "district": "Stadtteil",
                 "description": "Bezeichnung",
                 "places": "Plätze",
-                "notes": "Bemerkungen",
+                "notes": "Besonderheiten",
                 "attachments": "Anlagen",
                 "plan": "Plan",
                 "requestAlert": "nicht erreichbar",

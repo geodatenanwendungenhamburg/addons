@@ -135,12 +135,15 @@ const actions = {
 
                         feature[attr] = [parseFloat(coord[0]), parseFloat(coord[1])];
                     }
+                    else if (attr === "kategorie") {
+                        feature[attr] = element.innerHTML;
+                        feature.imgSrc = rootGetters.imagePath + getters.featureImages[feature[attr]];
+                    }
                     else {
                         feature[attr] = element.innerHTML;
                     }
-
                     feature.featureType = hit.childNodes[1].localName;
-                    feature.imgSrc = rootGetters.imagePath + feature.featureType + ".svg";
+
                 }
             });
             dispatch("scaleImages", feature);

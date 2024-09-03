@@ -51,12 +51,12 @@ export default {
             }
             if (value) {
                 this.selectedFeatures = currentFeatures?.filter(function (el) {
-                    return el.featureType.indexOf("geplant") === -1;
+                    return el.status === "in Betrieb";
                 });
             }
             else {
                 this.selectedFeatures = currentFeatures?.filter(function (el) {
-                    return el.featureType.indexOf("geplant") !== -1;
+                    return el.status !== "in Betrieb";
                 });
             }
         },
@@ -68,6 +68,7 @@ export default {
         filteredFeatures () {
             if (this.filteredFeatures[0] && this.filteredFeatures[0][0]) {
                 this.districtName = this.filteredFeatures[0][0].bezirk;
+                this.existingLocationActive = true;
             }
 
         }
@@ -95,11 +96,11 @@ export default {
                     this.allFeatures = false;
                     this.filterFeaturesByBezirk(districtName);
                     this.setActive(true);
-
                 }
             });
             this.loaded = true;
         });
+        this.styleLayer();
     },
     beforeMount () {
         this.requestRawLayerList();
@@ -118,6 +119,18 @@ export default {
         ...mapActions("Maps", ["removeAllHighlightedFeatures"]),
         isWebLink,
 
+        styleLayer () {
+            mapCollection.getMap("2D").getLayers().on("add", (item) => {
+                if (typeof item?.element?.get("name") === "undefined") {
+                    item.element.setStyle({
+                        "fill-color": "rgba(255, 255, 255, 0)",
+                        "stroke-color": "red",
+                        "stroke-width": 3
+                    });
+                    mapCollection.getMap("2D").removeLayer(item);
+                }
+            });
+        },
         /**
          * Checks for highlighting layer from zoomTo and removes it.
          * @returns {void}
@@ -294,13 +307,6 @@ export default {
                                     <th>{{ $t('additional:modules.tools.refugeehomes.description') }}</th>
                                     <th>{{ $t('additional:modules.tools.refugeehomes.places') }}</th>
                                     <th>{{ $t('additional:modules.tools.refugeehomes.notes') }}</th>
-                                    <th
-
-                                        v-if="existingLocationActive === false"
-                                    >
-                                        {{ $t('additional:modules.tools.refugeehomes.plan') }}
-                                    </th>
-                                    <th>{{ $t('additional:modules.tools.refugeehomes.attachments') }}</th>
                                 </tr>
                             </thead>
                             <tbody
@@ -325,31 +331,7 @@ export default {
                                     <td>{{ feature.stadtteil }}</td>
                                     <td>{{ feature.bezeichnung }}</td>
                                     <td>{{ feature.platzzahl }}</td>
-                                    <td>{{ feature.bemerkung }}</td>
-                                    <td
-                                        v-if="existingLocationActive === false"
-                                    >
-                                        {{ feature.geplante_inbetriebnahme }}
-                                    </td>
-                                    <td
-                                        v-if="isWebLink(feature.pfad)"
-                                    >
-                                        <div
-                                            v-for="(doc, id) in feature.pfad"
-                                            :key="id"
-                                        >
-                                            <a
-                                                :href="feature.pfad[id]"
-                                                target="_blank"
-                                                class="float-end"
-                                            >
-                                                {{ $t('additional:modules.tools.refugeehomes.attachments') }} {{ id + 1 }}
-                                            </a>
-                                            <br
-                                                v-if="id > 0"
-                                            >
-                                        </div>
-                                    </td>
+                                    <td>{{ feature.besonderheit }}</td>
                                 </tr>
                             </tbody>
                         </table>

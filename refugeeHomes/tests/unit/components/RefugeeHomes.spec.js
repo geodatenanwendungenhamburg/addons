@@ -66,6 +66,7 @@ describe("ADDONS: addons/refugeeHomes/components/RefugeeHomes.vue", () => {
         store.commit("Tools/RefugeeHomes/addFeature", [{bezirk: "Altona", bezeichnung: "123", strasse: "musterstr", stadtteil: "5", platzzahl: 130}]);
         store.commit("Tools/RefugeeHomes/addFilteredFeature", [{0: {bezirk: "Altona", bezeichnung: "123", strasse: "musterstr", stadtteil: "5", platzzahl: 130}, 1: {}}]);
         store.commit("Tools/RefugeeHomes/setActive", true);
+        sinon.stub(RefugeeHomesComponent.methods, "styleLayer");
     });
     afterEach(function () {
         sinon.restore();
