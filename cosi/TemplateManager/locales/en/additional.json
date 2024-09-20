@@ -6,6 +6,7 @@
                     "title": "Templates",
                     "importTemplate": "Import Template",
                     "loadFromTemplate": "Load Template",
+                    "exportFromTemplate": "Export template in report",
                     "infoLoadFromTemplates": "Load basic thematic configurations for specific types of analyses. You can find the data which will be loaded in the templates' overview. Some templates include the selection of areas, some require you to select areas yourself in beforehand.",
                     "noInfo": "Not available.",
                     "label": {

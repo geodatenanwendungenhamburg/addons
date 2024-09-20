@@ -7,6 +7,7 @@ import mutations from "../store/mutationsTemplateManager";
 import actions from "../store/actionsTemplateManager";
 import ToolInfo from "../../components/ToolInfo.vue";
 import TemplateManagerImport from "./TemplateManagerImport.vue";
+import TemplateManagerExport from "./TemplateManagerExport.vue";
 import axios from "axios";
 import mapping from "../../assets/mapping.json";
 import {getItemsByAttributes, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge";
@@ -18,13 +19,15 @@ export default {
         Tool,
         ToolInfo,
         TemplateManagerImport,
+        TemplateManagerExport,
         Multiselect
     },
     data () {
         return {
             templates: [],
             selectedTemplateName: false,
-            filters: []
+            filters: [],
+            showExportWindow: false
         };
     },
     computed: {
@@ -327,6 +330,15 @@ export default {
         getOrientationValueByStatistic (orientationValues, stat) {
             return orientationValues.find(orientation => orientation.statisticName === stat)?.value || "-";
 
+        },
+
+        /**
+         * Gets the orientation value for a statistic.
+         * @param {Boolean} val - if to show the export window.
+         * @returns {void}
+         */
+        openExportWindow (val) {
+            this.showExportWindow = !val;
         }
     }
 };
@@ -521,6 +533,19 @@ export default {
                 >
                     <i class="bi bi-file-earmark-plus pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.loadFromTemplate") }}
                 </button>
+                <button
+                    class="btn btn-outline lh-1 fs-5 float-right"
+                    @click="openExportWindow(showExportWindow)"
+                >
+                    <i
+                        :class="showExportWindow ? 'bi-arrow-up' : 'bi-arrow-down'"
+                        class="bi"
+                    />
+                    {{ $t("additional:modules.tools.cosi.templateManager.exportFromTemplate") }}
+                </button>
+                <TemplateManagerExport
+                    v-if="showExportWindow"
+                />
             </div>
         </template>
     </Tool>
@@ -540,6 +565,9 @@ export default {
         .btn-outline {
             border-color: $light_blue;
             color: $light_blue;
+            &.float-right {
+                float: right;
+            }
         }
        .btn-outline:hover {
             cursor: pointer;
