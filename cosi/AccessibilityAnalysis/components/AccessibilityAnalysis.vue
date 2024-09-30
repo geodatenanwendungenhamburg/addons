@@ -889,7 +889,6 @@ export default {
                                         {{ $t('additional:modules.tools.cosi.accessibilityAnalysis.clear') }}
                                     </v-btn>
                                     <v-btn
-                                        v-if="mode === 'point' || mode === 'facility' || mode === 'path'"
                                         tile
                                         depressed
                                         color="grey lighten-1"
