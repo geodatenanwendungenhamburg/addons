@@ -32,10 +32,6 @@ export default {
         tooltipOffset: {
             type: Number,
             default: 0
-        },
-        items: {
-            type: Array,
-            required: true
         }
     },
     computed: {

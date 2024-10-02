@@ -90,7 +90,6 @@ export default {
                 }
             ],
             districtColumns: [],
-            items: [],
             currentItems: [], // all current (visible) items in the table
             selectedItems: [], // selected items in the table
             timestampPrefix: "jahr_",
@@ -309,7 +308,7 @@ export default {
             this.handleOrientationColumn(this.hasMappingOrientationValue, this.aggregateColumns);
             this.districtColumns = this.getColumns(this.selectedDistrictLevel, this.selectedDistrictNames, []);
             this.rows = this.getRows();
-            this.items = this.getData();
+            this.setItems(this.getData());
             this.currentTimeStamp = this.selectedYear;
         },
         /**
@@ -964,7 +963,6 @@ export default {
                                         :timestamp-prefix="timestampPrefix"
                                         :current-locale="currentLocale"
                                         :tooltip-offset="toolOffset"
-                                        :items="items"
                                     />
                                 </template>
 

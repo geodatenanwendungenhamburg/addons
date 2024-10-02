@@ -12,6 +12,8 @@ import axios from "axios";
 import mapping from "../../assets/mapping.json";
 import {getItemsByAttributes, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge";
 import Multiselect from "vue-multiselect";
+import {download as pdfDownload, addChapter, addHeadline, addTable, getColumns, addCell, resetDocContent} from "../js/createPdf";
+import {getTotal, getCulmulativeTotal} from "../../Dashboard/utils/operations";
 
 export default {
     name: "TemplateManager",
@@ -35,7 +37,12 @@ export default {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/TemplateManager", Object.keys(getters)),
         ...mapGetters("Tools/SaveSession", []),
-        ...mapGetters("Tools/DistrictSelector", ["districtLevels"]),
+        ...mapGetters("Tools/DistrictSelector", {
+            districtLevels: "districtLevels",
+            selectedDistrictLevel: "selectedDistrictLevel",
+            selectedDistrictNames: "selectedDistrictNames"
+        }),
+        ...mapGetters("Tools/Dashboard", ["items"]),
 
         /**
          * Checks whether at least one template is available.
@@ -84,7 +91,16 @@ export default {
                 }
             }
         },
-        templates: "createFilterObjects"
+        templates: "createFilterObjects",
+
+        /**
+         * Listens to the statistics data from the dashboard to adds the data to the report.
+         * @returns {void}
+         */
+        items () {
+            this.addStatsToReport();
+            pdfDownload("report.pdf");
+        }
     },
     created () {
         /**
@@ -165,6 +181,7 @@ export default {
         },
 
         loadFromTemplate (template, index) {
+            resetDocContent();
             template.meta.isActive = true;
 
             const _template = this.applyFilters(template, this.filters[index]),
@@ -179,7 +196,6 @@ export default {
             this.setActive(false);
             this.openTool(startingTool);
             this.loadLayer(_template?.state?.Maps?.layerIds);
-
         },
 
         /**
@@ -338,9 +354,109 @@ export default {
          * @param {Boolean} val - if to show the export window.
          * @returns {void}
          */
-        openExportWindow (val) {
+        openExportWindow (val, template, index) {
             this.showExportWindow = !val;
+
+            template.meta.isActive = true;
+
+            const _template = this.applyFilters(template, this.filters[index]),
+                startingTool = template?.state?.Tools?.toolToOpen;
+
+            if (this.useTemplatesForMapping) {
+                template.meta.time = new Date().getTime();
+                this.createMappingByTemplates(this.templates, mapping);
+            }
+
+            this.loadSessionData(_template);
+            this.setActive(false);
+            this.openTool(startingTool);
+            this.loadLayer(_template?.state?.Maps?.layerIds);
         },
+
+        /**
+         * Prepares the statistical data and adds it to the report.
+         * @returns {void}
+         */
+        addStatsToReport () {
+            const templateCategories = this.getStatsCategories(this.selectedTemplate),
+                filteredMappingByCategories = mapping.filter(obj => {
+                    return templateCategories.includes(obj.value);
+                }),
+                groupedMapping = Object.groupBy(filteredMappingByCategories, (obj) => obj.group);
+
+            addChapter("Statistische Datenübersicht");
+
+            Object.keys(groupedMapping).forEach(group => {
+                const columns = getColumns(["", "Ausgewähltes Gebiet", ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
+                    body = [columns];
+
+                addHeadline(group);
+
+                groupedMapping[group].forEach(mappingObject => {
+                    const statFeature = this.items.find((item) => item.category === mappingObject.value),
+                        lastYear = statFeature.years[0],
+                        row = [];
+
+                    columns.forEach((col, index) => {
+                        let value;
+
+                        if (index === 0) {
+                            value = statFeature.category;
+                        }
+                        else if (index === 1) {
+                            value = this.getTotal(statFeature, this.selectedDistrictNames, lastYear, "jahr_");
+
+                            if (value === 0) {
+                                value = "-";
+                            }
+                        }
+                        else {
+                            value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
+                        }
+                        addCell(value.toLocaleString(this.currentLocale), row);
+                    });
+                    body.push(row);
+                });
+
+                addTable(body, 120);
+            });
+        },
+
+        /**
+         * Runs recursively through the district levels to get the names of the higher level districts.
+         * @param {Object} districtLevel - The district level to which the district names belong.
+         * @param {String[]} districtNames - The names of the needed districts.
+         * @param {String[]} columns - The names of the columns.
+         * @returns {String[]} The names of the columns
+         */
+        getStatCols (districtLevel, districtNames, columns) {
+            const districts = districtLevel.displayAll
+                    ? districtLevel.districts
+                    : districtLevel.districts.filter(dist => districtNames.includes(dist.getName())),
+                refDistrictNames = [];
+            let refDistrictName, district;
+
+            for (district of districts) {
+                if (districtLevel.label !== this.selectedDistrictLevel.label) {
+                    columns.push(district.getLabel());
+                }
+
+                refDistrictName = district.getReferencDistrictName();
+
+                if (refDistrictName) {
+                    refDistrictNames.push(refDistrictName);
+                }
+            }
+            if (districtLevel.referenceLevel) {
+                this.getStatCols(districtLevel.referenceLevel, refDistrictNames, columns);
+            }
+
+            return columns;
+        },
+        getCulmulativeTotal,
+        getTotal,
+
+
         /**
          * Show import section.
          * @param {Boolean} val - true if show import section.
@@ -547,7 +663,7 @@ export default {
                     </button>
                     <button
                         class="btn btn-outline lh-1 fs-5 float-right"
-                        @click="openExportWindow(showExportWindow)"
+                        @click="openExportWindow(showExportWindow, selectedTemplate, selectedTemplateIndex)"
                     >
                         <i
                             class="bi bi-arrow-up"

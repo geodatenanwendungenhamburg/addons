@@ -36,7 +36,8 @@ const state = {
     prefixExportFilename: "CoSI",
     columnHeader: {},
     ignoreColumnsByExport: false,
-    exportGrouped: false
+    exportGrouped: false,
+    items: []
 };
 
 export default state;

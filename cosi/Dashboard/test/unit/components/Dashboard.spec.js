@@ -1,5 +1,5 @@
 import Vuex from "vuex";
-import {config, mount, shallowMount, createLocalVue} from "@vue/test-utils";
+import {config, mount, createLocalVue} from "@vue/test-utils";
 import DashboardStore from "../../../store/indexDashboard";
 import Dashboard from "../../../components/Dashboard.vue";
 import {expect} from "chai";
@@ -150,6 +150,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
                 mobile: () => sinon.stub()
             }
         });
+        store.commit("Tools/Dashboard/setItems", []);
         store.commit("Tools/Dashboard/setActive", true);
         window.requestAnimationFrame = sinon.stub();
     });
@@ -163,7 +164,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
     });
 
     it("should render Component", async () => {
-        await factory.initialize(shallowMount);
+        await factory.initialize();
         expect(wrapper.find("#dashboard-wrapper").exists()).to.be.true;
         expect(wrapper.find("#dashboard-wrapper").html()).to.not.be.empty;
         expect(wrapper.find(".dashboard-table").exists()).to.be.true;
@@ -186,6 +187,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
             await factory.initialize();
 
             // test 1
+            await wrapper.vm.$nextTick();
             expect(wrapper.find("tbody").findAll("tr:not(.v-row-group__header)")).to.have.lengthOf(3);
 
             // act
@@ -426,7 +428,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
 
     describe("Methods", () => {
         describe("getSelectedDistrictsLabels", async () => {
-            await factory.initialize(shallowMount);
+            await factory.initialize();
 
             const selectedLabels = wrapper.vm.getSelectedDistrictsLabels(selectedDistrictLevel.districts);
 
@@ -435,14 +437,14 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
 
         describe("handleOrientationColumn", () => {
             it("should not add a column for orientation values if no orientation values available", async () => {
-                await factory.initialize(shallowMount);
+                await factory.initialize();
 
                 wrapper.vm.handleOrientationColumn(false, []);
                 expect(wrapper.vm.aggregateColumns.length).to.be.equal(2);
             });
 
             it("should not add a columns for orientation if it already exists", async () => {
-                await factory.initialize(shallowMount);
+                await factory.initialize();
 
                 wrapper.vm.aggregateColumns.push({value: "orientationValue"});
                 wrapper.vm.handleOrientationColumn(true, wrapper.vm.aggregateColumns);
@@ -450,7 +452,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
             });
 
             it("should add a column for orientation values", async () => {
-                await factory.initialize(shallowMount);
+                await factory.initialize();
 
                 wrapper.vm.handleOrientationColumn(true, [1, 2]);
                 expect(wrapper.vm.aggregateColumns.length).to.be.equal(3);
@@ -460,7 +462,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
 
         describe("getColumnHeader", async () => {
             it("should return the default value", async () => {
-                await factory.initialize(shallowMount);
+                await factory.initialize();
 
                 expect(wrapper.vm.getColumnHeader("value")).to.be.equal("value");
             });
@@ -483,7 +485,8 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
                                     state: {
                                         columnHeader: {
                                             "value1": "label1"
-                                        }
+                                        },
+                                        items: []
                                     },
                                     getters: {
                                         active: () => true,
@@ -501,7 +504,8 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
                                         reportTemplateMode: () => null,
                                         toolBridgeIn: () => sinon.stub(),
                                         toolBridgeOut: () => sinon.stub(),
-                                        prefixExportFilename: () => ""
+                                        prefixExportFilename: () => "",
+                                        items: () => []
                                     }
                                 },
                                 ColorCodeMap: {
@@ -572,7 +576,7 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
                     }
                 });
 
-                await factory.initialize(shallowMount);
+                await factory.initialize();
 
                 expect(wrapper.vm.getColumnHeader("value1")).to.be.equal("label1");
             });
