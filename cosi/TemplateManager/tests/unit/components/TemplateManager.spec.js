@@ -78,18 +78,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
     });
 
     describe("DOM", () => {
-        it("should find button with icon 'bi-arrow-down'", () => {
-            const wrapper = factory.getMount();
-
-            expect(wrapper.find("button .bi-arrow-down").exists()).to.be.true;
-        });
-
         it("should find button with icon 'bi-arrow-up'", async () => {
             const wrapper = factory.getMount();
 
-            await wrapper.setData({
-                showExportWindow: true
-            });
             expect(wrapper.find("button .bi-arrow-up").exists()).to.be.true;
         });
 
@@ -164,35 +155,6 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
             });
 
             expect(wrapper.vm.templateTitles).to.deep.equal(["one", "two"]);
-        });
-    });
-
-
-    describe("Interaction", () => {
-        it("should find button with icon 'bi-arrow-up' and component 'TemplateManagerExport'", async () => {
-            const wrapper = factory.getMount(),
-            button = wrapper.find("button.float-right");
-
-            await wrapper.setData({
-                showExportWindow: true
-            });
-            await button.trigger("click");
-
-            expect(wrapper.find("button .bi-arrow-down").exists()).to.be.true;
-            expect(wrapper.findComponent({name: "TemplateManagerExport"}).exists()).to.be.false;
-        });
-
-        it("should find button with icon 'bi-arrow-up' and should not find template 'TemplateManagerExport'", async () => {
-            const wrapper = factory.getMount(),
-                button = wrapper.find("button.float-right");
-
-            await wrapper.setData({
-                showExportWindow: false
-            });
-            await button.trigger("click");
-
-            expect(wrapper.find("button .bi-arrow-up").exists()).to.be.true;
-            expect(wrapper.findComponent({name: "TemplateManagerExport"}).exists()).to.be.true;
         });
     });
 

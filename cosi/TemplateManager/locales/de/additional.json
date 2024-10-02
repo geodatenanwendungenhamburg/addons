@@ -9,6 +9,11 @@
                     "exportFromTemplate": "Vorlage in Bericht exportieren",
                     "infoLoadFromTemplates": "Laden Sie eine thematische Basis-Konfiguration für fachspezifische Analysen. Welche Inhalte durch die Vorlage geladen werden entnehmen Sie der Vorlagenübersicht. Manche Vorlagen beinhalten eine Gebietsauswahl, bei anderen können Sie das Gebiet zuvor selbst auswählen.",
                     "noInfo": "Nicht vorhanden",
+                    "optionalComponents": "Optionale Bestandteile des auszugebenen Berichts:",
+                    "infrastructureData": "Infrastrukturdaten:",
+                    "generateReport": "Bericht generieren",
+                    "cancel": "Abbrechen",
+                    "creatingReport": "Bericht wird erstellt. Bitte warten.",
                     "label": {
                       "selectTemplate": "Vorlage auswählen",
                       "created": "Erstellt",
@@ -19,7 +24,10 @@
                       "selectedDistricts": "Ausgewählte Gebiete",
                       "categories": "Statistische Daten",
                       "addTool": "Starter Werkzeug",
-                      "calculations": "Berechnungen"
+                      "calculations": "Berechnungen",
+                      "title": "Titel",
+                      "selectedAreas": "Name der ausgewählten Gebiete",
+                      "author": "Ersteller:in"
                     },
                     "activeTool": "Aktive Werkzeuge",
                     "errors": {

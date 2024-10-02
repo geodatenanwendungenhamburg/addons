@@ -9,6 +9,11 @@
                     "exportFromTemplate": "Export template in report",
                     "infoLoadFromTemplates": "Load basic thematic configurations for specific types of analyses. You can find the data which will be loaded in the templates' overview. Some templates include the selection of areas, some require you to select areas yourself in beforehand.",
                     "noInfo": "Not available.",
+                    "optionalComponents": "Optional components of the report to be exported",
+                    "infrastructureData": "Infrastructure Data:",
+                    "generateReport": "Generate Report",
+                    "cancel": "Cancel",
+                    "creatingReport": "Report is being created. Please wait.",
                     "label": {
                       "selectTemplate": "Select Template",
                       "created": "Created",
@@ -19,7 +24,10 @@
                       "selectedDistricts": "Selected Districts",
                       "categories": "Statistical Data",
                       "addTools": "Starting Tool",
-                      "calculations": "Calculations"
+                      "calculations": "Calculations",
+                      "title": "Title",
+                      "selectedAreas": "Name of the selected areas",
+                      "author": "Author"
                     },
                     "activeTool": "Active Tool",
                     "errors": {

@@ -27,7 +27,8 @@ export default {
             templates: [],
             selectedTemplateName: false,
             filters: [],
-            showExportWindow: false
+            showExportWindow: false,
+            showImportSection: true
         };
     },
     computed: {
@@ -339,6 +340,14 @@ export default {
          */
         openExportWindow (val) {
             this.showExportWindow = !val;
+        },
+        /**
+         * Show import section.
+         * @param {Boolean} val - true if show import section.
+         * @returns {void}
+         */
+        showTemplateImport (val) {
+            this.showImportSection = val;
         }
     }
 };
@@ -368,183 +377,189 @@ export default {
                     :locale="currentLocale"
                     :summary="$t('additional:modules.tools.cosi.templateManager.infoLoadFromTemplates')"
                 />
-                <TemplateManagerImport
-                    v-if="useImport"
-                    @addTemplate="addTemplate"
-                />
-                <label
-                    class="col col-md form-label p-0 m-0"
-                    for="select-template"
-                >
-                    {{ $t("additional:modules.tools.cosi.templateManager.label.selectTemplate") }}
-                </label>
-                <Multiselect
-                    v-if="hasTemplates"
-                    id="select-template"
-                    v-model="selectedTemplateName"
-                    class="mb-4"
-                    :options="templateTitles"
-                    :close-on-select="true"
-                    :show-labels="false"
-                    :allow-empty="false"
-                    :multiple="false"
-                    :placeholder="$t('additional:modules.tools.cosi.templateManager.label.selectTemplate')"
-                />
-                <div class="mb-4">
-                    <label for="selected-template-created">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.created") }}
-                    </label>
-                    <p id="selected-template-created">
-                        {{ selectedTemplate?.meta?.created || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
-                    </p>
-                </div>
-                <div class="mb-4">
-                    <label for="selected-template-title">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.name") }}
-                    </label>
-                    <p id="selected-template-title">
-                        {{ selectedTemplate?.meta?.title || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
-                    </p>
-                </div>
-                <div
-                    v-if="selectedTemplate?.meta?.info"
-                    class="mb-4"
-                >
-                    <label for="selected-template-description">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.description") }}
-                    </label>
-                    <p id="selected-template-description">
-                        {{ selectedTemplate?.meta?.info }}
-                    </p>
-                </div>
-                <div
-                    v-if="getActiveLayerList(selectedTemplate).length > 0"
-                    class="mb-4"
-                >
-                    <label for="selected-template-layer">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.layers") }}
-                    </label>
-                    <div id="selected-template-layer">
-                        <v-chip
-                            v-for="layerMap in getActiveLayerList(selectedTemplate)"
-                            :key="selectedTemplate.meta.title + layerMap.id"
-                            class="m-1"
-                            small
-                        >
-                            {{ layerMap.name }}
-                            <v-checkbox
-                                v-model="filters[selectedTemplateIndex].activeLayerList[layerMap.id]"
-                                small
-                            />
-                        </v-chip>
-                    </div>
-                </div>
-                <div
-                    v-if="getActiveDistrictLevel(selectedTemplate)"
-                    class="mb-4"
-                >
-                    <label for="selected-template-level">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.districtLevel") }}
-                    </label>
-                    <p id="selected-template-level">
-                        {{ getActiveDistrictLevel(selectedTemplate) }}
-                    </p>
-                </div>
-                <div
-                    v-if="getSelectedDistricts(selectedTemplate).length > 0"
-                    class="mb-4"
-                >
-                    <label for="selected-template-districts">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.selectedDistricts") }}
-                    </label>
-                    <div id="selected-template-districts">
-                        <v-chip
-                            v-for="districtName in getSelectedDistricts(selectedTemplate)"
-                            :key="selectedTemplate.meta.title + districtName"
-                            class="m-1"
-                            small
-                        >
-                            {{ districtName }}
-                            <v-checkbox
-                                v-model="filters[selectedTemplateIndex].selectedDistrictNames[districtName]"
-                                small
-                            />
-                        </v-chip>
-                    </div>
-                </div>
-                <div
-                    v-if="getStatsCategories(selectedTemplate).length > 0"
-                    class="mb-4"
-                >
-                    <label for="selected-template-statistics">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.categories") }}
-                    </label>
-                    <div id="selected-template-statistics">
-                        <v-chip
-                            v-for="category in getStatsCategories(selectedTemplate)"
-                            :key="selectedTemplate.meta.title + category"
-                            class="m-1"
-                            small
-                        >
-                            {{ category }}
-                            <v-checkbox
-                                v-model="filters[selectedTemplateIndex].statsCategories[category]"
-                                small
-                            />
-                        </v-chip>
-                    </div>
-                </div>
-                <div
-                    v-if="getInitTool(selectedTemplate)"
-                    class="mb-4"
-                >
-                    <label for="selected-template-tool">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.addTool") }}
-                    </label>
-                    <p id="selected-template-tool">
-                        {{ getInitTool(selectedTemplate) }}
-                    </p>
-                </div>
-                <div
-                    v-if="getCalculations(selectedTemplate).length > 0"
-                    class="mb-4"
-                >
-                    <label for="selected-template-calculations">
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.calculations") }}
-                    </label>
-                    <div id="selected-template-calculations">
-                        <v-chip
-                            v-for="(calculation, j) in getCalculations(selectedTemplate)"
-                            :key="selectedTemplate.meta.title + 'calculation' + j"
-                            class="m-1"
-                            small
-                        >
-                            {{ calculation.id }}
-                            <v-checkbox
-                                v-model="filters[selectedTemplateIndex].calculations[calculation.id]"
-                                small
-                            />
-                        </v-chip>
-                    </div>
-                </div>
-                <button
-                    class="btn btn-outline lh-1 fs-5"
-                    @click="loadFromTemplate(selectedTemplate, selectedTemplateIndex)"
-                >
-                    <i class="bi bi-file-earmark-plus pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.loadFromTemplate") }}
-                </button>
-                <button
-                    class="btn btn-outline lh-1 fs-5 float-right"
-                    @click="openExportWindow(showExportWindow)"
-                >
-                    <i
-                        :class="showExportWindow ? 'bi-arrow-up' : 'bi-arrow-down'"
-                        class="bi"
+                <div v-if="showImportSection">
+                    <TemplateManagerImport
+                        v-if="useImport"
+                        @addTemplate="addTemplate"
                     />
-                    {{ $t("additional:modules.tools.cosi.templateManager.exportFromTemplate") }}
-                </button>
+                    <label
+                        class="col col-md form-label p-0 m-0"
+                        for="select-template"
+                    >
+                        {{ $t("additional:modules.tools.cosi.templateManager.label.selectTemplate") }}
+                    </label>
+                    <Multiselect
+                        v-if="hasTemplates"
+                        id="select-template"
+                        v-model="selectedTemplateName"
+                        class="mb-4"
+                        :options="templateTitles"
+                        :close-on-select="true"
+                        :show-labels="false"
+                        :allow-empty="false"
+                        :multiple="false"
+                        :placeholder="$t('additional:modules.tools.cosi.templateManager.label.selectTemplate')"
+                    />
+                </div>
+                <div v-if="!showExportWindow">
+                    <div class="mb-4">
+                        <label for="selected-template-created">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.created") }}
+                        </label>
+                        <p id="selected-template-created">
+                            {{ selectedTemplate?.meta?.created || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <label for="selected-template-title">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.name") }}
+                        </label>
+                        <p id="selected-template-title">
+                            {{ selectedTemplate?.meta?.title || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
+                        </p>
+                    </div>
+                    <div
+                        v-if="selectedTemplate?.meta?.info"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-description">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.description") }}
+                        </label>
+                        <p id="selected-template-description">
+                            {{ selectedTemplate?.meta?.info }}
+                        </p>
+                    </div>
+                    <div
+                        v-if="getActiveLayerList(selectedTemplate).length > 0"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-layer">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.layers") }}
+                        </label>
+                        <div id="selected-template-layer">
+                            <v-chip
+                                v-for="layerMap in getActiveLayerList(selectedTemplate)"
+                                :key="selectedTemplate.meta.title + layerMap.id"
+                                class="m-1"
+                                small
+                            >
+                                {{ layerMap.name }}
+                                <v-checkbox
+                                    v-model="filters[selectedTemplateIndex].activeLayerList[layerMap.id]"
+                                    small
+                                />
+                            </v-chip>
+                        </div>
+                    </div>
+                    <div
+                        v-if="getActiveDistrictLevel(selectedTemplate)"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-level">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.districtLevel") }}
+                        </label>
+                        <p id="selected-template-level">
+                            {{ getActiveDistrictLevel(selectedTemplate) }}
+                        </p>
+                    </div>
+                    <div
+                        v-if="getSelectedDistricts(selectedTemplate).length > 0"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-districts">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.selectedDistricts") }}
+                        </label>
+                        <div id="selected-template-districts">
+                            <v-chip
+                                v-for="districtName in getSelectedDistricts(selectedTemplate)"
+                                :key="selectedTemplate.meta.title + districtName"
+                                class="m-1"
+                                small
+                            >
+                                {{ districtName }}
+                                <v-checkbox
+                                    v-model="filters[selectedTemplateIndex].selectedDistrictNames[districtName]"
+                                    small
+                                />
+                            </v-chip>
+                        </div>
+                    </div>
+                    <div
+                        v-if="getStatsCategories(selectedTemplate).length > 0"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-statistics">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.categories") }}
+                        </label>
+                        <div id="selected-template-statistics">
+                            <v-chip
+                                v-for="category in getStatsCategories(selectedTemplate)"
+                                :key="selectedTemplate.meta.title + category"
+                                class="m-1"
+                                small
+                            >
+                                {{ category }}
+                                <v-checkbox
+                                    v-model="filters[selectedTemplateIndex].statsCategories[category]"
+                                    small
+                                />
+                            </v-chip>
+                        </div>
+                    </div>
+                    <div
+                        v-if="getInitTool(selectedTemplate)"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-tool">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.addTool") }}
+                        </label>
+                        <p id="selected-template-tool">
+                            {{ getInitTool(selectedTemplate) }}
+                        </p>
+                    </div>
+                    <div
+                        v-if="getCalculations(selectedTemplate).length > 0"
+                        class="mb-4"
+                    >
+                        <label for="selected-template-calculations">
+                            {{ $t("additional:modules.tools.cosi.templateManager.label.calculations") }}
+                        </label>
+                        <div id="selected-template-calculations">
+                            <v-chip
+                                v-for="(calculation, j) in getCalculations(selectedTemplate)"
+                                :key="selectedTemplate.meta.title + 'calculation' + j"
+                                class="m-1"
+                                small
+                            >
+                                {{ calculation.id }}
+                                <v-checkbox
+                                    v-model="filters[selectedTemplateIndex].calculations[calculation.id]"
+                                    small
+                                />
+                            </v-chip>
+                        </div>
+                    </div>
+                    <button
+                        class="btn btn-outline lh-1 fs-5"
+                        @click="loadFromTemplate(selectedTemplate, selectedTemplateIndex)"
+                    >
+                        <i class="bi bi-file-earmark-plus pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.loadFromTemplate") }}
+                    </button>
+                    <button
+                        class="btn btn-outline lh-1 fs-5 float-right"
+                        @click="openExportWindow(showExportWindow)"
+                    >
+                        <i
+                            class="bi bi-arrow-up"
+                        />
+                        {{ $t("additional:modules.tools.cosi.templateManager.exportFromTemplate") }}
+                    </button>
+                </div>
+                <hr v-if="showExportWindow && showImportSection">
                 <TemplateManagerExport
                     v-if="showExportWindow"
+                    :template-name="selectedTemplate?.meta?.title"
+                    @hideTemplateImport="showTemplateImport"
                 />
             </div>
         </template>
