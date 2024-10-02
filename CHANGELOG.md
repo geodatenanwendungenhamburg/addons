@@ -2,37 +2,27 @@
  All important changes in this project are stored in this file.
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
-## Unreleased - in development
-### __Breaking Changes__
-
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
 
 ---
 
-## 04-09-2024 - v2.49.0
+## v2.50.0 - 2024-10-02
+
+---
+
+## v2.49.0 - 2024-09-04
 ### __Breaking Changes__
 
 ### Added
 - CoSI: `getFeatures` utils function to retrieve features from various APIs via `layerId`
-### Changed
 
-### Deprecated
+---
 
-### Removed
-
-### Fixed
+## v2.48.0 - 2024-08-06
 
 ---
 
 ## v2.47.0 - 2024-07-03
+
 ---
 ## v2.46.0 - 2024-06-05
 
