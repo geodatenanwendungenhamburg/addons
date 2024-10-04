@@ -11,7 +11,7 @@ import TemplateManagerExport from "./TemplateManagerExport.vue";
 import axios from "axios";
 import mapping from "../../assets/mapping.json";
 import {getItemsByAttributes, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge";
-import Multiselect from "vue-multiselect";
+import TemplateManagerCard from "./TemplateManagerCard.vue";
 
 export default {
     name: "TemplateManager",
@@ -20,12 +20,13 @@ export default {
         ToolInfo,
         TemplateManagerImport,
         TemplateManagerExport,
-        Multiselect
+        TemplateManagerCard
     },
     data () {
         return {
             templates: [],
             selectedTemplateName: false,
+            activeTemplateName: false,
             filters: [],
             showExportWindow: false,
             showImportSection: true
@@ -64,7 +65,25 @@ export default {
         selectedTemplateIndex () {
             return this.templates.findIndex(template => template.meta.title === this.selectedTemplateName);
         },
-
+        /**
+         * Gets the current active template.
+         * @returns {Object} The activated template.
+         */
+        activeTemplateIndex () {
+            return this.templates.findIndex(template => template.meta.title === this.activeTemplateName);
+        },
+        /**
+         * Gets the index of the active template.
+         * @returns {Number} The index.
+         */
+        activeTemplate () {
+            this.templates.forEach(templ => {
+                if (templ.meta.title !== this.activeTemplateName) {
+                    templ.meta.isActive = false;
+                }
+            });
+            return this.templates.find(template => template.meta.title === this.activeTemplateName);
+        },
         /**
          * Gets the titles of all templates.
          * @returns {String[]} The titles.
@@ -169,6 +188,7 @@ export default {
         },
 
         loadFromTemplate (template, index) {
+
             template.meta.isActive = true;
 
             const _template = this.applyFilters(template, this.filters[index]),
@@ -180,7 +200,6 @@ export default {
             }
 
             this.loadSessionData(_template);
-            this.setActive(false);
             this.openTool(startingTool);
             this.loadLayer(_template?.state?.Maps?.layerIds);
         },
@@ -341,24 +360,8 @@ export default {
          * @param {Boolean} val - if to show the export window.
          * @returns {void}
          */
-        openExportWindow (val, template, index) {
+        openExportWindow (val) {
             this.showExportWindow = !val;
-
-            template.meta.isActive = true;
-
-            const _template = this.applyFilters(template, this.filters[index]);
-
-            // startingTool = template?.state?.Tools?.toolToOpen;
-
-            if (this.useTemplatesForMapping) {
-                template.meta.time = new Date().getTime();
-                this.createMappingByTemplates(this.templates, mapping);
-            }
-
-            this.loadSessionData(_template);
-            // this.setActive(false);
-            // this.openTool(startingTool);
-            this.loadLayer(_template?.state?.Maps?.layerIds);
         },
 
         /**
@@ -368,6 +371,27 @@ export default {
          */
         showTemplateImport (val) {
             this.showImportSection = val;
+        },
+        /**
+         * Sets the current selected card.
+         * @param {String} name - The selected template name.
+         * @returns {void}
+         */
+        selectCard (name) {
+            this.selectedTemplateName = name;
+
+            if (!this.selectedTemplate.meta?.isActive && this.showExportWindow) {
+                this.openExportWindow(true);
+            }
+        },
+        /**
+         * Sets the current activated template and loads it.
+         * @param {String} name - The activated template name.
+         * @returns {void}
+         */
+        activeCard (name) {
+            this.activeTemplateName = name;
+            this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex);
         }
     }
 };
@@ -402,27 +426,88 @@ export default {
                         v-if="useImport"
                         @addTemplate="addTemplate"
                     />
-                    <label
-                        class="col col-md form-label p-0 m-0"
-                        for="select-template"
+                    <div
+                        :id="`accordion-container-manage`"
+                        class="accordion accordion-bg accordion-flush"
                     >
-                        {{ $t("additional:modules.tools.cosi.templateManager.label.selectTemplate") }}
-                    </label>
-                    <Multiselect
-                        v-if="hasTemplates"
-                        id="select-template"
-                        v-model="selectedTemplateName"
-                        class="mb-4"
-                        :options="templateTitles"
-                        :close-on-select="true"
-                        :show-labels="false"
-                        :allow-empty="false"
-                        :multiple="false"
-                        :placeholder="$t('additional:modules.tools.cosi.templateManager.label.selectTemplate')"
-                    />
+                        <div class="accordion-item">
+                            <div
+                                :id="`flush-heading-manage`"
+                                class="accordion-header ms-0"
+                            >
+                                <button
+                                    class="accordion-button ps-0, collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    :data-bs-target="`#flush-collapse-manage`"
+                                    aria-expanded="true"
+                                    :aria-controls="`#flush-collapse-manage`"
+                                >
+                                    <i :class="`bi bi-clipboard-check mt-1 me-3`" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.manageTemplate") }}
+                                </button>
+                            </div>
+                            <div
+                                :id="`flush-collapse-manage`"
+                                class="accordion-collapse collapse show"
+                                :aria-labelledby="`flush-heading-manage`"
+                                :data-bs-parent="`#accordion-container-manage`"
+                            >
+                                <div class="accordion-body pt-1">
+                                    <div
+                                        v-if="hasTemplates"
+                                        class="row row-cols-1 row-cols-md-2 pb-3 pt-1"
+                                    >
+                                        <TemplateManagerCard
+                                            v-for="(templateCard, idx) in templates"
+                                            :key="idx"
+                                            class="col col-md-4 mt-0 p-1"
+                                            :card-id="`${idx}`"
+                                            :title="templateCard?.meta?.title"
+                                            :created="templateCard?.meta?.created"
+                                            :selected-template="selectedTemplate?.meta?.title === templateCard?.meta?.title"
+                                            :active-template="activeTemplateName === templateCard?.meta?.title"
+                                            @showTemplate="selectCard"
+                                            @activateTemplate="activeCard"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="button-bar mb-3">
+                        <button
+                            class="btn lh-1 fs-5"
+                            :class="showExportWindow === true ? 'btn-outline' : 'btn-primary'"
+                            @click="openExportWindow(true)"
+                        >
+                            <i class="bi bi-file-text pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.overview") }}
+                        </button>
+                        <button
+                            class="btn lh-1 fs-5"
+                            :class="showExportWindow === true ? 'btn-primary' : 'btn-outline'"
+                            :disabled="!selectedTemplate?.meta?.isActive"
+                            @click="openExportWindow(false)"
+                        >
+                            <i class="bi bi-download pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.export") }}
+                        </button>
+                    </div>
                 </div>
                 <div v-if="!showExportWindow">
+                    <div
+                        v-if="selectedTemplate?.meta?.isActive"
+                        class="template-note pt-1 pb-3"
+                    >
+                        <i class="bi bi-lock-fill pe-1" />{{ $t('additional:modules.tools.cosi.templateManager.note') }}
+                    </div>
                     <div class="mb-4">
+                        <h5
+                            id="selected-template-title"
+                            class="headline"
+                        >
+                            {{ selectedTemplate?.meta?.title || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
+                        </h5>
                         <label for="selected-template-created">
                             {{ $t("additional:modules.tools.cosi.templateManager.label.created") }}
                         </label>
@@ -430,159 +515,262 @@ export default {
                             {{ selectedTemplate?.meta?.created || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
                         </p>
                     </div>
-                    <div class="mb-4">
-                        <label for="selected-template-title">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.name") }}
-                        </label>
-                        <p id="selected-template-title">
-                            {{ selectedTemplate?.meta?.title || $t('additional:modules.tools.cosi.templateManager.noInfo') }}
-                        </p>
-                    </div>
                     <div
                         v-if="selectedTemplate?.meta?.info"
                         class="mb-4"
                     >
-                        <label for="selected-template-description">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.description") }}
-                        </label>
-                        <p id="selected-template-description">
-                            {{ selectedTemplate?.meta?.info }}
-                        </p>
-                    </div>
-                    <div
-                        v-if="getActiveLayerList(selectedTemplate).length > 0"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-layer">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.layers") }}
-                        </label>
-                        <div id="selected-template-layer">
-                            <v-chip
-                                v-for="layerMap in getActiveLayerList(selectedTemplate)"
-                                :key="selectedTemplate.meta.title + layerMap.id"
-                                class="m-1"
-                                small
-                            >
-                                {{ layerMap.name }}
-                                <v-checkbox
-                                    v-model="filters[selectedTemplateIndex].activeLayerList[layerMap.id]"
-                                    small
-                                />
-                            </v-chip>
-                        </div>
-                    </div>
-                    <div
-                        v-if="getActiveDistrictLevel(selectedTemplate)"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-level">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.districtLevel") }}
-                        </label>
-                        <p id="selected-template-level">
-                            {{ getActiveDistrictLevel(selectedTemplate) }}
-                        </p>
-                    </div>
-                    <div
-                        v-if="getSelectedDistricts(selectedTemplate).length > 0"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-districts">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.selectedDistricts") }}
-                        </label>
-                        <div id="selected-template-districts">
-                            <v-chip
-                                v-for="districtName in getSelectedDistricts(selectedTemplate)"
-                                :key="selectedTemplate.meta.title + districtName"
-                                class="m-1"
-                                small
-                            >
-                                {{ districtName }}
-                                <v-checkbox
-                                    v-model="filters[selectedTemplateIndex].selectedDistrictNames[districtName]"
-                                    small
-                                />
-                            </v-chip>
-                        </div>
-                    </div>
-                    <div
-                        v-if="getStatsCategories(selectedTemplate).length > 0"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-statistics">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.categories") }}
-                        </label>
-                        <div id="selected-template-statistics">
-                            <v-chip
-                                v-for="category in getStatsCategories(selectedTemplate)"
-                                :key="selectedTemplate.meta.title + category"
-                                class="m-1"
-                                small
-                            >
-                                {{ category }}
-                                <v-checkbox
-                                    v-model="filters[selectedTemplateIndex].statsCategories[category]"
-                                    small
-                                />
-                            </v-chip>
-                        </div>
-                    </div>
-                    <div
-                        v-if="getInitTool(selectedTemplate)"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-tool">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.addTool") }}
-                        </label>
-                        <p id="selected-template-tool">
-                            {{ getInitTool(selectedTemplate) }}
-                        </p>
-                    </div>
-                    <div
-                        v-if="getCalculations(selectedTemplate).length > 0"
-                        class="mb-4"
-                    >
-                        <label for="selected-template-calculations">
-                            {{ $t("additional:modules.tools.cosi.templateManager.label.calculations") }}
-                        </label>
-                        <div id="selected-template-calculations">
-                            <v-chip
-                                v-for="(calculation, j) in getCalculations(selectedTemplate)"
-                                :key="selectedTemplate.meta.title + 'calculation' + j"
-                                class="m-1"
-                                small
-                            >
-                                {{ calculation.id }}
-                                <v-checkbox
-                                    v-model="filters[selectedTemplateIndex].calculations[calculation.id]"
-                                    small
-                                />
-                            </v-chip>
-                        </div>
-                    </div>
-                    <button
-                        class="btn btn-outline lh-1 fs-5"
-                        @click="loadFromTemplate(selectedTemplate, selectedTemplateIndex)"
-                    >
-                        <i class="bi bi-file-earmark-plus pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.loadFromTemplate") }}
-                    </button>
-                    <button
-                        class="btn btn-outline lh-1 fs-5 float-right"
-                        @click="openExportWindow(showExportWindow, selectedTemplate, selectedTemplateIndex)"
-                    >
-                        <i
-                            class="bi bi-arrow-up"
+                        <p
+                            id="selected-template-description"
+                            v-html="selectedTemplate?.meta?.info"
                         />
-                        {{ $t("additional:modules.tools.cosi.templateManager.exportFromTemplate") }}
-                    </button>
+                    </div>
+                    <div
+                        id="accordionTemplateComponents"
+                        class="accordion accordion-flush"
+                    >
+                        <div
+                            v-if="getActiveLayerList(selectedTemplate).length > 0"
+                            class="accordion-item"
+                        >
+                            <h2 class="accordion-header">
+                                <button
+                                    class="accordion-button"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseLayerList"
+                                    aria-expanded="true"
+                                    aria-controls="collapseLayerList"
+                                >
+                                    <i class="bi bi-grid mt-1 me-3" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.layers") }}
+                                </button>
+                            </h2>
+                            <div
+                                id="collapseLayerList"
+                                class="accordion-collapse collapse show"
+                                data-bs-parent="#accordionTemplateComponents"
+                            >
+                                <div class="accordion-body pt-0">
+                                    <div id="selected-template-layer">
+                                        <v-chip-group
+                                            column
+                                            multiple
+                                        >
+                                            <v-chip
+                                                v-for="layerMap in getActiveLayerList(selectedTemplate)"
+                                                :key="selectedTemplate?.meta?.title + layerMap.id"
+                                                v-model="filters[selectedTemplateIndex].activeLayerList[layerMap.id]"
+                                                class="m-1"
+                                                variant="outlined"
+                                                filter
+                                                :disabled="selectedTemplate?.meta?.isActive"
+                                            >
+                                                {{ layerMap.name }}
+                                            </v-chip>
+                                        </v-chip-group>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="getActiveDistrictLevel(selectedTemplate)"
+                            class="accordion-item"
+                        >
+                            <h2 class="accordion-header">
+                                <button
+                                    class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseDistrictLevel"
+                                    aria-expanded="false"
+                                    aria-controls="collapseDistrictLevel"
+                                >
+                                    <i class="bi bi-circle-square mt-1 me-3" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.districtLevel") }}
+                                </button>
+                            </h2>
+                            <div
+                                id="collapseDistrictLevel"
+                                class="accordion-collapse collapse"
+                                data-bs-parent="#accordionTemplateComponents"
+                            >
+                                <div class="accordion-body pt-0">
+                                    <p id="selected-template-level">
+                                        {{ getActiveDistrictLevel(selectedTemplate) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="getSelectedDistricts(selectedTemplate).length > 0"
+                            class="accordion-item"
+                        >
+                            <h2 class="accordion-header">
+                                <button
+                                    class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseSelectedDistricts"
+                                    aria-expanded="false"
+                                    aria-controls="collapseSelectedDistricts"
+                                >
+                                    <i class="bi bi-geo-alt-fill mt-1 me-3" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.selectedDistricts") }}
+                                </button>
+                            </h2>
+                            <div
+                                id="collapseSelectedDistricts"
+                                class="accordion-collapse collapse"
+                                data-bs-parent="#accordionTemplateComponents"
+                            >
+                                <div class="accordion-body pt-0">
+                                    <div id="selected-template-districts">
+                                        <v-chip-group
+                                            column
+                                            multiple
+                                        >
+                                            <v-chip
+                                                v-for="districtName in getSelectedDistricts(selectedTemplate)"
+                                                :key="selectedTemplate?.meta?.title + districtName"
+                                                v-model="filters[selectedTemplateIndex].selectedDistrictNames[districtName]"
+                                                class="m-1"
+                                                variant="outlined"
+                                                filter
+                                                :disabled="selectedTemplate?.meta?.isActive"
+                                            >
+                                                {{ districtName }}
+                                            </v-chip>
+                                        </v-chip-group>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="getStatsCategories(selectedTemplate).length > 0"
+                            class="accordion-item"
+                        >
+                            <h2 class="accordion-header">
+                                <button
+                                    class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseCategories"
+                                    aria-expanded="false"
+                                    aria-controls="collapseCategories"
+                                >
+                                    <i class="bi bi-graph-up mt-1 me-3" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.categories") }}
+                                </button>
+                            </h2>
+                            <div
+                                id="collapseCategories"
+                                class="accordion-collapse collapse"
+                                data-bs-parent="#accordionTemplateComponents"
+                            >
+                                <div class="accordion-body pt-0">
+                                    <div id="selected-template-statistics">
+                                        <v-chip-group
+                                            column
+                                            multiple
+                                        >
+                                            <v-chip
+                                                v-for="category in getStatsCategories(selectedTemplate)"
+                                                :key="selectedTemplate?.meta?.title + category"
+                                                v-model="filters[selectedTemplateIndex].statsCategories[category]"
+                                                class="m-1"
+                                                variant="outlined"
+                                                filter
+                                                :disabled="selectedTemplate?.meta?.isActive"
+                                            >
+                                                {{ category }}
+                                            </v-chip>
+                                        </v-chip-group>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-if="getInitTool(selectedTemplate)"
+                                class="accordion-item"
+                            >
+                                <h2 class="accordion-header">
+                                    <button
+                                        class="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseTool"
+                                        aria-expanded="false"
+                                        aria-controls="collapseTool"
+                                    >
+                                        <i class="bi bi-tools mt-1 me-3" />
+                                        {{ $t("additional:modules.tools.cosi.templateManager.label.addTool") }}
+                                    </button>
+                                </h2>
+                                <div
+                                    id="collapseTool"
+                                    class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionTemplateComponents"
+                                >
+                                    <div class="accordion-body pt-0">
+                                        <p id="selected-template-tool">
+                                            {{ getInitTool(selectedTemplate) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-if="getCalculations(selectedTemplate).length > 0"
+                            class="accordion-item"
+                        >
+                            <h2 class="accordion-header">
+                                <button
+                                    class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseCalculations"
+                                    aria-expanded="false"
+                                    aria-controls="collapseCalculations"
+                                >
+                                    <i class="bi bi-plus-slash-minus mt-1 me-3" />
+                                    {{ $t("additional:modules.tools.cosi.templateManager.label.calculations") }}
+                                </button>
+                            </h2>
+                            <div
+                                id="collapseCalculations"
+                                class="accordion-collapse collapse"
+                                data-bs-parent="#accordionTemplateComponents"
+                            >
+                                <div class="accordion-body pt-0">
+                                    <div id="selected-template-calculations">
+                                        <v-chip-group
+                                            column
+                                            multiple
+                                        >
+                                            <v-chip
+                                                v-for="(calculation, j) in getCalculations(selectedTemplate)"
+                                                :key="selectedTemplate?.meta?.title + 'calculation' + j"
+                                                v-model="filters[selectedTemplateIndex].calculations[calculation.id]"
+                                                class="m-1"
+                                                variant="outlined"
+                                                filter
+                                                :disabled="selectedTemplate?.meta?.isActive"
+                                            >
+                                                {{ calculation.id }}
+                                            </v-chip>
+                                        </v-chip-group>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <hr v-if="showExportWindow && showImportSection">
-                <TemplateManagerExport
-                    v-if="showExportWindow"
-                    :template-name="selectedTemplate?.meta?.title"
-                    :template-stats-categories="selectedTemplate?.state?.Tools?.Dashboard?.statsFeatureFilter"
-                    @hideTemplateImport="showTemplateImport"
-                />
             </div>
+            <TemplateManagerExport
+                v-if="showExportWindow && selectedTemplate?.meta?.isActive"
+                :template-name="selectedTemplate?.meta?.title"
+                :template-stats-categories="selectedTemplate?.state?.Tools?.Dashboard?.statsFeatureFilter"
+                @hideTemplateImport="showTemplateImport"
+            />
         </template>
     </Tool>
 </template>
@@ -610,49 +798,48 @@ export default {
             background-color: $light_blue;
             color: $white;
        }
+       .btn:disabled {
+            background-color: $light_grey_inactive_contrast;
+            color: $white;
+            border-color: $light_grey_inactive_contrast;
+       }
+       .headline {
+            color: $dark_blue;
+            font-family: $font_family_accent;
+       }
+       .accordion {
+        --bs-border-color: $white;
+        --bs-accordion-active-bg: $white;
+        --bs-accordion-btn-focus-box-shadow: none;
+        .accordion-button {
+            font-size: $font_size_icon_lg;
+        }
+        #selected-template-title {
+            color: $light_blue;
+            font-family: $font_family_accent;
+        }
+        .template-note {
+            font-size: 11px;
+            color: $dark_grey;
+        }
     }
+}
 </style>
 
 <style lang="scss">
     @import "~variables";
 
-    #template-manager {
-        .multiselect, .multiselect__input, .multiselect__single {
-            font-family: inherit;
-            font-size: 12px;
-        }
-
-        .multiselect__option--selected.multiselect__option--highlight,
-        .multiselect__option--selected.multiselect__option--highlight:after,
-        .multiselect__option:after,
-        .multiselect__option--selected,
-        .multiselect__option--selected:after {
-            background: $light_blue;
-            color: $white;
-            font-weight: normal;
-        }
-
-        .multiselect__option--highlight,
-        .multiselect__option--highlight:after {
-            background: $light_grey;
-            color: $black;
-        }
-
-
-        .multiselect__select {
-            padding: 4px 8px 10px 8px;
-        }
-
-        .multiselect__tags {
-            border-radius: 0;
-        }
-
-        .multiselect__placeholder {
-            margin-bottom: 7px
-        }
-
-        .multiselect__option--selected {
-            font-family: $font_family_accent
-        }
+    .v-chip.v-size--default {
+        font-size: 12px;
+        height: 25px;
+    }
+    .v-chip .v-icon {
+        font-size: 18px;
+    }
+    .v-chip--active {
+        background-color: #DCE2F3;
+    }
+    .v-chip--disabled {
+        opacity: 0.8;
     }
 </style>

@@ -14,8 +14,10 @@
                     "generateReport": "Generate Report",
                     "cancel": "Cancel",
                     "creatingReport": "Report is being created. Please wait.",
+                    "overview": "Overview",
+                    "export": "Export",
+                    "note": "Note: loaded templates cannot be edited.",
                     "label": {
-                      "selectTemplate": "Select Template",
                       "created": "Created",
                       "name": "Name",
                       "description": "Description",
@@ -27,7 +29,10 @@
                       "calculations": "Calculations",
                       "title": "Title",
                       "selectedAreas": "Name of the selected areas",
-                      "author": "Author"
+                      "author": "Author",
+                      "manageTemplate": "Manage Template",
+                      "enable": "enable",
+                      "disable": "disable"
                     },
                     "activeTool": "Active Tool",
                     "errors": {

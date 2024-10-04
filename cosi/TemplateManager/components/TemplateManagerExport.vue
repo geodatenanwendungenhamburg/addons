@@ -201,9 +201,9 @@ export default {
 </script>
 
 <template lang="html">
-    <div class="container px-0">
+    <div class="container">
         <div class="row">
-            <h5 class="col col-md-12 bold-headline m-0 pb-0">
+            <h5 class="col col-md-12 bold-headline py-0">
                 {{ $t("additional:modules.tools.cosi.templateManager.exportFromTemplate") }}
             </h5>
             <h5 class="text-primary col col-md-12 pt-1">
@@ -317,6 +317,7 @@ export default {
     background-color: #DCE2F3;
 }
 .bold-headline {
+    color: $dark_blue;
     font-family: $font_family_accent;
 }
 .btn-outline {

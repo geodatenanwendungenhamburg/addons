@@ -14,8 +14,10 @@
                     "generateReport": "Bericht generieren",
                     "cancel": "Abbrechen",
                     "creatingReport": "Bericht wird erstellt. Bitte warten.",
+                    "overview": "Übersicht",
+                    "export": "Exportieren",
+                    "note": "Hinweis: geladene Vorlagen können nicht bearbeitet werden.",
                     "label": {
-                      "selectTemplate": "Vorlage auswählen",
                       "created": "Erstellt",
                       "name": "Name",
                       "description": "Beschreibung",
@@ -27,7 +29,10 @@
                       "calculations": "Berechnungen",
                       "title": "Titel",
                       "selectedAreas": "Name der ausgewählten Gebiete",
-                      "author": "Ersteller:in"
+                      "author": "Ersteller:in",
+                      "manageTemplate": "Vorlagen verwalten",
+                      "enable": "geladen",
+                      "disable": "nicht geladen"
                     },
                     "activeTool": "Aktive Werkzeuge",
                     "errors": {

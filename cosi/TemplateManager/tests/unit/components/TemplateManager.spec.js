@@ -24,6 +24,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 store,
                 localVue,
                 vuetify,
+                stubs: [ "VChipGroup" ],
                 computed: {
                     name: () => "Hallo",
                     renderToWindow: () => true,
@@ -75,13 +76,14 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 mobile: () => sinon.stub()
             }
         });
+        TemplateManager.methods.loadTemplates = () => sinon.stub();
     });
 
     describe("DOM", () => {
-        it("should find button with icon 'bi-arrow-up'", async () => {
+        it("should find button with icon 'bi-file-text'", async () => {
             const wrapper = factory.getMount();
 
-            expect(wrapper.find("button .bi-arrow-up").exists()).to.be.true;
+            expect(wrapper.find("button .bi-file-text").exists()).to.be.true;
         });
 
         it("should not find template 'TemplateManagerExport'", async () => {
@@ -94,24 +96,95 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         });
 
         it("should find template 'TemplateManagerExport'", async () => {
-            const wrapper = factory.getMount();
+            const wrapper = factory.getMount(),
+            templates = [{
+                meta: {
+                    title: "one",
+                    isActive: false,
+                    created: "01.01."
+                }
+            },
+            {
+                meta: {
+                    title: "two",
+                    isActive: true,
+                    created: "01.01."
+                }
+            }];
 
             await wrapper.setData({
-                showExportWindow: true
+                showExportWindow: true,
+                templates,
+                selectedTemplateName: "two"
             });
+            wrapper.vm.$nextTick();
             expect(wrapper.findComponent({name: "TemplateManagerExport"}).exists()).to.be.true;
+        });
+        it("should find TemplateManagerCard Component", async () => {
+            const wrapper = factory.getMount();
+            templates = [{
+                meta: {
+                    title: "one",
+                    isActive: false,
+                    created: "01.01."
+                }
+            },
+            {
+                meta: {
+                    title: "two",
+                    isActive: true,
+                    created: "01.01."
+                }
+            }];
+
+            await wrapper.setData({
+                showExportWindow: true,
+                templates,
+                selectedTemplateName: "two"
+            });
+            expect(wrapper.findComponent({name: "TemplateManagerCard"}).exists()).to.be.true;
+        });
+        it("should not render export view if selected template is not activated but showExportView is true", async () => {
+            const wrapper = factory.getMount();
+            templates = [{
+                meta: {
+                    title: "one",
+                    isActive: false,
+                    created: "01.01."
+                }
+            },
+            {
+                meta: {
+                    title: "two",
+                    isActive: true,
+                    created: "01.01."
+                }
+            }];
+
+            await wrapper.setData({
+                showExportWindow: true,
+                templates,
+                selectedTemplateName: "two"
+            });
+
+            wrapper.vm.selectCard("one");
+            expect(wrapper.vm.showExportWindow).to.be.false;
         });
     });
 
     describe("Computed Properties", () => {
         const templates = [{
             meta: {
-                title: "one"
+                title: "one",
+                isActive: false,
+                created: "01.01."
             }
         },
         {
             meta: {
-                title: "two"
+                title: "two",
+                isActive: false,
+                created: "01.01."
             }
         }];
 
@@ -147,6 +220,34 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
             expect(wrapper.vm.selectedTemplateIndex).to.be.equal(1);
         });
 
+        it("should update 'activeTemplate' if 'activeTemplateName' was changed", async () => {
+            const wrapper = factory.getMount();
+
+            await wrapper.setData({
+                templates
+            });
+
+           wrapper.vm.activeTemplateName = "two";
+
+           wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.activeTemplate).to.deep.equal(wrapper.vm.templates[1]);
+        });
+
+        it("should update 'activeTemplateIndex' if 'activeTemplateName' was changed", async () => {
+            const wrapper = factory.getMount();
+
+            await wrapper.setData({
+                templates
+            });
+
+            wrapper.vm.activeTemplateName = "two";
+
+            wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.activeTemplateIndex).to.be.equal(1);
+        });
+
         it("should update 'templateTitles' if 'templates' was changed", async () => {
             const wrapper = factory.getMount();
 
@@ -164,6 +265,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 {
                     meta: {
                         isActive: true,
+                        created: "01.01.",
                         title: "Vielfalt für alle",
                         time: 1700555383001
                     },
@@ -178,6 +280,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 {
                     meta: {
                         isActive: true,
+                        created: "01.01.",
                         title: "Alle für alle",
                         time: 1700555362955
                     },
@@ -192,6 +295,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 {
                     meta: {
                         isActive: false,
+                        created: "01.01.",
                         title: "Alle für Vielfalt",
                         time: 1700555344885
                     },
@@ -267,6 +371,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                         {
                             meta: {
                                 isActive: true,
+                                created: "01.01.",
                                 title: "Keine Stats to filter"
                             },
                             state: {
@@ -292,6 +397,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                         {
                             meta: {
                                 isActive: true,
+                                created: "01.01.",
                                 title: "Vielfalt für alle"
                             },
                             state: {
