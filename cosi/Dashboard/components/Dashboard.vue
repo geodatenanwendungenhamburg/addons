@@ -940,6 +940,7 @@ export default {
                                         @subtract="openCalcDialog('subtract', {field_A: fields.A, field_B: fields.B})"
                                         @multiply="openCalcDialog('multiply', {field_A: fields.A, field_B: fields.B})"
                                         @divide="openCalcDialog('divide', {field_A: fields.A, field_B: fields.B})"
+                                        @dividePercent="openCalcDialog('dividePercent', {field_A: fields.A, field_B: fields.B})"
                                         @sum="openCalcDialog('sumUpSelected', {selectedItems})"
                                         @divideSelected="addDivideSelectedCalculations"
                                         @correlate="renderScatterplot"

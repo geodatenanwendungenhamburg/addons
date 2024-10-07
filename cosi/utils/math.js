@@ -95,6 +95,19 @@ export function divide (a, b) {
 }
 
 /**
+ * Divides a and b
+ * @param {Number} a - a
+ * @param {Number} b - b
+ * @returns {Number} the result
+ */
+export function dividePercent (a, b) {
+    if (!assertValues(a, b)) {
+        return undefined;
+    }
+    return a * 100 / b;
+}
+
+/**
  * Sums up a list of numbers
  * @param {Number[]} arr - array of numbers
  * @returns {Number} the result
@@ -292,6 +305,7 @@ export default {
     subtract,
     multiply,
     divide,
+    dividePercent,
     sum,
     standardError,
     covar,

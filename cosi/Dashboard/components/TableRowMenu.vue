@@ -256,6 +256,19 @@ export default {
                                             </v-list-item-content>
                                         </v-list-item>
                                         <v-list-item
+                                            id="dividePercent"
+                                            dense
+                                            :disabled="!fields.A || !fields.B"
+                                            @click="$emit('dividePercent')"
+                                        >
+                                            <v-list-item-icon>
+                                                <v-icon>mdi-percent</v-icon>
+                                            </v-list-item-icon>
+                                            <v-list-item-content>
+                                                {{ $t('additional:modules.tools.cosi.dashboard.tableRowMenu.dividePercent') }}
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                        <v-list-item
                                             id="sum"
                                             dense
                                             :disabled="selectedItems.length === 0"

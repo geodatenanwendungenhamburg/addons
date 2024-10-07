@@ -7,13 +7,15 @@ const operationSymbols = {
         add: "+",
         subtract: "-",
         multiply: "*",
-        divide: "/"
+        divide: "/",
+        dividePercent: "*100/"
     },
     valueTypes = {
         add: "absolute",
         subtract: "absolute",
         multiply: "relative",
-        divide: "relative"
+        divide: "relative",
+        dividePercent: "relative"
     };
 
 /**
@@ -90,7 +92,7 @@ export function addDivideSelectedCalculations () {
 
 /**
  * Adds a new calc to the calculation list
- * @param {"add" | "subtract" | "multiply" | "divide" | "sumUpSelected"} operation - the mathmatical operation to execute
+ * @param {"add" | "subtract" | "multiply" | "divide"  | "dividePercent" | "sumUpSelected"} operation - the mathematical operation to execute
  * @param {{field_A: Object, field_B: Object, selectedItems: Object[] }} [options={}] - fields and selected items list
  * @param {String} [id] - the ID for the new calculation
  * @returns {void}
@@ -112,6 +114,12 @@ export function addCalculation (operation, options = {}, id = undefined) {
 
     calculation.id = id || getCalculationId(calculation);
     this.setCalculation(calculation);
+
+    this.addSingleAlert({
+        content: this.$t("additional:modules.tools.cosi.dashboard.calculationHint"),
+        class: "Info",
+        displayClass: "info"
+    });
 }
 
 /**

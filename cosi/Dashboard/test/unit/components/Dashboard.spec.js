@@ -424,6 +424,32 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
             expect(spyCalculateAll.callCount).to.equal(1);
             expect(spyUpdateDistricts.callCount).to.equal(1);
         });
+
+        it("create new table item by divisionPercent", async () => {
+            const spyCalculateAll = sinon.spy(Dashboard.methods, "calculateAll"),
+                spyUpdateDistricts = sinon.spy(Dashboard.methods, "updateDistricts");
+
+            await factory.initialize();
+            store.commit("Tools/Dashboard/setCalculations", []);
+            await wrapper.vm.$nextTick();
+            // act
+            await wrapper.findAll(".open-burger-menu").at(0).trigger("click");
+            await wrapper.findAll(".activator").at(0).trigger("click");
+            await wrapper.find("#set-field-B").trigger("click");
+
+            await wrapper.findAll(".open-burger-menu").at(1).trigger("click");
+            await wrapper.findAll(".activator").at(3).trigger("click");
+            await wrapper.findAll("#set-field-A").at(1).trigger("click");
+
+            await wrapper.findAll(".activator").at(1).trigger("click");
+            await wrapper.find("#dividePercent").trigger("click");
+            await wrapper.find("#confirm-calc").trigger("click");
+
+            await wrapper.vm.$nextTick();
+            expect(wrapper.vm.calculations).to.have.lengthOf(1);
+            expect(spyCalculateAll.callCount).to.equal(2);
+            expect(spyUpdateDistricts.callCount).to.equal(1);
+        });
     });
 
     describe("Methods", () => {

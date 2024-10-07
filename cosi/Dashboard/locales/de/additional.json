@@ -20,6 +20,7 @@
                     "nameCalc": "Berechnung benennen",
                     "titleForCalculatedStatistic": "Die mit rot gekennzeichneten Werte sind automatisch berechnet",
                     "tableDataParsingError": "Beim lesen der Daten ist ein Fehler aufgetreten",
+                    "calculationHint": "Das Ergebnis finden Sie unten in der Tabelle in der Kategoriengruppe Berechnungen",
                     "tableRowMenu": {
                         "expandTooltip": "Alle Jahre ein-/ausblenden",
                         "visualize": "In der Karte visualisieren",
@@ -35,6 +36,7 @@
                         "subtract": "Substrahieren (A - B)",
                         "multiply": "Multiplizieren (A x B)",
                         "divide": "Dividieren (A / B)",
+                        "dividePercent": "Anteil A in Prozent von B (A * 100 / B)",
                         "sumUpSelected": "Ausgewählte Aufsummieren",
                         "divideSelected": "Ausgewählte Dividieren (jeweils / B)",
                         "charts": "Diagramme",
