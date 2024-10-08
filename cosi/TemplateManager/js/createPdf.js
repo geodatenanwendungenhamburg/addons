@@ -24,7 +24,16 @@ function addChapter (text) {
  * @returns {void}
  */
 function addHeadline (text) {
-    docDefinition.content.push({text, fontSize: 11, bold: true, margin: [0, 2]});
+    docDefinition.content.push({text, fontSize: 11, bold: true, margin: [0, 4]});
+}
+
+/**
+ * Adds a paragraph to the report.
+ * @param {String} text - The content of the paragraph.
+ * @returns {void}
+ */
+function addParagraph (text) {
+    docDefinition.content.push({text, fontSize: 11, margin: [0, 4]});
 }
 
 /**
@@ -62,7 +71,7 @@ function getColumns (columnNames) {
     const columns = [];
 
     columnNames.forEach(name => {
-        columns.push({text: name, alignment: "center", fontSize: 11, bold: true, borderColor});
+        columns.push({text: name, alignment: "left", fontSize: 11, bold: true, borderColor});
     });
     return columns;
 }
@@ -73,8 +82,8 @@ function getColumns (columnNames) {
  * @param {Object[]} row - The given row.
  * @returns {void}
  */
-function addCell (text, row) {
-    row.push({text, alignment: "right", fontSize: 11, borderColor});
+function addCell (row, text, alignment = "right") {
+    row.push({text, alignment, fontSize: 11, borderColor});
 }
 
 /**
@@ -97,6 +106,7 @@ function resetDocContent () {
 export {
     addChapter,
     addHeadline,
+    addParagraph,
     addTable,
     getColumns,
     addCell,

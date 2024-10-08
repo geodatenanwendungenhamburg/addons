@@ -1,6 +1,10 @@
 <script>
 import dayjs from "dayjs";
+import {mapGetters} from "vuex";
 import TemplateManagerExportProgressBar from "./TemplateManagerExportProgressBar.vue";
+import {download as pdfDownload, addChapter, addHeadline, addParagraph, addTable, getColumns, addCell, resetDocContent} from "../js/createPdf";
+import {getTotal, getCulmulativeTotal} from "../../Dashboard/utils/operations";
+import mapping from "../../assets/mapping.json";
 
 export default {
     name: "TemplateManagerExport",
@@ -12,6 +16,11 @@ export default {
             type: String,
             required: false,
             default: ""
+        },
+        templateStatsCategories: {
+            type: Array,
+            required: false,
+            default: () => []
         }
     },
     data: () => ({
@@ -34,6 +43,10 @@ export default {
 
     }),
     computed: {
+        ...mapGetters("Tools/Dashboard", ["items"]),
+        ...mapGetters("Tools/FeaturesList", ["featuresListItems"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictNames"]),
+
         /**
          * Generates a file name for the report.
          * @returns {String} The file name.
@@ -47,6 +60,9 @@ export default {
             return prepareName + "-" + date + ".pdf";
         }
     },
+    mounted () {
+        resetDocContent();
+    },
     methods: {
         /**
          * Show the view with the progress bar.
@@ -55,8 +71,129 @@ export default {
          * @returns {void}
          */
         manageProgressBarView (val) {
+            resetDocContent();
+            this.addStatsToReport(this.items);
+            this.addTopicsToReport(this.featuresListItems);
+            pdfDownload("report.pdf");
             this.showProgressBar = val;
             this.$emit("hideTemplateImport", !this.showProgressBar);
+        },
+
+        /**
+         * Prepares the statistical data and adds it to the report.
+         * @param {Object[]} items - Items from dashboard component.
+         * @returns {void}
+         */
+        addStatsToReport (items) {
+            const filteredMappingByCategories = mapping.filter(obj => {
+                    return this.templateStatsCategories.includes(obj.value);
+                }),
+                groupedMapping = Object.groupBy(filteredMappingByCategories, (obj) => obj.group);
+
+            addChapter("Statistische Datenübersicht");
+
+            Object.keys(groupedMapping).forEach(group => {
+                const columns = getColumns(["", "Ausgewähltes Gebiet", ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
+                    body = [columns];
+
+                addHeadline(group);
+
+                groupedMapping[group].forEach(mappingObject => {
+                    const statFeature = items.find((item) => item.category === mappingObject.value),
+                        lastYear = statFeature.years[0],
+                        row = [];
+
+                    columns.forEach((col, index) => {
+                        let value,
+                            alignment = "right";
+
+                        if (index === 0) {
+                            alignment = "left";
+                            value = statFeature.category;
+                        }
+                        else if (index === 1) {
+                            value = this.getTotal(statFeature, this.selectedDistrictNames, lastYear, "jahr_");
+
+                            if (value === 0) {
+                                value = "-";
+                            }
+                        }
+                        else {
+                            value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
+                        }
+                        addCell(row, value.toLocaleString(this.currentLocale), alignment);
+                    });
+                    body.push(row);
+                });
+
+                addTable(body, 120);
+            });
+        },
+
+        /**
+         * Runs recursively through the district levels to get the names of the higher level districts.
+         * @param {Object} districtLevel - The district level to which the district names belong.
+         * @param {String[]} districtNames - The names of the needed districts.
+         * @param {String[]} columns - The names of the columns.
+         * @returns {String[]} The names of the columns
+         */
+        getStatCols (districtLevel, districtNames, columns) {
+            const districts = districtLevel.displayAll
+                    ? districtLevel.districts
+                    : districtLevel.districts.filter(dist => districtNames.includes(dist.getName())),
+                refDistrictNames = [];
+            let refDistrictName, district;
+
+            for (district of districts) {
+                if (districtLevel.label !== this.selectedDistrictLevel.label) {
+                    columns.push(district.getLabel());
+                }
+
+                refDistrictName = district.getReferencDistrictName();
+
+                if (refDistrictName) {
+                    refDistrictNames.push(refDistrictName);
+                }
+            }
+            if (districtLevel.referenceLevel) {
+                this.getStatCols(districtLevel.referenceLevel, refDistrictNames, columns);
+            }
+
+            return columns;
+        },
+        getCulmulativeTotal,
+        getTotal,
+
+        /**
+         * Prepares the geospatial data and adds it to the report.
+         * @param {Object[]} topics - Items from FeaturesList Component.
+         * @returns {void}
+         */
+        addTopicsToReport (topics) {
+            const groupedTopics = Object.groupBy(topics, (topic) => topic.layerName);
+
+            addChapter("Infrastrukturdaten");
+            Object.keys(groupedTopics).forEach(group => {
+                const topicLength = groupedTopics[group].length,
+                    columns = getColumns(["Typ der Einrichtung", "Name", "Adresse"], []),
+                    body = topicLength <= 10 ? [columns] : [],
+                    columnAttirbutes = ["type", "name", "address"];
+
+                addHeadline(group);
+                addParagraph(`Anzahl der ${group} im ausgewählten Gebiet: ${groupedTopics[group].length}`);
+
+                if (topicLength <= 10) {
+                    groupedTopics[group].forEach(topic => {
+                        const row = [];
+
+                        columnAttirbutes.forEach((attribute) => {
+                            addCell(row, topic[attribute], "left");
+                        });
+                        body.push(row);
+                    });
+                    addTable(body, 120);
+                }
+            });
         }
     }
 };
