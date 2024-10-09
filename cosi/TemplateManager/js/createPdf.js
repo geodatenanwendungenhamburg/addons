@@ -1,13 +1,19 @@
 import pdfMake from "pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import {getSvg} from "../js/getSvg";
 
-const docDefinition = {
+const footerInfo = {
+        author: ""
+    },
+    docDefinition = {
         content: [],
         pageSize: "A4",
-        pageMargins: [40, 60, 40, 60]
+        pageMargins: [40, 60, 40, 60],
+        footer: function (currentPage, pageCount) {
+            return getSvg(currentPage, pageCount, footerInfo.author);
+        }
     },
     borderColor = ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"];
-
 
 /**
  * Adds the header to the report.
@@ -15,6 +21,15 @@ const docDefinition = {
  */
 function addHeader (reportTitle) {
     docDefinition.header = {text: reportTitle, alignment: "right", fontSize: 11, margin: [0, 20, 40, 40], color: "#646464"};
+}
+
+/**
+ * Sets the author.
+ * @param {string} author - The given author in form.
+ * @returns {void}
+ */
+function setAuthor (auth) {
+    footerInfo.author = auth;
 }
 
 /**
@@ -114,6 +129,7 @@ function resetDocContent () {
 
 export {
     addHeader,
+    setAuthor,
     addChapter,
     addHeadline,
     addParagraph,
