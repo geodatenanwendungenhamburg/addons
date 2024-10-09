@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 import {mapGetters} from "vuex";
 import TemplateManagerExportProgressBar from "./TemplateManagerExportProgressBar.vue";
-import {download as pdfDownload, addChapter, addHeadline, addParagraph, addTable, getColumns, addCell, resetDocContent} from "../js/createPdf";
+import {download as pdfDownload, addHeader, addChapter, addHeadline, addParagraph, addTable, getColumns, addCell, resetDocContent} from "../js/createPdf";
 import {getTotal, getCulmulativeTotal} from "../../Dashboard/utils/operations";
 import mapping from "../../assets/mapping.json";
 
@@ -72,6 +72,7 @@ export default {
          */
         manageProgressBarView (val) {
             resetDocContent();
+            addHeader(this.reportTitle);
             this.addStatsToReport(this.items);
             this.addTopicsToReport(this.featuresListItems);
             pdfDownload("report.pdf");

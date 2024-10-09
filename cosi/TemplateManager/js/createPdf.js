@@ -8,9 +8,18 @@ const docDefinition = {
     },
     borderColor = ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"];
 
+
+/**
+ * Adds the header to the report.
+ * @param {String} reportTitle - The title of the report.
+ */
+function addHeader (reportTitle) {
+    docDefinition.header = {text: reportTitle, alignment: "right", fontSize: 11, margin: [0, 20, 40, 40], color: "#646464"};
+}
+
 /**
  * Adds a chapter to the report.
- * @param {String} text - The name of the report.
+ * @param {String} text - The name of the chapter.
  * @returns {void}
  */
 function addChapter (text) {
@@ -104,6 +113,7 @@ function resetDocContent () {
 }
 
 export {
+    addHeader,
     addChapter,
     addHeadline,
     addParagraph,
