@@ -72,7 +72,7 @@ export default {
                             <input
                                 :id="`flexSwitchCheckChecked-${cardId}`"
                                 :v-model="activeTemplate"
-                                class="form-check-input"
+                                class="form-check-input flexSwitch"
                                 type="radio"
                                 :aria-checked="activeTemplate === true"
                                 role="switch"
@@ -130,8 +130,9 @@ export default {
             display: block;
             width: 200px;
         }
-        #flexSwitchCheckChecked {
+        .flexSwitch {
             border-radius: 10px;
+            cursor: pointer;
         }
 }
 .card[isActive='true'] {

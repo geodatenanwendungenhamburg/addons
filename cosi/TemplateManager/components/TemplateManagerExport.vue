@@ -2,9 +2,15 @@
 import dayjs from "dayjs";
 import {mapGetters} from "vuex";
 import TemplateManagerExportProgressBar from "./TemplateManagerExportProgressBar.vue";
-import {download as pdfDownload, addHeader, setAuthor, addChapter, addHeadline, addParagraph, addTable, getColumns, addCell, resetDocContent} from "../js/createPdf";
+import PDFMaker from "../js/createPdf";
 import {getTotal, getCulmulativeTotal} from "../../Dashboard/utils/operations";
 import mapping from "../../assets/mapping.json";
+import {createMapfishDialog} from "../../../valuationPrint/utils/createMapfishDialog";
+import {getCenter as getCenterOfExtent} from "ol/extent";
+import {startPrintProcess} from "../../../valuationPrint/utils/startPrintProcess.js";
+import {unionFeatures} from "../../../valuationPrint/utils/unionFeatures";
+import axios from "axios";
+import {baseProportionTemplate, baseFixedTemplateForHamburg, mapfishServerConfig} from "../js/mapfishUtils";
 
 export default {
     name: "TemplateManagerExport",
@@ -39,13 +45,15 @@ export default {
         percentage: 50,
         reportTitle: "",
         selectedAreasName: "",
-        author: ""
-
+        author: "",
+        pdf: null
     }),
     computed: {
         ...mapGetters("Tools/Dashboard", ["items"]),
         ...mapGetters("Tools/FeaturesList", ["featuresListItems"]),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictNames"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures"]),
+        ...mapGetters(["getRestServiceById"]),
+        ...mapGetters("Maps", ["projection"]),
 
         /**
          * Generates a file name for the report.
@@ -61,7 +69,8 @@ export default {
         }
     },
     mounted () {
-        resetDocContent();
+        this.pdf = new PDFMaker();
+        this.pdf.resetDocContent();
     },
     methods: {
         /**
@@ -70,13 +79,14 @@ export default {
          * @param {Boolean} val - if the progress bar should be shown.
          * @returns {void}
          */
-        manageProgressBarView (val) {
-            resetDocContent();
-            addHeader(this.reportTitle);
-            setAuthor(this.author);
+        async manageProgressBarView (val) {
+            this.pdf.resetDocContent();
+            this.pdf.addHeader(this.reportTitle);
+            this.pdf.setAuthor(this.author);
+            await this.addOverViewPageToReport();
             this.addStatsToReport(this.items);
             this.addTopicsToReport(this.featuresListItems);
-            pdfDownload("report.pdf");
+            this.pdf.download("report.pdf");
             this.showProgressBar = val;
             this.$emit("hideTemplateImport", !this.showProgressBar);
         },
@@ -92,13 +102,13 @@ export default {
                 }),
                 groupedMapping = Object.groupBy(filteredMappingByCategories, (obj) => obj.group);
 
-            addChapter("Statistische Datenübersicht");
+            this.pdf.addChapter("Statistische Datenübersicht");
 
             Object.keys(groupedMapping).forEach(group => {
-                const columns = getColumns(["", "Ausgewähltes Gebiet", ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
+                const columns = this.pdf.getColumns(["", "Ausgewähltes Gebiet", ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
                     body = [columns];
 
-                addHeadline(group);
+                this.pdf.addHeadline(group);
 
                 groupedMapping[group].forEach(mappingObject => {
                     const statFeature = items.find((item) => item.category === mappingObject.value),
@@ -123,12 +133,76 @@ export default {
                         else {
                             value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
                         }
-                        addCell(row, value.toLocaleString(this.currentLocale), alignment);
+                        this.pdf.addCell(row, value.toLocaleString(this.currentLocale), alignment);
                     });
                     body.push(row);
                 });
 
-                addTable(body, 120);
+                this.pdf.addTable(body, 120);
+            });
+        },
+
+        /**
+         * Adds the overview page to the report.
+         * @returns {void}
+         */
+        async addOverViewPageToReport () {
+            const imageName = "overviewMap",
+                feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
+                template = typeof feature !== "undefined" ? {...baseProportionTemplate} : {...baseFixedTemplateForHamburg},
+                overviewImageUrl = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig).catch(error => console.error(error));
+
+            if (typeof overviewImageUrl === "string") {
+                this.pdf.addChapter("Übersichtskarte");
+                this.pdf.addImageByUrl(overviewImageUrl, imageName, {fit: [600, 600], alignment: "center"});
+            }
+        },
+
+        /**
+         * Prepares an image on mapfish and resolves an url to that image.
+         * Rejects if an error occurs.
+         * @param {ol/Feature} feature An feature to display on the image.
+         * @param {Object} baseLayer The configuration for the base layer to use.
+         * @param {String} projectionCode The projection code.
+         * @param {String} imageName The image name.
+         * @param {Object} serverConfig The config of which mapfish server and template to use.
+         * @param {String} serverConfig.template The name of the template.
+         * @param {String} serverConfig.name The name of the mapfish server (most of the time mapfish or mapfish_qs).
+         * @returns {void}
+         */
+        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig) {
+            const extent = feature?.getGeometry()?.getExtent(),
+                baseLayerName = Object.keys(baseLayer)[0],
+                mapfishDialog = createMapfishDialog(
+                    typeof feature !== "undefined" ? {
+                        center: getCenterOfExtent(extent),
+                        extent,
+                        feature,
+                        featureList: [feature],
+                        geometry: feature?.getGeometry()
+                    } : undefined,
+                    {},
+                    baseLayer,
+                    "",
+                    projectionCode,
+                    imageName
+                );
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    mapfishDialog.attributes.map = mapfishDialog.attributes[`${baseLayerName}.map`];
+                    delete mapfishDialog.attributes[`${baseLayerName}.map`];
+                    startPrintProcess(this.getRestServiceById(serverConfig.name).url, "png", serverConfig.template, mapfishDialog, (url, payload) => {
+                        return axios.post(url, payload);
+                    },
+                    () => console.warn("ongoing"), // needs to be there. use for progressbar later on
+                    error => {
+                        reject(error);
+                    },
+                    downloadURL => {
+                        resolve(downloadURL);
+                    });
+                }, 0);
             });
         },
 
@@ -174,26 +248,26 @@ export default {
         addTopicsToReport (topics) {
             const groupedTopics = Object.groupBy(topics, (topic) => topic.layerName);
 
-            addChapter("Infrastrukturdaten");
+            this.pdf.addChapter("Infrastrukturdaten");
             Object.keys(groupedTopics).forEach(group => {
                 const topicLength = groupedTopics[group].length,
-                    columns = getColumns(["Typ der Einrichtung", "Name", "Adresse"], []),
+                    columns = this.pdf.getColumns(["Typ der Einrichtung", "Name", "Adresse"], []),
                     body = topicLength <= 10 ? [columns] : [],
                     columnAttirbutes = ["type", "name", "address"];
 
-                addHeadline(group);
-                addParagraph(`Anzahl der ${group} im ausgewählten Gebiet: ${groupedTopics[group].length}`);
+                this.pdf.addHeadline(group);
+                this.pdf.addParagraph(`Anzahl der ${group} im ausgewählten Gebiet: ${groupedTopics[group].length}`);
 
                 if (topicLength <= 10) {
                     groupedTopics[group].forEach(topic => {
                         const row = [];
 
                         columnAttirbutes.forEach((attribute) => {
-                            addCell(row, topic[attribute], "left");
+                            this.pdf.addCell(row, topic[attribute], "left");
                         });
                         body.push(row);
                     });
-                    addTable(body, 120);
+                    this.pdf.addTable(body, 120);
                 }
             });
         }

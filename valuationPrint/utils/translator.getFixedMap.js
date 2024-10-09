@@ -17,9 +17,9 @@ import {Point} from "ol/geom";
 function getFixedMap (coordinate, projection, style, bbox, layerIds, dpi = 200) {
     const mapConfig = {},
         defaultBbox = [545114.80, 5914269.80, 591483.01, 5957132.28],
-        feature = new Feature({
+        feature = typeof coordinate !== "undefined" ? new Feature({
             geometry: new Point(coordinate)
-        });
+        }) : undefined;
     let originLayers = [];
 
     mapConfig.dpi = dpi;
@@ -28,11 +28,13 @@ function getFixedMap (coordinate, projection, style, bbox, layerIds, dpi = 200) 
     mapConfig.layers = [];
 
     if (!layerIds.includes("feature")) {
-        originLayers.push({
-            layer: getFeatureLayer(style, feature, "point"),
-            opacity: 1,
-            dpi
-        });
+        if (typeof feature !== "undefined") {
+            originLayers.push({
+                layer: getFeatureLayer(style, feature, "point"),
+                opacity: 1,
+                dpi
+            });
+        }
         originLayers = originLayers.concat(getPrintedLayers(layerIds));
     }
     else {
@@ -41,11 +43,13 @@ function getFixedMap (coordinate, projection, style, bbox, layerIds, dpi = 200) 
             backLayerIds = layerIds.slice(splitIndex + 1 - layerIds.length);
 
         originLayers = getPrintedLayers(frontLayerIds);
-        originLayers.push({
-            layer: getFeatureLayer(style, feature, "point"),
-            opacity: 1,
-            dpi
-        });
+        if (typeof feature !== "undefined") {
+            originLayers.push({
+                layer: getFeatureLayer(style, feature, "point"),
+                opacity: 1,
+                dpi
+            });
+        }
         originLayers = originLayers.concat(getPrintedLayers(backLayerIds));
 
     }
