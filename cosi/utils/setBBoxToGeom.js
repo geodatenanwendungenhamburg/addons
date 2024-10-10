@@ -3,6 +3,7 @@ import Vue from "vue";
 import {getItemsByAttributes, getCollection} from "../utils/radioBridge.js";
 import * as webgl from "@masterportal/masterportalapi/src/renderer/webgl";
 import {getCenter} from "ol/extent";
+import LoaderOverlay from "../../../src/utils/loaderOverlay.js";
 
 /**
  * filters all features by a given geometry
@@ -68,6 +69,7 @@ function updateSource (model, bboxGeometry, url, item, app) {
                     // as updateFeaturesList may be triggered multiple times from different places as data loads, info where this event came from needs to be passed along
                     app.$root.$emit("updateFeaturesList", "setBBoxToGeom-updateSource");
                 }
+                LoaderOverlay.hide();
             });
         }
     }

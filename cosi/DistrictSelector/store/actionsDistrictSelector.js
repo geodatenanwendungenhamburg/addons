@@ -24,7 +24,6 @@ const actions = {
     async loadStatFeatures ({dispatch, rootGetters}, {districtLevel, districts, getStatFeatures = wfsGetFeature, recursive = true}) {
         dispatch("Alerting/addSingleAlert", {content: "Datensätze werden geladen"}, {root: true});
         LoaderOverlay.show();
-
         const wfsFormat = new WFS(),
             layers = districtLevel.stats.layers;
 
@@ -68,7 +67,7 @@ const actions = {
                     return refNames.includes(mapDistrictNames(district.getName(), referenceLevel));
                 });
 
-            dispatch("loadStatFeatures", {
+            await dispatch("loadStatFeatures", {
                 districts: referenceLevel.label === "Hamburg" ? referenceLevel.districts : refDistricts,
                 districtLevel: referenceLevel,
                 getStatFeatures
@@ -76,8 +75,8 @@ const actions = {
             LoaderOverlay.hide();
         }
         else {
-            dispatch("updateDistricts");
-            dispatch("Alerting/cleanup", null, {root: true});
+            await dispatch("updateDistricts");
+            await dispatch("Alerting/cleanup", null, {root: true});
             LoaderOverlay.hide();
         }
     },
