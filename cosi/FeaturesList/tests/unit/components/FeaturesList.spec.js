@@ -19,8 +19,6 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import mockConfigJson from "./mock.config.json";
 import districtLevel from "./mock.districtLevel";
-// import {initializeLayerList} from "../../../../utils/initializeLayerList";
-// import {VChip} from "vuetify/lib";
 import Map from "ol/Map";
 
 
@@ -97,6 +95,14 @@ describe("addons/cosi/FeaturesList/components/FeaturesList.vue", () => {
     const expMapping = [{
             group: "Bildung und Wissenschaft",
             layer: [{
+                additionalValues: [{
+                    id: "heute",
+                    name: "Heute"
+                },
+                {
+                    id: "morgen",
+                    name: "Morgen"
+                }],
                 addressField: [
                     "adresse_strasse_hausnr",
                     "adresse_ort"
@@ -123,7 +129,9 @@ describe("addons/cosi/FeaturesList/components/FeaturesList.vue", () => {
             "layerName",
             "type",
             "group",
-            "anzahl_schueler"
+            "anzahl_schueler",
+            "heute",
+            "morgen"
         ],
         layersMock = [];
 
@@ -355,7 +363,7 @@ describe("addons/cosi/FeaturesList/components/FeaturesList.vue", () => {
             const wrapper = await mountComponent(true, [addNewLayerIfNotExists()]);
 
             expect(wrapper.vm.items).to.have.lengthOf(1);
-            expect(wrapper.vm.items[0]).to.have.all.keys("key", "name", "style", "district", "group", "layerName", "layerId", "type", "address", "feature", "enabled", "isModified", "isSimulation", "anzahl_schueler", "gfiAttributes");
+            expect(wrapper.vm.items[0]).to.have.all.keys("key", "name", "style", "district", "group", "heute", "morgen", "layerName", "layerId", "type", "address", "feature", "enabled", "isModified", "isSimulation", "anzahl_schueler", "gfiAttributes");
         });
 
         // it("should show layers for distance score", async () => {
@@ -559,5 +567,41 @@ describe("addons/cosi/FeaturesList/components/FeaturesList.vue", () => {
         //     await wrapper.find("#weights").trigger("click");
         //     expect(wrapper.vm.showWeightsDialog).to.be.true;
         // });
+    });
+
+    describe("Methods", () => {
+        describe("getColumns", () => {
+            it("should return an empty array", async () => {
+                const wrapper = await mountComponent();
+
+                expect(wrapper.vm.getColumns([], "numericalValues")).to.be.an("array").that.is.empty;
+            });
+            it("should return the columns header for the numerical values", async () => {
+                const wrapper = await mountComponent(),
+                    columns = wrapper.vm.getColumns(expMapping[0].layer, "numericalValues"),
+                    expectedColumns = [{
+                        text: "Schülerzahl",
+                        value: "anzahl_schueler",
+                        divider: true
+                    }];
+
+                expect(columns).deep.to.equal(expectedColumns);
+            });
+            it("should return the columns header for the additional values", async () => {
+                const wrapper = await mountComponent(),
+                    columns = wrapper.vm.getColumns(expMapping[0].layer, "additionalValues"),
+                    expectedColumns = [{
+                        text: "Heute",
+                        value: "heute"
+                    },
+                    {
+                        text: "Morgen",
+                        value: "morgen",
+                        divider: true
+                    }];
+
+                expect(columns).deep.to.equal(expectedColumns);
+            });
+        });
     });
 });

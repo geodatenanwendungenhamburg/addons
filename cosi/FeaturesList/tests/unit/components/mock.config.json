@@ -41,7 +41,15 @@
                           "schulname",
                           "kapitelbezeichnung"
                         ],
-                        "addressField": ["adresse_strasse_hausnr", "adresse_ort"]
+                        "addressField": ["adresse_strasse_hausnr", "adresse_ort"],
+                        "additionalValues": [{
+                            "id": "heute",
+                            "name": "Heute"
+                        },
+                        {
+                            "id": "morgen",
+                            "name": "Morgen"
+                        }]
                     }]
                 }]
             }]

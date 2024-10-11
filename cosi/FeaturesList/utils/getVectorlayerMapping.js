@@ -7,7 +7,8 @@
  */
 export function createVectorLayerMappingObject (layer, title) {
     const keyOfAttrName = layer.mouseHoverField || "name",
-        addressField = layer.addressField || "adresse";
+        addressField = layer.addressField || "adresse",
+        categoryField = layer.categoryField || layer.searchField;
 
     return {
         // hier die group erweitern und default für weighting?
@@ -19,12 +20,13 @@ export function createVectorLayerMappingObject (layer, title) {
         addressField: Array.isArray(addressField) // the address can be a single or multiple fields that will be combined for the table view
             ? addressField
             : [addressField],
-        categoryField: Array.isArray(layer.searchField) // last search field, must be set in config.json
-            ? layer.searchField[layer.searchField.length - 1]
-            : layer.searchField,
+        categoryField: Array.isArray(categoryField) // last search field, must be set in config.json
+            ? categoryField[categoryField.length - 1]
+            : categoryField,
         keyOfAttrName: Array.isArray(keyOfAttrName) // first mouse hover field
             ? keyOfAttrName[0]
-            : keyOfAttrName
+            : keyOfAttrName,
+        additionalValues: layer.additionalValues || []
     };
 }
 

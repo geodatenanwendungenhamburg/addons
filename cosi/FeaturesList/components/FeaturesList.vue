@@ -20,7 +20,6 @@ import chartMethods from "../utils/charts";
 import FeaturesScore from "./FeaturesListScore.vue";
 import setGeomAttributes from "../../utils/features/setGeomAttributes";
 import getFeatureStyle from "../../utils/features/getFeatureStyle";
-
 import
 {
     Fill,
@@ -115,6 +114,7 @@ export default {
                 }
             ],
             numericalColumns: [],
+            additionalColumns: [],
             distScoreLayer: null,
             exportDetails: false,
             dipasInFeaturesList: true,
@@ -131,7 +131,8 @@ export default {
         columns () {
             return [
                 ...this.featureColumns,
-                ...this.numericalColumns
+                ...this.numericalColumns,
+                ...this.additionalColumns
             ];
         },
         selected: {
@@ -149,6 +150,7 @@ export default {
             set (value) {
                 this.setFeaturesListItems(value);
                 this.numericalColumns = this.getNumericalColumns();
+                this.additionalColumns = this.getColumns(this.getActiveLayers(), "additionalValues");
             }
         }
     },
@@ -216,6 +218,7 @@ export default {
 
         groupActiveLayer () {
             this.numericalColumns = this.getNumericalColumns();
+            this.additionalColumns = this.getColumns(this.getActiveLayers(), "additionalValues");
         },
 
         items (newItems) {
@@ -230,6 +233,7 @@ export default {
 
         layerFilter () {
             this.numericalColumns = this.getNumericalColumns();
+            this.additionalColumns = this.getColumns(this.getActiveLayers(), "additionalValues");
         },
 
         show (val) {
@@ -296,24 +300,7 @@ export default {
         ...chartMethods,
 
         getNumericalColumns () {
-            const numCols = this.getActiveLayers().reduce((cols, mappingObj) => {
-                const _numCols = mappingObj.numericalValues.map(v => ({
-                    text: v.name,
-                    value: v.id
-                }));
-
-                for (const col of _numCols) {
-                    if (!cols.find(c => c.value === col.value)) {
-                        cols.push(col);
-                    }
-                }
-                return cols;
-            }, []);
-
-            // add divider to last col
-            if (numCols.length > 0) {
-                numCols[numCols.length - 1].divider = true;
-            }
+            const numCols = this.getColumns(this.getActiveLayers(), "numericalValues");
 
             if (this.items.length && typeof this.items[0]?.score?.value !== "undefined") {
                 numCols.push({
@@ -340,6 +327,39 @@ export default {
         },
 
         /**
+         * Gets column header objects by layers config.
+         * Different types of column headers can be configured on the layer in the config.json
+         * @param {Object[]} mappedLayersConfig - A mapped layer config list.
+         * @param {String} type - The type of the header.
+         * @returns {Object[]} An array of objects that each describe a header column.
+         */
+        getColumns (mappedLayersConfig, type) {
+            if (mappedLayersConfig.length === 0) {
+                return [];
+            }
+
+            const additionalColumns = mappedLayersConfig.reduce((cols, layerConfig) => {
+                const _numCols = layerConfig[type].map(value => ({
+                    text: value.name,
+                    value: value.id
+                }));
+
+                for (const col of _numCols) {
+                    if (!cols.find(c => c.value === col.value)) {
+                        cols.push(col);
+                    }
+                }
+                return cols;
+            }, []);
+
+            // add divider to last col
+            if (additionalColumns.length > 0) {
+                additionalColumns[additionalColumns.length - 1].divider = true;
+            }
+
+            return additionalColumns;
+        },
+        /**
          * Reads the active vector layers, constructs the list of table items and writes them to the store.
          * Finds the containing district from districtSelector for each feature
          * @todo connect to other features and statistics to build location score
@@ -355,6 +375,7 @@ export default {
                         visibleFeatures = features.filter(this.isFeatureActive),
                         layerMap = this.layerMapById(vectorLayer.get("id")),
                         layerStyleFunction = vectorLayer.getStyleFunction?.();
+
 
                     list.push(...this.checkDisabledFeatures(vectorLayer));
                     return [...list, ...visibleFeatures.map((feature) => {
@@ -378,7 +399,8 @@ export default {
                             enabled: true,
                             isSimulation: feature.get("isSimulation") || false,
                             isModified: feature.get("isModified") || false,
-                            ...Object.fromEntries(layerMap.numericalValues.map(field => [field.id, feature.get(field.id)]))
+                            ...Object.fromEntries(layerMap.numericalValues.map(field => [field.id, feature.get(field.id)])),
+                            ...Object.fromEntries(layerMap.additionalValues.map(field => [field.id, feature.get(field.id)]))
                         };
                     })];
                 }, []);
@@ -387,7 +409,6 @@ export default {
                 this.items = [];
             }
             this.$root.$emit("featureListUpdatedBy-" + (senderName ? senderName : "Unknown"));
-
         },
 
         checkDisabledFeatures (layer) {
