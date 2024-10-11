@@ -11,6 +11,8 @@ import {startPrintProcess} from "../../../valuationPrint/utils/startPrintProcess
 import {unionFeatures} from "../../../valuationPrint/utils/unionFeatures";
 import axios from "axios";
 import {baseProportionTemplate, baseFixedTemplateForHamburg, mapfishServerConfig} from "../js/mapfishUtils";
+import {Chart as ChartJS} from "chart.js";
+import isObject from "../../../../src/utils/isObject";
 
 export default {
     name: "TemplateManagerExport",
@@ -49,7 +51,8 @@ export default {
         selectedAreasNameMaxLength: 25,
         author: "",
         authorMaxLength: 35,
-        pdf: null
+        pdf: null,
+        categoryInChart: [{"Bevölkerung": "Bevölkerung insgesamt"}]
     }),
     computed: {
         ...mapGetters("Tools/Dashboard", ["items"]),
@@ -132,6 +135,7 @@ export default {
             await this.addOverViewPageToReport();
             this.addStatsToReport(this.items);
             this.addTopicsToReport(this.featuresListItems);
+            await this.addDiagram();
             this.pdf.download("report.pdf");
         },
 
@@ -169,10 +173,6 @@ export default {
                         }
                         else if (index === 1) {
                             value = this.getTotal(statFeature, this.selectedDistrictNames, lastYear, "jahr_");
-
-                            if (value === 0) {
-                                value = "-";
-                            }
                         }
                         else {
                             value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
@@ -314,6 +314,144 @@ export default {
                     this.pdf.addTable(body, 120);
                 }
             });
+        },
+
+        /**
+         * Add diagram to report
+         * @returns {void}
+         */
+        async addDiagram () {
+            const data = this.getChartData(this.items, this.templateStatsCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart),
+                imageArr = [];
+
+            if (!Array.isArray(data) || !data.length) {
+                return;
+            }
+
+            for (let i = 0; i < data.length; i++) {
+                imageArr.push(await this.getChartImage(data[i]));
+            }
+
+            if (imageArr.length) {
+                this.pdf.addChapter("Datenvisualisierung");
+
+                imageArr.forEach((image, index) => {
+                    this.pdf.addHeadline(Object.keys(this.categoryInChart[index])[0]);
+                    this.pdf.addParagraph(Object.values(this.categoryInChart[index])[0]);
+                    this.pdf.addImageByUrl(undefined, imageArr, {width: 500, alignment: "center"});
+                    document.getElementById("canvas").remove();
+                });
+            }
+        },
+
+        /**
+         * Gets the chart image as Base64 format.
+         * @param {Object} data - the chart data.
+         * @returns {Promise<string>} the toBase64Image image string.
+         */
+        getChartImage (data) {
+            const canvasElement = document.createElement("canvas");
+
+            canvasElement.id = "canvas";
+            canvasElement.style.cssText = "display: none";
+            document.body.appendChild(canvasElement);
+            ChartJS.defaults.font.size = 22;
+
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const chartDiagram = new ChartJS(document.getElementById("canvas").getContext("2d"), {
+                        type: "line",
+                        data: data,
+                        options: {
+                            animation: {
+                                onComplete: function () {
+                                    resolve(chartDiagram.toBase64Image());
+                                }
+                            }
+                        }
+                    });
+                }, 0);
+            });
+        },
+
+        /**
+         * Gets the data for chart.
+         * @param {Object[]} items - Items from dashboard component.
+         * @param {Object[]} templateStatsCategories - the template stats categories.
+         * @param {String[]} selectedDistrictNames - the selected district name in id.
+         * @param {String} areaColumnName - the area name.
+         * @param {Object[]} categoryInChart - the category to be used in chart.
+         * @returns {Object} the data.
+         */
+        getChartData (items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart) {
+            const filteredMappingByCategories = mapping.filter(obj => {
+                    return templateStatsCategories.includes(obj.value);
+                }),
+                groupedMapping = this.groupBy(filteredMappingByCategories, "group"),
+                categoryData = [];
+
+            if (!Array.isArray(items) || !items.length || !Array.isArray(templateStatsCategories) || !templateStatsCategories.length || !Array.isArray(selectedDistrictNames) || !selectedDistrictNames.length) {
+                return categoryData;
+            }
+
+            categoryInChart.forEach(category => {
+                if (!isObject(category)) {
+                    return;
+                }
+
+                const labels = [],
+                    data = [];
+
+                Object.keys(category).forEach(key => {
+                    if (!Object.prototype.hasOwnProperty.call(groupedMapping, key)) {
+                        return;
+                    }
+
+                    groupedMapping[key].forEach(mappingObject => {
+                        const statFeature = items.find((item) => item.category === mappingObject.value);
+
+                        statFeature.years.reverse().forEach(year => {
+                            const value = this.getTotal(statFeature, selectedDistrictNames, year, "jahr_");
+
+                            labels.push(year);
+                            data.push(value);
+                        });
+                    });
+                });
+
+                if (data.length) {
+                    categoryData.push(
+                        {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: areaColumnName,
+                                    data: data,
+                                    borderColor: "rgba(25, 118, 210, 1)",
+                                    borderWidth: 4
+                                }
+                            ]
+                        }
+                    );
+                }
+            });
+
+            return categoryData;
+        },
+
+        /**
+         * This is a alternative function of Object.groupBy.
+         * Object.groupBy is not recognized before node v21.0.0, but we use currently v20.x.x,
+         * Later if the node version is upddated, this function should be replaced of Object.groupBy.
+         * @param {Object[]} obj - objects in array.
+         * @param {String} key - the key to group by.
+         * @returns {Object} the grouped by object.
+         */
+        groupBy (obj, key) {
+            return obj.reduce((rv, x) => {
+                (rv[x[key]] = rv[x[key]] || []).push(x);
+                return rv;
+            }, {});
         }
     }
 };

@@ -135,7 +135,9 @@ export default class PDFMaker {
      * @returns {void}
      */
     addImageByUrl (imageUrl, label, options) {
-        this.images[label] = imageUrl;
+        if (typeof imageUrl === "string") {
+            this.images[label] = imageUrl;
+        }
         this.content.push({image: label, ...options});
     }
 

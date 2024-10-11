@@ -397,6 +397,143 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 wrapper.destroy();
                 sinon.restore();
             });
-        })
+        });
+        describe("getChartData", () => {
+            const items = [{
+                "48008": {
+                    "kategorie": "Bevölkerung insgesamt",
+                    "group": "Bevölkerung",
+                    "stat_gebiet": "48008",
+                    "stadtteil": "Winterhude",
+                    "jahr_2022": "1416",
+                    "jahr_2023": "1910"
+                },
+                "48010": {
+                    "kategorie": "Bevölkerung insgesamt",
+                    "group": "Bevölkerung",
+                    "stat_gebiet": "48010",
+                    "stadtteil": "Winterhude",
+                    "jahr_2022": "4002",
+                    "jahr_2023": "4737"
+                },
+                "category": "Bevölkerung insgesamt",
+                "valueType": "absolute",
+                "group": "Bevölkerung",
+                "years": [2022, 2023],
+                "id": "Bevölkerung insgesamt0"
+            }],
+                templateStatsCategories = ["Bevölkerung insgesamt", "Bevölkerung unter 18 Jahren"],
+                selectedDistrictNames = ["48010", "48008"],
+                areaColumnName = "Ausgewähltes Gebiet",
+                categoryInChart = [{"Bevölkerung": "Bevölkerung insgesamt"}];
+
+            it("should return empty array", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.getChartData(items, [], selectedDistrictNames, areaColumnName, categoryInChart)).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, [], areaColumnName, categoryInChart)).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, [])).to.be.deep.equal([]);
+                wrapper.destroy();
+            });
+
+            it("should return chart data", () => {
+                const wrapper = factory.getShallowMount(),
+                    data = [
+                        {
+                            "labels": [
+                                2023,
+                                2022
+                            ],
+                            "datasets": [
+                                {
+                                    "label": "Ausgewähltes Gebiet",
+                                    "data": [
+                                        6647,
+                                        5418
+                                    ],
+                                    "borderColor": "rgba(25, 118, 210, 1)",
+                                    "borderWidth": 4
+                                }
+                            ]
+                        }
+                    ];
+
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart)).to.be.deep.equal(data);
+                wrapper.destroy();
+            });
+        });
+        describe("groupBy", () => {
+            it("should return the grouped object", () => {
+                const wrapper = factory.getShallowMount(),
+                     objArr = [
+                        { Phase: "Phase 1", Step: "Step 1", Task: "Task 1", Value: "5" },
+                        { Phase: "Phase 1", Step: "Step 1", Task: "Task 2", Value: "10" },
+                        { Phase: "Phase 1", Step: "Step 2", Task: "Task 1", Value: "15" },
+                        { Phase: "Phase 1", Step: "Step 2", Task: "Task 2", Value: "20" },
+                        { Phase: "Phase 2", Step: "Step 1", Task: "Task 1", Value: "25" },
+                        { Phase: "Phase 2", Step: "Step 1", Task: "Task 2", Value: "30" },
+                        { Phase: "Phase 2", Step: "Step 2", Task: "Task 1", Value: "35" },
+                        { Phase: "Phase 2", Step: "Step 2", Task: "Task 2", Value: "40" }
+                    ],
+                    key = "Step",
+                    result = {
+                        "Step 1": [
+                            {
+                                "Phase": "Phase 1",
+                                "Step": "Step 1",
+                                "Task": "Task 1",
+                                "Value": "5"
+                            },
+                            {
+                                "Phase": "Phase 1",
+                                "Step": "Step 1",
+                                "Task": "Task 2",
+                                "Value": "10"
+                            },
+                            {
+                                "Phase": "Phase 2",
+                                "Step": "Step 1",
+                                "Task": "Task 1",
+                                "Value": "25"
+                            },
+                            {
+                                "Phase": "Phase 2",
+                                "Step": "Step 1",
+                                "Task": "Task 2",
+                                "Value": "30"
+                            }
+                        ],
+                        "Step 2": [
+                            {
+                                "Phase": "Phase 1",
+                                "Step": "Step 2",
+                                "Task": "Task 1",
+                                "Value": "15"
+                            },
+                            {
+                                "Phase": "Phase 1",
+                                "Step": "Step 2",
+                                "Task": "Task 2",
+                                "Value": "20"
+                            },
+                            {
+                                "Phase": "Phase 2",
+                                "Step": "Step 2",
+                                "Task": "Task 1",
+                                "Value": "35"
+                            },
+                            {
+                                "Phase": "Phase 2",
+                                "Step": "Step 2",
+                                "Task": "Task 2",
+                                "Value": "40"
+                            }
+                        ]
+                    };
+
+                expect(wrapper.vm.groupBy(objArr, key)).to.be.deep.equal(result);
+                wrapper.destroy();
+            });
+        });
     });
 });
