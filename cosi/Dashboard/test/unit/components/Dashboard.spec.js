@@ -607,5 +607,38 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
                 expect(wrapper.vm.getColumnHeader("value1")).to.be.equal("label1");
             });
         });
+
+        describe("getModifiedData", () => {
+            it("should return the default data", () => {
+                factory.initialize();
+
+                expect(wrapper.vm.getModifiedData("")).to.be.equal("");
+                expect(wrapper.vm.getModifiedData(true)).to.be.true;
+                expect(wrapper.vm.getModifiedData([])).to.be.deep.equal([]);
+                expect(wrapper.vm.getModifiedData({})).to.be.deep.equal({});
+                expect(wrapper.vm.getModifiedData(0)).to.be.equal(0);
+                expect(wrapper.vm.getModifiedData([{"oldKey": true}], 0)).to.be.deep.equal([{"oldKey": true}]);
+                expect(wrapper.vm.getModifiedData([{"oldKey": true}], true)).to.be.deep.equal([{"oldKey": true}]);
+                expect(wrapper.vm.getModifiedData([{"oldKey": true}], [])).to.be.deep.equal([{"oldKey": true}]);
+                expect(wrapper.vm.getModifiedData([{"oldKey": true}], {})).to.be.deep.equal([{"oldKey": true}]);
+                expect(wrapper.vm.getModifiedData([{"oldKey": true}], 0)).to.be.deep.equal([{"oldKey": true}]);
+            });
+
+            it("should return the data with modified key", () => {
+                factory.initialize();
+
+                const data = [
+                        {"key1": 0, "key2": 1},
+                        {"key1": 0, "key2": 1, "oldKey": 2}
+                    ],
+                    modifiedKey = [{"oldKey": "oldKey", "newKey": "newKey"}],
+                    newData = [
+                        {"key1": 0, "key2": 1},
+                        {"key1": 0, "key2": 1, "newKey": 2}
+                    ];
+
+                expect(wrapper.vm.getModifiedData(data, modifiedKey)).to.be.deep.equal(newData);
+            });
+        });
     });
 });

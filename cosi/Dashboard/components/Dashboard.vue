@@ -575,7 +575,8 @@ export default {
                 rawData = exportTimeline
                     ? this.prepareTableExportWithTimeline(preparedItems, this.selectedDistrictNames, this.timestamps, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped)
                     : this.prepareTableExport(preparedItems, this.selectedDistrictNames, this.selectedYear, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped),
-                filename = composeFilename(this.$t("additional:modules.tools.cosi.dashboard.exportFilename", {prefix}));
+                filename = composeFilename(this.$t("additional:modules.tools.cosi.dashboard.exportFilename", {prefix})),
+                modifiedKey = [{"oldKey": "isTemp", "newKey": "eigene Berechnungen"}];
 
             try {
                 exportedData = this.sanitizeData(JSON.parse(JSON.stringify(rawData)), [...this.excludedPropsForExport, ...this.unselectedColumnLabels]);
@@ -597,7 +598,36 @@ export default {
                 return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
             }), fixedHeaderEnd);
 
+            exportedData = this.getModifiedData(exportedData, modifiedKey);
+
             exportXlsx(header, exportedData, filename);
+        },
+
+        /**
+         * Gets modified data by changing the key
+         * @param {Object[]} data - the original data.
+         * @param {Object[]} modifiedKey - the modified key.
+         * @returns {Object[]} the modified data.
+         */
+        getModifiedData (data, modifiedKey) {
+            if (!Array.isArray(data) || !data.length || !Array.isArray(modifiedKey) || !modifiedKey.length) {
+                return data;
+            }
+
+            modifiedKey.forEach(key => {
+                if (!Object.prototype.hasOwnProperty.call(key, "oldKey") || !Object.prototype.hasOwnProperty.call(key, "newKey")) {
+                    return;
+                }
+
+                for (let i = 0; i < data.length; i++) {
+                    if (Object.prototype.hasOwnProperty.call(data[i], key.oldKey)) {
+                        data[i][key.newKey] = data[i][key.oldKey];
+                        delete data[i][key.oldKey];
+                    }
+                }
+            });
+
+            return data;
         },
 
         /**
