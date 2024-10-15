@@ -64,8 +64,15 @@ export default {
                 fileName = this.reportTitle ? this.reportTitle : this.templateName,
                 prepareName = fileName.replace(/(?:\.(?![^.]+$)|[^\w.])+/g, "-");
 
-
             return prepareName + "-" + date + ".pdf";
+        },
+
+        /**
+         * Gets the column name for the export based on entered selected areas name.
+         * @returns {String} the column name to use for the selected area.
+         */
+        areaColumnName () {
+            return this.selectedAreasName ? this.selectedAreasName : "Ausgewähltes Gebiet";
         }
     },
     mounted () {
@@ -105,7 +112,7 @@ export default {
             this.pdf.addChapter("Statistische Datenübersicht");
 
             Object.keys(groupedMapping).forEach(group => {
-                const columns = this.pdf.getColumns(["", "Ausgewähltes Gebiet", ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
+                const columns = this.pdf.getColumns(["", this.areaColumnName, ...this.getStatCols(this.selectedDistrictLevel, this.selectedDistrictNames, [])]),
                     body = [columns];
 
                 this.pdf.addHeadline(group);

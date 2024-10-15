@@ -159,7 +159,8 @@ export default class PDFMaker {
             pageSize: this.pageSize,
             pageMargins: this.pageMargins,
             images: this.images,
-            footer: function (currentPage, pageCount) {
+            header: this.header,
+            footer: (currentPage, pageCount) => {
                 return getSvg(currentPage, pageCount, this.footerInfo.author);
             }
         };
