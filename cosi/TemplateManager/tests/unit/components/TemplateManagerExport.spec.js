@@ -54,7 +54,75 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
 
     });
 
+    describe("User Interactions", () => {
+        it("should call 'manageProgressBar', if user click the button to create the report", async () => {
+            const wrapper = factory.getShallowMount(),
+                buttonWrapper = wrapper.find("button"),
+                stubManageProgressBarView = sinon.stub(wrapper.vm, "manageProgressBarView");
+
+            await buttonWrapper.trigger("click");
+
+            expect(stubManageProgressBarView.calledOnce).to.be.true;
+            wrapper.destroy();
+        });
+
+        it("should set 'showProgressBar' to true, if user click the button to create the report", async () => {
+            const wrapper = factory.getShallowMount(),
+                buttonWrapper = wrapper.find("button");
+
+            await buttonWrapper.trigger("click");
+
+            expect(wrapper.vm.showProgressBar).to.be.true;
+            wrapper.destroy();
+        });
+    });
+
     describe("methods", () => {
+        describe("manageProgressBarView", () => {
+            it("should set 'showProgressBar' to false", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.manageProgressBarView(false);
+                expect(wrapper.vm.showProgressBar).to.be.false;
+                wrapper.destroy();
+            });
+
+            it("should emit 'toggleTemplateImport' with true, if 'showProgressBar' is false", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.manageProgressBarView(false);
+                expect(wrapper.emitted()).to.have.property("toggleTemplateImport");
+                expect(wrapper.emitted()["toggleTemplateImport"][0]).to.deep.equal([true]);
+                wrapper.destroy();
+            });
+
+            it("should set 'showProgressBar' to true", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.manageProgressBarView(true);
+                expect(wrapper.vm.showProgressBar).to.be.true;
+                wrapper.destroy();
+            });
+
+            it("should emit 'toggleTemplateImport' with false, if 'showProgressBar' is true", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.manageProgressBarView(true);
+                expect(wrapper.emitted()).to.have.property("toggleTemplateImport");
+                expect(wrapper.emitted()["toggleTemplateImport"][0]).to.deep.equal([false]);
+                wrapper.destroy();
+            });
+
+            it("should call 'createReport', if 'showProgressBar is true", () => {
+                const wrapper = factory.getShallowMount(),
+                    stubCreateReport = sinon.stub(wrapper.vm, "createReport");
+
+                wrapper.vm.manageProgressBarView(true);
+                expect(stubCreateReport.calledOnce).to.be.true;
+                wrapper.destroy();
+                sinon.restore();
+            });
+        });
         describe("addOverViewPageToReport", () => {
             const mockGetters = {
                     projection: () => {

@@ -769,7 +769,7 @@ export default {
                 v-if="showExportWindow && selectedTemplate?.meta?.isActive"
                 :template-name="selectedTemplate?.meta?.title"
                 :template-stats-categories="selectedTemplate?.state?.Tools?.Dashboard?.statsFeatureFilter"
-                @hideTemplateImport="showTemplateImport"
+                @toggleTemplateImport="showTemplateImport"
             />
         </template>
     </Tool>

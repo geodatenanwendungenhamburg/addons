@@ -86,7 +86,19 @@ export default {
          * @param {Boolean} val - if the progress bar should be shown.
          * @returns {void}
          */
-        async manageProgressBarView (val) {
+        manageProgressBarView (val) {
+            this.showProgressBar = val;
+            this.$emit("toggleTemplateImport", !this.showProgressBar);
+            if (val) {
+                this.createReport();
+            }
+        },
+
+        /**
+         * Creates the report and calls the download function.
+         * @returns {void}
+         */
+        async createReport () {
             this.pdf.resetDocContent();
             this.pdf.addHeader(this.reportTitle);
             this.pdf.setAuthor(this.author);
@@ -94,8 +106,6 @@ export default {
             this.addStatsToReport(this.items);
             this.addTopicsToReport(this.featuresListItems);
             this.pdf.download("report.pdf");
-            this.showProgressBar = val;
-            this.$emit("hideTemplateImport", !this.showProgressBar);
         },
 
         /**
