@@ -44,8 +44,11 @@ export default {
         showProgressBar: false,
         percentage: 50,
         reportTitle: "",
+        reportTitleMaxLength: 50,
         selectedAreasName: "",
+        selectedAreasNameMaxLength: 25,
         author: "",
+        authorMaxLength: 35,
         pdf: null
     }),
     computed: {
@@ -72,7 +75,31 @@ export default {
          * @returns {String} the column name to use for the selected area.
          */
         areaColumnName () {
-            return this.selectedAreasName ? this.selectedAreasName : "Ausgewähltes Gebiet";
+            return this.selectedAreasName ? this.selectedAreasName.trim() : "Ausgewähltes Gebiet";
+        },
+
+        /**
+         * Checks if the report title is valid.
+         * @returns {Boolean} True if valid.
+         */
+        isReportTitleValid () {
+            return this.reportTitle.length < this.reportTitleMaxLength;
+        },
+
+        /**
+         * Checks if the selected areas name is valid.
+         * @returns {Boolean} True if valid.
+         */
+        isSelectedAreasNameValid () {
+            return this.selectedAreasName.length < this.selectedAreasNameMaxLength;
+        },
+
+        /**
+         * Checks if the author is valid.
+         * @returns {Boolean} True if valid.
+         */
+        isAuthorValid () {
+            return this.author.length < this.authorMaxLength;
         }
     },
     mounted () {
@@ -100,8 +127,8 @@ export default {
          */
         async createReport () {
             this.pdf.resetDocContent();
-            this.pdf.addHeader(this.reportTitle);
-            this.pdf.setAuthor(this.author);
+            this.pdf.addHeader(this.reportTitle.trim());
+            this.pdf.setAuthor(this.author.trim());
             await this.addOverViewPageToReport();
             this.addStatsToReport(this.items);
             this.addTopicsToReport(this.featuresListItems);
@@ -317,7 +344,14 @@ export default {
                         v-model="reportTitle"
                         type="text"
                         class="form-control"
+                        maxlength="50"
                     >
+                    <span
+                        v-if="!isReportTitleValid"
+                        class="hint"
+                    >
+                        {{ `${$t("additional:modules.tools.cosi.templateManager.errors.invalidReportTitle", {reportTitleMaxLength})}` }}
+                    </span>
                 </div>
                 <div class="export-areas mb-3">
                     <label
@@ -331,7 +365,14 @@ export default {
                         v-model="selectedAreasName"
                         type="text"
                         class="form-control"
+                        maxlength="25"
                     >
+                    <span
+                        v-if="!isSelectedAreasNameValid"
+                        class="hint"
+                    >
+                        {{ `${$t("additional:modules.tools.cosi.templateManager.errors.invalidSelectedAreasName", {selectedAreasNameMaxLength})}` }}
+                    </span>
                 </div>
                 <div class="export-author mb-3">
                     <label
@@ -345,7 +386,14 @@ export default {
                         v-model="author"
                         type="text"
                         class="form-control"
+                        maxlength="35"
                     >
+                    <span
+                        v-if="!isAuthorValid"
+                        class="hint"
+                    >
+                        {{ `${$t("additional:modules.tools.cosi.templateManager.errors.invalidAuthor", {authorMaxLength})}` }}
+                    </span>
                 </div>
                 <fieldset>
                     <h5 class="bold-headline">
@@ -403,36 +451,39 @@ export default {
 </template>
 
 <style scoped lang="scss">
-@import "~variables";
-
-.v-chip--active {
-    background-color: #DCE2F3;
-}
-.bold-headline {
-    color: $dark_blue;
-    font-family: $font_family_accent;
-}
-.btn-outline {
-    border-color: $light_blue;
-    color: $light_blue;
-}
-.btn-outline:hover {
-        cursor: pointer;
-        background-color: $light_blue;
-        color: $white;
-}
-
-</style>
-<style lang="scss">
     @import "~variables";
 
-.v-chip.v-size--default {
-    font-size: 12px;
-    height: 25px;
-}
+    .v-chip--active {
+        background-color: #DCE2F3;
+    }
+    .bold-headline {
+        color: $dark_blue;
+        font-family: $font_family_accent;
+    }
+    .btn-outline {
+        border-color: $light_blue;
+        color: $light_blue;
+    }
+    .btn-outline:hover {
+            cursor: pointer;
+            background-color: $light_blue;
+            color: $white;
+    }
 
-.v-chip .v-icon {
-    font-size: 18px;
-}
+    .hint {
+        display: block;
+        color: $danger;
+        margin-top: 4px;
+    }
+</style>
 
+<style lang="scss">
+    .v-chip.v-size--default {
+        font-size: 12px;
+        height: 25px;
+    }
+
+    .v-chip .v-icon {
+        font-size: 18px;
+    }
 </style>

@@ -52,6 +52,136 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
             wrapper.destroy();
         });
 
+        it("should not find a hint if report title is valid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                reportTitle: "Ein kurzer Titel"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.false;
+            wrapper.destroy();
+        });
+
+        it("should find a hint if report title is invalid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                reportTitle: "Ein sehr sehr sehr sehr sehr mega großer langer Titel"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.true;
+            expect(wrapper.find("span.hint").text()).to.be.equal("additional:modules.tools.cosi.templateManager.errors.invalidReportTitle");
+            wrapper.destroy();
+        });
+
+        it("should not find a hint if selected areas name is valid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                selectedAreasName: "Die sieben Königslanden"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.false;
+            wrapper.destroy();
+        });
+
+        it("should find a hint if selected areas name is invalid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                selectedAreasName: "Das Königreich von Berg und Grünem Tal"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.true;
+            expect(wrapper.find("span.hint").text()).to.be.equal("additional:modules.tools.cosi.templateManager.errors.invalidSelectedAreasName");
+            wrapper.destroy();
+        });
+
+        it("should not find a hint if author is valid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                author: "George R. R. Martin"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.false;
+            wrapper.destroy();
+        });
+
+        it("should find a hint if author is invalid", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                author: "George Raymond Richard Martin from Bayonne"
+            });
+
+            expect(wrapper.find("span.hint").exists()).to.be.true;
+            expect(wrapper.find("span.hint").text()).to.be.equal("additional:modules.tools.cosi.templateManager.errors.invalidAuthor");
+            wrapper.destroy();
+        });
+    });
+
+    describe("Computed", () => {
+        it("should set 'isReportTitleValid' to true, if 'reportTitle' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                reportTitle: "Ein kurzer Titel"
+            });
+            expect(wrapper.vm.isReportTitleValid).to.be.true;
+            wrapper.destroy();
+        });
+
+        it("should set 'isReportTitleValid' to false, if 'reportTitle' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                reportTitle: "Ein sehr sehr sehr sehr sehr mega großer langer Titel"
+            });
+            expect(wrapper.vm.isReportTitleValid).to.be.false;
+            wrapper.destroy();
+        });
+
+        it("should set 'isSelectedAreasNameValid' to true, if 'selectedAreasName' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                selectedAreasName: "Die sieben Königslanden"
+            });
+            expect(wrapper.vm.isSelectedAreasNameValid).to.be.true;
+            wrapper.destroy();
+        });
+
+        it("should set 'isSelectedAreasNameValid' to false, if 'selectedAreasName' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                selectedAreasName: "Das Königreich von Berg und Grünem Tal"
+            });
+            expect(wrapper.vm.isSelectedAreasNameValid).to.be.false;
+            wrapper.destroy();
+        });
+
+        it("should set 'isAuthorValid' to true, if 'author' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                author: "George R. R. Martin"
+            });
+            expect(wrapper.vm.isAuthorValid).to.be.true;
+            wrapper.destroy();
+        });
+
+        it("should set 'isAuthorValid' to false, if 'author' was changed", async () => {
+            const wrapper = factory.getShallowMount();
+
+            await wrapper.setData({
+                author: "George Raymond Richard Martin from Bayonne"
+            });
+            expect(wrapper.vm.isAuthorValid).to.be.false;
+            wrapper.destroy();
+        });
     });
 
     describe("User Interactions", () => {

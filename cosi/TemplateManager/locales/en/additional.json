@@ -39,7 +39,10 @@
                       "default": "File could not be loaded.",
                       "invalid": "File could not be read.",
                       "wrongFileFormat": "The file is not in the correct format.",
-                      "attErr": " {{attribute}} node does not exist."
+                      "attErr": " {{attribute}} node does not exist.",
+                      "invalidReportTitle": "A maximum of {{reportTitleMaxLength}} characters are allowed",
+                      "invalidSelectedAreasName": "A maximum of {{selectedAreasNameMaxLength}} characters are allowed",
+                      "invalidAuthor": "A maximum of {{authorMaxLength}} characters are allowed"
                     }
                 }
             }
