@@ -6,11 +6,26 @@ export default {
             type: String,
             required: false,
             default: ""
+        },
+        progress: {
+            type: Number,
+            required: true
         }
     },
-    data: () => ({
-        percentage: 50
-    })
+    data () {
+        return {
+            showGoBack: false
+        };
+    },
+    watch: {
+        progress () {
+            if (this.progress === 100) {
+                setTimeout(() => {
+                    this.showGoBack = true;
+                }, 500);
+            }
+        }
+    }
 };
 </script>
 
@@ -18,44 +33,58 @@ export default {
     <div
         class="progress-section col col-md-12"
     >
-        <div
-            class="export-infos row mb-1"
-        >
-            <i class="export-icon bi bi-file-earmark-pdf col col-md-1" />
-            <div class="col col-md-8">
-                <div
-                    class="downloadName bold-headline"
-                >
-                    {{ downloadName }}
+        <div v-if="!showGoBack">
+            <div
+                class="export-infos row mb-1"
+            >
+                <i class="export-icon bi bi-file-earmark-pdf col col-md-1" />
+                <div class="col col-md-8">
+                    <div
+                        class="downloadName bold-headline"
+                    >
+                        {{ downloadName }}
+                    </div>
+                    <span class="creatingReport">
+                        {{ $t("additional:modules.tools.cosi.templateManager.creatingReport") }}
+                    </span>
                 </div>
-                <span class="creatingReport">
-                    {{ $t("additional:modules.tools.cosi.templateManager.creatingReport") }}
-                </span>
             </div>
-            <div class="col col-md-3">
-                <button
-                    class="btn btn-outline lh-1 fs-5 px-2 py-1 mt-2"
-                    @click.prevent="$emit('closeProgressBar')"
+            <div
+                class="progress"
+            >
+                <div
+                    class="progress-bar bg-primary"
+                    role="progressbar"
+                    :style="`width: ${progress}%`"
+                    :aria-valuenow="progress"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                 >
-                    <i
-                        class="bi bi-x"
-                    />
-                    {{ $t("additional:modules.tools.cosi.templateManager.cancel") }}
-                </button>
+                    <span class="progress-percentage">{{ progress > 2 ? `${progress} %` : '' }}</span>
+                </div>
             </div>
         </div>
-        <div
-            class="progress"
-        >
-            <div
-                class="progress-bar bg-primary"
-                role="progressbar"
-                :style="`width: ${percentage}%`"
-                :aria-valuenow="percentage"
-                aria-valuemin="0"
-                aria-valuemax="100"
-            >
-                <span class="progress-percentage">{{ percentage > 2 ? `${percentage} %` : '' }}</span>
+        <div v-else>
+            <div class="row">
+                <i
+                    class="bi bi-check"
+                />
+                <p
+                    class="p-0"
+                >
+                    {{ $t("additional:modules.tools.cosi.templateManager.reportSuccess") }}
+                </p>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <button
+                        class="btn btn-outline lh-1 fs-5 px-2 py-1 mt-2"
+                        @click.prevent="$emit('closeProgressBar')"
+                    >
+                        <i class="bi bi-arrow-return-left" />
+                        {{ $t("additional:modules.tools.cosi.templateManager.backToTemplate") }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

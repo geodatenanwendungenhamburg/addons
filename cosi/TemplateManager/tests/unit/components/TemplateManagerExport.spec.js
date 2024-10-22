@@ -287,13 +287,18 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                     localVue,
                     store
                 }),
-                prepareImageStub = sinon.stub(wrapper.vm, "prepareImage");
-                sinon.stub(PDFMaker.prototype, "addChapter");
+                prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves();
+                sinon.stub(wrapper.vm, "getProgressValuePerStep")
+                sinon.stub(PDFMaker.prototype, "addChapterHeadline");
                 sinon.stub(PDFMaker.prototype, "addImageByUrl");
 
-                wrapper.vm.addOverViewPageToReport();
+                await wrapper.vm.addOverViewPageToReport();
                 await wrapper.vm.$nextTick();
-                expect(prepareImageStub.getCall(0).args).to.deep.equal(["fooo", {...baseProportionTemplate}, "12345", "overviewMap", {...mapfishServerConfig}]);
+                expect(prepareImageStub.getCall(0).args[0]).to.be.equal("fooo");
+                expect(prepareImageStub.getCall(0).args[1]).to.deep.equal({...baseProportionTemplate});
+                expect(prepareImageStub.getCall(0).args[2]).to.be.equal("12345");
+                expect(prepareImageStub.getCall(0).args[3]).to.be.equal("overviewMap");
+                expect(prepareImageStub.getCall(0).args[4]).to.deep.equal({...mapfishServerConfig});
                 wrapper.destroy();
                 sinon.restore();
             });
@@ -323,13 +328,18 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                         localVue,
                         store
                     }),
-                    prepareImageStub = sinon.stub(wrapper.vm, "prepareImage");
-                    sinon.stub(PDFMaker.prototype, "addChapter");
+                    prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves();
+                    sinon.stub(wrapper.vm, "getProgressValuePerStep")
+                    sinon.stub(PDFMaker.prototype, "addChapterHeadline");
                     sinon.stub(PDFMaker.prototype, "addImageByUrl");
 
-                wrapper.vm.addOverViewPageToReport();
+                await wrapper.vm.addOverViewPageToReport();
                 await wrapper.vm.$nextTick();
-                expect(prepareImageStub.getCall(0).args).to.deep.equal([undefined, {...baseFixedTemplateForHamburg}, "12345", "overviewMap", {...mapfishServerConfig}]);
+                expect(prepareImageStub.getCall(0).args[0]).to.be.undefined;
+                expect(prepareImageStub.getCall(0).args[1]).to.deep.equal({...baseFixedTemplateForHamburg});
+                expect(prepareImageStub.getCall(0).args[2]).to.be.equal("12345");
+                expect(prepareImageStub.getCall(0).args[3]).to.be.equal("overviewMap");
+                expect(prepareImageStub.getCall(0).args[4]).to.deep.equal({...mapfishServerConfig});
                 wrapper.destroy();
                 sinon.restore();
             });
@@ -339,12 +349,14 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                     localVue,
                     store
                 }),
-                addChapterStub = sinon.stub(PDFMaker.prototype, "addChapter"),
+                addChapterStub = sinon.stub(PDFMaker.prototype, "addChapterHeadline"),
                 addImageByUrlStub = sinon.stub(PDFMaker.prototype, "addImageByUrl");
 
+                sinon.stub(wrapper.vm, "getProgressValuePerStep")
                 sinon.stub(wrapper.vm, "prepareImage").resolves("test.url.de");
+                wrapper.vm.pdf = new PDFMaker();
 
-                wrapper.vm.addOverViewPageToReport();
+                await wrapper.vm.addOverViewPageToReport();
                 await wrapper.vm.$nextTick();
                 expect(addChapterStub.getCall(0).args[0]).to.be.equal("Übersichtskarte");
                 expect(addImageByUrlStub.getCall(0).args[0]).to.be.equal("test.url.de");
@@ -391,7 +403,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                         localVue,
                         store
                     }),
-                    result = await wrapper.vm.prepareImage(new Feature(new Point([1, 1])), baseProportionTemplate, "1234", "imageName", mapfishServerConfig);
+                    result = await wrapper.vm.prepareImage(new Feature(new Point([1, 1])), baseProportionTemplate, "1234", "imageName", mapfishServerConfig, () => {});
 
                 expect(result).to.be.a("string");
                 wrapper.destroy();
@@ -535,5 +547,70 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 wrapper.destroy();
             });
         });
+        describe("createReport", () => {
+            it("should call the functions of the progress steps", async () => {
+                const wrapper = factory.getShallowMount(),
+                    stubOne = sinon.stub(),
+                    stubTwo = sinon.stub(),
+                    stubThree = sinon.stub();
+
+                wrapper.vm.progressSteps = [
+                    {func: stubOne},
+                    {func: stubTwo},
+                    {func: stubThree},
+                ];
+                sinon.stub(PDFMaker.prototype, "resetDocContent");
+                sinon.stub(PDFMaker.prototype, "download");
+                sinon.stub(wrapper.vm, "registerProgressSteps");
+
+                await wrapper.vm.createReport();
+
+                expect(stubOne.called).to.be.true;
+                expect(stubTwo.called).to.be.true;
+                expect(stubThree.called).to.be.true;
+                wrapper.destroy();
+                sinon.restore();
+            });
+            it("should increment the progress value based on the steps", async () => {
+                const wrapper = factory.getShallowMount(),
+                    stubOne = () => expect(wrapper.vm.progressValue).to.be.equal(0),
+                    stubTwo = () => expect(wrapper.vm.progressValue).to.be.equal(25),
+                    stubThree = () => expect(wrapper.vm.progressValue).to.be.equal(50);
+                    stubFour = () => expect(wrapper.vm.progressValue).to.be.equal(75);
+
+                wrapper.vm.progressSteps = [
+                    {func: stubOne},
+                    {func: stubTwo},
+                    {func: stubThree},
+                    {func: stubFour}
+                ];
+                sinon.stub(wrapper.vm, "registerProgressSteps");
+                sinon.stub(PDFMaker.prototype, "download").callsFake(() => expect(wrapper.vm.progressValue).to.be.equal(100));
+
+                await wrapper.vm.createReport();
+                wrapper.destroy();
+                sinon.restore();
+            });
+            it("should increment the progress value based on the steps but should not correct the calculation if its calculated by the function itself", async () => {
+                const wrapper = factory.getShallowMount(),
+                    stubOne = () => expect(wrapper.vm.progressValue).to.be.equal(0),
+                    stubTwo = () => wrapper.vm.progressValue += 1,
+                    stubThree = () => expect(wrapper.vm.progressValue).to.be.equal(26);
+                    stubFour = () => expect(wrapper.vm.progressValue).to.be.equal(51);
+
+                wrapper.vm.progressSteps = [
+                    {func: stubOne},
+                    {func: stubTwo, handleProgressByThemSelves: true},
+                    {func: stubThree},
+                    {func: stubFour}
+                ];
+                sinon.stub(wrapper.vm, "registerProgressSteps");
+                sinon.stub(PDFMaker.prototype, "download").callsFake(() => expect(wrapper.vm.progressValue).to.be.equal(100));
+
+                await wrapper.vm.createReport();
+                wrapper.destroy();
+                sinon.restore();
+            });
+        })
     });
 });

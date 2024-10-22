@@ -18,6 +18,7 @@ export default class PDFMaker {
         this.pageMargins = [40, 60, 40, 60];
         this.images = {};
         this.borderColor = ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"];
+        this.chapterHeadlineFormat = {decoration: "underline", fontSize: 14, bold: true};
         this.footerInfo = {
             author: ""
         };
@@ -37,10 +38,19 @@ export default class PDFMaker {
      * @returns {void}
      */
     addChapter (text) {
-        this.content.push({text, decoration: "underline", fontSize: 14, bold: true, pageBreak: "before"});
+        this.content.push({...this.chapterHeadlineFormat, text, pageBreak: "before"});
         this.content.push("\n");
     }
 
+    /**
+     * Adds a headline in the same format as a chapter headline but without the pagebreak.
+     * @param {String} text - The headline text.
+     * @returns {void}
+     */
+    addChapterHeadline (text) {
+        this.content.push({...this.chapterHeadlineFormat, text});
+        this.content.push("\n");
+    }
 
     /**
      * Adds a headline to the report.

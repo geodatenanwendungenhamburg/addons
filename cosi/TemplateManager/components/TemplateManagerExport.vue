@@ -52,7 +52,8 @@ export default {
         author: "",
         authorMaxLength: 35,
         pdf: null,
-        categoryInChart: [{"Bevölkerung": "Bevölkerung insgesamt"}]
+        categoryInChart: [{"Bevölkerung": "Bevölkerung insgesamt"}],
+        progressValue: 0
     }),
     computed: {
         ...mapGetters("Tools/Dashboard", ["items"]),
@@ -66,7 +67,7 @@ export default {
          * @returns {String} The file name.
          */
         downloadName () {
-            const date = dayjs(this.dates).format("YYYY-MM-DD"),
+            const date = dayjs(new Date()).format("YYYY-MM-DD"),
                 fileName = this.reportTitle ? this.reportTitle : this.templateName,
                 prepareName = fileName.replace(/(?:\.(?![^.]+$)|[^\w.])+/g, "-");
 
@@ -105,11 +106,22 @@ export default {
             return this.author.length < this.authorMaxLength;
         }
     },
-    mounted () {
-        this.pdf = new PDFMaker();
-        this.pdf.resetDocContent();
-    },
     methods: {
+        /**
+         * Registers the steps for the progress of the export.
+         * @returns {void}
+         */
+        registerProgressSteps () {
+            this.progressSteps = [
+                {func: () => this.pdf.resetDocContent()},
+                {func: () => this.pdf.addHeader(this.reportTitle.trim())},
+                {func: () => this.pdf.setAuthor(this.author.trim())},
+                {func: async () => this.addOverViewPageToReport(), handleProgressByThemSelves: true},
+                {func: () => this.addStatsToReport(this.items)},
+                {func: () => this.addTopicsToReport(this.featuresListItems)},
+                {func: async () => this.addDiagram()}
+            ];
+        },
         /**
          * Show the view with the progress bar.
          * If the progress bar is displayed, the template import should not be shown.
@@ -125,18 +137,32 @@ export default {
         },
 
         /**
+         * Gets the progress value for each step.
+         * @returns {Number} the progress value.
+         */
+        getProgressValuePerStep () {
+            return Math.round(100 / this.progressSteps.length);
+        },
+
+        /**
          * Creates the report and calls the download function.
          * @returns {void}
          */
         async createReport () {
+            this.progressValue = 0;
+            this.pdf = new PDFMaker();
             this.pdf.resetDocContent();
-            this.pdf.addHeader(this.reportTitle.trim());
-            this.pdf.setAuthor(this.author.trim());
-            await this.addOverViewPageToReport();
-            this.addStatsToReport(this.items);
-            this.addTopicsToReport(this.featuresListItems);
-            await this.addDiagram();
-            this.pdf.download("report.pdf");
+            this.registerProgressSteps();
+            for (let i = 0; i < this.progressSteps.length; i++) {
+                await this.progressSteps[i].func();
+                if (i === this.progressSteps.length - 1) {
+                    this.progressValue = 100;
+                }
+                else if (this.progressSteps[i].handleProgressByThemSelves !== true) {
+                    this.progressValue += this.getProgressValuePerStep();
+                }
+            }
+            this.pdf.download(this.downloadName);
         },
 
         /**
@@ -194,12 +220,22 @@ export default {
             const imageName = "overviewMap",
                 feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
                 template = typeof feature !== "undefined" ? {...baseProportionTemplate} : {...baseFixedTemplateForHamburg},
-                overviewImageUrl = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig).catch(error => console.error(error));
+                availableProgressForThisStep = this.getProgressValuePerStep(),
+                initialProgressValue = this.progressValue,
+                overviewImageUrl = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig,
+                    () => {
+                        if (this.progressValue < (initialProgressValue + availableProgressForThisStep)) {
+                            this.progressValue += 1;
+                        }
+                    }
+                ).catch(error => console.error(error));
+
 
             if (typeof overviewImageUrl === "string") {
-                this.pdf.addChapter("Übersichtskarte");
+                this.pdf.addChapterHeadline("Übersichtskarte");
                 this.pdf.addImageByUrl(overviewImageUrl, imageName, {fit: [600, 600], alignment: "center"});
             }
+            this.progressValue = initialProgressValue + availableProgressForThisStep;
         },
 
         /**
@@ -212,9 +248,10 @@ export default {
          * @param {Object} serverConfig The config of which mapfish server and template to use.
          * @param {String} serverConfig.template The name of the template.
          * @param {String} serverConfig.name The name of the mapfish server (most of the time mapfish or mapfish_qs).
+         * @param {Function} handleOngoing Function to handle the ongoing process of creating the image.
          * @returns {void}
          */
-        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig) {
+        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig, handleOngoing) {
             const extent = feature?.getGeometry()?.getExtent(),
                 baseLayerName = Object.keys(baseLayer)[0],
                 mapfishDialog = createMapfishDialog(
@@ -236,10 +273,10 @@ export default {
                 setTimeout(() => {
                     mapfishDialog.attributes.map = mapfishDialog.attributes[`${baseLayerName}.map`];
                     delete mapfishDialog.attributes[`${baseLayerName}.map`];
+
                     startPrintProcess(this.getRestServiceById(serverConfig.name).url, "png", serverConfig.template, mapfishDialog, (url, payload) => {
                         return axios.post(url, payload);
-                    },
-                    () => console.warn("ongoing"), // needs to be there. use for progressbar later on
+                    }, handleOngoing,
                     error => {
                         reject(error);
                     },
@@ -582,6 +619,7 @@ export default {
             <TemplateManagerExportProgressBar
                 v-else
                 :download-name="downloadName"
+                :progress="progressValue"
                 @closeProgressBar="manageProgressBarView(false)"
             />
         </div>

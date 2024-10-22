@@ -45,14 +45,14 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExportProgressBa
         });
     });
     describe("User Interaction", () => {
-        it("should emits closeProgressBar if cancel button was clicked", async () => {
+        it("should emits closeProgressBar if go back button was clicked", async () => {
             const wrapper = factory.getShallowMount();
 
             await wrapper.setData({
-                showProgressBar: true
+                showGoBack: true
             });
 
-            wrapper.find("button .bi-x").trigger("click");
+            wrapper.find("button .bi-arrow-return-left").trigger("click");
 
             await wrapper.vm.$nextTick();
 
