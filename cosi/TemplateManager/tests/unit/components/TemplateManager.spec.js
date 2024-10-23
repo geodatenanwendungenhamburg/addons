@@ -483,5 +483,53 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 wrapper.destroy();
             });
         });
+
+        describe("checkSelectedDistricts", () => {
+            it("should return false.", () => {
+                const wrapper = factory.getMount();
+
+                expect(wrapper.vm.checkSelectedDistricts(0, 0)).to.be.false;
+                expect(wrapper.vm.checkSelectedDistricts(null, null)).to.be.false;
+                expect(wrapper.vm.checkSelectedDistricts([], [])).to.be.false;
+                expect(wrapper.vm.checkSelectedDistricts("", "")).to.be.false;
+                expect(wrapper.vm.checkSelectedDistricts(false, false)).to.be.false;
+                expect(wrapper.vm.checkSelectedDistricts({}, {})).to.be.false;
+                wrapper.destroy();
+            });
+
+            it("should return true if there are selected districts.", () => {
+                const wrapper = factory.getMount(),
+                    selectedDistrict = ["district"];
+
+                expect(wrapper.vm.checkSelectedDistricts(0, selectedDistrict)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(null, selectedDistrict)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts([], selectedDistrict)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts("", selectedDistrict)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(false, selectedDistrict)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts({}, selectedDistrict)).to.be.true;
+                wrapper.destroy();
+            });
+
+            it("should return true if there are default districts.", () => {
+                const wrapper = factory.getMount(),
+                    template = {
+                        state: {
+                            Tools: {
+                                DistrictSelector: {
+                                    selectedDistrictNames: ["district"]
+                                }
+                            }
+                        }
+                    };
+
+                expect(wrapper.vm.checkSelectedDistricts(template, 0)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(template, null)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(template, [])).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(template, "")).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(template, false)).to.be.true;
+                expect(wrapper.vm.checkSelectedDistricts(template, {})).to.be.true;
+                wrapper.destroy();
+            });
+        });
     });
 });

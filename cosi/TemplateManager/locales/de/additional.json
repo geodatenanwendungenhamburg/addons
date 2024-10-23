@@ -41,6 +41,7 @@
                       "wrongFileFormat": "Die Datei hat nicht das richtige Format.",
                       "templateName": "Eine Vorlage mit dem Namen: ",
                       "isLoaded": "ist bereits geladen.",
+                      "notAllowLoaded": "kann ohne ausgewählte Gebiete nicht geladen werden.",
                       "attErr": " {{attribute}} Tag existiert nicht.",
                       "invalidReportTitle": "Es sind maximal {{reportTitleMaxLength}} Zeichen erlaubt",
                       "invalidSelectedAreasName": "Es sind maximal {{selectedAreasNameMaxLength}} Zeichen erlaubt",

@@ -392,6 +392,21 @@ export default {
         activeCard (name) {
             this.activeTemplateName = name;
             this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex);
+        },
+
+        /**
+         * Sets the current activated template and loads it.
+         * @param {Object} template - The current template.
+         * @param {String[]} selectedDistrictNames - The selected district names.
+         * @returns {Boolean} true if there are selected districts or default districts existed.
+         */
+        checkSelectedDistricts (template, selectedDistrictNames) {
+            if (Array.isArray(selectedDistrictNames) && selectedDistrictNames.length
+            || (Array.isArray(template?.state?.Tools?.DistrictSelector?.selectedDistrictNames) && template.state.Tools.DistrictSelector.selectedDistrictNames.length)) {
+                return true;
+            }
+
+            return false;
         }
     }
 };
@@ -467,6 +482,7 @@ export default {
                                             :created="templateCard?.meta?.created"
                                             :selected-template="selectedTemplate?.meta?.title === templateCard?.meta?.title"
                                             :active-template="activeTemplateName === templateCard?.meta?.title"
+                                            :is-enabled="checkSelectedDistricts(templateCard, selectedDistrictNames)"
                                             @showTemplate="selectCard"
                                             @activateTemplate="activeCard"
                                         />

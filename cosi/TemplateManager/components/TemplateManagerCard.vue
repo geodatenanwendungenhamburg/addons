@@ -1,4 +1,6 @@
 <script>
+import {mapActions} from "vuex";
+
 export default {
     name: "TemplateManagerCard",
     components: {
@@ -25,9 +27,16 @@ export default {
             type: Boolean,
             required: false,
             default: false
+        },
+        isEnabled: {
+            type: Boolean,
+            required: false,
+            default: true
         }
     },
     methods: {
+        ...mapActions("Alerting", ["addSingleAlert"]),
+
         /**
          * Emits which card has been activated and selects it.
          * @returns {void}
@@ -35,6 +44,21 @@ export default {
         checkActive () {
             this.$emit("showTemplate", this.title);
             this.$emit("activateTemplate", this.title);
+        },
+
+        /**
+         * Shows alert info if there are no districts existed.
+         * @param {Boolean} val - the flag if this template is enabled.
+         * @returns {void}
+         */
+        showDistrictInfo (val) {
+            if (!val) {
+                this.addSingleAlert({
+                    content: `${this.$t("additional:modules.tools.cosi.templateManager.errors.templateName")} ${this.title} ${this.$t("additional:modules.tools.cosi.templateManager.errors.notAllowLoaded")}`,
+                    category: "Warning",
+                    displayClass: "warning"
+                });
+            }
         }
     }
 };
@@ -68,7 +92,13 @@ export default {
                                 {{ created }}
                             </div>
                         </button>
-                        <div class="form-check form-switch col col-md-3 p-auto align-items-end">
+                        <div
+                            class="form-check form-switch col col-md-3 p-auto align-items-end"
+                            role="button"
+                            tabindex="0"
+                            @click="showDistrictInfo(isEnabled)"
+                            @keydown="showDistrictInfo(isEnabled)"
+                        >
                             <input
                                 :id="`flexSwitchCheckChecked-${cardId}`"
                                 :v-model="activeTemplate"
@@ -76,6 +106,7 @@ export default {
                                 type="radio"
                                 :aria-checked="activeTemplate === true"
                                 role="switch"
+                                :disabled="!isEnabled ? 'disabled' : false"
                                 :checked="activeTemplate === true"
                                 @change="activeTemplate !== true ? checkActive() : ''"
                             >
@@ -129,6 +160,10 @@ export default {
         .form-text {
             display: block;
             width: 200px;
+        }
+        .form-switch {
+            display: inline-block;
+            padding-left: 30px;
         }
         .flexSwitch {
             border-radius: 10px;
