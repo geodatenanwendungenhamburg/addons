@@ -29,7 +29,8 @@ export default {
             activeTemplateName: false,
             filters: [],
             showExportWindow: false,
-            showImportSection: true
+            showImportSection: true,
+            saveTemplate: []
         };
     },
     computed: {
@@ -90,6 +91,106 @@ export default {
          */
         templateTitles () {
             return this.templates.map(template => template.meta.title);
+        },
+        /**
+         * Select and deselect the active layers in the selected templates.
+         * @returns {Object} The active layers.
+         */
+        selectedActiveLayer: {
+            get () {
+                return this.getAllSelectedDataFromTemplate("activeLayer");
+
+            },
+            set (val) {
+                const filterArray = Object.keys(this.filters[this.selectedTemplateIndex].activeLayerList);
+
+                if (Array.isArray(filterArray) && filterArray.length > 0) {
+                    filterArray.forEach(layer => {
+                        if (Object.values(val).some(item => item.id.includes(layer))) {
+                            this.filters[this.selectedTemplateIndex].activeLayerList[layer] = true;
+                        }
+                        else {
+                            this.filters[this.selectedTemplateIndex].activeLayerList[layer] = false;
+                        }
+                    });
+
+                    this.setSelectedData(val, "activeLayer");
+                }
+            }
+        },
+        /**
+         * Select and deselect the districts in the selected templates.
+         * @returns {Object} The selected districts.
+         */
+        selectedDistricts: {
+            get () {
+                return this.getAllSelectedDataFromTemplate("districts");
+            },
+            set (val) {
+                const filterArray = Object.keys(this.filters[this.selectedTemplateIndex].selectedDistrictNames);
+
+                if (Array.isArray(filterArray) && filterArray.length > 0) {
+                    filterArray.forEach(name => {
+                        if (Object.values(val).some(item => item.includes(name))) {
+                            this.filters[this.selectedTemplateIndex].selectedDistrictNames[name] = true;
+                        }
+                        else {
+                            this.filters[this.selectedTemplateIndex].selectedDistrictNames[name] = false;
+                        }
+                    });
+
+                    this.setSelectedData(val, "districts");
+                }
+
+            }
+        },
+        /**
+         * Select and deselect the statistical categories in the selected templates.
+         * @returns {Object} The statistical categories.
+         */
+        selectedStatsCategories: {
+            get () {
+                return this.getAllSelectedDataFromTemplate("statsCategories");
+            },
+            set (val) {
+                const filterArray = Object.keys(this.filters[this.selectedTemplateIndex].statsCategories);
+
+                if (Array.isArray(filterArray) && filterArray.length > 0) {
+                    filterArray.forEach(category => {
+                        if (Object.values(val).some(item => item.includes(category))) {
+                            this.filters[this.selectedTemplateIndex].statsCategories[category] = true;
+                        }
+                        else {
+                            this.filters[this.selectedTemplateIndex].statsCategories[category] = false;
+                        }
+                    });
+                    this.setSelectedData(val, "statsCategories");
+                }
+            }
+        },
+        /**
+         * Select and deselect the calculations in the selected templates.
+         * @returns {Object} The calculations.
+         */
+        selectedCalculations: {
+            get () {
+                return this.getAllSelectedDataFromTemplate("calculations");
+            },
+            set (val) {
+                const layerIdArray = Object.keys(this.filters[this.selectedTemplateIndex].calculations);
+
+                if (Array.isArray(layerIdArray) && layerIdArray.length > 0) {
+                    layerIdArray.forEach(calc => {
+                        if (Object.values(val).some(item => item.id.includes(calc))) {
+                            this.filters[this.selectedTemplateIndex].calculations[calc] = true;
+                        }
+                        else {
+                            this.filters[this.selectedTemplateIndex].calculations[calc] = false;
+                        }
+                    });
+                    this.setSelectedData(val, "calculations");
+                }
+            }
         }
     },
     watch: {
@@ -151,6 +252,9 @@ export default {
 
             this.templates = templates;
             this.selectedTemplateName = this.templates[0].meta.title;
+            this.templates.forEach(temp => {
+                this.templateData(temp);
+            });
         },
 
         createFilterObjects () {
@@ -161,6 +265,14 @@ export default {
                 statsCategories: Object.fromEntries(this.getStatsCategories(template).map(el => [el, true])),
                 calculations: Object.fromEntries(this.getCalculations(template).map(el => [el.id, true]))
             }));
+        },
+
+        templateData (template) {
+            this.saveTemplate.push({name: template.meta.title,
+                activeLayer: this.getActiveLayerList(template),
+                districts: this.getSelectedDistricts(template),
+                statsCategories: this.getStatsCategories(template),
+                calculations: this.getCalculations(template)});
         },
 
         applyFilters (template, filter) {
@@ -284,6 +396,45 @@ export default {
         getCalculations (template) {
             return template?.state?.Tools?.Dashboard?.calculations || [];
         },
+        /**
+         * Returns the selected data from selected templates.
+         * @param {String} type - The type of data.
+         * @returns {Object} The selected data or empty object.
+         */
+        getAllSelectedDataFromTemplate (type) {
+            if (typeof type !== "string") {
+                return {};
+            }
+            let result = [];
+
+            if (Array.isArray(this.templateContents)) {
+                this.templateContents.forEach(template => {
+                    if (template.name === this.selectedTemplateName) {
+                        result = template[type];
+                    }
+                });
+                return result;
+            }
+            return this.saveTemplate[this.selectedTemplateIndex][type];
+        },
+        /**
+         * Sets the selected data.
+         * @param {String} selected - The selected data from the user.
+         * @param {Function} type - The type of data.
+         * @returns {void}
+         */
+        setSelectedData (selected, type) {
+            if (!Array.isArray(this.saveTemplate) || !this.saveTemplate.length) {
+                return;
+            }
+
+            this.saveTemplate.forEach(template => {
+                if (template.name === this.selectedTemplateName) {
+                    template[type] = selected;
+                }
+            });
+            this.setTemplateContents(this.saveTemplate);
+        },
 
         /**
          * Adds a template to the list of templates.
@@ -293,6 +444,7 @@ export default {
         addTemplate (template) {
             this.templates.push(template);
             this.selectedTemplateName = template.meta.title;
+            this.templateData(template);
         },
 
         /*
@@ -569,13 +721,14 @@ export default {
                                 <div class="accordion-body pt-0">
                                     <div id="selected-template-layer">
                                         <v-chip-group
+                                            v-model="selectedActiveLayer"
                                             column
                                             multiple
                                         >
                                             <v-chip
-                                                v-for="layerMap in getActiveLayerList(selectedTemplate)"
-                                                :key="selectedTemplate?.meta?.title + layerMap.id"
-                                                v-model="filters[selectedTemplateIndex].activeLayerList[layerMap.id]"
+                                                v-for="(layerMap) in getActiveLayerList(selectedTemplate)"
+                                                :key="layerMap.id"
+                                                :value="layerMap"
                                                 class="m-1"
                                                 variant="outlined"
                                                 filter
@@ -642,13 +795,14 @@ export default {
                                 <div class="accordion-body pt-0">
                                     <div id="selected-template-districts">
                                         <v-chip-group
+                                            v-model="selectedDistricts"
                                             column
                                             multiple
                                         >
                                             <v-chip
-                                                v-for="districtName in getSelectedDistricts(selectedTemplate)"
-                                                :key="selectedTemplate?.meta?.title + districtName"
-                                                v-model="filters[selectedTemplateIndex].selectedDistrictNames[districtName]"
+                                                v-for="(districtName, j) in getSelectedDistricts(selectedTemplate)"
+                                                :key="j"
+                                                :value="districtName"
                                                 class="m-1"
                                                 variant="outlined"
                                                 filter
@@ -686,13 +840,14 @@ export default {
                                 <div class="accordion-body pt-0">
                                     <div id="selected-template-statistics">
                                         <v-chip-group
+                                            v-model="selectedStatsCategories"
                                             column
                                             multiple
                                         >
                                             <v-chip
                                                 v-for="category in getStatsCategories(selectedTemplate)"
                                                 :key="selectedTemplate?.meta?.title + category"
-                                                v-model="filters[selectedTemplateIndex].statsCategories[category]"
+                                                :value="category"
                                                 class="m-1"
                                                 variant="outlined"
                                                 filter
@@ -759,13 +914,14 @@ export default {
                                 <div class="accordion-body pt-0">
                                     <div id="selected-template-calculations">
                                         <v-chip-group
+                                            v-model="selectedCalculations"
                                             column
                                             multiple
                                         >
                                             <v-chip
                                                 v-for="(calculation, j) in getCalculations(selectedTemplate)"
                                                 :key="selectedTemplate?.meta?.title + 'calculation' + j"
-                                                v-model="filters[selectedTemplateIndex].calculations[calculation.id]"
+                                                :value="calculation"
                                                 class="m-1"
                                                 variant="outlined"
                                                 filter

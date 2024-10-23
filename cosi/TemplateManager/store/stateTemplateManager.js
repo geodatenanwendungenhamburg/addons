@@ -11,6 +11,7 @@
  * @property {String} toolToOpen - the tool to be open after this tool is closed.
  * @property {Boolean} [useImport=false] - If true, it is possible to import templates.
  * @property {Boolean} [useTemplatesForMapping=false] - If true, the mapping is overwritten with the statistic data from the templates.
+ * @property {Object} templateContents - The selected data from templates.
  */
 const state = {
     active: false,
@@ -23,6 +24,7 @@ const state = {
     renderToWindow: true,
     resizableWindow: true,
     templatePath: "./assets/templates",
+    templateContents: undefined,
     templateFiles: [
         "Erhaltungsmanagement_Spielplaetze"
     ],

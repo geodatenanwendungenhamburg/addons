@@ -483,7 +483,6 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 wrapper.destroy();
             });
         });
-
         describe("checkSelectedDistricts", () => {
             it("should return false.", () => {
                 const wrapper = factory.getMount();
@@ -528,6 +527,142 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 expect(wrapper.vm.checkSelectedDistricts(template, "")).to.be.true;
                 expect(wrapper.vm.checkSelectedDistricts(template, false)).to.be.true;
                 expect(wrapper.vm.checkSelectedDistricts(template, {})).to.be.true;
+            });
+        });
+        describe("getAllSelectedDataFromTemplate", () => {
+            const templateData = [
+                {
+                    activeLayer: {
+                        "first": {"name": "active1", "id": "123"},
+                        "second": {"name": "active2", "id": "456"}
+                    },
+                    name: "First",
+                    category: {
+                        "0": "Bevölkerung insgesamt",
+                        "0": "Bevölkerung ab 65 Jahren"
+                    }
+                },
+                {
+                    activeLayer: {
+                        "third": {"name": "active3", "id": "123"},
+                        "fourth": {"name": "active4", "id": "456"}
+                    },
+                    name: "Second",
+                    category: {
+                        "0": "Bevölkerung insgesamt",
+                        "0": "Bevölkerung ab 65 Jahren"
+                    }
+                }
+            ],
+            templates = [{
+                meta: {
+                    title: "First",
+                    isActive: false,
+                    created: "01.01."
+                }
+            },
+            {
+                meta: {
+                    title: "Second",
+                    isActive: true,
+                    created: "01.01."
+                }
+            }];
+
+            it("should return all data from one type", async () => {
+                const wrapper = factory.getMount();
+
+                await wrapper.setData({
+                    saveTemplate: templateData,
+                    templates,
+                    selectedTemplateName: "First"
+                });
+
+                wrapper.vm.$nextTick();
+
+                expect(wrapper.vm.getAllSelectedDataFromTemplate("activeLayer")).to.be.deep.equal( {
+                    "first": {"name": "active1", "id": "123"},
+                    "second": {"name": "active2", "id": "456"}
+                });
+                wrapper.destroy();
+            });
+            it("should return selected data from one type", async () => {
+                const wrapper = factory.getMount();
+
+                await wrapper.setData({
+                    templates,
+                    selectedTemplateName: "First"
+                });
+
+                wrapper.vm.setTemplateContents(templateData);
+
+                wrapper.vm.$nextTick();
+
+                expect(wrapper.vm.getAllSelectedDataFromTemplate("activeLayer")).to.be.deep.equal( {
+                    "first": {"name": "active1", "id": "123"},
+                    "second": {"name": "active2", "id": "456"}
+                });
+                wrapper.destroy();
+            });
+            it("should return empty object if 'type' is not a string", async () => {
+                const wrapper = factory.getMount();
+
+                await wrapper.setData({
+                    saveTemplate: templateData,
+                    templates,
+                    selectedTemplateName: "First"
+                });
+
+                wrapper.vm.$nextTick();
+
+                expect(wrapper.vm.getAllSelectedDataFromTemplate([])).to.be.deep.equal({});
+                expect(wrapper.vm.getAllSelectedDataFromTemplate({})).to.be.deep.equal({});
+                expect(wrapper.vm.getAllSelectedDataFromTemplate(null)).to.be.deep.equal({});
+                expect(wrapper.vm.getAllSelectedDataFromTemplate(undefined)).to.be.deep.equal({});
+                expect(wrapper.vm.getAllSelectedDataFromTemplate(0)).to.be.deep.equal({});
+                expect(wrapper.vm.getAllSelectedDataFromTemplate(true)).to.be.deep.equal({});
+                wrapper.destroy();
+            });
+        });
+        describe("setSelectedData", () => {
+            const templateData = [
+                {
+                    activeLayer: {
+                        "first": {"name": "active1", "id": "123"},
+                        "second": {"name": "active2", "id": "456"}
+                    },
+                    name: "First",
+                    category: {
+                        "0": "Bevölkerung insgesamt",
+                        "0": "Bevölkerung ab 65 Jahren"
+                    }
+                }
+            ],
+            selected = {"first": {"name": "active1", "id": "123"}};
+
+            it("should set selected data", async () => {
+                const wrapper = factory.getMount();
+
+                await wrapper.setData({
+                    saveTemplate: templateData,
+                    selectedTemplateName: "First"
+                });
+                wrapper.vm.$nextTick();
+
+                wrapper.vm.setSelectedData(selected, "activeLayer");
+
+                expect(wrapper.vm.templateContents).to.be.deep.equal( [
+                    {
+                        activeLayer: {
+                            "first": {"name": "active1", "id": "123"},
+                        },
+                        name: "First",
+                        category: {
+                            "0": "Bevölkerung insgesamt",
+                            "0": "Bevölkerung ab 65 Jahren"
+                        }
+                    }
+                ]);
                 wrapper.destroy();
             });
         });
