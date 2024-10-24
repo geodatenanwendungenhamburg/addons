@@ -2,7 +2,7 @@ const baseProportionTemplate = {
         baseLayer: {
             map: {
                 type: "mapProportion",
-                proportion: 0.5,
+                proportion: 0.6,
                 style: {
                     borderSize: 2,
                     color: [
@@ -44,8 +44,8 @@ const baseProportionTemplate = {
         }
     },
     mapfishServerConfig = {
-        template: "wertermittlungImage",
-        name: "mapfish"
+        template: "cosiImage",
+        name: "mapfish_qs"
     };
 
 export {

@@ -287,11 +287,13 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                     localVue,
                     store
                 }),
-                prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves();
-                sinon.stub(wrapper.vm, "getProgressValuePerStep")
+                prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves({downloadURL: "", bbox: ""});
+                sinon.stub(wrapper.vm, "getProgressValuePerStep");
+                sinon.stub(wrapper.vm, "addDetailViewToOverviewPage");
                 sinon.stub(PDFMaker.prototype, "addChapterHeadline");
                 sinon.stub(PDFMaker.prototype, "addImageByUrl");
 
+                wrapper.vm.pdf = new PDFMaker();
                 await wrapper.vm.addOverViewPageToReport();
                 await wrapper.vm.$nextTick();
                 expect(prepareImageStub.getCall(0).args[0]).to.be.equal("fooo");
@@ -328,11 +330,14 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                         localVue,
                         store
                     }),
-                    prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves();
-                    sinon.stub(wrapper.vm, "getProgressValuePerStep")
-                    sinon.stub(PDFMaker.prototype, "addChapterHeadline");
-                    sinon.stub(PDFMaker.prototype, "addImageByUrl");
+                    prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves({downloadURL: "", bbox: ""});
 
+                sinon.stub(wrapper.vm, "addDetailViewToOverviewPage");
+                sinon.stub(wrapper.vm, "getProgressValuePerStep")
+                sinon.stub(PDFMaker.prototype, "addChapterHeadline");
+                sinon.stub(PDFMaker.prototype, "addImageByUrl");
+
+                wrapper.vm.pdf = new PDFMaker();
                 await wrapper.vm.addOverViewPageToReport();
                 await wrapper.vm.$nextTick();
                 expect(prepareImageStub.getCall(0).args[0]).to.be.undefined;
@@ -343,7 +348,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 wrapper.destroy();
                 sinon.restore();
             });
-            it("should call addChapter and addImageByUrl if prepareImage resolves an string", async () => {
+            it("should call addChapter and addImageByUrl if prepareImage resolves an object", async () => {
                 const wrapper = shallowMount(TemplateManagerExport, {
                     vuetify,
                     localVue,
@@ -353,7 +358,8 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 addImageByUrlStub = sinon.stub(PDFMaker.prototype, "addImageByUrl");
 
                 sinon.stub(wrapper.vm, "getProgressValuePerStep")
-                sinon.stub(wrapper.vm, "prepareImage").resolves("test.url.de");
+                sinon.stub(wrapper.vm, "addDetailViewToOverviewPage");
+                sinon.stub(wrapper.vm, "prepareImage").resolves({downloadURL: "test.url.de", bbox: ""});
                 wrapper.vm.pdf = new PDFMaker();
 
                 await wrapper.vm.addOverViewPageToReport();
@@ -405,7 +411,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                     }),
                     result = await wrapper.vm.prepareImage(new Feature(new Point([1, 1])), baseProportionTemplate, "1234", "imageName", mapfishServerConfig, () => {});
 
-                expect(result).to.be.a("string");
+                expect(result).to.be.an("object");
                 wrapper.destroy();
                 sinon.restore();
             });

@@ -13,6 +13,9 @@ import axios from "axios";
 import {baseProportionTemplate, baseFixedTemplateForHamburg, mapfishServerConfig} from "../js/mapfishUtils";
 import {Chart as ChartJS} from "chart.js";
 import isObject from "../../../../src/utils/isObject";
+import {fromExtent} from "ol/geom/Polygon";
+import Feature from "ol/Feature.js";
+import getBasicInfo from "../js/getBasicInfo";
 
 export default {
     name: "TemplateManagerExport",
@@ -59,9 +62,9 @@ export default {
     computed: {
         ...mapGetters("Tools/Dashboard", ["items"]),
         ...mapGetters("Tools/FeaturesList", ["featuresListItems"]),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures"]),
+        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures"]),
         ...mapGetters(["getRestServiceById"]),
-        ...mapGetters("Maps", ["projection"]),
+        ...mapGetters("Maps", ["projection", "getCurrentExtent"]),
 
         /**
          * Generates a file name for the report.
@@ -237,22 +240,71 @@ export default {
             const imageName = "overviewMap",
                 feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
                 template = typeof feature !== "undefined" ? {...baseProportionTemplate} : {...baseFixedTemplateForHamburg},
-                availableProgressForThisStep = this.getProgressValuePerStep(),
+                availableProgressForThisStep = this.getProgressValuePerStep() / 2,
                 initialProgressValue = this.progressValue,
-                overviewImageUrl = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig,
-                    () => {
-                        if (this.progressValue < (initialProgressValue + availableProgressForThisStep)) {
-                            this.progressValue += 1;
-                        }
+                {downloadURL: overviewImageUrl, bbox} = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig, () => {
+                    if (this.progressValue < (initialProgressValue + availableProgressForThisStep)) {
+                        this.progressValue += 1;
                     }
-                ).catch(error => console.error(error));
+                }).catch(error => console.error(error));
 
-
-            if (typeof overviewImageUrl === "string") {
-                this.pdf.addChapterHeadline("Übersichtskarte");
-                this.pdf.addImageByUrl(overviewImageUrl, imageName, {fit: [600, 600], alignment: "center"});
+            if (typeof overviewImageUrl !== "string") {
+                return;
             }
-            this.progressValue = initialProgressValue + availableProgressForThisStep;
+            this.pdf.addChapterHeadline("Übersichtskarte");
+            this.pdf.addImageByUrl(overviewImageUrl, imageName, {fit: [500, 500], alignment: "center"});
+            this.pdf.addLineBreak();
+            await this.addDetailViewToOverviewPage(template, bbox, () => {
+                if (this.progressValue < initialProgressValue + (availableProgressForThisStep * 2)) {
+                    this.progressValue += 1;
+                }
+            });
+
+            this.progressValue = initialProgressValue + (availableProgressForThisStep * 2);
+        },
+
+        /**
+         * Adds a detail box and a detail view for the overview page.
+         * @param {Object} template A template for mapfish.
+         * @param {Number[]} bbox A bbox to use for the overviewmap as feature coordinates.
+         * @param {Function} progressHandler Function to handle the print progress.
+         * @returns {void}
+         */
+        async addDetailViewToOverviewPage (template, bbox, progressHandler) {
+            template.baseLayer.map.proportion = 0.25;
+            const {downloadURL: minimapImageUrl} = await this.prepareImage(
+                    new Feature({geometry: fromExtent(bbox)}),
+                    template, this.projection.getCode(),
+                    "miniMap",
+                    mapfishServerConfig,
+                    progressHandler,
+                    "rectangleTemplate"
+                ).catch(error => console.error(error)),
+                text = [],
+                tableBody = [[
+                    {
+                        margin: [0, 4, 0, 4]
+                    }
+                ]],
+                infoData = getBasicInfo.getOverviewBasicInfo(this.selectedDistrictLevel);
+
+            infoData.forEach(data => {
+                text.push({text: `${data.label}: `, bold: true});
+                text.push(`${data.value}\n`);
+            });
+            tableBody[0][0].text = text;
+
+            this.pdf.addImageInstance(minimapImageUrl, "miniMap");
+            this.pdf.addColumns([
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [200],
+                        body: tableBody
+                    }
+                },
+                {image: "miniMap", fit: [300, 150], alignment: "right"}
+            ]);
         },
 
         /**
@@ -268,7 +320,7 @@ export default {
          * @param {Function} handleOngoing Function to handle the ongoing process of creating the image.
          * @returns {void}
          */
-        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig, handleOngoing) {
+        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig, handleOngoing, layoutName) {
             const extent = feature?.getGeometry()?.getExtent(),
                 baseLayerName = Object.keys(baseLayer)[0],
                 mapfishDialog = createMapfishDialog(
@@ -283,7 +335,8 @@ export default {
                     baseLayer,
                     "",
                     projectionCode,
-                    imageName
+                    imageName,
+                    layoutName
                 );
 
             return new Promise((resolve, reject) => {
@@ -298,7 +351,7 @@ export default {
                         reject(error);
                     },
                     downloadURL => {
-                        resolve(downloadURL);
+                        resolve({downloadURL, bbox: mapfishDialog.attributes.map.bbox});
                     });
                 }, 0);
             });

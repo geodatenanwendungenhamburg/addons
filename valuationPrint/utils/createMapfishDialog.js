@@ -18,7 +18,7 @@ import {mergeObjectsByDatakey} from "./translator.mergeObjectsByDatakey";
  * @param {String} outputFilename - The output filename of the pdf (without extension).
  * @returns {Object} The mapfish dialog.
  */
-export function createMapfishDialog (parcel, knowledgeBase, transformer, defaultValue, mapProjection, outputFilename) {
+export function createMapfishDialog (parcel, knowledgeBase, transformer, defaultValue, mapProjection, outputFilename, layoutName = "A4 Hochformat") {
     const mapfishDialog = {},
         defaultDelimitor = ", ";
 
@@ -68,7 +68,7 @@ export function createMapfishDialog (parcel, knowledgeBase, transformer, default
     });
 
     return {
-        layout: "A4 Hochformat",
+        layout: layoutName,
         attributes: mapfishDialog,
         outputFilename
     };

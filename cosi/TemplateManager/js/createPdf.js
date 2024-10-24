@@ -74,6 +74,7 @@ export default class PDFMaker {
      * Adds a table to the report.
      * @param {Array[]} body - The content of a table.
      * @param {Number} width - The width of the first column.
+     * @returns {void}
      */
     addTable (body, width) {
         const widths = [];
@@ -94,6 +95,16 @@ export default class PDFMaker {
             }
         });
         this.content.push("\n\n");
+    }
+
+    /**
+     * Adds columns. Usefull for aligning items side by side.
+     * @param {Object[]} columns A list of objects which each object represents a column.
+     * @param {Number} columnGap The gap between the columns.
+     * @returns {void}
+     */
+    addColumns (columns, columnGap) {
+        this.content.push({columns, columnGap});
     }
 
     /**
@@ -149,6 +160,25 @@ export default class PDFMaker {
             this.images[label] = imageUrl;
         }
         this.content.push({image: label, ...options});
+    }
+
+    /**
+     * Adds an image url to the image instance of the document.
+     * May be usefull to register the image before it get actually used.
+     * @param {String} imageUrl The image url.
+     * @param {String} label The label to use.
+     * @returns {void}
+     */
+    addImageInstance (imageUrl, label) {
+        this.images[label] = imageUrl;
+    }
+
+    /**
+     * Adds a line break to the document.
+     * @returns {void}
+     */
+    addLineBreak () {
+        this.content.push("\n");
     }
 
     /**
