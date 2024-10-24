@@ -12,6 +12,8 @@
  * @property {Boolean} [useImport=false] - If true, it is possible to import templates.
  * @property {Boolean} [useTemplatesForMapping=false] - If true, the mapping is overwritten with the statistic data from the templates.
  * @property {Object} templateContents - The selected data from templates.
+ * @property {String[]} defaultActiveLayerIds - the default active layer Ids in COSI.
+ * @property {String} currentActiveTemplate - the current active template name.
  */
 const state = {
     active: false,
@@ -34,7 +36,9 @@ const state = {
     },
     toolToOpen: undefined,
     useImport: false,
-    useTemplatesForMapping: false
+    useTemplatesForMapping: false,
+    defaultActiveLayerIds: [],
+    currentActiveTemplate: ""
 };
 
 export default state;

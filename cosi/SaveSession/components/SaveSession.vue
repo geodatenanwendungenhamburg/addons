@@ -117,8 +117,8 @@ export default {
         ...mapGetters("Tools/SaveSession", Object.keys(getters)),
         ...mapGetters("Tools/ScenarioBuilder", {simGuideLayer: "guideLayer"}),
         ...mapGetters("Tools/ResidentialSimulation", {simNeighborhoodLayer: "drawingLayer"}),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "districtLevels"]),
-        ...mapGetters("Maps", ["getLayerById"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "districtLevels", "selectedDistrictNames"]),
+        ...mapGetters("Maps", ["getLayerById", "getVisibleLayerList"]),
         ...mapGetters("Tools/TemplateManager", ["useTemplatesForMapping"])
     },
     watch: {
@@ -156,6 +156,8 @@ export default {
         }
     },
     created () {
+        this.setDefaultActiveLayerIds(this.getVisibleLayerList.map(x => x.getProperties().id));
+
         /**
          * listens to the close event of the Tool Component
          * @listens #close
@@ -377,23 +379,41 @@ export default {
          * @returns {void}
          */
         load (session) {
-            const state = session.state || session; // fallback for old saves
+            let state,
+                createdTime;
 
-            this.session.meta.title = session.meta?.title || this.session.meta.title;
+            if (!Object.hasOwnProperty.call(session, "template") && !Object.hasOwnProperty.call(session, "reset")) {
+                state = session.state || session; // fallback for old saves
+                this.session.meta.title = session.meta?.title || this.session.meta.title;
+                createdTime = session.meta?.created;
+            }
+            else {
+                state = session.template.state || session.template; // fallback for old saves
+                this.session.meta.title = session.template.meta?.title || this.session.meta.title;
+                createdTime = session.template.meta?.created;
+            }
+
             this.setActive(false);
-            this.parseState(this.storePaths, typeof state === "string" ? JSON.parse(state) : state);
-            this.addSingleAlert({
-                content: `Sitzung ${session.meta?.title} vom ${session.meta?.created} erfolgreich geladen.`,
-                category: "Erfolg",
-                displayClass: "success"
-            });
+            this.parseState(this.storePaths, typeof state === "string" ? JSON.parse(state) : state, [], false, session.reset);
+            if (Object.hasOwnProperty.call(session, "reset") && session.reset) {
+                this.$store.commit("Tools/DistrictSelector/setActive", false);
+            }
+
+            if (!session.reset) {
+                this.addSingleAlert({
+                    content: `Sitzung ${this.session.meta?.title} vom ${createdTime} erfolgreich geladen.`,
+                    category: "Erfolg",
+                    displayClass: "success"
+                });
+            }
         },
         /**
          * Getting the saved layers from id
          * @param {String} layerId The layer Id
+         * @param {Boolean} reset if layers are reset as not selected.
          * @returns {module:ol/Layer} the layer
          */
-        getTopicsLayer (layerId) {
+        getTopicsLayer (layerId, reset = false) {
             let layer = this.getLayerById({layerId: layerId});
 
             if (layer) {
@@ -406,7 +426,7 @@ export default {
             const model = this.initializeLayer(layerId);
 
             if (model) {
-                model.set("isSelected", true);
+                model.set("isSelected", !(reset && !this.defaultActiveLayerIds.includes(layerId)));
                 layer = model.get("layer");
             }
 

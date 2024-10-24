@@ -21,7 +21,7 @@ localVue.use(Vuex);
 global.requestAnimationFrame = (fn) => fn();
 
 describe("addons/cosi/SaveSession/components/SaveSession.vue", () => {
-    let vuetify, store,
+    let vuetify, store, layerListStub,
         wrapper = null;
 
     const factory = {
@@ -99,11 +99,17 @@ describe("addons/cosi/SaveSession/components/SaveSession.vue", () => {
 
     beforeEach(() => {
         vuetify = new Vuetify();
+        layerListStub = sinon.stub();
         store = new Vuex.Store({
             namespaced: true,
             modules: {
                 Maps: {
-                    namespaced: true
+                    namespaced: true,
+                    getters: {
+                        getVisibleLayerList: layerListStub.returns([{
+                            getProperties: () => ({id: "1111"})
+                        }])
+                    }
                 },
                 Tools: {
                     namespaced: true,

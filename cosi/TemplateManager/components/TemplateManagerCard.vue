@@ -1,5 +1,5 @@
 <script>
-import {mapActions} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 
 export default {
     name: "TemplateManagerCard",
@@ -34,16 +34,44 @@ export default {
             default: true
         }
     },
+    computed: {
+        ...mapGetters("Tools/TemplateManager", ["currentActiveTemplate"]),
+
+        checked: {
+            get () {
+                return this.currentActiveTemplate === this.title;
+            },
+            set (v) {
+                if (v) {
+                    this.setCurrentActiveTemplate(this.title);
+                }
+                else {
+                    this.setCurrentActiveTemplate("");
+                }
+            }
+        }
+    },
     methods: {
         ...mapActions("Alerting", ["addSingleAlert"]),
+        ...mapMutations("Tools/TemplateManager", ["setCurrentActiveTemplate"]),
 
         /**
          * Emits which card has been activated and selects it.
          * @returns {void}
          */
-        checkActive () {
+        checkActive (evt) {
+            const checkbox = document.getElementsByName("template-card");
+
+            Array.prototype.forEach.call(checkbox, el => {
+                if (evt.target.id !== el.id && el.checked === true) {
+                    el.checked = false;
+                    this.$emit("showTemplate", el.title);
+                    this.$emit("activateTemplate", el.title, false);
+                }
+            });
+
             this.$emit("showTemplate", this.title);
-            this.$emit("activateTemplate", this.title);
+            this.$emit("activateTemplate", this.title, evt?.target?.checked);
         },
 
         /**
@@ -69,6 +97,7 @@ export default {
     >
         <div
             class="card h-100"
+            :class="!isEnabled ? 'disabled' : ''"
             :isSelected="selectedTemplate"
             :isActive="activeTemplate"
         >
@@ -92,8 +121,8 @@ export default {
                                 {{ created }}
                             </div>
                         </button>
-                        <div
-                            class="form-check form-switch col col-md-3 p-auto align-items-end"
+                        <label
+                            class="switch"
                             role="button"
                             tabindex="0"
                             @click="showDistrictInfo(isEnabled)"
@@ -101,20 +130,16 @@ export default {
                         >
                             <input
                                 :id="`flexSwitchCheckChecked-${cardId}`"
-                                :v-model="activeTemplate"
-                                class="form-check-input flexSwitch"
-                                type="radio"
-                                :aria-checked="activeTemplate === true"
-                                role="switch"
+                                v-model="checked"
+                                type="checkbox"
+                                name="template-card"
+                                :title="title"
                                 :disabled="!isEnabled ? 'disabled' : false"
-                                :checked="activeTemplate === true"
-                                @change="activeTemplate !== true ? checkActive() : ''"
+                                @change="checkActive"
                             >
-                            <label
-                                class="form-check-label"
-                                for="flexSwitchCheckDefault"
-                            > {{ activeTemplate === true ? $t("additional:modules.tools.cosi.templateManager.label.enable") : $t("additional:modules.tools.cosi.templateManager.label.disable") }}</label>
-                        </div>
+                            <span class="slider round" />
+                        </label>
+                        <span> {{ checked ? $t("additional:modules.tools.cosi.templateManager.label.enable") : $t("additional:modules.tools.cosi.templateManager.label.disable") }}</span>
                     </div>
                 </div>
             </div>
@@ -126,60 +151,104 @@ export default {
 .card {
     border: 1px solid $light_grey;
     border-radius: 5px;
-       i {
-            color: #6E7174;
-            font-size: 30px;
-       }
-        &:hover {
-            background-color: #DCE2F3;
+    &.disabled {
+        opacity: 0.5;
+    }
+   i {
+        color: #6E7174;
+        font-size: 30px;
+   }
+    &:hover {
+        background-color: #DCE2F3;
+    }
+    .title-button {
+        box-shadow: none;
+        text-align: left;
+        &:enabled {
+            border: none;
+            outline: 0;
         }
-        .title-button {
-            box-shadow: none;
-            text-align: left;
-            &:enabled {
-                border: none;
-                outline: 0;
-            }
-        }
-        .card-title {
-            font-size: 12px;
-            color: #6E7174;
-            font-family: $font_family_accent;
-        }
-        .created-section {
-            font-size: 11px;
-            color: #6E7174;
-        }
-        .card-text {
-            color: #5A5A5A;
-            font-size: 11px;
-        }
-        .template-label {
-            font-family: $font_family_accent;
-        }
-        .form-text {
-            display: block;
-            width: 200px;
-        }
-        .form-switch {
-            display: inline-block;
-            padding-left: 30px;
-        }
-        .flexSwitch {
-            border-radius: 10px;
-            cursor: pointer;
-        }
+    }
+    .card-title {
+        font-size: 12px;
+        color: #6E7174;
+        font-family: $font_family_accent;
+    }
+    .created-section {
+        font-size: 11px;
+        color: #6E7174;
+    }
 }
 .card[isActive='true'] {
     border: 2px solid $light_blue;
-        .card-title {
-            color: $light_blue;
-        }
-        i {
-            color: $light_blue
-        }
+    .card-title {
+        color: $light_blue;
+    }
+    i {
+        color: $light_blue
+    }
 }
 .card[isSelected='true'] {
     background-color: #DCE2F3;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 14px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 1px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #003063;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #003063;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(14px);
+    -ms-transform: translateX(14px);
+    transform: translateX(14px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 14px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }
 </style>

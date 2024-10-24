@@ -12,9 +12,10 @@ export default {
      * @param {Object} state the state parameter
      * @param {Object} path the store paths
      * @param {Boolean} districtsSet if districts are set
+     * @param {Boolean} reset if states are reset
      * @returns {void}
      */
-    parseState (map, state, path = [], districtsSet = false) {
+    parseState (map, state, path = [], districtsSet = false, reset = false) {
         for (const key in map) {
             if (
                 Array.isArray(map[key]) &&
@@ -42,20 +43,20 @@ export default {
                                 // hacky, wait for the districtStyle to be drawn
                                 await this.$nextTick();
                                 this.setDistrictsByName({
-                                    districtNames: state[key][attr],
+                                    districtNames: reset ? [] : state[key][attr],
                                     zoomToExtent: false
                                 });
                             });
                             break;
                         case "Maps/layerIds":
                             this.$nextTick(() => {
-                                state[key][attr].forEach(layerId => this.getTopicsLayer(layerId));
+                                state[key][attr].forEach(layerId => this.getTopicsLayer(layerId, reset));
                             });
                             break;
                         case "Maps/loadedLayers":
                             setTimeout(() => {
                                 this.$nextTick(() => {
-                                    state[key][attr].forEach(layerId => this.getTopicsLayer(layerId));
+                                    state[key][attr].forEach(layerId => this.getTopicsLayer(layerId, reset));
                                 });
                             }, 500);
                             break;
@@ -91,7 +92,7 @@ export default {
                 }
             }
             else if (map[key].constructor === Object) {
-                state[key] = this.parseState(map[key], state[key], [...path, key], districtsSet);
+                state[key] = this.parseState(map[key], state[key], [...path, key], districtsSet, reset);
             }
         }
     },

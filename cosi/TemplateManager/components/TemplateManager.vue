@@ -36,12 +36,12 @@ export default {
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/TemplateManager", Object.keys(getters)),
-        ...mapGetters("Tools/SaveSession", []),
         ...mapGetters("Tools/DistrictSelector", {
             districtLevels: "districtLevels",
             selectedDistrictLevel: "selectedDistrictLevel",
             selectedDistrictNames: "selectedDistrictNames"
         }),
+        ...mapGetters("Maps", ["getVisibleLayerList"]),
 
         /**
          * Checks whether at least one template is available.
@@ -227,6 +227,8 @@ export default {
         this.$on("close", () => {
             this.setActive(false);
         });
+
+        this.setDefaultActiveLayerIds(this.getVisibleLayerList.map(x => x?.getProperties()?.id));
     },
     updated () {
         this.showTemplateImport(true);
@@ -311,9 +313,8 @@ export default {
             return _template;
         },
 
-        loadFromTemplate (template, index) {
-
-            template.meta.isActive = true;
+        loadFromTemplate (template, index, active) {
+            template.meta.isActive = active;
 
             const _template = this.applyFilters(template, this.filters[index]),
                 startingTool = template?.state?.Tools?.toolToOpen;
@@ -323,17 +324,18 @@ export default {
                 this.createMappingByTemplates(this.templates, mapping);
             }
 
-            this.loadSessionData(_template);
-            this.openTool(startingTool);
-            this.loadLayer(_template?.state?.Maps?.layerIds);
+            this.loadSessionData({template: _template, reset: !active});
+            this.openTool(startingTool, active);
+            this.loadLayer(_template?.state?.Maps?.layerIds, active);
         },
 
         /**
          * Loading the layers from id
          * @param {String[]} layerIds The layer Id list
+         * @param {Boolean} active - Flag if it is activated.
          * @returns {void}
          */
-        loadLayer (layerIds) {
+        loadLayer (layerIds, active) {
             if (Array.isArray(layerIds) && layerIds.length) {
                 layerIds.forEach(layerId => {
                     if (!getModelByAttributes({id: layerId})) {
@@ -343,7 +345,7 @@ export default {
                     const model = getModelByAttributes({id: layerId});
 
                     if (model) {
-                        model.set("isSelected", true);
+                        model.set("isSelected", !this.defaultActiveLayerIds.includes(layerId) ? active : true);
                     }
                 });
             }
@@ -352,14 +354,15 @@ export default {
         /**
          * Opening a tool after loading the template
          * @param {String} startingTool - the starting tool to open after loading the template
+         * @param {Boolean} active - Flag if it is activated.
          * @returns {void}
          */
-        openTool (startingTool) {
+        openTool (startingTool, active) {
             if (typeof startingTool === "string") {
-                this.$store.dispatch("Tools/setToolActive", {id: startingTool, active: true});
+                this.$store.dispatch("Tools/setToolActive", {id: startingTool, active: active});
             }
             else if (typeof this.toolToOpen === "string") {
-                this.$store.dispatch("Tools/setToolActive", {id: this.toolToOpen, active: true});
+                this.$store.dispatch("Tools/setToolActive", {id: this.toolToOpen, active: active});
             }
         },
 
@@ -552,11 +555,13 @@ export default {
         /**
          * Sets the current activated template and loads it.
          * @param {String} name - The activated template name.
+         * @param {Boolean} active - Flag if it is activated.
          * @returns {void}
          */
-        activeCard (name) {
+        activeCard (name, active) {
             this.activeTemplateName = name;
-            this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex);
+
+            this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex, active);
         },
 
         /**

@@ -16,7 +16,7 @@ Vue.use(Vuetify);
 localVue.use(Vuex);
 
 describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
-    let vuetify, store, stubSetMapping;
+    let vuetify, store, stubSetMapping, layerListStub;
 
     const factory = {
         getMount: () => {
@@ -40,6 +40,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
     beforeEach(() => {
         vuetify = new Vuetify();
         stubSetMapping = sinon.stub();
+        layerListStub = sinon.stub();
         store = new Vuex.Store({
             namespaced: true,
             modules: {
@@ -68,6 +69,14 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     namespaced: true,
                     actions: {
                         addSingleAlert: () => sinon.stub()
+                    }
+                },
+                Maps: {
+                    namespaced: true,
+                    getters: {
+                        getVisibleLayerList: layerListStub.returns([{
+                            getProperties: () => ({id: "1111"})
+                        }])
                     }
                 }
             },
@@ -160,7 +169,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         });
         it("should not render export view if selected template is not activated but showExportView is true", async () => {
             const wrapper = factory.getMount(),
-                templates = [{
+            templates = [{
                 meta: {
                     title: "one",
                     isActive: false,

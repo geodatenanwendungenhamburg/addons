@@ -18,6 +18,10 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerCard.vue", () =>
                 propsData: {
                     title: "Card Title",
                     created: "01.01.2024"
+                },
+                computed: {
+                    currentActiveTemplate: () => "Card Title",
+                    checked: () => true
                 }
             });
         }
@@ -45,7 +49,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerCard.vue", () =>
         it("should render switch", () => {
             const wrapper = factory.getShallowMount();
 
-            expect(wrapper.find(".form-switch").exists()).to.be.true;
+            expect(wrapper.find(".switch").exists()).to.be.true;
             wrapper.destroy();
         });
     });

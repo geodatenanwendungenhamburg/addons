@@ -8,6 +8,7 @@
  * @property {String} [name="Sitzung speichern"] - The name of the tool (config-param).
  * @property {Boolean} [renderToWindow=true] - Renders tool in a window if true, otherwise in the sidebar (config-param).
  * @property {Boolean} [resizableWindow=false] - If True, window is resizable (config-param).
+ * @property {String[]} defaultActiveLayerIds - the default active layer Ids in COSI.
  */
 const state = {
     active: false,
@@ -23,7 +24,8 @@ const state = {
         "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/014savesession.md",
         "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/014sitzungspeichern.md"
     },
-    onlyUdpServices: true
+    onlyUdpServices: true,
+    defaultActiveLayerIds: []
 };
 
 export default state;
