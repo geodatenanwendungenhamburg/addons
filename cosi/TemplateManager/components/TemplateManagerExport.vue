@@ -53,7 +53,8 @@ export default {
         authorMaxLength: 35,
         pdf: null,
         categoryInChart: [{"Bevölkerung": "Bevölkerung insgesamt"}],
-        progressValue: 0
+        progressValue: 0,
+        selectedReportComponents: []
     }),
     computed: {
         ...mapGetters("Tools/Dashboard", ["items"]),
@@ -73,7 +74,6 @@ export default {
 
             return prepareName + "-" + date + ".pdf";
         },
-
         /**
          * Gets the column name for the export based on entered selected areas name.
          * @returns {String} the column name to use for the selected area.
@@ -106,6 +106,9 @@ export default {
             return this.author.length < this.authorMaxLength;
         }
     },
+    mounted () {
+        this.selectedReportComponents = [...this.tagsOptionalComponents, ...this.tagsInfrastructureData];
+    },
     methods: {
         /**
          * Registers the steps for the progress of the export.
@@ -134,6 +137,14 @@ export default {
             if (val) {
                 this.createReport();
             }
+        },
+        /**
+         * Returns true or false, depending on whether the component was selected by the user or not.
+         * @param {String} component - The name of the component.
+         * @returns {Boolean} - True if the component was selected.
+         */
+        controlsReportComponent (component) {
+            return this.selectedReportComponents.includes(component);
         },
 
         /**
@@ -171,6 +182,9 @@ export default {
          * @returns {void}
          */
         addStatsToReport (items) {
+            if (!this.controlsReportComponent("statistische Datenübersicht")) {
+                return;
+            }
             const filteredMappingByCategories = mapping.filter(obj => {
                     return this.templateStatsCategories.includes(obj.value);
                 }),
@@ -217,6 +231,9 @@ export default {
          * @returns {void}
          */
         async addOverViewPageToReport () {
+            if (!this.controlsReportComponent("Titelblatt inkl. Kartenausschnitt")) {
+                return;
+            }
             const imageName = "overviewMap",
                 feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
                 template = typeof feature !== "undefined" ? {...baseProportionTemplate} : {...baseFixedTemplateForHamburg},
@@ -327,6 +344,9 @@ export default {
          * @returns {void}
          */
         addTopicsToReport (topics) {
+            if (!this.controlsReportComponent("Auflistung")) {
+                return;
+            }
             const groupedTopics = Object.groupBy(topics, (topic) => topic.layerName);
 
             this.pdf.addChapter("Infrastrukturdaten");
@@ -358,6 +378,9 @@ export default {
          * @returns {void}
          */
         async addDiagram () {
+            if (!this.controlsReportComponent("Datenvisualisierung")) {
+                return;
+            }
             const data = this.getChartData(this.items, this.templateStatsCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart),
                 imageArr = [];
 
@@ -575,13 +598,14 @@ export default {
                         {{ $t("additional:modules.tools.cosi.templateManager.optionalComponents") }}
                     </h5>
                     <v-chip-group
+                        v-model="selectedReportComponents"
                         column
                         multiple
                     >
                         <v-chip
                             v-for="tag in tagsOptionalComponents"
                             :key="tag"
-                            :text="tag"
+                            :value="tag"
                             variant="outlined"
                             filter
                         >
@@ -592,17 +616,18 @@ export default {
                         {{ $t("additional:modules.tools.cosi.templateManager.infrastructureData") }}
                     </h6>
                     <v-chip-group
+                        v-model="selectedReportComponents"
                         column
                         multiple
                     >
                         <v-chip
-                            v-for="chip in tagsInfrastructureData"
-                            :key="chip"
-                            :text="chip"
+                            v-for="feature in tagsInfrastructureData"
+                            :key="feature"
+                            :value="feature"
                             variant="outlined"
                             filter
                         >
-                            {{ chip }}
+                            {{ feature }}
                         </v-chip>
                     </v-chip-group>
                 </fieldset>

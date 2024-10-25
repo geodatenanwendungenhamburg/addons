@@ -612,5 +612,27 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 sinon.restore();
             });
         })
+        describe("controlsReportComponent", () => {
+            it("should return false, if string is not included", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({
+                    selectedReportComponents: ["Seite 1", "Seite 2", "Seite 3"]
+                });
+
+                expect(wrapper.vm.controlsReportComponent("Seite 4")).to.be.false;
+                wrapper.destroy();
+            });
+            it("should return true, if string is included", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({
+                    selectedReportComponents: ["Seite 1", "Seite 2", "Seite 3"]
+                });
+
+                expect(wrapper.vm.controlsReportComponent("Seite 1")).to.be.true;
+                wrapper.destroy();
+            });
+        });
     });
 });
