@@ -15,12 +15,14 @@ import {styleSelectedDistrictLevels} from "../utils/styleSelectedDistrictLevels"
 import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
 import ToolInfo from "../../components/ToolInfo.vue";
 import {onFeaturesLoaded, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge.js";
+import DistrictSelectorFilter from "./DistrictSelectorFilter.vue";
 
 export default {
     name: "DistrictSelector",
     components: {
         Tool,
-        ToolInfo
+        ToolInfo,
+        DistrictSelectorFilter
     },
     data () {
         return {
@@ -328,7 +330,11 @@ export default {
             // select interaction
             this.select = new Select({
                 // select only features of the selected district level
-                filter: (feature, layer) => layer.get("id") === this.selectedLevelId,
+                filter: (feature, layer) => {
+                    const keyOfAttrName = this.selectedDistrictLevel.keyOfAttrName;
+
+                    return layer.get("id") === this.selectedLevelId && this.selectedDistrictLevel.filterableValues.includes(feature.get(keyOfAttrName));
+                },
                 style: new Style({
                     fill: new Fill({color: "rgba(255, 255, 255, 0)"}),
                     stroke: new Stroke({color: "#3399CC", width: 5})
@@ -540,27 +546,31 @@ export default {
                     :locale="currentLocale"
                     :summary="$t('additional:modules.tools.cosi.districtSelector.description')"
                 />
+                <label
+                    class="text-black-50"
+                    for="chip-group"
+                >
+                    {{ $t('additional:modules.tools.cosi.districtSelector.districtLevel') }}
+                </label>
+                <div class="text-left my-2">
+                    <v-chip
+                        v-for="level in districtLevels"
+                        :key="level.layerId"
+                        class="mr-2"
+                        :input-value="level.layerId === selectedLevelId"
+                        filter
+                        @click="setSelectedDistrictLevelId(level.layerId)"
+                    >
+                        {{ level.label }}
+                    </v-chip>
+                </div>
+                <DistrictSelectorFilter
+                    :district-levels="districtLevels"
+                    :selected-level-id="selectedLevelId"
+                    :selected-district-names-by-map="selectedNames"
+                    @updateSelectedFeatures="updateSelectedFeatures"
+                />
                 <form>
-                    <v-select
-                        v-model="selectedLevelId"
-                        :items="districtLevels"
-                        :label="$t('additional:modules.tools.cosi.districtSelector.dropdownLabel')"
-                        item-text="label"
-                        item-value="layerId"
-                        outlined
-                        dense
-                    />
-                    <v-autocomplete
-                        :value="selectedNames"
-                        :items="selectedDistrictLevel.nameList"
-                        :label="$t('additional:modules.tools.cosi.districtSelector.multiDropdownLabel')"
-                        outlined
-                        dense
-                        multiple
-                        small-chips
-                        deletable-chips
-                        @input="updateSelectedFeatures"
-                    />
                     <v-text-field
                         v-if="enableBuffer"
                         v-model="bufferVal"

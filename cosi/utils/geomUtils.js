@@ -1,7 +1,7 @@
 import {default as turfUnion} from "@turf/union";
 import {default as turfIntersect} from "@turf/intersect";
 import {GeoJSON} from "ol/format";
-import {getCenter} from "ol/extent";
+import {getCenter, intersects} from "ol/extent";
 
 /**
  * Checks which district contains a given feature
@@ -77,13 +77,18 @@ export function getContainingDistrictForExtent (districtLevel, extent, returnsFe
     const containingDistricts = [];
 
     for (const district of districtLevel.districts) {
-        const geom = district.adminFeature.getGeometry();
+        const districtExtent = district.adminFeature.getGeometry().getExtent();
 
-        if (geom.intersectsExtent(extent)) {
-            containingDistricts.push(returnsFeature ? district : district.getName());
+        // first the extent for a better performance
+        if (intersects(districtExtent, extent)) {
+            const districtGeometry = district.adminFeature.getGeometry();
 
-            if (!multiple) {
-                break;
+            if (districtGeometry.intersectsExtent(extent)) {
+                containingDistricts.push(returnsFeature ? district : district.getName());
+
+                if (!multiple) {
+                    break;
+                }
             }
         }
     }

@@ -111,26 +111,26 @@ describe("addons/DistrictSelector/utils/prepareDistrictLevels.js", () => {
         });
 
         it("should returns two districts", () => {
-            const districts = getDistricts({label: "Stadtteil", layer: layer, keyOfAttrName: "name"});
+            const districts = getDistricts({label: "Stadtteil", layer: layer, keyOfAttrName: "name", referenceLevel: null});
 
             expect(districts).to.be.an("array").lengthOf(2);
         });
 
         it("should returns two districts with a 'getName' function", () => {
-            const districts = getDistricts({label: "Stadtteil", layer: layer, keyOfAttrName: "name"});
+            const districts = getDistricts({label: "Stadtteil", layer: layer, keyOfAttrName: "name", referenceLevel: null});
 
             expect(districts[0].getName).to.be.a("function");
             expect(districts[1].getName).to.be.a("function");
         });
 
         it("should returns a district where the name and the label are the same", () => {
-            const districts = getDistricts({label: "Stadtteile", layer: layer, keyOfAttrName: "name"});
+            const districts = getDistricts({label: "Stadtteile", layer: layer, keyOfAttrName: "name", referenceLevel: null});
 
             expect(districts[0].getLabel()).to.equal(districts[0].getName());
         });
 
         it("should returns a district where the name and the label are not the same, if duplicateDistrictNames includes the name of the district", () => {
-            const districts = getDistricts({label: "Stadtteile", layer: layer, keyOfAttrName: "name", duplicateDistrictNames: ["Altona"]});
+            const districts = getDistricts({label: "Stadtteile", layer: layer, keyOfAttrName: "name", duplicateDistrictNames: ["Altona"], referenceLevel: null});
 
             expect(districts[0].getLabel()).not.to.equal(districts[0].getName());
             expect(districts[0].getLabel()).to.equal("Altona (Stadtteil)");

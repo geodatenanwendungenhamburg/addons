@@ -73,6 +73,7 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
 
     before(() => {
         sinon.spy(layerOne.getSource(), "on");
+        window.requestAnimationFrame = sinon.stub();
     });
 
 
@@ -132,22 +133,12 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             expect(wrapper.find("form").exists()).to.be.false;
         });
 
-        it("should find a select component with the text 'Stube'", () => {
+        it("should find two chips components", () => {
             const wrapper = factory.getMount(),
-                selectWrapper = wrapper.findComponent({name: "v-select"});
+                chipsWrapper = wrapper.findAllComponents({name: "v-chip"});
 
-            expect(selectWrapper.find(".v-select__selection").text()).to.equal("Stube");
-        });
-
-        it("should find an empty multiple autocomplete component with the items 'Kamin, Sessel, Sofa'", async () => {
-            const wrapper = factory.getMount(),
-                autoCompleteWrapper = wrapper.findComponent({name: "v-autocomplete"});
-
-            await wrapper.setData({selectedDistrictLevel: {nameList: ["Kamin", "Sessel", "Sofa"]}});
-
-            expect(autoCompleteWrapper.props("multiple")).to.be.true;
-            expect(autoCompleteWrapper.props("items")).to.deep.equal(["Kamin", "Sessel", "Sofa"]);
-            expect(autoCompleteWrapper.find(".v-select__selections").text()).to.equal("");
+            expect(chipsWrapper.at(0).text()).to.be.equal("Stube");
+            expect(chipsWrapper.at(1).text()).to.be.equal("Kueche");
         });
 
         it("should find a text-field component with the type 'number'", () => {
@@ -254,7 +245,7 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
                 spyInitializeAdditionalInfoLayers = sinon.spy(DistrictSelector.methods, "initializeAdditionalInfoLayers"),
                 wrapper = factory.getMount();
 
-            expect(wrapper.vm.districtLevels[0]).to.have.all.keys("districts", "referenceLevel", "propertyNameList", "nameList", "layer", "label", "stats", "layerId");
+            expect(wrapper.vm.districtLevels[0]).to.have.all.keys("districts", "referenceLevel", "propertyNameList", "nameList", "layer", "label", "stats", "layerId", "subLevel", "selectedValues", "filterableValues");
             expect(wrapper.vm.selectedLevelId).to.equal("123");
             expect(spySetNonReactiveData.calledOnce).to.be.true;
             expect(spyInitializeAdditionalInfoLayers.calledOnce).to.be.true;
@@ -300,16 +291,6 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
     });
 
     describe("User Interactions", () => {
-        it("should display the correct value if the user changes the district level selection", async () => {
-            const wrapper = factory.getMount(),
-                selectWrapper = wrapper.findComponent({name: "v-select"});
-
-            selectWrapper.vm.selectItem("456");
-            await wrapper.vm.$nextTick();
-
-            expect(selectWrapper.find(".v-select__selection").text()).to.equal("Kueche");
-        });
-
         it("should remove all features if user clicks the reset button", async () => {
             const wrapper = factory.getMount(),
                 btnWrapperArray = wrapper.findAllComponents({name: "v-btn"});

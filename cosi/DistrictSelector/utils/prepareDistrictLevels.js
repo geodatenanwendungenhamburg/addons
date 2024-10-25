@@ -11,22 +11,19 @@ import {getContainingDistrictForExtent} from "../../utils/geomUtils.js";
  * @returns {void}
  */
 export async function prepareDistrictLevels (districtLevels, layerList) {
-    const filteredDistrictLevels = getAllDistrictsWithoutLayer(districtLevels);
+    const filteredDistrictLevels = getAllDistrictsWithoutLayer(districtLevels).reverse();
 
     if (filteredDistrictLevels.length > 0) {
         filteredDistrictLevels.forEach(async (districtLevel, index) => {
+            districtLevel.selectedValues = [];
             // the reference level, null if there is none reference level
-            districtLevel.referenceLevel = index < districtLevels.length - 1 ? districtLevels[index + 1] : null;
+            districtLevel.referenceLevel = index > 0 ? filteredDistrictLevels[index - 1] : null;
+            // the subLevel, null if there is none sublevel
+            districtLevel.subLevel = index < filteredDistrictLevels.length - 1 ? filteredDistrictLevels[index + 1] : null;
+            // // the stats layer for the district level
+            districtLevel.stats.layers = getRawLayersById(districtLevel.stats.layerIds);
             // the layer for the district level
             districtLevel.layer = getLayerById(layerList, districtLevel.layerId);
-            // the stats layer for the district level
-            districtLevel.stats.layers = getRawLayersById(districtLevel.stats.layerIds);
-            districtLevel.layer.getSource().on("featuresloadend", () => {
-                // all districts at this level
-                districtLevel.districts = getDistricts(districtLevel);
-                // the names of all avaible districts
-                districtLevel.nameList = getNameList(districtLevel.layer, districtLevel.keyOfAttrName);
-            });
             // property names for the WFS GetFeature request for the stats features, without geometry
             if (!districtLevel.propertyNameList) {
                 const propertyNameList = await getPropertyNameList(districtLevel.stats.layers);
@@ -36,7 +33,36 @@ export async function prepareDistrictLevels (districtLevels, layerList) {
                 }
             }
         });
+        checkIfFeaturesLoaded(filteredDistrictLevels[0]);
     }
+}
+
+/**
+ * Checks whether the features are already loaded or not. Runs through the districts recursively and gets required data.
+ * @param {Object} districtLevel - The level starting with the top level district.
+ * @returns {void}
+ */
+function checkIfFeaturesLoaded (districtLevel) {
+    if (districtLevel.layer.getSource().getFeatures().length) {
+        // all districts at this level
+        districtLevel.districts = getDistricts(districtLevel);
+        // the names of all avaible districts
+        districtLevel.nameList = getNameList(districtLevel.layer, districtLevel.keyOfAttrName);
+        districtLevel.filterableValues = districtLevel.nameList;
+        if (districtLevel.subLevel !== null) {
+            checkIfFeaturesLoaded(districtLevel.subLevel);
+        }
+    }
+    districtLevel.layer.getSource().on("featuresloadend", () => {
+        // all districts at this level
+        districtLevel.districts = getDistricts(districtLevel);
+        // the names of all avaible districts
+        districtLevel.nameList = getNameList(districtLevel.layer, districtLevel.keyOfAttrName);
+        districtLevel.filterableValues = districtLevel.nameList;
+        if (districtLevel.subLevel !== null) {
+            checkIfFeaturesLoaded(districtLevel.subLevel);
+        }
+    });
 }
 
 /**
@@ -74,6 +100,10 @@ export function getDistricts ({layer, keyOfAttrName, label, duplicateDistrictNam
     const districts = [];
 
     layer.getSource().getFeatures().forEach(function (feature) {
+        if (feature.get("statgebiet") && feature.get("statgebiet") === "106001") {
+            layer.getSource().removeFeature(feature);
+            return;
+        }
         districts.push({
             // the administration feature (district)
             adminFeature: feature,
@@ -104,25 +134,35 @@ export function getDistricts ({layer, keyOfAttrName, label, duplicateDistrictNam
                 return feature.get(keyOfAttrName);
             },
             // name of the reference (parent) district
-            getReferencDistrictName: () => {
-                // Districtlevel = Hamburg
-                if (referenceLevel === null) {
-                    return null;
-                }
-                // Districtlevel = Stadtteile/Bezirke
-                // The info for this can be found already at the admin feautre
-                if (layerId !== "6071") {
-                    return feature.get(referenceLevel.keyOfAttrName);
-                }
-                // Districtlevel = Stat.Gebiete
-                const referenceDistrict = getContainingDistrictForExtent(referenceLevel, feature.getGeometry().getInteriorPoint().getExtent());
-
-                return referenceDistrict.getName();
-            }
+            getReferencDistrictName: () => getReferencDistrictName(referenceLevel, feature, layerId),
+            referencDistrictName: getReferencDistrictName(referenceLevel, feature, layerId)
         });
     });
 
     return districts;
+}
+
+/**
+ * Gets the name of the reference district.
+ * @param {Object} referenceLevel -The reference level from the feature district level.
+ * @param {ol/Feature} feature - The feature where to set the name of the reference district.
+ * @param {String} layerId - The id of the layer for the feature.
+ * @returns {String|null} The name of the reference district if avaiable.
+ */
+function getReferencDistrictName (referenceLevel, feature, layerId) {
+    // Districtlevel = Hamburg
+    if (referenceLevel === null) {
+        return null;
+    }
+    // Districtlevel = Stadtteile/Bezirke
+    // The info for this can be found already at the admin feautre
+    if (layerId !== "6071") {
+        return feature.get(referenceLevel.keyOfAttrName);
+    }
+    // Districtlevel = Stat.Gebiete
+    const referenceDistrict = getContainingDistrictForExtent(referenceLevel, feature.getGeometry().getInteriorPoint().getExtent());
+
+    return referenceDistrict.getName();
 }
 
 /**
