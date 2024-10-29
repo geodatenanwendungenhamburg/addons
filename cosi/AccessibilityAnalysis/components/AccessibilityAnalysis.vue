@@ -33,29 +33,25 @@ export default {
         EditForReportTemplate
     },
     data () {
-        this.availableModes = [
-            {
-                type: "point",
-                text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.mode.point")
-            },
-            {
-                type: "facility",
-                text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.mode.facility")
-            },
-            {
-                type: "region",
-                text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.mode.region")
-            },
-            {
-                type: "path",
-                text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.mode.path")
-            }
-        ];
         return {
             facilityNames: [],
             mapLayer: null,
             directionsLayer: null,
             toolName: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.title"),
+            availableReferenceObjects: [
+                {type: "point", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.points")},
+                {type: "facility", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.facilities")},
+                {type: "path", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.referToPath")}
+            ],
+            pointCardinalities: [
+                {type: "one", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.onePoint")},
+                {type: "some", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.multiplePoints")}
+            ],
+            facilityCardinalities: [
+                {type: "one", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.oneFacility")},
+                {type: "some", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.multipleFacilities")},
+                {type: "all", text: this.$t("additional:modules.tools.cosi.accessibilityAnalysis.allFacilities")}
+            ],
             transportTypes: [
                 {
                     type: "",
@@ -103,7 +99,8 @@ export default {
             currentCoordinates: null,
             hide: false,
             facilityFeature: null,
-            addMultiplePoints: false
+            addMultiplePoints: false,
+            cardinalities: this.pointCardinalities
         };
     },
     computed: {
@@ -132,6 +129,30 @@ export default {
             },
             set (v) {
                 this.setCoordinate(v);
+            }
+        },
+        _selectedFacilities: {
+            get () {
+                return this.selectedFacilities;
+            },
+            set (v) {
+                this.setSelectedFacilities(v);
+            }
+        },
+        _pointFacilityOrRoute: {
+            get () {
+                return this.pointFacilityOrRoute;
+            },
+            set (v) {
+                this.setPointFacilityOrRoute(v);
+            }
+        },
+        _cardinality: {
+            get () {
+                return this.cardinality;
+            },
+            set (v) {
+                this.setCardinality(v);
             }
         },
         _selectedFacilityNames: {
@@ -223,27 +244,29 @@ export default {
                 offSearchbar(this.setSearchResultToOrigin);
                 this.removePointMarker();
                 this.select.getFeatures().clear();
+                this.facilityFeature = null;
             }
         },
         activeSet (newValue) {
             if (!this.dataSets[newValue]) {
                 return;
             }
+            this.facilityFeature = null;
 
             for (const key in this.dataSets[newValue].inputs) {
                 this[key] = this.dataSets[newValue].inputs[key];
             }
             this.removePointMarker();
-            if (this.dataSets[newValue].inputs._mode === "point" || this.dataSets[newValue].inputs._mode === "facility") {
-                for (const coordinate of this.dataSets[newValue].inputs._coordinate) {
-                    const icoord = transformCoordinate(coordinate, "EPSG:4326", this.projectionCode);
+            this.$nextTick(() => {
+                if (this.dataSets[newValue].inputs._mode === "point" || this.dataSets[newValue].inputs._mode === "facility") {
+                    for (const coordinate of this.dataSets[newValue].inputs._coordinate) {
+                        const icoord = transformCoordinate(coordinate, "EPSG:4326", this.projectionCode);
 
-                    if (!this.dataSets[newValue].inputs._setByFeature) {
                         icoord.keepPreviousMarker = true;
+                        this.placingPointMarker(icoord);
                     }
-                    this.placingPointMarker(icoord);
                 }
-            }
+            });
 
             this._isochroneFeatures = this.dataSets[newValue].results;
             this.renderIsochrones(this._isochroneFeatures);
@@ -253,14 +276,56 @@ export default {
             await this.$nextTick();
             this.tryUpdateIsochrones();
         },
+        pointFacilityOrRoute (value) {
+            this.setMode(value);
+            if (value === "point") {
+                this.cardinalities = this.pointCardinalities;
+                this.setCardinality("one");
+            }
+            else if (value === "facility") {
+                this.cardinalities = this.facilityCardinalities;
+                this.setCardinality("one");
+            }
+            else if (value === "path") {
+                this.cardinalities = null;
+                this.setCardinality(null);
+            }
+        },
+        cardinality (value) {
+            if (value === null) {
+                return;
+            }
+            if (value === "one") {
+                this.setCoordinate([]);
+                this.setSelectedFacilities([]);
+                this.removePointMarker();
+            }
+            if (this.pointFacilityOrRoute === "point") {
+                this.addMultiplePoints = value === "some";
+            }
+            else if (this.pointFacilityOrRoute === "facility") {
+                if (value === "one") {
+                    this.addMultiplePoints = false;
+                    this.setMode("facility");
+                }
+                else if (value === "some") {
+                    this.addMultiplePoints = true;
+                    this.setMode("facility");
+                }
+                else if (value === "all") {
+                    this.setMode("region");
+                }
+            }
+        },
         mode () {
-            this.setSetByFeature(false);
+            this.setCoordinate([]);
+            this.setSelectedFacilities([]);
+            this.removePointMarker();
 
             if (this.mode === "facility") {
                 this.addInteraction(this.select);
             }
             else {
-                this.removePointMarker();
                 this.removeInteraction(this.select);
             }
 
@@ -278,7 +343,10 @@ export default {
             }
         },
         setByFeature (val) {
-            if (val && this.mode === "facility" && this.facilityFeature) {
+            if (this.mode === "facility" && this.facilityFeature) {
+                this.setCoordinate([]);
+                this.setSelectedFacilities([]);
+                this.removePointMarker();
                 if (val) {
                     this.setCoordinateFromFeature(this.facilityFeature, this.projectionCode);
                 }
@@ -327,7 +395,7 @@ export default {
                     if (request.settings.steps) {
                         this.setSteps(request.settings.steps);
                     }
-                    this.setSelectedFacility(request.settings.selectedFacility);
+                    this.setSelectedFacilities([request.settings.selectedFacility]);
                     return request; // (we care about the side effects only)
                 },
                 /**
@@ -458,9 +526,14 @@ export default {
                     unpackedFeature = unpackCluster(selectedFeature)[0];
 
                 this.facilityFeature = unpackedFeature;
-                this.setSelectedFacility(unpackedFeature.get(layerMap.keyOfAttrName));
-                if (this.setByFeature) {
-                    this.setCoordinateFromFeature(unpackedFeature, this.projectionCode);
+
+                if (!this.addMultiplePoints) {
+                    this.setSelectedFacilities([]);
+                }
+                this.selectedFacilities.push(unpackedFeature.get(layerMap.keyOfAttrName));
+
+                if (this.pointFacilityOrRoute === "facility") {
+                    this.setCoordinateFromFeature(unpackedFeature, this.projectionCode, this.clickCoordinate);
                 }
                 else {
                     this.setCoordinateFromClick(this.clickCoordinate, this.projectionCode, evt.mapBrowserEvent.originalEvent.shiftKey);
@@ -500,10 +573,19 @@ export default {
          */
         setCoordinateFromFeature: function (feature, mapProjectionCode) {
             const simplifiedGeom = simplify(feature.getGeometry()),
-                coordiantes = getFlatCoordinates(simplifiedGeom);
+                flatCoordinates = getFlatCoordinates(simplifiedGeom),
+                transformedCoordinates = transformCoordinates(flatCoordinates, mapProjectionCode);
 
-            this.setCoordinate(transformCoordinates(coordiantes, mapProjectionCode));
-            this.placingPointMarker(this.clickCoordinate);
+            if (this.setByFeature || feature.getGeometry().getType() === "Point") {
+                this.setCoordinate(this.addMultiplePoints ? [...transformedCoordinates, ...this.coordinate] : transformedCoordinates);
+                flatCoordinates.forEach((coordinate, index) => {
+                    coordinate.keepPreviousMarker = index === 0 ? this.addMultiplePoints : true;
+                    this.placingPointMarker(coordinate);
+                });
+            }
+            else {
+                this.setCoordinateFromClick(this.clickCoordinate, mapProjectionCode);
+            }
         },
 
         downloadMap () {
@@ -576,7 +658,6 @@ export default {
         },
         createAnalysisSet: async function () {
             this.hide = false;
-            this.addMultiplePoints = false;
 
             const analysisSet = {
                 inputs: {},
@@ -602,7 +683,10 @@ export default {
                 _useTravelTimeIndex: this._useTravelTimeIndex !== undefined ? JSON.parse(JSON.stringify(this._useTravelTimeIndex)) : undefined,
                 _setByFeature: this._setByFeature ? JSON.parse(JSON.stringify(this._setByFeature)) : undefined,
                 _steps: this._steps ? JSON.parse(JSON.stringify(this._steps)) : [],
-                _selectedFacility: this._selectedFacility ? this._selectedFacility : undefined
+                _selectedFacility: this._selectedFacility ? this._selectedFacility : undefined,
+                _selectedFacilities: this._selectedFacilities ? this._selectedFacilities : undefined,
+                _pointFacilityOrRoute: this._pointFacilityOrRoute ? this._pointFacilityOrRoute : undefined,
+                _cardinality: this._cardinality ? this._cardinality : undefined
             };
             this.dataSets.push(analysisSet);
 
@@ -632,6 +716,8 @@ export default {
         },
         removeAll () {
             this.setDataSets([]);
+            this.setCoordinate([]);
+            this.setSelectedFacilities([]);
             this.clear();
             this.mapLayer.getSource().clear();
             this.resetIsochroneBBox();
@@ -715,10 +801,22 @@ export default {
                     >
                         <v-form>
                             <v-select
-                                v-model="_mode"
+                                v-model="_pointFacilityOrRoute"
                                 class="mb-4"
-                                :items="availableModes"
-                                :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.dropdownInfo')"
+                                :items="availableReferenceObjects"
+                                :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.pointFacilityOrRoute')"
+                                item-text="text"
+                                item-value="type"
+                                outlined
+                                dense
+                                hide-details
+                            />
+                            <v-select
+                                v-if="Array.isArray(cardinalities)"
+                                v-model="_cardinality"
+                                class="mb-4"
+                                :items="cardinalities"
+                                :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.cardinality')"
                                 item-text="text"
                                 item-value="type"
                                 outlined
@@ -737,14 +835,12 @@ export default {
                                 outlined
                                 dense
                                 hide-details
-                                :append-icon="addMultiplePoints ? 'mdi-map-marker-plus' : 'mdi-map-marker-plus-outline'"
                                 :title="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeatureInfo')"
-                                @click:append="addMultiplePoints = !addMultiplePoints"
                             />
                             <v-text-field
                                 v-if="mode === 'facility'"
                                 id="facility"
-                                :value="selectedFacility"
+                                v-model="_selectedFacilities"
                                 class="mb-4"
                                 :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeature')"
                                 type="text"
@@ -752,9 +848,6 @@ export default {
                                 outlined
                                 dense
                                 hide-details
-                                :append-icon="addMultiplePoints ? 'mdi-map-marker-plus' : 'mdi-map-marker-plus-outline'"
-                                :title="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeatureInfo')"
-                                @click:append="addMultiplePoints = !addMultiplePoints"
                             />
                             <v-select
                                 v-if="mode === 'region'"
@@ -968,7 +1061,7 @@ export default {
         }
 
         .v-input--checkbox {
-            padding: 5px 0;
+            padding: 5px 0 0 0;
         }
 
         button {
