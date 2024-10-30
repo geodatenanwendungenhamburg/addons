@@ -219,6 +219,9 @@ export default {
             this.setActive(false);
         });
     },
+    updated () {
+        this.showTemplateImport(true);
+    },
     mounted () {
         this.loadTemplates();
     },
