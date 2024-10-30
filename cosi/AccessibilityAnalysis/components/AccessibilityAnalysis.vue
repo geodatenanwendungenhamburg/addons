@@ -99,8 +99,7 @@ export default {
             currentCoordinates: null,
             hide: false,
             facilityFeature: null,
-            addMultiplePoints: false,
-            cardinalities: this.pointCardinalities
+            addMultiplePoints: false
         };
     },
     computed: {
@@ -229,6 +228,15 @@ export default {
         },
         selectedFacilityLayer () {
             return this.activeVectorLayerList.filter(layer => this.selectedFacilityNames.includes(layer.get("name")));
+        },
+        cardinalities () {
+            if (this.pointFacilityOrRoute === "point") {
+                return this.pointCardinalities;
+            }
+            if (this.pointFacilityOrRoute === "facility") {
+                return this.facilityCardinalities;
+            }
+            return null;
         }
     },
     watch: {
@@ -279,15 +287,12 @@ export default {
         pointFacilityOrRoute (value) {
             this.setMode(value);
             if (value === "point") {
-                this.cardinalities = this.pointCardinalities;
                 this.setCardinality("one");
             }
             else if (value === "facility") {
-                this.cardinalities = this.facilityCardinalities;
                 this.setCardinality("one");
             }
             else if (value === "path") {
-                this.cardinalities = null;
                 this.setCardinality(null);
             }
         },
@@ -343,16 +348,17 @@ export default {
             }
         },
         setByFeature (val) {
-            if (this.mode === "facility" && this.facilityFeature) {
-                this.setCoordinate([]);
-                this.setSelectedFacilities([]);
-                this.removePointMarker();
-                if (val) {
-                    this.setCoordinateFromFeature(this.facilityFeature, this.projectionCode);
-                }
-                else {
-                    this.setCoordinateFromClick(this.clickCoordinate, this.projectionCode);
-                }
+            this.setCoordinate([]);
+            this.setSelectedFacilities([]);
+            this.removePointMarker();
+            if (!this.facilityFeature) {
+                return;
+            }
+            if (val || this.facilityFeature.getGeometry().getType() === "Point") {
+                this.setCoordinateFromFeature(this.facilityFeature, this.projectionCode);
+            }
+            else {
+                this.setCoordinateFromClick(this.clickCoordinate, this.projectionCode);
             }
         },
         activeVectorLayerList (newValues) {
@@ -533,7 +539,7 @@ export default {
                 this.selectedFacilities.push(unpackedFeature.get(layerMap.keyOfAttrName));
 
                 if (this.pointFacilityOrRoute === "facility") {
-                    this.setCoordinateFromFeature(unpackedFeature, this.projectionCode, this.clickCoordinate);
+                    this.setCoordinateFromFeature(unpackedFeature, this.projectionCode);
                 }
                 else {
                     this.setCoordinateFromClick(this.clickCoordinate, this.projectionCode, evt.mapBrowserEvent.originalEvent.shiftKey);
@@ -837,18 +843,6 @@ export default {
                                 hide-details
                                 :title="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeatureInfo')"
                             />
-                            <v-text-field
-                                v-if="mode === 'facility'"
-                                id="facility"
-                                v-model="_selectedFacilities"
-                                class="mb-4"
-                                :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeature')"
-                                type="text"
-                                readonly
-                                outlined
-                                dense
-                                hide-details
-                            />
                             <v-select
                                 v-if="mode === 'region'"
                                 v-model="_selectedFacilityNames"
@@ -869,6 +863,18 @@ export default {
                                 hide-details
                                 :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeatureOutline')"
                                 :title="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeatureInfo')"
+                            />
+                            <v-text-field
+                                v-if="mode === 'facility'"
+                                id="facility"
+                                v-model="_selectedFacilities"
+                                class="mb-4"
+                                :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.setByFeature')"
+                                type="text"
+                                readonly
+                                outlined
+                                dense
+                                hide-details
                             />
                             <v-select
                                 v-if="mode === 'path'"
