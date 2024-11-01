@@ -66,6 +66,15 @@ export default {
         selectedTemplateIndex () {
             return this.templates.findIndex(template => template.meta.title === this.selectedTemplateName);
         },
+
+        /**
+         * Gets the current selected categories in template.
+         * @returns {String[]} The selected categories.
+         */
+        selectedCategoriesInTemplate () {
+            return this.saveTemplate.find(template => template.name === this.selectedTemplateName).statsCategories;
+        },
+
         /**
          * Gets the current active template.
          * @returns {Object} The activated template.
@@ -436,6 +445,7 @@ export default {
                     template[type] = selected;
                 }
             });
+
             this.setTemplateContents(this.saveTemplate);
         },
 
@@ -943,7 +953,7 @@ export default {
             <TemplateManagerExport
                 v-if="showExportWindow && selectedTemplate?.meta?.isActive"
                 :template-name="selectedTemplate?.meta?.title"
-                :template-stats-categories="selectedTemplate?.state?.Tools?.Dashboard?.statsFeatureFilter"
+                :template-stats-categories="selectedCategoriesInTemplate"
                 @toggleTemplateImport="showTemplateImport"
             />
         </template>

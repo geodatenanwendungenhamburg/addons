@@ -110,19 +110,26 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     isActive: true,
                     created: "01.01."
                 }
-            }];
+            }],
+            saveTemplate = [
+                {
+                    name: "two",
+                    statsCategories: ["cat1"]
+                }
+            ];
 
             await wrapper.setData({
                 showExportWindow: true,
                 templates,
+                saveTemplate,
                 selectedTemplateName: "two"
             });
             wrapper.vm.$nextTick();
             expect(wrapper.findComponent({name: "TemplateManagerExport"}).exists()).to.be.true;
         });
         it("should find TemplateManagerCard Component", async () => {
-            const wrapper = factory.getMount();
-            templates = [{
+            const wrapper = factory.getMount(),
+                templates = [{
                 meta: {
                     title: "one",
                     isActive: false,
@@ -135,18 +142,25 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     isActive: true,
                     created: "01.01."
                 }
-            }];
+            }],
+            saveTemplate = [
+                {
+                    name: "two",
+                    statsCategories: ["cat1"]
+                }
+            ];
 
             await wrapper.setData({
                 showExportWindow: true,
                 templates,
+                saveTemplate,
                 selectedTemplateName: "two"
             });
             expect(wrapper.findComponent({name: "TemplateManagerCard"}).exists()).to.be.true;
         });
         it("should not render export view if selected template is not activated but showExportView is true", async () => {
-            const wrapper = factory.getMount();
-            templates = [{
+            const wrapper = factory.getMount(),
+                templates = [{
                 meta: {
                     title: "one",
                     isActive: false,
@@ -539,7 +553,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     name: "First",
                     category: {
                         "0": "Bevölkerung insgesamt",
-                        "0": "Bevölkerung ab 65 Jahren"
+                        "1": "Bevölkerung ab 65 Jahren"
                     }
                 },
                 {
@@ -550,7 +564,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     name: "Second",
                     category: {
                         "0": "Bevölkerung insgesamt",
-                        "0": "Bevölkerung ab 65 Jahren"
+                        "1": "Bevölkerung ab 65 Jahren"
                     }
                 }
             ],
@@ -634,7 +648,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                     name: "First",
                     category: {
                         "0": "Bevölkerung insgesamt",
-                        "0": "Bevölkerung ab 65 Jahren"
+                        "1": "Bevölkerung ab 65 Jahren"
                     }
                 }
             ],
@@ -659,7 +673,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                         name: "First",
                         category: {
                             "0": "Bevölkerung insgesamt",
-                            "0": "Bevölkerung ab 65 Jahren"
+                            "1": "Bevölkerung ab 65 Jahren"
                         }
                     }
                 ]);
