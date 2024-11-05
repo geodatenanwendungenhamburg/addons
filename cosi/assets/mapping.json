@@ -416,6 +416,102 @@
     "valueType": "absolute"
   },
   {
+    "category": "gesamt_unter_6",
+    "value": "Bevölkerung gesamt unter 6 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "weiblich_unter_6",
+    "value": "Bevölkerung weiblich unter 6 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "maennlich_unter_6",
+    "value": "Bevölkerung maennlich unter 6 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "gesamt_6_17",
+    "value": "Bevölkerung gesamt 6 bis 17 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "weiblich_6_17",
+    "value": "Bevölkerung weiblich 6 bis 17 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "maennlich_6_17",
+    "value": "Bevölkerung maennlich 6 bis 17 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "gesamt_18_64",
+    "value": "Bevölkerung gesamt 18 bis 64 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "weiblich_18_64",
+    "value": "Bevölkerung weiblich 18 bis 64 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "maennlich_18_64",
+    "value": "Bevölkerung maennlich 18 bis 64 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "gesamt_ab_65",
+    "value": "Bevölkerung gesamt ab 65 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "weiblich_ab_65",
+    "value": "Bevölkerung weiblich ab 65 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
+    "category": "maennlich_ab_65",
+    "value": "Bevölkerung maennlich ab 65 Jahren",
+    "group": "Bevölkerung Prognose",
+    "ltf": true,
+    "stadtteil": "22121",
+    "valueType": "absolute"
+  },
+  {
     "category": "bev_auslaender_anz",
     "value": "Ausländer insgesamt",
     "group": "Bevölkerung Migrationshintergrund",
@@ -545,102 +641,6 @@
     "stat_gebiet": "31231",
     "stadtteil": "31241",
     "bezirk": "31269",
-    "valueType": "absolute"
-  },
-  {
-    "category": "gesamt_unter_6",
-    "value": "Bevölkerung gesamt unter 6 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "weiblich_unter_6",
-    "value": "Bevölkerung weiblich unter 6 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "maennlich_unter_6",
-    "value": "Bevölkerung maennlich unter 6 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "gesamt_6_17",
-    "value": "Bevölkerung gesamt 6 bis 17 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "weiblich_6_17",
-    "value": "Bevölkerung weiblich 6 bis 17 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "maennlich_6_17",
-    "value": "Bevölkerung maennlich 6 bis 17 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "gesamt_18_64",
-    "value": "Bevölkerung gesamt 18 bis 64 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "weiblich_18_64",
-    "value": "Bevölkerung weiblich 18 bis 64 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "maennlich_18_64",
-    "value": "Bevölkerung maennlich 18 bis 64 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "gesamt_ab_65",
-    "value": "Bevölkerung gesamt ab 65 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "weiblich_ab_65",
-    "value": "Bevölkerung weiblich ab 65 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
-    "valueType": "absolute"
-  },
-  {
-    "category": "maennlich_ab_65",
-    "value": "Bevölkerung maennlich ab 65 Jahren",
-    "group": "Bevölkerung Prognose",
-    "ltf": true,
-    "stadtteil": "22121",
     "valueType": "absolute"
   },
   {
