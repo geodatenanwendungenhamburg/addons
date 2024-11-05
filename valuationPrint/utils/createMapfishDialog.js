@@ -16,9 +16,10 @@ import {mergeObjectsByDatakey} from "./translator.mergeObjectsByDatakey";
  * @param {String} defaultValue - Used when nothing is present or nothing was found.
  * @param {String} mapProjection - The EPSG-Code of the current map projection.
  * @param {String} outputFilename - The output filename of the pdf (without extension).
+ * @param {Number|null} mapScaleFactor the scale factor for the map
  * @returns {Object} The mapfish dialog.
  */
-export function createMapfishDialog (parcel, knowledgeBase, transformer, defaultValue, mapProjection, outputFilename, layoutName = "A4 Hochformat") {
+export function createMapfishDialog (parcel, knowledgeBase, transformer, defaultValue, mapProjection, outputFilename, layoutName = "A4 Hochformat", mapScaleFactor = null) {
     const mapfishDialog = {},
         defaultDelimitor = ", ";
 
@@ -28,7 +29,7 @@ export function createMapfishDialog (parcel, knowledgeBase, transformer, default
                 mapfishDialog[prefix + "." + postfix] = getWalkerMap(parcel?.feature, parcel?.center, mapProjection, transformerConfig.style, transformerConfig.scale, transformerConfig.layerIds, transformerConfig.dpi);
             }
             else if (transformerConfig.type === "mapProportion") {
-                mapfishDialog[prefix + "." + postfix] = getProportionMap(parcel?.feature, parcel?.extent, mapProjection, transformerConfig.style, transformerConfig.proportion, transformerConfig.layerIds, transformerConfig.dpi);
+                mapfishDialog[prefix + "." + postfix] = getProportionMap(parcel?.feature, parcel?.extent, mapProjection, transformerConfig.style, transformerConfig.proportion, transformerConfig.layerIds, transformerConfig.dpi, mapScaleFactor);
             }
             else if (transformerConfig.type === "mapFixed") {
                 mapfishDialog[prefix + "." + postfix] = getFixedMap(parcel?.center, mapProjection, transformerConfig.style, transformerConfig.bbox, transformerConfig.layerIds, transformerConfig.dpi);

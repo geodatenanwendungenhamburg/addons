@@ -368,7 +368,86 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 expect(addImageByUrlStub.getCall(0).args[0]).to.be.equal("test.url.de");
                 wrapper.destroy();
                 sinon.restore();
-            })
+            });
+        });
+        describe("addInfrastructureMapPageToReport", () => {
+            const mockGetters = {
+                    projection: () => {
+                        return {
+                            getCode: () => "12345"
+                        };
+                    }
+                }
+            let store = new Vuex.Store({
+                namespaces: true,
+                modules: {
+                    Maps: {
+                        namespaced: true,
+                        getters: mockGetters
+                    },
+                    Tools: {
+                        namespaced: true,
+                        modules: {
+                            DistrictSelector: {
+                                namespaced: true,
+                                getters: {
+                                    selectedFeatures: () => ["fooo"]
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            it("should call prepareImage with expected params", async () => {
+                const wrapper = shallowMount(TemplateManagerExport, {
+                    vuetify,
+                    localVue,
+                    store
+                }),
+                prepareImageStub = sinon.stub(wrapper.vm, "prepareImage").resolves({downloadURL: "", bbox: ""}),
+                template = JSON.parse(JSON.stringify(baseProportionTemplate));
+
+                sinon.stub(wrapper.vm, "getProgressValuePerStep");
+                sinon.stub(PDFMaker.prototype, "addChapter");
+                sinon.stub(PDFMaker.prototype, "addImageByUrl");
+
+                wrapper.vm.templateLayerIds = ["1", "2"];
+                template.baseLayer.map.layerIds.unshift("1");
+                template.baseLayer.map.layerIds.unshift("2");
+                template.baseLayer.map.proportion = 0.99;
+                wrapper.vm.pdf = new PDFMaker();
+                await wrapper.vm.addInfrastructureMapPageToReport();
+                await wrapper.vm.$nextTick();
+                expect(prepareImageStub.getCall(0).args[0]).to.be.equal("fooo");
+                expect(prepareImageStub.getCall(0).args[1]).to.deep.equal(template);
+                expect(prepareImageStub.getCall(0).args[2]).to.be.equal("12345");
+                expect(prepareImageStub.getCall(0).args[3]).to.be.equal("infrastructureMap");
+                expect(prepareImageStub.getCall(0).args[4]).to.deep.equal({...mapfishServerConfig});
+                wrapper.destroy();
+                sinon.restore();
+            });
+            it("should call addChapter and addImageByUrl if prepareImage resolves an object", async () => {
+                const wrapper = shallowMount(TemplateManagerExport, {
+                    vuetify,
+                    localVue,
+                    store
+                }),
+                addChapterStub = sinon.stub(PDFMaker.prototype, "addChapter"),
+                addImageByUrlStub = sinon.stub(PDFMaker.prototype, "addImageByUrl");
+
+                sinon.stub(wrapper.vm, "getProgressValuePerStep")
+                sinon.stub(wrapper.vm, "addDetailViewToOverviewPage");
+                sinon.stub(wrapper.vm, "prepareImage").resolves({downloadURL: "test.url.de", bbox: ""});
+                wrapper.vm.pdf = new PDFMaker();
+
+                await wrapper.vm.addInfrastructureMapPageToReport();
+                await wrapper.vm.$nextTick();
+                expect(addChapterStub.getCall(0).args[0]).to.be.equal("Darstellung der Infrastrukturdaten");
+                expect(addImageByUrlStub.getCall(0).args[0]).to.be.equal("test.url.de");
+                wrapper.destroy();
+                sinon.restore();
+            });
         });
         describe("prepareImage", () => {
             it("should call prepareImages and get a string as result", async () => {

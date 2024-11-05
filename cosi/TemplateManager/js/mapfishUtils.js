@@ -26,7 +26,7 @@ const baseProportionTemplate = {
         }
     },
     baseFixedTemplateForHamburg = {
-        uebersichtskarte: {
+        baseLayer: {
             map: {
                 type: "mapFixed",
                 bbox: [545114.80, 5914269.80, 591483.01, 5957132.28],

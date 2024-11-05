@@ -77,6 +77,19 @@ export default {
         },
 
         /**
+         * Gets the selected layer ids in template.
+         * @returns {String[]} The layer ids.
+         */
+        selectedLayerIdsInTemplate () {
+            const foundTemplate = this.saveTemplate.find(template => template.name === this.selectedTemplateName);
+
+            if (!Array.isArray(foundTemplate?.activeLayer)) {
+                return [];
+            }
+            return foundTemplate.activeLayer.map(layer => layer.id);
+        },
+
+        /**
          * Gets the current active template.
          * @returns {Object} The activated template.
          */
@@ -967,6 +980,7 @@ export default {
                 v-if="showExportWindow && isTemplateActive"
                 :template-name="selectedTemplate?.meta?.title"
                 :template-stats-categories="selectedCategoriesInTemplate"
+                :template-layer-ids="selectedLayerIdsInTemplate"
                 @toggleTemplateImport="showTemplateImport"
             />
         </template>

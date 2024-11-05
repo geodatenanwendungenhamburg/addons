@@ -5,9 +5,10 @@ import isObject from "../../../src/utils/isObject.js";
 /**
  * Parses the layers into mapfisch format
  * @param {Object[]} layerList an array of objects with layer, opacity and dpi
+ * @param {Number|null} mapScaleFactor the scale factor for the map
  * @returns {ol/layer[]} the parsed layers in an Array for mapfish
  */
-async function buildLayers (layerList) {
+async function buildLayers (layerList, mapScaleFactor) {
     const layers = [],
         currentResolution = store.getters["Maps/getView"].getResolution();
 
@@ -19,7 +20,7 @@ async function buildLayers (layerList) {
                 return [];
             }
 
-            printLayers.push(await BuildSpec.buildLayerType(item.layer, currentResolution, item.dpi, true));
+            printLayers.push(await BuildSpec.buildLayerType(item.layer, currentResolution, item.dpi, true, mapScaleFactor));
             printLayers.forEach(printLayer => {
                 if (typeof printLayer !== "undefined") {
                     printLayer.opacity = item.opacity;

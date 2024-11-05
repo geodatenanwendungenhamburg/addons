@@ -32,6 +32,11 @@ export default {
             type: Array,
             required: false,
             default: () => []
+        },
+        templateLayerIds: {
+            type: Array,
+            required: false,
+            default: () => []
         }
     },
     data: () => ({
@@ -142,7 +147,8 @@ export default {
                 {func: async () => this.addOverViewPageToReport(), handleProgressByThemSelves: true},
                 {func: () => this.addStatsToReport(this.items)},
                 {func: () => this.addTopicsToReport(this.featuresListItems)},
-                {func: async () => this.addDiagram()}
+                {func: async () => this.addDiagram()},
+                {func: async () => this.addInfrastructureMapPageToReport(), handleProgressByThemSelves: true}
             ];
         },
         /**
@@ -261,7 +267,9 @@ export default {
             }
             const imageName = "overviewMap",
                 feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
-                template = typeof feature !== "undefined" ? {...baseProportionTemplate} : {...baseFixedTemplateForHamburg},
+                template = typeof feature !== "undefined" ?
+                    this.getObjectCopyWithoutReference(baseProportionTemplate) :
+                    this.getObjectCopyWithoutReference(baseFixedTemplateForHamburg),
                 availableProgressForThisStep = this.getProgressValuePerStep() / 2,
                 initialProgressValue = this.progressValue,
                 {downloadURL: overviewImageUrl, bbox} = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig, () => {
@@ -283,6 +291,43 @@ export default {
             });
 
             this.progressValue = initialProgressValue + (availableProgressForThisStep * 2);
+        },
+
+        /**
+         * Adds infrastructure map to the page report.
+         * @returns {void}
+         */
+        async addInfrastructureMapPageToReport () {
+            if (!this.controlsReportComponent("Kartendarstellung der Infrastrukturdaten")) {
+                return;
+            }
+            const imageName = "infrastructureMap",
+                feature = this.selectedFeatures.length > 1 ? unionFeatures(this.selectedFeatures) : this.selectedFeatures[0],
+                template = typeof feature !== "undefined" ?
+                    this.getObjectCopyWithoutReference(baseProportionTemplate) :
+                    this.getObjectCopyWithoutReference(baseFixedTemplateForHamburg),
+                initialProgressValue = this.progressValue,
+                availableProgressForThisStep = this.getProgressValuePerStep();
+            let imageOptions = {};
+
+            this.templateLayerIds.forEach(layerId => {
+                if (!template.baseLayer.map.layerIds.includes(layerId)) {
+                    template.baseLayer.map.layerIds.unshift(layerId);
+                }
+            });
+            template.baseLayer.map.proportion = 0.99;
+            imageOptions = await this.prepareImage(feature, template, this.projection.getCode(), imageName, mapfishServerConfig, () => {
+                if (this.progressValue < (initialProgressValue + availableProgressForThisStep)) {
+                    this.progressValue += 1;
+                }
+            }, undefined, 1).catch(error => console.error(error));
+
+            if (typeof imageOptions.downloadURL !== "string") {
+                return;
+            }
+            this.pdf.addChapter("Darstellung der Infrastrukturdaten");
+            this.pdf.addImageByUrl(imageOptions.downloadURL, imageName, {fit: [500, 500], alignment: "center"});
+            this.pdf.addLineBreak();
         },
 
         /**
@@ -330,7 +375,7 @@ export default {
         },
 
         /**
-         * Prepares an image on mapfish and resolves an url to that image.
+         * Prepares an image on mapfish and resolves an object with an url to that image and its bbox.
          * Rejects if an error occurs.
          * @param {ol/Feature} feature An feature to display on the image.
          * @param {Object} baseLayer The configuration for the base layer to use.
@@ -340,9 +385,11 @@ export default {
          * @param {String} serverConfig.template The name of the template.
          * @param {String} serverConfig.name The name of the mapfish server (most of the time mapfish or mapfish_qs).
          * @param {Function} handleOngoing Function to handle the ongoing process of creating the image.
-         * @returns {void}
+         * @param {String} layoutName The layout name.
+         * @param {Number} mapScaleFactor The scale factor for the map.
+         * @returns {Promise<Object>} a promise which resolves an object {downloadURL, bbox}.
          */
-        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig, handleOngoing, layoutName) {
+        prepareImage (feature, baseLayer, projectionCode, imageName, serverConfig, handleOngoing, layoutName, mapScaleFactor) {
             const extent = feature?.getGeometry()?.getExtent(),
                 baseLayerName = Object.keys(baseLayer)[0],
                 mapfishDialog = createMapfishDialog(
@@ -358,7 +405,8 @@ export default {
                     "",
                     projectionCode,
                     imageName,
-                    layoutName
+                    layoutName,
+                    mapScaleFactor
                 );
 
             return new Promise((resolve, reject) => {
@@ -590,6 +638,15 @@ export default {
                 (rv[x[key]] = rv[x[key]] || []).push(x);
                 return rv;
             }, {});
+        },
+
+        /**
+         * Get the given object as copy without reference of the given object.
+         * @param {Object} obj The object.
+         * @returns {Object} the object as copy.
+         */
+        getObjectCopyWithoutReference (obj) {
+            return JSON.parse(JSON.stringify(obj));
         }
     }
 };
