@@ -17,7 +17,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerCard.vue", () =>
                 localVue,
                 propsData: {
                     title: "Card Title",
-                    created: "01.01.2024"
+                    created: "01.01.2024",
+                    cardId: "1",
+                    isEnabled: false
                 },
                 computed: {
                     currentActiveTemplate: () => "Card Title",
@@ -50,6 +52,11 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerCard.vue", () =>
             const wrapper = factory.getShallowMount();
 
             expect(wrapper.find(".switch").exists()).to.be.true;
+            wrapper.destroy();
+        });
+        it("should render hint", () => {
+            const wrapper = factory.getShallowMount();
+            expect(wrapper.find(".hint").exists()).to.be.true;
             wrapper.destroy();
         });
     });

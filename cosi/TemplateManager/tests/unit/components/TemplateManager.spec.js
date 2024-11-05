@@ -535,13 +535,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
             it("should return true if there are default districts.", () => {
                 const wrapper = factory.getMount(),
                     template = {
-                        state: {
-                            Tools: {
-                                DistrictSelector: {
-                                    selectedDistrictNames: ["district"]
-                                }
-                            }
-                        }
+                        districts: ["district"]
                     };
 
                 expect(wrapper.vm.checkSelectedDistricts(template, 0)).to.be.true;

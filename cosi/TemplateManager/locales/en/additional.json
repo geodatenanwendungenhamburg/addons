@@ -47,7 +47,8 @@
                       "invalidReportTitle": "A maximum of {{reportTitleMaxLength}} characters are allowed",
                       "invalidSelectedAreasName": "A maximum of {{selectedAreasNameMaxLength}} characters are allowed",
                       "invalidAuthor": "A maximum of {{authorMaxLength}} characters are allowed"
-                    }
+                    },
+                    "chooseDistricts": "Please choose districts!"
                 }
             }
         }

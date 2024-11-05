@@ -123,6 +123,7 @@ export default {
                         </button>
                         <label
                             class="switch"
+                            :class="isEnabled ? 'middle' : ''"
                             role="button"
                             tabindex="0"
                             @click="showDistrictInfo(isEnabled)"
@@ -139,7 +140,18 @@ export default {
                             >
                             <span class="slider round" />
                         </label>
-                        <span> {{ checked ? $t("additional:modules.tools.cosi.templateManager.label.enable") : $t("additional:modules.tools.cosi.templateManager.label.disable") }}</span>
+                        <span
+                            :class="isEnabled ? 'middle' : ''"
+                        >
+                            {{ checked ? $t("additional:modules.tools.cosi.templateManager.label.enable") : $t("additional:modules.tools.cosi.templateManager.label.disable") }}
+                        </span>
+                        <div
+                            v-if="!isEnabled"
+                            class="hint"
+                        >
+                            <i class="bi bi-info-circle" />
+                            {{ $t("additional:modules.tools.cosi.templateManager.chooseDistricts") }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -151,6 +163,7 @@ export default {
 .card {
     border: 1px solid $light_grey;
     border-radius: 5px;
+    padding-top: 5px;
     &.disabled {
         opacity: 0.5;
     }
@@ -177,6 +190,18 @@ export default {
     .created-section {
         font-size: 11px;
         color: #6E7174;
+    }
+    .middle {
+        align-self: center;
+    }
+    .hint {
+        position: absolute;
+        right: 0;
+        bottom: 5px;
+        font-size: 10px;
+        i {
+            font-size: 14px;
+        }
     }
 }
 .card[isActive='true'] {

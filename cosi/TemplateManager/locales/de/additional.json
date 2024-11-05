@@ -47,7 +47,8 @@
                       "invalidReportTitle": "Es sind maximal {{reportTitleMaxLength}} Zeichen erlaubt",
                       "invalidSelectedAreasName": "Es sind maximal {{selectedAreasNameMaxLength}} Zeichen erlaubt",
                       "invalidAuthor": "Es sind maximal {{authorMaxLength}} Zeichen erlaubt"
-                    }
+                    },
+                    "chooseDistricts": "Bitte Gebiete auswählen!"
                 }
             }
         }
