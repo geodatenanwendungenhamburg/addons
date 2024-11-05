@@ -60,6 +60,7 @@ export default {
         selectedReportComponents: []
     }),
     computed: {
+        ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/Dashboard", ["items"]),
         ...mapGetters("Tools/FeaturesList", ["featuresListItems"]),
         ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures"]),
@@ -207,6 +208,11 @@ export default {
                         row = [];
 
                     columns.forEach((col, index) => {
+                        const numberOptions = statFeature.valueType === "relative" ? {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1
+                        } : {};
+
                         let value,
                             alignment = "right";
 
@@ -220,7 +226,7 @@ export default {
                         else {
                             value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
                         }
-                        this.pdf.addCell(row, value.toLocaleString(this.currentLocale), alignment);
+                        this.pdf.addCell(row, value.toLocaleString(this.currentLocale, numberOptions), alignment);
                     });
                     body.push(row);
                 });

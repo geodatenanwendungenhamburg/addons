@@ -11,9 +11,10 @@ import Feature from "ol/Feature";
  * @param {*} timestamp - year
  * @param {Object[]} districts - All districts of the current level.
  * @param {String} [timestampPrefix="jahr_"] - The string the timestamps start with (e.g. jahr_).
- * @returns {String} The value as Sring for the cell or "-" if no value is available.
+ * @param {String} [locale="de-DE"] The locale to be used for number formatting.
+ * @returns {String} The value as String for the cell or "-" if no value is available.
  */
-export function getValue (item, header, timestamp, districts, timestampPrefix = "jahr_") {
+export function getValue (item, header, timestamp, districts, timestampPrefix = "jahr_", locale = "de-DE") {
     let val;
 
     if (!isObject(item)) {
@@ -21,10 +22,14 @@ export function getValue (item, header, timestamp, districts, timestampPrefix = 
     }
 
     if (header?.value && item[header.value]) {
-        val = parseFloat(item[header.value][String(timestampPrefix) + timestamp]);
+        const parsedFloat = parseFloat(item[header.value][String(timestampPrefix) + timestamp]);
+
+        if (Number.isFinite(parsedFloat)) {
+            val = parsedFloat.toLocaleString(locale, {maximumFractionDigits: 1});
+        }
     }
 
-    if (isNaN(val) && isObject(item.calculation) && item.valueType === "relative" && item[header.value]) {
+    if (!val && isObject(item.calculation) && item.valueType === "relative" && item[header.value]) {
         const foundDistrict = getDistrictByName(districts, header.value),
             statFeature_A = getStatisticByCategory(foundDistrict, item.calculation.category_A),
             statFeature_B = getStatisticByCategory(foundDistrict, item.calculation.category_B);
@@ -35,11 +40,13 @@ export function getValue (item, header, timestamp, districts, timestampPrefix = 
             dividend = Number(statFeature_A.get(String(timestampPrefix) + timestamp));
             divisor = Number(statFeature_B.get(String(timestampPrefix) + timestamp));
             result = mathutils[item.calculation.operation](dividend, divisor) * (item.calculation.modifier || 1);
-            val = Number(result.toFixed(2));
+            if (Number.isFinite(result)) {
+                val = result.toLocaleString(locale, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            }
             item[header.value].isCalculated = true;
         }
     }
-    return val ? Math.round(val * 1000) / 1000 : "-";
+    return val || "-";
 }
 
 /**

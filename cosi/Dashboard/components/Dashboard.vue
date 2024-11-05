@@ -439,7 +439,7 @@ export default {
         getAverageAsString (item, timestamp) {
             const average = this.getAverage(item, this.getSelectedDistrictsLabels(this.selectedDistrictLevel.districts), timestamp, this.timestampPrefix);
 
-            return average.toLocaleString(this.currentLocale);
+            return average.toLocaleString(this.currentLocale, {maximumFractionDigits: 1});
         },
 
         getAverageForAllTimestamps (item) {
@@ -454,7 +454,7 @@ export default {
         getTotalAsString (item, timestamp) {
             const total = this.getTotal(item, this.getSelectedDistrictsLabels(this.selectedDistrictLevel.districts), timestamp, this.timestampPrefix);
 
-            return total.toLocaleString(this.currentLocale);
+            return total.toLocaleString(this.currentLocale, {maximumFractionDigits: 1});
         },
 
         getTotalForAllTimestamps (item) {
