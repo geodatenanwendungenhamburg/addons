@@ -323,15 +323,15 @@ export function getAverage (item, districtNames, timestamp, timestampPrefix) {
 /**
  * Calculates the total of a dataset
  * @param {Object} item - the data for that category
- * @param {String[]} districtNames - the districts objects to generate the chart data for
+ * @param {String[]} districts - the districts to generate the data for (must be the LABELS of the districts as they are used as keys in param 'item' NOT the names)
  * @param {Number} timestamp - the current timestamp
  * @param {String} timestampPrefix - the prefix for timestamp attributes
  * @param {Boolean} [simple=false] - get culmulative total if available
  * @returns {Number} the total
  */
-export function getTotal (item, districtNames, timestamp, timestampPrefix, simple = false) {
+export function getTotal (item, districts, timestamp, timestampPrefix, simple = false) {
     if (!simple && item?.calculation && item?.valueType === "relative") {
-        return this.getCulmulativeTotal(item, districtNames, timestamp, timestampPrefix);
+        return this.getCulmulativeTotal(item, districts, timestamp, timestampPrefix);
     }
     if (!simple && item?.valueType !== "absolute") {
         return "-";
@@ -339,7 +339,7 @@ export function getTotal (item, districtNames, timestamp, timestampPrefix, simpl
 
     let result = 0;
 
-    for (const district of districtNames) {
+    for (const district of districts) {
         if (item[district]?.[timestampPrefix + timestamp]) {
             result += parseFloat(item[district][timestampPrefix + timestamp]);
         }

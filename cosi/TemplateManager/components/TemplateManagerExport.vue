@@ -108,6 +108,16 @@ export default {
          */
         isAuthorValid () {
             return this.author.length < this.authorMaxLength;
+        },
+        /**
+         * Gets the labels of the selected districts.
+         * These are the identifiers used in the dashboard (e.g. "Bergedorf (Bezirk)" instead of "Bergedorf")
+         * @returns {String[]} The labels of the selected districts.
+         */
+        selectedDistrictLabels () {
+            return this.selectedDistrictLevel.districts
+                .filter(dist => this.selectedDistrictNames.includes(dist.getName()))
+                .map(dist => dist.getLabel());
         }
     },
     mounted () {
@@ -221,7 +231,7 @@ export default {
                             value = statFeature.category;
                         }
                         else if (index === 1) {
-                            value = this.getTotal(statFeature, this.selectedDistrictNames, lastYear, "jahr_");
+                            value = this.getTotal(statFeature, this.selectedDistrictLabels, lastYear, "jahr_");
                         }
                         else {
                             value = parseFloat(statFeature[col.text]["jahr_" + lastYear]) || "-";
