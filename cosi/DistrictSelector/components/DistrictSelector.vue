@@ -10,12 +10,14 @@ import getters from "../store/gettersDistrictSelector";
 import mutations from "../store/mutationsDistrictSelector";
 import {DragBox, Select} from "ol/interaction";
 import {singleClick} from "ol/events/condition";
-import {Fill, Stroke, Style} from "ol/style.js";
+import {Fill, Stroke, Style, Text} from "ol/style.js";
 import {styleSelectedDistrictLevels} from "../utils/styleSelectedDistrictLevels";
 import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
 import ToolInfo from "../../components/ToolInfo.vue";
 import {onFeaturesLoaded, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge.js";
 import DistrictSelectorFilter from "./DistrictSelectorFilter.vue";
+import Feature from "ol/Feature";
+import {union} from "../../utils/geomUtils.js";
 
 export default {
     name: "DistrictSelector",
@@ -167,6 +169,15 @@ export default {
             if (this.selectedNames.length !== 0 || this.active) {
                 styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, this.selectedDistrictLevel.activeStyle);
             }
+        },
+
+        boundingGeometry () {
+            this.bufferLayer.getSource().clear();
+            if (this.bufferVal > 0 && typeof this.boundingGeometry !== "undefined") {
+                const bufferedFeature = this.getBufferFeature(this.boundingGeometry.getGeometries());
+
+                this.bufferLayer.getSource().addFeature(bufferedFeature);
+            }
         }
     },
     created () {
@@ -204,7 +215,7 @@ export default {
         ...mapMutations("Tools/Filter", ["setFilterGeometry"]),
         ...mapActions("Alerting", ["addSingleAlert", "cleanup"]),
         ...mapActions("Tools/DistrictSelector", ["loadStatFeatures", "loadMapping"]),
-        ...mapActions("Maps", ["addInteraction", "removeInteraction", "zoomToExtent", "resetView"]),
+        ...mapActions("Maps", ["addInteraction", "removeInteraction", "zoomToExtent", "resetView", "addNewLayerIfNotExists"]),
         ...mapActions("Tools/SelectionManager", ["addNewSelection"]),
         /**
          * quickly checks the key evt code
@@ -216,6 +227,24 @@ export default {
             if (evt.code === "Enter") {
                 this.setActive(false);
             }
+        },
+
+        /**
+         * Get a feature to display the buffer. Merges the geometries of the districts.
+         * @param {ol/geom/Geometry[]} geometries - An array of buffered district geometries.
+         * @returns {ol/Feature} The bufferd feature.
+         */
+        getBufferFeature (geometries) {
+            const features = [];
+
+            geometries.forEach(geom => {
+                const feature = new Feature({
+                    geometry: geom
+                });
+
+                features.push(feature);
+            });
+            return union(features, false, true);
         },
 
         /**
@@ -326,7 +355,7 @@ export default {
          * Sets all needed non reactive data.
          * @returns {void}
          */
-        setNonReactiveData () {
+        async setNonReactiveData () {
             // select interaction
             this.select = new Select({
                 // select only features of the selected district level
@@ -350,6 +379,28 @@ export default {
             this.dragBox.setActive(false);
             this.registerDragBoxListener(this.dragBox, this.select.getFeatures());
             this.addInteraction(this.dragBox);
+
+            // buffer layer
+            this.bufferLayer = await this.addNewLayerIfNotExists({layerName: "district-selection-buffer"});
+            this.bufferLayer.setStyle(() => {
+                return new Style({
+                    stroke: new Stroke({
+                        color: [66, 66, 66, 1],
+                        width: 1,
+                        lineDash: [10, 4]
+                    }),
+                    text: new Text({
+                        textAlign: "start",
+                        textBaseline: "middle",
+                        text: "Puffer",
+                        fill: new Fill({color: "white"}),
+                        stroke: new Stroke({color: [66, 66, 66, 1], width: 4}),
+                        placement: "line",
+                        font: "12px Arial",
+                        repeat: 500
+                    })
+                });
+            });
         },
 
         /**

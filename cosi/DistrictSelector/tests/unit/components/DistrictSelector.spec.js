@@ -30,7 +30,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             addInteraction: () => sinon.stub(),
             removeInteraction: () => sinon.stub(),
             resetView: () => sinon.stub(),
-            zoomToExtent: () => sinon.stub()
+            zoomToExtent: () => sinon.stub(),
+            addNewLayerIfNotExists: () => new Layer({source: new Source()})
         },
         layerOne = new Layer({id: "123", source: new Source()}),
         layerTwo = new Layer({id: "456", source: new Source()}),
