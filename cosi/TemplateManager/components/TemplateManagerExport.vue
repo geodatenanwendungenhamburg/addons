@@ -55,7 +55,13 @@ export default {
         author: "",
         authorMaxLength: 35,
         pdf: null,
-        categoryInChart: [{"Bevölkerung": "Bevölkerung insgesamt"}],
+        categoryInChart: [
+            {"Bevölkerung": "Bevölkerung insgesamt"},
+            {"Bevölkerung unter x Jahren": "Bevölkerung unter 18 Jahren"},
+            {"Bevölkerung ab x Jahren": "Bevölkerung ab 65 Jahren"},
+            {"Bevölkerung Migrationshintergrund": "Bevölkerung mit Migrationshintergrund"},
+            {"Bevölkerung Migrationshintergrund": "Ausländer insgesamt"}
+        ],
         progressValue: 0,
         selectedReportComponents: []
     }),
@@ -467,8 +473,8 @@ export default {
                 imageArr.forEach((image, index) => {
                     this.pdf.addHeadline(Object.keys(this.categoryInChart[index])[0]);
                     this.pdf.addParagraph(Object.values(this.categoryInChart[index])[0]);
-                    this.pdf.addImageByUrl(undefined, imageArr, {width: 500, alignment: "center"});
-                    document.getElementById("canvas").remove();
+                    this.pdf.addImageByUrl(undefined, image, {width: 500, alignment: "center"});
+                    this.pdf.addLineBreak(5);
                 });
             }
         },
@@ -479,7 +485,12 @@ export default {
          * @returns {Promise<string>} the toBase64Image image string.
          */
         getChartImage (data) {
-            const canvasElement = document.createElement("canvas");
+            const oldCanvasElement = document.getElementById("canvas"),
+                canvasElement = document.createElement("canvas");
+
+            if (oldCanvasElement !== null) {
+                oldCanvasElement.parentElement.removeChild(oldCanvasElement);
+            }
 
             canvasElement.id = "canvas";
             canvasElement.style.cssText = "display: none";
@@ -536,15 +547,13 @@ export default {
                         return;
                     }
 
-                    groupedMapping[key].forEach(mappingObject => {
-                        const statFeature = items.find((item) => item.category === mappingObject.value);
+                    const statFeature = items.find((item) => item.category === category[key]);
 
-                        statFeature.years.reverse().forEach(year => {
-                            const value = this.getTotal(statFeature, selectedDistrictNames, year, "jahr_");
+                    statFeature.years.reverse().forEach(year => {
+                        const value = this.getTotal(statFeature, selectedDistrictNames, year, "jahr_");
 
-                            labels.push(year);
-                            data.push(value);
-                        });
+                        labels.push(year);
+                        data.push(value);
                     });
                 });
 

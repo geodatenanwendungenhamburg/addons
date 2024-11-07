@@ -175,10 +175,19 @@ export default class PDFMaker {
 
     /**
      * Adds a line break to the document.
+     * @param {Number} count The break lines.
      * @returns {void}
      */
-    addLineBreak () {
-        this.content.push("\n");
+    addLineBreak (count = 1) {
+        let breakLine = "\n";
+
+        if (Number.isInteger(count) && count > 1) {
+            for (let n = 1; n < count; n++) {
+                breakLine += "\n";
+            }
+        }
+
+        this.content.push(breakLine);
     }
 
     /**
