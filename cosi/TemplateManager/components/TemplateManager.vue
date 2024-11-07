@@ -30,7 +30,8 @@ export default {
             filters: [],
             showExportWindow: false,
             showImportSection: true,
-            saveTemplate: []
+            saveTemplate: [],
+            isTemplateActive: false
         };
     },
     computed: {
@@ -551,6 +552,8 @@ export default {
             if (!this.selectedTemplate.meta?.isActive && this.showExportWindow) {
                 this.openExportWindow(true);
             }
+
+            this.isTemplateActive = this.activeTemplateName === this.selectedTemplateName;
         },
         /**
          * Sets the current activated template and loads it.
@@ -560,6 +563,11 @@ export default {
          */
         activeCard (name, active) {
             this.activeTemplateName = name;
+            this.isTemplateActive = active;
+
+            if (!active) {
+                this.openExportWindow(true);
+            }
 
             this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex, active);
         },
@@ -673,7 +681,7 @@ export default {
                         <button
                             class="btn lh-1 fs-5"
                             :class="showExportWindow === true ? 'btn-primary' : 'btn-outline'"
-                            :disabled="!selectedTemplate?.meta?.isActive"
+                            :disabled="!isTemplateActive"
                             @click="openExportWindow(false)"
                         >
                             <i class="bi bi-download pe-2" />{{ $t("additional:modules.tools.cosi.templateManager.export") }}
@@ -956,7 +964,7 @@ export default {
                 </div>
             </div>
             <TemplateManagerExport
-                v-if="showExportWindow && selectedTemplate?.meta?.isActive"
+                v-if="showExportWindow && isTemplateActive"
                 :template-name="selectedTemplate?.meta?.title"
                 :template-stats-categories="selectedCategoriesInTemplate"
                 @toggleTemplateImport="showTemplateImport"

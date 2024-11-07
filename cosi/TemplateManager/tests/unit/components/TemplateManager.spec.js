@@ -129,6 +129,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
 
             await wrapper.setData({
                 showExportWindow: true,
+                isTemplateActive: true,
                 templates,
                 saveTemplate,
                 selectedTemplateName: "two"
