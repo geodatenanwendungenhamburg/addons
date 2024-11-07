@@ -45,7 +45,7 @@ export default {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Maps", ["getLayerById"]),
         ...mapGetters("Tools/FeaturesList", ["activeVectorLayerList", "layerMapById"]),
-        ...mapGetters("Tools/ScenarioBuilder", ["activeScenario"]),
+        ...mapGetters("Tools/ScenarioBuilder", ["activeScenario", "active"]),
         /**
          * gets the 2D map from the collection
          * @returns {module:ol/Map} the 2D map
@@ -96,7 +96,7 @@ export default {
                 if (this.activeScenario) {
                     this.editDialog = true;
                 }
-                else {
+                else if (!this.activeScenario && this.active) {
                     this.noScenarioWarning = true;
                 }
             }
