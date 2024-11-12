@@ -142,12 +142,12 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             expect(chipsWrapper.at(1).text()).to.be.equal("Kueche");
         });
 
-        it("should find a text-field component with the type 'number'", () => {
+        it("should find a input element with the type 'number'", () => {
             const wrapper = factory.getMount(),
-                textFieldWrapper = wrapper.findComponent({name: "v-text-field"});
+                inputElement = wrapper.find("#input-buffer");
 
-            expect(textFieldWrapper.exists()).to.be.true;
-            expect(textFieldWrapper.props("type")).to.equal("number");
+            expect(inputElement.exists()).to.be.true;
+            expect(inputElement.attributes("type")).to.equal("number");
         });
 
         it("should not find a text-field component with the type 'number'", () => {
@@ -183,31 +183,32 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             expect(textFieldWrapper.exists()).to.be.false;
         });
 
-        it("should find a checkbox component with the value Sozialräume", () => {
+        it("should find a switch element with the value Sozialräume", () => {
             const wrapper = factory.getMount(),
-                checkboxWrapperArray = wrapper.findAllComponents({name: "v-checkbox"});
+                switchElements = wrapper.findAll("#layerSwitcher");
 
-            expect(checkboxWrapperArray.exists()).to.be.true;
-            expect(checkboxWrapperArray.at(0).props("value")).to.equal("Sozialräume");
+            expect(switchElements.exists()).to.be.true;
+            expect(switchElements.at(0).attributes("role")).to.equal("switch");
+            expect(switchElements.at(0).attributes("value")).to.equal("Sozialräume");
         });
 
-        it("should find a checkbox component with the value RISE", () => {
+        it("should find a switch element with the value RISE", () => {
             const wrapper = factory.getMount(),
-                checkboxWrapperArray = wrapper.findAllComponents({name: "v-checkbox"});
+                switchElements = wrapper.findAll("#layerSwitcher");
 
-            expect(checkboxWrapperArray.exists()).to.be.true;
-            expect(checkboxWrapperArray.at(1).props("value")).to.equal("RISE");
+            expect(switchElements.exists()).to.be.true;
+            expect(switchElements.at(1).attributes("role")).to.equal("switch");
+            expect(switchElements.at(1).attributes("value")).to.equal("RISE");
         });
 
-        it("should find three button components with the right content", () => {
+        it("should find two button elements with the right content", () => {
             const wrapper = factory.getMount(),
-                buttonWrapperArray = wrapper.findAllComponents({name: "v-btn"});
+                resetButton = wrapper.find("#resetButton"),
+                confirmButton = wrapper.find("#confirmButton");
 
-            expect(buttonWrapperArray.exists()).to.be.true;
-            expect(buttonWrapperArray).to.have.lengthOf(4);
-            expect(buttonWrapperArray.wrappers[1].text()).to.equal("additional:modules.tools.cosi.districtSelector.buttonConfirm");
-            expect(buttonWrapperArray.wrappers[2].text()).to.equal("additional:modules.tools.cosi.districtSelector.buttonReset");
-            expect(buttonWrapperArray.wrappers[3].findComponent({name: "v-icon"}).classes("mdi-pencil")).to.be.true;
+            expect(confirmButton.text()).to.equal("additional:modules.tools.cosi.districtSelector.buttonConfirm");
+            expect(resetButton.text()).to.equal("additional:modules.tools.cosi.districtSelector.buttonReset");
+
 
         });
     });
@@ -294,17 +295,17 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
     describe("User Interactions", () => {
         it("should remove all features if user clicks the reset button", async () => {
             const wrapper = factory.getMount(),
-                btnWrapperArray = wrapper.findAllComponents({name: "v-btn"});
+                resetButton = wrapper.find("#resetButton");
 
-            await btnWrapperArray.at(1).trigger("click");
+            await resetButton.trigger("click");
             expect(wrapper.vm.select.getFeatures().getLength()).to.be.equal(0);
         });
 
-        it("should activate the dropbox interaction if user clicks the mdi-pencil button", async () => {
+        it("should activate the dropbox interaction if user clicks the appropriate button", async () => {
             const wrapper = factory.getMount(),
-                btnWrapperArray = wrapper.findAllComponents({name: "v-btn"});
+                buttonElement = wrapper.find("#drawButton");
 
-            await btnWrapperArray.at(3).trigger("click");
+            await buttonElement.trigger("click");
             expect(wrapper.vm.dragBox.getActive()).to.be.true;
         });
     });

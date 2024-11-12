@@ -18,13 +18,17 @@ import {onFeaturesLoaded, addModelsByAttributes, getModelByAttributes} from "../
 import DistrictSelectorFilter from "./DistrictSelectorFilter.vue";
 import Feature from "ol/Feature";
 import {union} from "../../utils/geomUtils.js";
+import IconButton from "./IconButton.vue";
+import AccordionItem from "./AccordionItem.vue";
 
 export default {
     name: "DistrictSelector",
     components: {
         Tool,
         ToolInfo,
-        DistrictSelectorFilter
+        DistrictSelectorFilter,
+        IconButton,
+        AccordionItem
     },
     data () {
         return {
@@ -621,70 +625,85 @@ export default {
                     :selected-district-names-by-map="selectedNames"
                     @updateSelectedFeatures="updateSelectedFeatures"
                 />
-                <form>
-                    <v-text-field
+                <hr class="my-4 mx-0 text-black-50">
+                <AccordionItem
+                    id="hidden-objects"
+                    :title="$t('additional:modules.tools.cosi.districtSelector.drawLabel')"
+                    icon="bi bi-plus-square-dotted"
+                >
+                    <div class="d-flex align-items-center">
+                        <IconButton
+                            :id="'drawButton'"
+                            :aria="'Rechteck zeichnen'"
+                            :class-array="['btn-primary', 'me-3', dragBox.getActive() ? 'active': '']"
+                            :icon="'bi bi-square'"
+                            :interaction="() => toggleDragBox()"
+                        />
+                    </div>
+                </AccordionItem>
+                <div v-if="Object.keys(additionalInfoLayers).length">
+                    <AccordionItem
+                        id="hidden-objects2"
+                        :title="$t('additional:modules.tools.cosi.districtSelector.additionalLayer')"
+                        icon="bi bi-layers-half"
+                    >
+                        <div class="mb-2">
+                            {{ $t('additional:modules.tools.cosi.districtSelector.additionalInfoLayersHelp') }}
+                        </div>
+                        <div
+                            v-for="(ids, key) in additionalInfoLayers"
+                            :key="key"
+                            class="form-check form-switch fs-5 me-3"
+                        >
+                            <input
+                                id="layerSwitcher"
+                                v-model="visibleInfoLayers"
+                                class="form-check-input rounded-pill me-1"
+                                type="checkbox"
+                                :value="key"
+                                role="switch"
+                                aria-checked="false"
+                            >
+                            <label
+                                class="form-check-label"
+                                for="layerSwitcher"
+                            >
+                                {{ key }}
+                            </label>
+                        </div>
+                    </AccordionItem>
+                </div>
+                <AccordionItem
+                    id="hidden-objects3"
+                    :title="$t('additional:modules.tools.cosi.districtSelector.inputLabel')"
+                    icon="bi bi-record-circle"
+                >
+                    <input
                         v-if="enableBuffer"
+                        id="input-buffer"
                         v-model="bufferVal"
-                        :label="$t('additional:modules.tools.cosi.districtSelector.inputLabel')"
-                        outlined
-                        dense
+                        class="form-control w-25"
                         type="number"
                         step="250"
                         min="0"
-                    />
-                    <div v-if="Object.keys(additionalInfoLayers).length">
-                        <span class="text-subtitle-2">
-                            {{ $t('additional:modules.tools.cosi.districtSelector.additionalLayer') }}
-                        </span>
-                        <v-icon
-                            small
-                            @click="showAlert($t('additional:modules.tools.cosi.districtSelector.additionalInfoLayersHelp'))"
-                        >
-                            mdi-help-circle
-                        </v-icon>
-                    </div>
-                    <v-row dense>
-                        <v-col
-                            v-for="(ids, key) in additionalInfoLayers"
-                            :key="key"
-                        >
-                            <v-checkbox
-                                v-model="visibleInfoLayers"
-                                :value="key"
-                                multiple
-                                dense
-                                hide-details
-                                type="checkbox"
-                                :label="`${key}`"
-                            />
-                        </v-col>
-                    </v-row>
-                    <v-divider />
-                    <v-btn
-                        tile
-                        depressed
-                        color="grey lighten-1"
+                    >
+                </AccordionItem>
+                <div class="d-grid d-flex justify-content-between mt-5">
+                    <button
+                        id="confirmButton"
+                        class="btn btn-outline lh-1 fs-5"
                         @click="setActive(false);"
                     >
-                        {{ $t('additional:modules.tools.cosi.districtSelector.buttonConfirm') }}
-                    </v-btn>
-                    <v-btn
-                        tile
-                        depressed
-                        color="grey lighten-1"
+                        <i class="bi bi-check-lg pe-2" />{{ $t("additional:modules.tools.cosi.districtSelector.buttonConfirm") }}
+                    </button>
+                    <button
+                        id="resetButton"
+                        class="btn btn-outline lh-1 fs-5"
                         @click="clearFeatures"
                     >
-                        {{ $t('additional:modules.tools.cosi.districtSelector.buttonReset') }}
-                    </v-btn>
-                    <v-btn
-                        tile
-                        depressed
-                        :color="dragBoxButtonColor"
-                        @click="toggleDragBox"
-                    >
-                        <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
-                </form>
+                        <i class="bi bi-arrow-counterclockwise pe-2" />{{ $t("additional:modules.tools.cosi.districtSelector.buttonReset") }}
+                    </button>
+                </div>
             </v-app>
         </template>
     </Tool>
@@ -692,21 +711,21 @@ export default {
 
 <style lang="scss">
     @import "~variables";
+    @import "~/css/mixins.scss";
 
     #district-selector {
         font-family: $font_family_default;
         max-width: 460px;
-        .v-input {
-            border-radius: $border-radius-base;
-            font-size: 14px;
-            .v-label {
-                font-size: 14px;
-            }
+
+        .btn-outline {
+            border-color: $light_blue;
+            color: $light_blue;
         }
-        button {
-            text-transform: inherit;
-            font-family: $font_family_accent;
-        }
+       .btn-outline:hover {
+            cursor: pointer;
+            background-color: $light_blue;
+            color: $white;
+       }
     }
 
     .ol-dragbox {
