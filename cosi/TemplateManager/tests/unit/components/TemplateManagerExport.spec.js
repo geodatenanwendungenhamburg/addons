@@ -79,7 +79,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
             const wrapper = factory.getShallowMount();
 
             await wrapper.setData({
-                selectedAreasName: "Die sieben Königslanden"
+                selectedAreasName: "Die 7 Königslanden",
             });
 
             expect(wrapper.find("span.hint").exists()).to.be.false;
@@ -147,7 +147,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
             const wrapper = factory.getShallowMount();
 
             await wrapper.setData({
-                selectedAreasName: "Die sieben Königslanden"
+                selectedAreasName: "Die 7 Königslanden"
             });
             expect(wrapper.vm.isSelectedAreasNameValid).to.be.true;
             wrapper.destroy();

@@ -7,7 +7,7 @@
                     "importTemplate": "Import Template",
                     "loadFromTemplate": "Load Template",
                     "exportFromTemplate": "Export template in report",
-                    "infoLoadFromTemplates": "Load basic thematic configurations for specific types of analyses. You can find the data which will be loaded in the templates' overview. Some templates include the selection of areas, some require you to select areas yourself in beforehand.",
+                    "infoLoadFromTemplates": "Load basic thematic configurations for specific types of analyses. You can find the data which will be loaded in the templates' overview. To load templates, areas must first be selected. Data can only be exported from templates once a template has been loaded.",
                     "noInfo": "Not available.",
                     "optionalComponents": "Optional components of the report to be exported",
                     "infrastructureData": "Infrastructure Data:",
@@ -18,6 +18,7 @@
                     "overview": "Overview",
                     "export": "Export",
                     "note": "Note: loaded templates cannot be edited.",
+                    "infrastructureHint": "Note: If there are more than 10 institutions, no infrastructure data table is displayed.",
                     "label": {
                       "created": "Created",
                       "name": "Name",

@@ -76,12 +76,12 @@ export default {
                 </p>
             </div>
             <div class="row">
-                <div class="col">
+                <div class="col mt-3">
                     <button
-                        class="btn btn-outline lh-1 fs-5 px-2 py-1 mt-2"
+                        class="btn btn-outline lh-1 fs-5"
                         @click.prevent="$emit('closeProgressBar')"
                     >
-                        <i class="bi bi-arrow-return-left" />
+                        <i class="bi bi-arrow-return-left pe-2" />
                         {{ $t("additional:modules.tools.cosi.templateManager.backToTemplate") }}
                     </button>
                 </div>

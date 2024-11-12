@@ -47,16 +47,14 @@ export default {
         ],
         tagsInfrastructureData: [
             "Auflistung",
-            "Kartendarstellung der Infrastrukturdaten",
-            "Legenden",
-            "Quellen"
+            "Kartendarstellung der Infrastrukturdaten"
         ],
         showProgressBar: false,
         percentage: 50,
         reportTitle: "",
         reportTitleMaxLength: 50,
         selectedAreasName: "",
-        selectedAreasNameMaxLength: 25,
+        selectedAreasNameMaxLength: 20,
         author: "",
         authorMaxLength: 35,
         pdf: null,
@@ -276,12 +274,13 @@ export default {
                     if (this.progressValue < (initialProgressValue + availableProgressForThisStep)) {
                         this.progressValue += 1;
                     }
-                }).catch(error => console.error(error));
+                }).catch(error => console.error(error)),
+                headline = this.reportTitle ? this.reportTitle.trim() : "Übersichtskarte";
 
             if (typeof overviewImageUrl !== "string") {
                 return;
             }
-            this.pdf.addChapterHeadline("Übersichtskarte");
+            this.pdf.addChapterHeadline(headline);
             this.pdf.addImageByUrl(overviewImageUrl, imageName, {fit: [500, 500], alignment: "center"});
             this.pdf.addLineBreak();
             await this.addDetailViewToOverviewPage(template, bbox, () => {
@@ -698,7 +697,7 @@ export default {
                         v-model="selectedAreasName"
                         type="text"
                         class="form-control"
-                        maxlength="25"
+                        :maxlength="selectedAreasNameMaxLength"
                     >
                     <span
                         v-if="!isSelectedAreasNameValid"
@@ -766,12 +765,22 @@ export default {
                         </v-chip>
                     </v-chip-group>
                 </fieldset>
+                <div
+                    class="row mt-3"
+                >
+                    <i
+                        class="pe-0 bi bi-info-circle"
+                    />
+                    <p>
+                        {{ $t("additional:modules.tools.cosi.templateManager.infrastructureHint") }}
+                    </p>
+                </div>
                 <button
-                    class="btn btn-outline lh-1 fs-5 mt-4"
+                    class="btn btn-outline lh-1 fs-5 mt-5"
                     @click.prevent="manageProgressBarView(true)"
                 >
                     <i
-                        class="bi bi-play-circle"
+                        class="bi bi-play-circle pe-2"
                     />
                     {{ $t("additional:modules.tools.cosi.templateManager.generateReport") }}
                 </button>
