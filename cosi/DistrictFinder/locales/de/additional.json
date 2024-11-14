@@ -1,0 +1,11 @@
+{
+    "modules": {
+        "tools": {
+            "cosi": {
+                "districtFinder": {
+                    "title": "Gebiete Finder"
+                }
+            }
+        }
+    }
+}

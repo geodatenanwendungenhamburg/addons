@@ -217,5 +217,9 @@
   "TemplateAdmin": {
     "path": "cosi/TemplateAdmin",
     "type": "tool"
+  },
+  "DistrictFinder": {
+    "path": "cosi/DistrictFinder",
+    "type": "tool"
   }
 }
