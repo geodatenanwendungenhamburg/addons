@@ -40,7 +40,8 @@ export default {
         ...mapGetters("Tools/DistrictSelector", {
             districtLevels: "districtLevels",
             selectedDistrictLevel: "selectedDistrictLevel",
-            selectedDistrictNames: "selectedDistrictNames"
+            selectedDistrictNames: "selectedDistrictNames",
+            isDistrictSelectorActive: "active"
         }),
         ...mapGetters("Maps", ["getVisibleLayerList"]),
 
@@ -231,7 +232,19 @@ export default {
                 }
             }
         },
-        templates: "createFilterObjects"
+        templates: "createFilterObjects",
+
+        /**
+         * Listens to the district selector.
+         * If the district selector is deactivated, no districts are selected and there is an active template, this will be deselected.
+         * @param {Boolean} value - True if district selector is activated.
+         * @returns {void}
+         */
+        isDistrictSelectorActive (value) {
+            if (!value && !this.selectedDistrictNames.length && this.activeTemplate) {
+                this.activeCard(this.activeTemplateName, false);
+            }
+        }
     },
     created () {
         /**
@@ -583,6 +596,10 @@ export default {
             }
 
             this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex, active);
+            if (!active) {
+                this.activeTemplateName = "";
+                this.setCurrentActiveTemplate("");
+            }
         },
 
         /**

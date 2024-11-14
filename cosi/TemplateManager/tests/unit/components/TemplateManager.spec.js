@@ -51,7 +51,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                         DistrictSelector: {
                             namespaced: true,
                             getters: {
-                                districtLevels: () => []
+                                districtLevels: () => [],
+                                active: () => false,
+                                selectedDistrictNames: () => []
                             },
                             mutations: {
                                 setMapping: stubSetMapping
@@ -684,5 +686,52 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 wrapper.destroy();
             });
         });
+        describe("activeCard", () => {
+            it("should set 'activeTemplateName' and 'currentActiveTemplate' to an empty string", () => {
+                const wrapper = factory.getMount();
+
+                sinon.stub(wrapper.vm, "openExportWindow");
+                sinon.stub(wrapper.vm, "loadFromTemplate");
+                wrapper.vm.setCurrentActiveTemplate("temp");
+                wrapper.vm.activeCard("Moin", false);
+
+                expect(wrapper.vm.currentActiveTemplate).to.be.equal("");
+                expect(wrapper.vm.activeTemplateName).to.be.equal("");
+                wrapper.destroy();
+            });
+
+            it("should not set 'activeTemplateName' and 'currentActiveTemplate' to an empty string", () => {
+                const wrapper = factory.getMount();
+
+                sinon.stub(wrapper.vm, "openExportWindow");
+                sinon.stub(wrapper.vm, "loadFromTemplate");
+                wrapper.vm.setCurrentActiveTemplate("temp");
+                wrapper.vm.activeCard("Moin", true);
+
+                expect(wrapper.vm.currentActiveTemplate).to.be.equal("temp");
+                expect(wrapper.vm.activeTemplateName).to.be.equal("Moin");
+                wrapper.destroy();
+            });
+
+            it("should call 'openExportWindow'", () => {
+                const wrapper = factory.getMount(),
+                    stubOpenExportWindow = sinon.stub(wrapper.vm, "openExportWindow");
+
+                sinon.stub(wrapper.vm, "loadFromTemplate");
+                wrapper.vm.activeCard("Moin", false);
+                expect(stubOpenExportWindow.calledOnce).to.be.true;
+                wrapper.destroy();
+            });
+
+            it("should not call 'openExportWindow'", () => {
+                const wrapper = factory.getMount(),
+                    stubOpenExportWindow = sinon.stub(wrapper.vm, "openExportWindow");
+
+                sinon.stub(wrapper.vm, "loadFromTemplate");
+                wrapper.vm.activeCard("Moin", true);
+                expect(stubOpenExportWindow.calledOnce).to.be.false;
+                wrapper.destroy();
+            });
+        })
     });
 });
