@@ -116,7 +116,8 @@ export default {
             if (!Array.isArray(propertyNamesOfEachLayer) || !Array.isArray(mappingList)) {
                 return [];
             }
-            let result = [];
+            const result = [];
+            let resultData = [];
 
             propertyNamesOfEachLayer.forEach(propertiesForLayer => {
                 if (!Array.isArray(propertiesForLayer)) {
@@ -126,14 +127,22 @@ export default {
                     const foundObject = mappingList.find(mappingObject => mappingObject?.category === property);
 
                     if (!isObject(foundObject) || !Object.prototype.hasOwnProperty.call(foundObject, "value")) {
-                        result.push({propertyName: property, label: property, valueType: foundObject?.valueType || false});
+                        resultData.push({group: foundObject?.group, propertyName: property, label: property, valueType: foundObject?.valueType || false});
                         return;
                     }
-                    result.push({propertyName: property, label: foundObject.value, valueType: foundObject.valueType || false});
+                    resultData.push({group: foundObject?.group, propertyName: property, label: foundObject.value, valueType: foundObject.valueType || false});
                 });
             });
 
-            result = sort("", result, "label");
+            resultData = sort("", resultData, "label");
+
+            [...new Set(mappingList.map(ml => ml.group))].forEach(cat => {
+                const data = resultData.filter(rd => rd.group === cat);
+
+                if (data.length) {
+                    result.push({category: cat, data: data});
+                }
+            });
 
             return result;
         },

@@ -644,6 +644,8 @@ export default {
                     :clear-on-select="false"
                     :allow-empty="false"
                     :placeholder="$t('additional:modules.tools.cosi.templateAdmin.label.placeholder')"
+                    group-values="data"
+                    group-label="category"
                     label="label"
                     track-by="propertyName"
                     @input="setIsStatDataValidating(false)"

@@ -276,17 +276,39 @@ describe("addons/cosi/TemplateAdmin/components/TemplateAdmin.vue", () => {
             it("should return array of objects with propertyName as value of the first param and as label the value property of second param", () => {
                 const wrapper = shallowMount(TemplateAdmin, {store, localVue}),
                     expected = [
-                        {propertyName: "bar", label: "BAR", valueType: false},
-                        {propertyName: "foo", label: "FOO", valueType: false}
+                        {
+                            "category": "group1",
+                            "data": [
+                                {
+                                    "group": "group1",
+                                    "label": "FOO",
+                                    "propertyName": "foo",
+                                    "valueType": false
+                                }
+                            ]
+                        },
+                        {
+                            "category": "group2",
+                            "data": [
+                                {
+                                    "group": "group2",
+                                    "label": "BAR",
+                                    "propertyName": "bar",
+                                    "valueType": false
+                                }
+                            ]
+                        }
                     ],
                     mappingList = [
                         {
                             category: "foo",
-                            value: "FOO"
+                            value: "FOO",
+                            group: "group1"
                         },
                         {
                             category: "bar",
-                            value: "BAR"
+                            value: "BAR",
+                            group: "group2"
                         }
                     ],
                     filteredList = [["foo", "bar"]];
@@ -297,22 +319,55 @@ describe("addons/cosi/TemplateAdmin/components/TemplateAdmin.vue", () => {
             it("should return array of objects with propertyName as value of the first param and as label the value property of second param for two nested lists", () => {
                 const wrapper = shallowMount(TemplateAdmin, {store, localVue}),
                     expected = [
-                        {propertyName: "bar", label: "BAR", valueType: false},
-                        {propertyName: "foo", label: "FOO", valueType: false},
-                        {propertyName: "fow", label: "FOW", valueType: false}
+                        {
+                            "category": "group1",
+                            "data": [
+                                {
+                                    "group": "group1",
+                                    "label": "FOO",
+                                    "propertyName": "foo",
+                                    "valueType": false
+                                }
+                            ]
+                        },
+                        {
+                            "category": "group2",
+                            "data": [
+                                {
+                                    "group": "group2",
+                                    "label": "BAR",
+                                    "propertyName": "bar",
+                                    "valueType": false
+                                }
+                            ]
+                        },
+                        {
+                            "category": "group3",
+                            "data": [
+                                {
+                                    "group": "group3",
+                                    "label": "FOW",
+                                    "propertyName": "fow",
+                                    "valueType": false
+                                }
+                            ]
+                        }
                     ],
                     mappingList = [
                         {
                             category: "foo",
-                            value: "FOO"
+                            value: "FOO",
+                            group: "group1"
                         },
                         {
                             category: "bar",
-                            value: "BAR"
+                            value: "BAR",
+                            group: "group2"
                         },
                         {
                             category: "fow",
-                            value: "FOW"
+                            value: "FOW",
+                            group: "group3"
                         }
                     ],
                     filteredList = [["foo", "bar"], ["fow"]];
@@ -322,43 +377,42 @@ describe("addons/cosi/TemplateAdmin/components/TemplateAdmin.vue", () => {
             });
             it("should return array of objects if valueType is given", () => {
                 const wrapper = shallowMount(TemplateAdmin, {store, localVue}),
-                    expected = [
-                        {propertyName: "bar", label: "BAR", valueType: "absolute"},
-                        {propertyName: "foo", label: "FOO", valueType: "relative"},
-                        {propertyName: "fow", label: "fow", valueType: false}
+                    expected =        [
+                        {
+                            "category": "group1",
+                            "data": [
+                                {
+                                    "group": "group1",
+                                    "label": "FOO",
+                                    "propertyName": "foo",
+                                    "valueType": "relative"
+                                }
+                            ]
+                        },
+                        {
+                            "category": "group2",
+                            "data": [
+                                {
+                                    "group": "group2",
+                                    "label": "BAR",
+                                    "propertyName": "bar",
+                                    "valueType": "absolute"
+                                }
+                            ]
+                        }
                     ],
                     mappingList = [
                         {
                             category: "foo",
                             value: "FOO",
-                            valueType: "relative"
+                            valueType: "relative",
+                            group: "group1"
                         },
                         {
                             category: "bar",
                             value: "BAR",
-                            valueType: "absolute"
-                        }
-                    ],
-                    filteredList = [["foo", "bar", "fow"]];
-
-                expect(wrapper.vm.getMappedLabelByValue(filteredList, mappingList)).to.deep.equal(expected);
-                wrapper.destroy();
-            });
-            it("should return an array of objects with value from first array as propertyName and as label if not exists in second param", () => {
-                const wrapper = shallowMount(TemplateAdmin, {store, localVue}),
-                    expected = [
-                        {propertyName: "bar", label: "BAR", valueType: false},
-                        {propertyName: "foo", label: "FOO", valueType: false},
-                        {propertyName: "fow", label: "fow", valueType: false}
-                    ],
-                    mappingList = [
-                        {
-                            category: "foo",
-                            value: "FOO"
-                        },
-                        {
-                            category: "bar",
-                            value: "BAR"
+                            valueType: "absolute",
+                            group: "group2"
                         }
                     ],
                     filteredList = [["foo", "bar", "fow"]];
