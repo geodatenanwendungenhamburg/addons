@@ -56,48 +56,64 @@ export function getTrend (stats, timestamps, currentTimestamp, timestampPrefix =
 
 /**
  * gets a style for a trend arrow
- * @param {Number} dy - the expected growth for the next timestep
+ * @param {Number} dy - the expected growth for the next timestep.
+ * @param {String|String[]} trendColors - The trend color of arrows.
  * @returns {Object} css style
  */
-export function getTrendStyle (dy) {
+export function getTrendStyle (dy, trendColors) {
+    let trendUp = "green",
+        trendEqual = "lightgrey",
+        trendDown = "crimson";
+
+    if (typeof trendColors === "string" && trendColors !== "") {
+        trendUp = trendColors;
+        trendEqual = trendColors;
+        trendDown = trendColors;
+    }
+    else if (Array.isArray(trendColors) && trendColors.length === 3) {
+        trendUp = trendColors[0];
+        trendEqual = trendColors[1];
+        trendDown = trendColors[2];
+    }
+
     if (dy > 1.055) {
-        return {color: "green", transform: "rotate(-60deg)"};
+        return {color: trendUp, transform: "rotate(-60deg)"};
     }
     if (dy > 1.045 && dy <= 1.055) {
-        return {color: "green", transform: "rotate(-50deg)"};
+        return {color: trendUp, transform: "rotate(-50deg)"};
     }
     if (dy > 1.035 && dy <= 1.045) {
-        return {color: "green", transform: "rotate(-40deg)"};
+        return {color: trendUp, transform: "rotate(-40deg)"};
     }
     if (dy > 1.025 && dy <= 1.035) {
-        return {color: "green", transform: "rotate(-30deg)"};
+        return {color: trendUp, transform: "rotate(-30deg)"};
     }
     if (dy > 1.015 && dy <= 1.025) {
-        return {color: "green", transform: "rotate(-20deg)"};
+        return {color: trendUp, transform: "rotate(-20deg)"};
     }
     if (dy > 1.005 && dy <= 1.015) {
-        return {color: "green", transform: "rotate(-10deg)"};
+        return {color: trendUp, transform: "rotate(-10deg)"};
     }
     if (dy >= 0.995 && dy <= 1.005) {
-        return {color: "lightgrey"};
+        return {color: trendEqual};
     }
     if (dy >= 0.985 && dy < 0.995) {
-        return {color: "crimson", transform: "rotate(10deg)"};
+        return {color: trendDown, transform: "rotate(10deg)"};
     }
     if (dy >= 0.975 && dy < 0.985) {
-        return {color: "crimson", transform: "rotate(20deg)"};
+        return {color: trendDown, transform: "rotate(20deg)"};
     }
     if (dy >= 0.965 && dy < 0.975) {
-        return {color: "crimson", transform: "rotate(30deg)"};
+        return {color: trendDown, transform: "rotate(30deg)"};
     }
     if (dy >= 0.955 && dy < 0.965) {
-        return {color: "crimson", transform: "rotate(40deg)"};
+        return {color: trendDown, transform: "rotate(40deg)"};
     }
     if (dy >= 0.945 && dy < 0.955) {
-        return {color: "crimson", transform: "rotate(50deg)"};
+        return {color: trendDown, transform: "rotate(50deg)"};
     }
     if (dy < 0.945) {
-        return {color: "crimson", transform: "rotate(60deg)"};
+        return {color: trendDown, transform: "rotate(60deg)"};
     }
 
     return {display: "none"};

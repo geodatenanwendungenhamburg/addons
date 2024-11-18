@@ -32,6 +32,10 @@ export default {
         tooltipOffset: {
             type: Number,
             default: 0
+        },
+        trendColors: {
+            type: [String, Array],
+            default: ""
         }
     },
     computed: {
@@ -70,6 +74,7 @@ export default {
                     :timestamp-prefix="timestampPrefix"
                     :current-locale="currentLocale"
                     :tooltip-offset="tooltipOffset"
+                    :trend-colors="trendColors"
                 />
                 <template v-if="item.expanded">
                     <ul class="timeline">

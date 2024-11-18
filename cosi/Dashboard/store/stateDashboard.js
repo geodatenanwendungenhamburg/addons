@@ -12,6 +12,7 @@
  * @property {object} toolBridgeOut: {}  pass current settings to toolBridge (must have a *getter*)
  * @property {String} prefixExportFilename - The prefix of exported file name.
  * @property {Object} columnHeader - The column header object
+ * @property {String|String[]} trendColors - The trend color of arrows.
  */
 const state = {
     active: false,
@@ -37,7 +38,8 @@ const state = {
     columnHeader: {},
     ignoreColumnsByExport: false,
     exportGrouped: false,
-    items: []
+    items: [],
+    trendColors: ""
 };
 
 export default state;

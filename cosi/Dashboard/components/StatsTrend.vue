@@ -27,6 +27,10 @@ export default {
         tooltipOffset: {
             type: Number,
             default: 0
+        },
+        trendColors: {
+            type: [String, Array],
+            default: ""
         }
     },
     computed: {
@@ -53,7 +57,7 @@ export default {
         <template #activator="{ on, attrs }">
             <v-icon
                 class="float-left"
-                :style="getTrendStyle(dy)"
+                :style="getTrendStyle(dy, trendColors)"
                 v-bind="attrs"
                 v-on="on"
             >

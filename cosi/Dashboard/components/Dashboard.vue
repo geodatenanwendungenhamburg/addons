@@ -994,6 +994,7 @@ export default {
                                         :timestamp-prefix="timestampPrefix"
                                         :current-locale="currentLocale"
                                         :tooltip-offset="toolOffset"
+                                        :trend-colors="trendColors"
                                     />
                                 </template>
 
@@ -1007,6 +1008,7 @@ export default {
                                         :timestamp-prefix="timestampPrefix"
                                         :current-locale="currentLocale"
                                         :tooltip-offset="toolOffset"
+                                        :trend-colors="trendColors"
                                     />
                                     <!-- eslint-disable-next-line -->
                                     <v-tooltip
@@ -1048,6 +1050,7 @@ export default {
                                         :timestamp-prefix="timestampPrefix"
                                         :current-locale="currentLocale"
                                         :tooltip-offset="toolOffset"
+                                        :trend-colors="trendColors"
                                     />
                                     <!-- eslint-disable-next-line -->
                                     <v-tooltip

@@ -43,7 +43,7 @@ describe("Dashboard/utils/trends", () => {
             expect(getTrendStyle()).to.be.deep.equal({display: "none"});
         });
 
-        it("should return the corresponding value", () => {
+        it("should return the corresponding value if no trend colors are configured", () => {
             expect(getTrendStyle(1.056)).to.be.deep.equal({color: "green", transform: "rotate(-60deg)"});
             expect(getTrendStyle(1.055)).to.be.deep.equal({color: "green", transform: "rotate(-50deg)"});
             expect(getTrendStyle(1.045)).to.be.deep.equal({color: "green", transform: "rotate(-40deg)"});
@@ -57,6 +57,38 @@ describe("Dashboard/utils/trends", () => {
             expect(getTrendStyle(0.964)).to.be.deep.equal({color: "crimson", transform: "rotate(40deg)"});
             expect(getTrendStyle(0.954)).to.be.deep.equal({color: "crimson", transform: "rotate(50deg)"});
             expect(getTrendStyle(0.944)).to.be.deep.equal({color: "crimson", transform: "rotate(60deg)"});
+        });
+
+        it("should return the corresponding value if the trend colors are in string format", () => {
+            expect(getTrendStyle(1.056, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-60deg)"});
+            expect(getTrendStyle(1.055, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-50deg)"});
+            expect(getTrendStyle(1.045, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-40deg)"});
+            expect(getTrendStyle(1.035, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-30deg)"});
+            expect(getTrendStyle(1.025, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-20deg)"});
+            expect(getTrendStyle(1.015, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(-10deg)"});
+            expect(getTrendStyle(1.005, "gray")).to.be.deep.equal({color: "gray"});
+            expect(getTrendStyle(0.994, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(10deg)"});
+            expect(getTrendStyle(0.984, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(20deg)"});
+            expect(getTrendStyle(0.974, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(30deg)"});
+            expect(getTrendStyle(0.964, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(40deg)"});
+            expect(getTrendStyle(0.954, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(50deg)"});
+            expect(getTrendStyle(0.944, "gray")).to.be.deep.equal({color: "gray", transform: "rotate(60deg)"});
+        });
+
+        it("should return the corresponding value if the trend colors are array with 3 color elements", () => {
+            expect(getTrendStyle(1.056, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-60deg)"});
+            expect(getTrendStyle(1.055, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-50deg)"});
+            expect(getTrendStyle(1.045, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-40deg)"});
+            expect(getTrendStyle(1.035, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-30deg)"});
+            expect(getTrendStyle(1.025, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-20deg)"});
+            expect(getTrendStyle(1.015, ["green", "gray", "crimson"])).to.be.deep.equal({color: "green", transform: "rotate(-10deg)"});
+            expect(getTrendStyle(1.005, ["green", "gray", "crimson"])).to.be.deep.equal({color: "gray"});
+            expect(getTrendStyle(0.994, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(10deg)"});
+            expect(getTrendStyle(0.984, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(20deg)"});
+            expect(getTrendStyle(0.974, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(30deg)"});
+            expect(getTrendStyle(0.964, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(40deg)"});
+            expect(getTrendStyle(0.954, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(50deg)"});
+            expect(getTrendStyle(0.944, ["green", "gray", "crimson"])).to.be.deep.equal({color: "crimson", transform: "rotate(60deg)"});
         });
     });
 });
