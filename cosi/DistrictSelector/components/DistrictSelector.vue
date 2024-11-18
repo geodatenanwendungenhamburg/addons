@@ -16,6 +16,7 @@ import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeatur
 import ToolInfo from "../../components/ToolInfo.vue";
 import {onFeaturesLoaded, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge.js";
 import DistrictSelectorFilter from "./DistrictSelectorFilter.vue";
+import DistrictSelectorLevel from "./DistrictSelectorLevel.vue";
 import Feature from "ol/Feature";
 import {union} from "../../utils/geomUtils.js";
 import IconButton from "./IconButton.vue";
@@ -27,6 +28,7 @@ export default {
         Tool,
         ToolInfo,
         DistrictSelectorFilter,
+        DistrictSelectorLevel,
         IconButton,
         AccordionItem
     },
@@ -601,24 +603,11 @@ export default {
                     :locale="currentLocale"
                     :summary="$t('additional:modules.tools.cosi.districtSelector.description')"
                 />
-                <label
-                    class="text-black-50"
-                    for="chip-group"
-                >
-                    {{ $t('additional:modules.tools.cosi.districtSelector.districtLevel') }}
-                </label>
-                <div class="text-left my-2">
-                    <v-chip
-                        v-for="level in districtLevels"
-                        :key="level.layerId"
-                        class="mr-2"
-                        :input-value="level.layerId === selectedLevelId"
-                        filter
-                        @click="setSelectedDistrictLevelId(level.layerId)"
-                    >
-                        {{ level.label }}
-                    </v-chip>
-                </div>
+                <DistrictSelectorLevel
+                    :district-levels="districtLevels"
+                    :selected-level-id="selectedLevelId"
+                    @setSelectedDistrictLevelId="setSelectedDistrictLevelId"
+                />
                 <DistrictSelectorFilter
                     :district-levels="districtLevels"
                     :selected-level-id="selectedLevelId"

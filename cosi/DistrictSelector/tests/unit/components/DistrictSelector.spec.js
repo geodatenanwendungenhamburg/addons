@@ -128,6 +128,13 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             expect(toolWrapper.exists()).to.be.true;
         });
 
+        it("should find DistrictSelectorLevel component", () => {
+            const wrapper = factory.getMount(),
+                dSLWrapper = wrapper.find(".district-selector-level");
+
+            expect(dSLWrapper.exists()).to.be.true;
+        });
+
         it("should not render if active is false", () => {
             const wrapper = factory.getMount({}, false);
 
