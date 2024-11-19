@@ -533,7 +533,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 wrapper.destroy();
             });
 
-            it("should return chart data", () => {
+            it("should return chart data", async () => {
                 const wrapper = factory.getShallowMount(),
                     data = [
                         {

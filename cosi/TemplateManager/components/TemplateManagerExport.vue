@@ -66,7 +66,8 @@ export default {
             {"Bevölkerung Migrationshintergrund": "Ausländer insgesamt"}
         ],
         progressValue: 0,
-        selectedReportComponents: []
+        selectedReportComponents: [],
+        selectedCategoryInChart: []
     }),
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
@@ -518,8 +519,8 @@ export default {
                 this.pdf.addChapter("Datenvisualisierung");
 
                 imageArr.forEach((image, index) => {
-                    this.pdf.addHeadline(Object.keys(this.categoryInChart[index])[0]);
-                    this.pdf.addParagraph(Object.values(this.categoryInChart[index])[0]);
+                    this.pdf.addHeadline(Object.keys(this.selectedCategoryInChart[index])[0]);
+                    this.pdf.addParagraph(Object.values(this.selectedCategoryInChart[index])[0]);
                     this.pdf.addImageByUrl(undefined, image, {width: 500, alignment: "center"});
                     this.pdf.addLineBreak(5);
                 });
@@ -581,6 +582,8 @@ export default {
                 return categoryData;
             }
 
+            this.selectedCategoryInChart = [];
+
             categoryInChart.forEach(category => {
                 if (!isObject(category)) {
                     return;
@@ -590,8 +593,15 @@ export default {
                     data = [];
 
                 Object.keys(category).forEach(key => {
-                    if (!Object.prototype.hasOwnProperty.call(groupedMapping, key)) {
+                    if (!Object.prototype.hasOwnProperty.call(groupedMapping, key) || !templateStatsCategories.includes(category[key])) {
                         return;
+                    }
+
+                    if (templateStatsCategories.includes(category[key])) {
+                        const innerObj = {};
+
+                        innerObj[key] = category[key];
+                        this.selectedCategoryInChart.push(innerObj);
                     }
 
                     const statFeature = items.find((item) => item.category === category[key]);
