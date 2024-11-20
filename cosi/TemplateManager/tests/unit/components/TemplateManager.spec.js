@@ -692,7 +692,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
 
                 sinon.stub(wrapper.vm, "openExportWindow");
                 sinon.stub(wrapper.vm, "loadFromTemplate");
-                wrapper.vm.setCurrentActiveTemplate("temp");
+                wrapper.vm.setCurrentActiveTemplate("");
                 wrapper.vm.activeCard("Moin", false);
 
                 expect(wrapper.vm.currentActiveTemplate).to.be.equal("");

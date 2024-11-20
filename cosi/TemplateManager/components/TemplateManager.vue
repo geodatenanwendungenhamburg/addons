@@ -596,7 +596,8 @@ export default {
             }
 
             this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex, active);
-            if (!active) {
+
+            if (!active && this.currentActiveTemplate === "") {
                 this.activeTemplateName = "";
                 this.setCurrentActiveTemplate("");
             }
