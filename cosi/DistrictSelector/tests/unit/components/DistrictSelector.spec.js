@@ -31,10 +31,10 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             removeInteraction: () => sinon.stub(),
             resetView: () => sinon.stub(),
             zoomToExtent: () => sinon.stub(),
-            addNewLayerIfNotExists: () => new Layer({source: new Source()})
+            addNewLayerIfNotExists: () => new Layer({source: new Source(), typ: "WFS"})
         },
-        layerOne = new Layer({id: "123", source: new Source()}),
-        layerTwo = new Layer({id: "456", source: new Source()}),
+        layerOne = new Layer({id: "123", source: new Source(), typ: "WFS"}),
+        layerTwo = new Layer({id: "456", source: new Source(), typ: "WFS"}),
         layerList = [layerOne, layerTwo],
         districtLevels = [{layerId: "123", label: "Stube", stats: {}, districts: [], nameList: [], filterableValues: []}, {layerId: "456", label: "Kueche", stats: {}}],
         additionalInfoLayers = {
@@ -240,8 +240,9 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
                 spyInitializeAdditionalInfoLayers = sinon.spy(DistrictSelector.methods, "initializeAdditionalInfoLayers"),
                 wrapper = factory.getMount();
 
-            expect(wrapper.vm.districtLevels[0]).to.have.all.keys("districts", "referenceLevel", "propertyNameList", "nameList", "layer", "label", "stats", "layerId", "subLevel", "selectedValues", "filterableValues");
+            expect(wrapper.vm.districtLevels[0]).to.have.all.keys("districts", "referenceLevel", "nameList", "layer", "label", "stats", "layerId", "subLevel", "selectedValues", "filterableValues");
             expect(wrapper.vm.selectedDistrictLevelId).to.equal("123");
+            //expect(wrapper.vm.selectedLevelId).to.equal("123");
             expect(spySetNonReactiveData.calledOnce).to.be.true;
             expect(spyInitializeAdditionalInfoLayers.calledOnce).to.be.true;
             spySetNonReactiveData.restore();

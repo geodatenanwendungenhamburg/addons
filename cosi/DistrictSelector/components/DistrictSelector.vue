@@ -1,6 +1,7 @@
 <script>
 import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
 import {getComponent} from "../../../../src/utils/getComponent";
+import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
 import {prepareDistrictLevels} from "../utils/prepareDistrictLevels";
 import calculateExtent from "../../utils/features/calculateExtent.js";
 import getBoundingGeometry from "../../utils/getBoundingGeometry.js";
@@ -12,7 +13,6 @@ import {DragBox, Select} from "ol/interaction";
 import {singleClick} from "ol/events/condition";
 import {Fill, Stroke, Style, Text} from "ol/style.js";
 import {styleSelectedDistrictLevels} from "../utils/styleSelectedDistrictLevels";
-import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
 import ToolInfo from "../../components/ToolInfo.vue";
 import {onFeaturesLoaded, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge.js";
 import DistrictSelectorFilter from "./DistrictSelectorFilter.vue";
@@ -456,9 +456,9 @@ export default {
                 }
 
                 this.loadStatFeatures({
-                    districts: selectedDistricts,
                     districtLevel: this.selectedDistrictLevel,
-                    getStatFeatures: wfsGetFeature
+                    getStatFeatures: wfsGetFeature,
+                    districts: selectedDistricts
                 });
             }
             else {

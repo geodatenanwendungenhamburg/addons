@@ -8,6 +8,8 @@ import {
     prepareDistrictLevels,
     mapDistrictNames
 } from "../../../utils/prepareDistrictLevels.js";
+
+import describeFeatureType from "../../../../../../src/api/wfs/describeFeatureType.js";
 import {expect} from "chai";
 import Source from "ol/source/Vector.js";
 import Layer from "ol/layer/Vector.js";
@@ -288,7 +290,8 @@ describe("addons/DistrictSelector/utils/prepareDistrictLevels.js", () => {
                             name: "Ottensen"
                         })
                     ]
-                })
+                }),
+                typ: "WFS"
             });
 
             expect(getNameList(layerOne, "name")).to.be.an("array");
@@ -318,7 +321,7 @@ describe("addons/DistrictSelector/utils/prepareDistrictLevels.js", () => {
     describe("prepareDistrictLevels", () => {
         it("should call on listener", async () => {
             const testArray = [{layerId: "123", stats: {}}],
-                layerOne = new Layer({id: "123", source: new Source()}),
+                layerOne = new Layer({id: "123", source: new Source(), typ: "WFS"}),
                 spyOnSource = sinon.spy(layerOne.getSource(), "on"),
                 layerList = [layerOne];
 
@@ -327,8 +330,8 @@ describe("addons/DistrictSelector/utils/prepareDistrictLevels.js", () => {
         });
 
         it("should return an object with the properties 'nameList', 'layer' , 'propertyNameList', 'referenceLevel' and 'districts'", async () => {
-            const testArray = [{layerId: "123", stats: {}, nameList: [], districts: []}],
-                layerOne = new Layer({id: "123", source: new Source()}),
+            const testArray = [{layerId: "123", stats: {}, nameList: [], districts: [], propertyNameList: []}],
+                layerOne = new Layer({id: "123", source: new Source(), typ: "WFS"}),
                 layerList = [layerOne];
 
             await prepareDistrictLevels(testArray, layerList);
@@ -342,7 +345,7 @@ describe("addons/DistrictSelector/utils/prepareDistrictLevels.js", () => {
 
         it("should do nothing if layer already there", () => {
             const testArray = [{layer: {}, stats: {}}],
-                layerOne = new Layer({id: "123", source: new Source()}),
+                layerOne = new Layer({id: "123", source: new Source(), typ: "WFS"}),
                 layerList = [layerOne];
 
             prepareDistrictLevels(testArray, layerList);

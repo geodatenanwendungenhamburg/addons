@@ -1,5 +1,6 @@
 import {WFS} from "ol/format.js";
 import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
+import oafRequest from "../../../../src/api/oaf/getOAFFeature";
 import {parseFeatures} from "../utils/prepareStatsFeatures";
 import {mapDistrictNames} from "../utils/prepareDistrictLevels";
 import {equalTo} from "ol/format/filter";
@@ -7,6 +8,7 @@ import Vue from "vue";
 import Collection from "ol/Collection";
 import LoaderOverlay from "../../../../src/utils/loaderOverlay.js";
 import {getRecordById} from "../../../../src/api/csw/getRecordById.js";
+
 const actions = {
     /**
      * Loads the statistical features for the given districts.
@@ -27,19 +29,37 @@ const actions = {
         const wfsFormat = new WFS(),
             layers = districtLevel.stats.layers;
 
+        let olFeatures;
+
         for (let i = 0; i < districts.length; i++) {
             // check if statFeatures are already loaded
             if (districts[i].statFeatures.length === 0) {
+                const districtName = mapDistrictNames(districts[i].getName(), districtLevel);
+
                 for (let j = 0; j < layers.length; j++) {
-                    const districtName = mapDistrictNames(districts[i].getName(), districtLevel),
-                        statFeatures = await getStatFeatures(districtLevel.stats.layers[j].url, {
+                    if (districtLevel.stats.layers[j].typ === "WFS") {
+                        const statFeatures = await getStatFeatures(districtLevel.stats.layers[j].url, {
                             featureTypes: [districtLevel.stats.layers[j].featureType],
                             srsName: rootGetters["Maps/projectionCode"],
                             propertyNames: districtLevel.propertyNameList[j],
                             filter: equalTo(districtLevel.stats.keyOfAttrName[j], districtName)
-                        }),
-                        olFeatures = wfsFormat.readFeatures(statFeatures);
+                        });
 
+                        olFeatures = wfsFormat.readFeatures(statFeatures);
+                    }
+                    else if (districtLevel.stats.layers[j].typ === "OAF") {
+                        const response = await oafRequest.getOAFFeatureGet({
+                            baseUrl: districtLevel.stats.layers[j].url,
+                            collection: districtLevel.stats.layers[j].collection,
+                            crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
+                            limit: 400,
+                            filter: districtLevel.stats.keyOfAttrName[j] + "='" + districtName + "'",
+                            filterCrs: "http://www.opengis.net/def/crs/EPSG/0/25832",
+                            skipGeometry: true
+                        });
+
+                        olFeatures = oafRequest.readAllOAFToGeoJSON(response);
+                    }
                     if (olFeatures.length > 0) {
                         parseFeatures(olFeatures, districts[i], districtLevel);
                     }
@@ -70,7 +90,7 @@ const actions = {
             await dispatch("loadStatFeatures", {
                 districts: referenceLevel.label === "Hamburg" ? referenceLevel.districts : refDistricts,
                 districtLevel: referenceLevel,
-                getStatFeatures
+                getStatFeatures: wfsGetFeature
             });
             LoaderOverlay.hide();
         }

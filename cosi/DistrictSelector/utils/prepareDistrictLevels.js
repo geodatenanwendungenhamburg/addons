@@ -25,14 +25,15 @@ export async function prepareDistrictLevels (districtLevels, layerList) {
             // the layer for the district level
             districtLevel.layer = getLayerById(layerList, districtLevel.layerId);
             // property names for the WFS GetFeature request for the stats features, without geometry
-            if (!districtLevel.propertyNameList) {
+            if (!districtLevel.propertyNameList && typeof districtLevel?.layer?.get === "function" && districtLevel.layer.get("typ") === "WFS") {
                 const propertyNameList = await getPropertyNameList(districtLevel.stats.layers);
 
-                if (!districtLevel.propertyNameList) {
+                if (!districtLevel.propertyNameList && Array.isArray(propertyNameList) && propertyNameList.length > 0) {
                     districtLevel.propertyNameList = propertyNameList;
                 }
             }
         });
+
         checkIfFeaturesLoaded(filteredDistrictLevels[0]);
     }
 }
@@ -156,7 +157,7 @@ function getReferencDistrictName (referenceLevel, feature, layerId) {
     }
     // Districtlevel = Stadtteile/Bezirke
     // The info for this can be found already at the admin feautre
-    if (layerId !== "6071") {
+    if (layerId !== "6071" && layerId !== "27773") {
         return feature.get(referenceLevel.keyOfAttrName);
     }
     // Districtlevel = Stat.Gebiete
