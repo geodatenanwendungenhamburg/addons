@@ -27,7 +27,7 @@ export default {
             <v-chip
                 v-for="level in districtLevels"
                 :key="level.layerId"
-                class="mr-2"
+                class="me-2"
                 :input-value="level.layerId === selectedLevelId"
                 filter
                 @click="$emit('setSelectedDistrictLevelId', level.layerId)"

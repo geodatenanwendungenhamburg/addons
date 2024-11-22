@@ -102,7 +102,7 @@ export default {
 
         /**
          * Checks whether sublevels exist and updates them.
-         * If not 'updateSelectedFeatures' is emitted.
+         * If not 'updateSelectedDistricts' is emitted.
          * @param {Object} level - The level whose sublevel is checked.
          * @returns {void}
          */
@@ -110,7 +110,7 @@ export default {
             const lowestLevel = this.levelsForFilter[this.levelsForFilter.length - 1];
 
             if (level.layerId === lowestLevel.layerId) {
-                this.$emit("updateSelectedFeatures", level.selectedValues);
+                this.$emit("updateSelectedDistricts", level.selectedValues);
                 return;
             }
             if (level.selectedValues.length) {
@@ -140,7 +140,7 @@ export default {
                 this.updateSubLevelValues(level.filterableValues, level.subLevel);
             }
             else {
-                this.$emit("updateSelectedFeatures", level.selectedValues);
+                this.$emit("updateSelectedDistricts", level.selectedValues);
             }
         },
 
@@ -158,7 +158,7 @@ export default {
                 else {
                     level.selectedValues = level.filterableValues.slice();
                 }
-                this.$emit("updateSelectedFeatures", level.selectedValues);
+                this.$emit("updateSelectedDistricts", level.selectedValues);
                 this.forceRerender();
             });
         },

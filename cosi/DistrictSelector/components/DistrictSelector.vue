@@ -51,24 +51,6 @@ export default {
         ...mapState(["easyReadMode"]),
         ...mapGetters("Tools/AreaSelector", {areaSelectorGeom: "geometry"}),
 
-        selectedNames: {
-            get () {
-                return this.selectedDistrictNames;
-            },
-            set (v) {
-                this.setSelectedDistrictNames(v);
-            }
-        },
-
-        selectedLevelId: {
-            get () {
-                return this.selectedDistrictLevelId;
-            },
-            set (v) {
-                this.setSelectedDistrictLevelId(v);
-            }
-        },
-
         layerList () {
             return mapCollection.getMap("2D").getLayers().getArray();
         }
@@ -88,8 +70,8 @@ export default {
                 document.addEventListener("keyup", this.checkKey);
 
                 // add overlay if no districts are selected at this point
-                if (this.selectedNames.length === 0) {
-                    styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, this.selectedDistrictLevel.activeStyle);
+                if (this.selectedDistrictNames.length === 0) {
+                    styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, this.selectedDistrictLevel.activeStyle);
                 }
             }
             else {
@@ -109,7 +91,7 @@ export default {
 
                 this.$watch("$store.state.Tools.Print.active", (newVal) => {
                     if (newVal) {
-                        styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, {
+                        styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, {
                             fill: {
                                 color: [255, 255, 255, 0]
                             },
@@ -119,8 +101,8 @@ export default {
                             }
                         }, 0);
                     }
-                    else if (this.selectedNames.length) {
-                        styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, {
+                    else if (this.selectedDistrictNames.length) {
+                        styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, {
                             fill: {
                                 color: [255, 255, 255, 0]
                             },
@@ -133,11 +115,11 @@ export default {
                 });
 
                 // remove overlay if no districts are selected at this point
-                if (this.selectedNames.length === 0) {
+                if (this.selectedDistrictNames.length === 0) {
                     styleSelectedDistrictLevels(this.districtLevels);
                 }
 
-                if (this.selectedNames.length && typeof this.toolToOpen === "string") {
+                if (this.selectedDistrictNames.length && typeof this.toolToOpen === "string") {
                     this.$store.dispatch("Tools/setToolActive", {id: this.toolToOpen, active: true});
                 }
             }
@@ -152,7 +134,7 @@ export default {
         },
 
         selectedDistrictsCollection: "transferFeatures",
-        selectedLevelId: ["clearFeatures", "changeSelectedDistrictLevel"],
+        selectedDistrictLevelId: ["clearFeatures", "changeSelectedDistrictLevel"],
 
         visibleInfoLayers () {
             this.toggleAdditionalLayers();
@@ -172,8 +154,8 @@ export default {
          * @returns {void}
          */
         easyReadMode () {
-            if (this.selectedNames.length !== 0 || this.active) {
-                styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, this.selectedDistrictLevel.activeStyle);
+            if (this.selectedDistrictNames.length !== 0 || this.active) {
+                styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, this.selectedDistrictLevel.activeStyle);
             }
         },
 
@@ -191,19 +173,20 @@ export default {
             this.setActive(false);
         });
         prepareDistrictLevels(this.districtLevels, this.layerList);
-        this.selectedLevelId = this.districtLevels[0].layerId;
+        this.setSelectedDistrictLevelId(this.districtLevels[0].layerId);
         this.setNonReactiveData();
         this.initializeAdditionalInfoLayers();
     },
     mounted () {
+        this.$root.$on("updateSelectedDistricts", this.updateSelectedFeatures);
         /**
          * @description Styles the selected district level when the layer is loaded, then unsubsubscribes the call
          * @todo refactor to vuex, there should be an event on the map calling out loaded features
          * @deprecated
          */
         onFeaturesLoaded((layerId) => {
-            if (!this.districtLevelLayersLoaded && this.selectedLevelId === layerId) {
-                styleSelectedDistrictLevels(this.districtLevels, this.selectedLevelId, this.selectedDistrictLevel.activeStyle);
+            if (!this.districtLevelLayersLoaded && this.selectedDistrictLevelId === layerId) {
+                styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, this.selectedDistrictLevel.activeStyle);
                 this.districtLevelLayersLoaded = true;
                 this.$forceUpdate();
             }
@@ -295,7 +278,7 @@ export default {
         registerDragBoxListener (dragBox, featureCollection) {
             dragBox.on("boxend", (evt) => {
                 const extent = evt.target.getGeometry().getExtent(),
-                    source = this.getDistrictLevelById(this.selectedLevelId).layer.getSource();
+                    source = this.getDistrictLevelById(this.selectedDistrictLevelId).layer.getSource();
 
                 source.forEachFeatureIntersectingExtent(extent, (feature) => {
                     featureCollection.push(feature);
@@ -320,7 +303,7 @@ export default {
                 });
 
                 this.setSelectedDistrictsCollection(evt.target);
-                this.selectedNames = [...new Set(selectedNames)];
+                this.setSelectedDistrictNames([...new Set(selectedNames)]);
             });
 
             featureCollection.on("remove", (evt) => {
@@ -368,7 +351,7 @@ export default {
                 filter: (feature, layer) => {
                     const keyOfAttrName = this.selectedDistrictLevel.keyOfAttrName;
 
-                    return layer.get("id") === this.selectedLevelId && this.selectedDistrictLevel.filterableValues.includes(feature.get(keyOfAttrName));
+                    return layer.get("id") === this.selectedDistrictLevelId && this.selectedDistrictLevel.filterableValues.includes(feature.get(keyOfAttrName));
                 },
                 style: new Style({
                     fill: new Fill({color: "rgba(255, 255, 255, 0)"}),
@@ -429,7 +412,7 @@ export default {
          * the features of this collection are transferred to the feature collection of the select interaction.
          * Then the updateExtent function is called.
          * Otherwise nothing else happens.
-         * @param {module:ol/Collection} featureCollection - The feature collection of the select interaction.
+         * @param {module:ol/Collection} featureCollection - The feature collection to set to the select interaction.
          * @returns {void}
          */
         transferFeatures (featureCollection) {
@@ -438,7 +421,7 @@ export default {
                 // and the tool is closed
                 // shade all not selected districts
                 // before applying the new selection
-                if (this.selectedNames.length === 0 && !this.active) {
+                if (this.selectedDistrictNames.length === 0 && !this.active) {
                     styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevel.layerId, this.selectedDistrictLevel.activeStyle);
                 }
                 this.select.getFeatures().clear();
@@ -605,14 +588,14 @@ export default {
                 />
                 <DistrictSelectorLevel
                     :district-levels="districtLevels"
-                    :selected-level-id="selectedLevelId"
+                    :selected-level-id="selectedDistrictLevelId"
                     @setSelectedDistrictLevelId="setSelectedDistrictLevelId"
                 />
                 <DistrictSelectorFilter
                     :district-levels="districtLevels"
-                    :selected-level-id="selectedLevelId"
-                    :selected-district-names-by-map="selectedNames"
-                    @updateSelectedFeatures="updateSelectedFeatures"
+                    :selected-level-id="selectedDistrictLevelId"
+                    :selected-district-names-by-map="selectedDistrictNames"
+                    @updateSelectedDistricts="updateSelectedFeatures"
                 />
                 <hr class="my-4 mx-0 text-black-50">
                 <AccordionItem

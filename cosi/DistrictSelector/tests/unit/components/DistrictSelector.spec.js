@@ -36,7 +36,7 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
         layerOne = new Layer({id: "123", source: new Source()}),
         layerTwo = new Layer({id: "456", source: new Source()}),
         layerList = [layerOne, layerTwo],
-        districtLevels = [{layerId: "123", label: "Stube", stats: {}, districts: [], nameList: []}, {layerId: "456", label: "Kueche", stats: {}}],
+        districtLevels = [{layerId: "123", label: "Stube", stats: {}, districts: [], nameList: [], filterableValues: []}, {layerId: "456", label: "Kueche", stats: {}}],
         additionalInfoLayers = {
             "Sozialräume": [
                 "20179"
@@ -232,20 +232,6 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
             });
             expect(wrapper.vm.selectedDistrictLevel.nameList).to.deep.equal(["Mario", "und", "Luigi"]);
         });
-
-        it("should update 'selectedNames' if 'selectedDistrictName' was changed", () => {
-            const wrapper = factory.getMount();
-
-            wrapper.vm.setSelectedDistrictNames(["Laurel", "und", "Hardy"]);
-            expect(wrapper.vm.selectedNames).to.deep.equal(["Laurel", "und", "Hardy"]);
-        });
-
-        it("should update 'selectedLevelId' if 'selectedDistrictLevelId' was changed", () => {
-            const wrapper = factory.getMount();
-
-            wrapper.vm.setSelectedDistrictLevelId("456");
-            expect(wrapper.vm.selectedLevelId).to.equal("456");
-        });
     });
 
     describe("Lifecycle Hooks", () => {
@@ -255,7 +241,7 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
                 wrapper = factory.getMount();
 
             expect(wrapper.vm.districtLevels[0]).to.have.all.keys("districts", "referenceLevel", "propertyNameList", "nameList", "layer", "label", "stats", "layerId", "subLevel", "selectedValues", "filterableValues");
-            expect(wrapper.vm.selectedLevelId).to.equal("123");
+            expect(wrapper.vm.selectedDistrictLevelId).to.equal("123");
             expect(spySetNonReactiveData.calledOnce).to.be.true;
             expect(spyInitializeAdditionalInfoLayers.calledOnce).to.be.true;
             spySetNonReactiveData.restore();
@@ -280,7 +266,7 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelector.vue", () => {
                 spyClearFeatures = sinon.spy(DistrictSelector.methods, "clearFeatures"),
                 wrapper = factory.getMount();
 
-            await wrapper.setData({selectedLevelId: "456"});
+            await wrapper.vm.setSelectedDistrictLevelId("456");
 
             expect(spyClearFeatures.calledOnce).to.be.true;
             expect(spyChangeSelectedDistrictLevel.calledOnce).to.be.true;

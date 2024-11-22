@@ -1,15 +1,20 @@
 <script>
 import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
+import DistrictSelectorLevel from "../../DistrictSelector/components/DistrictSelectorLevel.vue";
+import DistrictSelectorFilter from "../../DistrictSelector/components/DistrictSelectorFilter.vue";
 import {getComponent} from "../../../../src/utils/getComponent";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import getters from "../store/gettersDistrictFinder";
 import mutations from "../store/mutationsDistrictFinder";
 import actions from "../store/actionsDistrictFinder";
+import {styleSelectedDistrictLevels} from "../../DistrictSelector/utils/styleSelectedDistrictLevels";
 
 export default {
     name: "DistrictFinder",
     components: {
-        Tool
+        Tool,
+        DistrictSelectorLevel,
+        DistrictSelectorFilter
     },
     data () {
         return {
@@ -17,7 +22,8 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", Object.keys(getters))
+        ...mapGetters("Tools/DistrictFinder", Object.keys(getters)),
+        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevelId", "selectedDistrictLevel"])
     },
     watch: {
         /**
@@ -33,6 +39,9 @@ export default {
                     model.set("isActive", false);
                 }
             }
+            else {
+                styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, this.selectedDistrictLevel.activeStyle);
+            }
         }
     },
     created () {
@@ -46,7 +55,17 @@ export default {
     },
     methods: {
         ...mapMutations("Tools/DistrictFinder", Object.keys(mutations)),
-        ...mapActions("Tools/DistrictFinder", Object.keys(actions))
+        ...mapActions("Tools/DistrictFinder", Object.keys(actions)),
+        ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
+
+        /**
+         * Emits the root event 'updateSelectedDistricts' with the given districts names.
+         * @param {String[]} districtsNames - Names of the districts to be selected.
+         * @returns {void}
+         */
+        emitSelectedDistricts (districtsNames) {
+            this.$root.$emit("updateSelectedDistricts", districtsNames);
+        }
     }
 };
 </script>
@@ -69,7 +88,16 @@ export default {
                 id="district-finder"
                 class="container"
             >
-                nur eine Test
+                <DistrictSelectorLevel
+                    :district-levels="districtLevels"
+                    :selected-level-id="selectedDistrictLevelId"
+                    @setSelectedDistrictLevelId="setSelectedDistrictLevelId"
+                />
+                <DistrictSelectorFilter
+                    :district-levels="districtLevels"
+                    :selected-level-id="selectedDistrictLevelId"
+                    @updateSelectedDistricts="emitSelectedDistricts"
+                />
             </div>
         </template>
     </Tool>

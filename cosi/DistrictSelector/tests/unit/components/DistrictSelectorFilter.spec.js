@@ -194,8 +194,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelectorFilter.vue", (
                 });
 
                 wrapper.vm.checkSublevels(level);
-                expect(wrapper.emitted()).to.have.property("updateSelectedFeatures");
-                expect(wrapper.emitted()["updateSelectedFeatures"][0]).to.deep.equal([level.selectedValues]);
+                expect(wrapper.emitted()).to.have.property("updateSelectedDistricts");
+                expect(wrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([level.selectedValues]);
                 wrapper.destroy();
             });
 
@@ -243,8 +243,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelectorFilter.vue", (
                 wrapper = factory.getShallowMount();
 
                 wrapper.vm.updateSubLevelValues(["Bergedorf", "Wandsbek"], level);
-                expect(wrapper.emitted()).to.have.property("updateSelectedFeatures");
-                expect(wrapper.emitted()["updateSelectedFeatures"][0]).to.deep.equal([["Altengamme"]]);
+                expect(wrapper.emitted()).to.have.property("updateSelectedDistricts");
+                expect(wrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([["Altengamme"]]);
                 wrapper.destroy();
             });
             it("should call 'updateSubLevelValues' recursively and emit correctly", () => {
@@ -277,8 +277,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelectorFilter.vue", (
                 wrapper = factory.getShallowMount();
 
                 wrapper.vm.updateSubLevelValues(["Bergedorf", "Wandsbek"], level);
-                expect(wrapper.emitted()).to.have.property("updateSelectedFeatures");
-                expect(wrapper.emitted()["updateSelectedFeatures"][0]).to.deep.equal([["123456"]]);
+                expect(wrapper.emitted()).to.have.property("updateSelectedDistricts");
+                expect(wrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([["123456"]]);
                 wrapper.destroy();
             });
         });
@@ -294,8 +294,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelectorFilter.vue", (
                 wrapper.vm.toggleSelectAll(undefined, level);
                 await wrapper.vm.$nextTick();
                 expect(level.selectedValues).to.be.an("array").to.have.lengthOf(0);
-                expect(wrapper.emitted()).to.have.property("updateSelectedFeatures");
-                expect(wrapper.emitted()["updateSelectedFeatures"][0]).to.deep.equal([[]]);
+                expect(wrapper.emitted()).to.have.property("updateSelectedDistricts");
+                expect(wrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([[]]);
                 wrapper.destroy();
             });
 
@@ -309,8 +309,8 @@ describe("addons/cosi/DistrictSelector/components/DistrictSelectorFilter.vue", (
                 wrapper.vm.toggleSelectAll(undefined, level);
                 await wrapper.vm.$nextTick();
                 expect(level.selectedValues).to.be.an("array").to.have.lengthOf(3);
-                expect(wrapper.emitted()).to.have.property("updateSelectedFeatures");
-                expect(wrapper.emitted()["updateSelectedFeatures"][0]).to.deep.equal([["Ottensen", "Altengamme", "Wilhelmsburg"]]);
+                expect(wrapper.emitted()).to.have.property("updateSelectedDistricts");
+                expect(wrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([["Ottensen", "Altengamme", "Wilhelmsburg"]]);
                 wrapper.destroy();
             });
         });
