@@ -8,16 +8,22 @@ import getters from "../store/gettersDistrictFinder";
 import mutations from "../store/mutationsDistrictFinder";
 import actions from "../store/actionsDistrictFinder";
 import {styleSelectedDistrictLevels} from "../../DistrictSelector/utils/styleSelectedDistrictLevels";
+import DistrictFinderCondition from "./DistrictFinderCondition.vue";
 
 export default {
     name: "DistrictFinder",
     components: {
         Tool,
         DistrictSelectorLevel,
-        DistrictSelectorFilter
+        DistrictSelectorFilter,
+        DistrictFinderCondition
     },
     data () {
         return {
+            prefilteredDistrictNames: [],
+            numberOfConditions: 1,
+            resultNamesArray: [],
+            resultList: []
         };
     },
     computed: {
@@ -42,6 +48,14 @@ export default {
             else {
                 styleSelectedDistrictLevels(this.districtLevels, this.selectedDistrictLevelId, this.selectedDistrictLevel.activeStyle);
             }
+        },
+
+        /**
+         * Deletes any saved results from conditions that have been removed.
+         * @returns {void}
+         */
+        numberOfConditions () {
+            this.resultNamesArray.splice(this.numberOfConditions);
         }
     },
     created () {
@@ -57,6 +71,7 @@ export default {
         ...mapMutations("Tools/DistrictFinder", Object.keys(mutations)),
         ...mapActions("Tools/DistrictFinder", Object.keys(actions)),
         ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
+        ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
 
         /**
          * Emits the root event 'updateSelectedDistricts' with the given districts names.
@@ -64,7 +79,28 @@ export default {
          * @returns {void}
          */
         emitSelectedDistricts (districtsNames) {
+            this.prefilteredDistrictNames = districtsNames;
             this.$root.$emit("updateSelectedDistricts", districtsNames);
+        },
+
+        /**
+         * Updates the resulting district names when a conditions has been updated.
+         * @param {Number} conditionId - The id of the condition that is sending new results.
+         * @param {String[]} resultNames - The district names that have been found by the condition.
+         * @returns {void}
+         */
+        updateResults (conditionId, resultNames) {
+            this.resultNamesArray[conditionId] = resultNames.filter(rN => this.prefilteredDistrictNames.includes(rN));
+            this.resultList = [...new Set(this.resultNamesArray.flat())];
+        },
+
+        /**
+         * Sets the currently found districts as selected districts.
+         * @returns {void}
+         */
+        setDistricts () {
+            this.setSelectedDistrictLevelId(this.selectedDistrictLevel.layerId);
+            this.setDistrictsByName({districtNames: this.resultList});
         }
     }
 };
@@ -98,6 +134,37 @@ export default {
                     :selected-level-id="selectedDistrictLevelId"
                     @updateSelectedDistricts="emitSelectedDistricts"
                 />
+                <h4>GebieteScan</h4>
+                <label>
+                    Anzahl Bedingungen:
+                    <input
+                        v-model.number="numberOfConditions"
+                        type="number"
+                        min="1"
+                    >
+                </label>
+                <hr>
+                <div
+                    v-for="conditionId in numberOfConditions"
+                    :key="conditionId - 1"
+                >
+                    <DistrictFinderCondition
+                        :condition-id="conditionId - 1"
+                        @scanCompleted="updateResults"
+                    />
+                </div>
+                <ul>
+                    <li
+                        v-for="resultName in resultList"
+                        :key="resultName"
+                    >
+                        {{ resultName }}
+                    </li>
+                </ul>
+                <hr>
+                <button @click="setDistricts">
+                    Hier klicken, um gefundene Gebiete als Gebietsauswahl zu setzen
+                </button>
             </div>
         </template>
     </Tool>

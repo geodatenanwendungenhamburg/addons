@@ -73,6 +73,25 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
         });
     });
 
+    describe("Watchers", () => {
+        describe("numberOfConditions", () => {
+            it("should not change results when number is raised", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({numberOfConditions: 2});
+                expect(wrapper.vm.resultNamesArray).to.have.lengthOf(0);
+            });
+
+            it("should cut off results when number is reduced", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({resultNamesArray: [[], [], []]})
+                await wrapper.setData({numberOfConditions: 2});
+                expect(wrapper.vm.resultNamesArray).to.deep.equal([[], []]);
+            });
+        });
+    });
+
     describe("Methods", () => {
         describe("emitSelectedDistricts", () => {
             it("should emit 'updateSelectedDistricts' correctly to root", () => {
@@ -84,5 +103,21 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                 expect(rootWrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([["Altona"]]);
             });
         });
+
+        describe("updateResults", () => {
+            it("should update results correctly", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({
+                    prefilteredDistrictNames: ["Altona", "Bergedorf", "Harburg"],
+                    resultNamesArray: [["Altona"]]
+                });
+                wrapper.vm.updateResults(1, ["Harburg"]);
+
+                expect(wrapper.vm.resultNamesArray).to.deep.equal([["Altona"], ["Harburg"]]);
+
+                expect(wrapper.vm.resultList).to.deep.equal(["Altona", "Harburg"]);
+            })
+        })
     });
 });
