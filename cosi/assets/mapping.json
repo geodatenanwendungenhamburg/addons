@@ -1387,7 +1387,7 @@
   },
   {
     "category": "bevb_zuzuege_ueber_stadtteilgrenze_anz",
-    "value": "Zuzüge über Stadteilgrenze",
+    "value": "Zuzüge Stadteilgrenze",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1396,7 +1396,7 @@
   },
   {
     "category": "bevb_fortzuege_ueber_stadtteilgrenze_anz",
-    "value": "Fortzüge über Stadteilgrenze",
+    "value": "Fortzüge Stadteilgrenze",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1414,7 +1414,7 @@
   },
   {
     "category": "bevb_zuzuege_u6_anz",
-    "value": "Zuzüge über Stadteilgrenze unter 6 Jahren",
+    "value": "Zuzüge unter 6 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1423,7 +1423,7 @@
   },
   {
     "category": "bevb_zuzuege_u18_anz",
-    "value": "Zuzüge über Stadteilgrenze unter 18 Jahren",
+    "value": "Zuzüge unter 18 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1432,7 +1432,7 @@
   },
   {
     "category": "bevb_zuzuege_18_bis_u65_anz",
-    "value": "Zuzüge über Stadteilgrenze 18 bis unter 65 Jahren",
+    "value": "Zuzüge 18 bis unter 65 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1441,7 +1441,7 @@
   },
   {
     "category": "bevb_zuzuege_ab65_anz",
-    "value": "Zuzüge über Stadteilgrenze ab 65 Jahren",
+    "value": "Zuzüge ab 65 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1450,7 +1450,7 @@
   },
   {
     "category": "bevb_fortzuege_u6_anz",
-    "value": "Fortzüge über Stadteilgrenze unter 6 Jahren",
+    "value": "Fortzüge unter 6 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1459,7 +1459,7 @@
   },
   {
     "category": "bevb_fortzuege_u18_anz",
-    "value": "Fortzüge über Stadteilgrenze unter 18 Jahren",
+    "value": "Fortzüge unter 18 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1468,7 +1468,7 @@
   },
   {
     "category": "bevb_fortzuege_18_bis_u65_anz",
-    "value": "Fortzüge über Stadteilgrenze 18 Jahren bis unter 65 Jahren",
+    "value": "Fortzüge 18 Jahren bis unter 65 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
@@ -1477,7 +1477,7 @@
   },
   {
     "category": "bevb_fortzuege_ab65_anz",
-    "value": "Fortzüge über Stadteilgrenze ab 65 Jahren",
+    "value": "Fortzüge ab 65 Jahren",
     "group": "Bevölkerungsbewegung",
     "stat_gebiet": "31231",
     "stadtteil": "31241",
