@@ -35,7 +35,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                             namespaced: true,
                             getters: {
                                 districtLevels: () => [],
-                                selectedDistrictLevelId: () => "123"
+                                selectedDistrictLevelId: () => "123",
+                                selectedDistrictNames: () => ["Altona", "Bergedorf", "Harburg"]
                             }
                         }
                     }
@@ -124,15 +125,49 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
             it("should update results correctly", async () => {
                 const wrapper = factory.getShallowMount();
 
-                await wrapper.setData({
-                    prefilteredDistrictNames: ["Altona", "Bergedorf", "Harburg"],
-                    resultNamesArray: [["Altona"]]
-                });
+                await wrapper.setData({resultNamesArray: [["Altona"]]});
                 wrapper.vm.updateResults(1, ["Harburg"]);
 
                 expect(wrapper.vm.resultNamesArray).to.deep.equal([["Altona"], ["Harburg"]]);
 
                 expect(wrapper.vm.resultList).to.deep.equal(["Altona", "Harburg"]);
+            });
+        });
+
+        describe("updateOperator", () => {
+            it("should update component data correctly on operator change event", async () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.updateOperator(0, "and");
+                wrapper.vm.updateOperator(1, "and");
+                wrapper.vm.updateOperator(0, "or");
+
+                expect(wrapper.vm.operators).to.deep.equal(["or", "and"]);
+            })
+        });
+
+        describe("getResultList", () => {
+            it("should return empty array in case of unexpected parameters", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.getResultList(null, [])).to.deep.equal([]);
+                expect(wrapper.vm.getResultList([[], null], ["or"])).to.deep.equal([]);
+                expect(wrapper.vm.getResultList([[], []], null)).to.deep.equal([]);
+                expect(wrapper.vm.getResultList([[], []], ["and", "and"])).to.deep.equal([]);
+            });
+
+            it("should return expected result", () => {
+                const wrapper = factory.getShallowMount(),
+                    resultNamesArray = [
+                        ["Altona", "Bergedorf"],
+                        ["Eimsbüttel", "Harburg"],
+                        ["Harburg", "Wandsbek"]
+                    ],
+                    operators = ["or", "and"];
+
+                expect(wrapper.vm.getResultList(resultNamesArray, operators)).to.deep.equal(
+                    ["Altona", "Bergedorf", "Harburg"]
+                );
             })
         })
     });

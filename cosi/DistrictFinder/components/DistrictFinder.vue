@@ -10,6 +10,7 @@ import actions from "../store/actionsDistrictFinder";
 import {styleSelectedDistrictLevels} from "../../DistrictSelector/utils/styleSelectedDistrictLevels";
 import DistrictFinderCondition from "./DistrictFinderCondition.vue";
 import ContentCard from "../../components/ContentCard.vue";
+import DistrictFinderOperator from "./DistrictFinderOperator.vue";
 
 export default {
     name: "DistrictFinder",
@@ -18,11 +19,11 @@ export default {
         DistrictSelectorLevel,
         DistrictSelectorFilter,
         DistrictFinderCondition,
-        ContentCard
+        ContentCard,
+        DistrictFinderOperator
     },
     data () {
         return {
-            prefilteredDistrictNames: [],
             numberOfConditions: 1,
             resultNamesArray: [],
             resultList: [],
@@ -39,13 +40,19 @@ export default {
             maximum: 6340,
             meanValue: 2000,
             type: "absolut",
-            expandDataInfo: true
+            expandDataInfo: true,
+            operators: []
         };
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/DistrictFinder", Object.keys(getters)),
-        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevelId", "selectedDistrictLevel"])
+        ...mapGetters("Tools/DistrictSelector", [
+            "districtLevels",
+            "selectedDistrictLevelId",
+            "selectedDistrictLevel",
+            "selectedDistrictNames"
+        ])
     },
     watch: {
         /**
@@ -72,6 +79,7 @@ export default {
          */
         numberOfConditions () {
             this.resultNamesArray.splice(this.numberOfConditions);
+            this.operators.splice(this.numberOfConditions - 1);
         }
     },
     created () {
@@ -95,7 +103,6 @@ export default {
          * @returns {void}
          */
         emitSelectedDistricts (districtsNames) {
-            this.prefilteredDistrictNames = districtsNames;
             this.$root.$emit("updateSelectedDistricts", districtsNames);
         },
 
@@ -106,8 +113,9 @@ export default {
          * @returns {void}
          */
         updateResults (conditionId, resultNames) {
-            this.resultNamesArray[conditionId] = resultNames.filter(rN => this.prefilteredDistrictNames.includes(rN));
-            this.resultList = [...new Set(this.resultNamesArray.flat())];
+            this.resultNamesArray[conditionId] = resultNames;
+            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
+                .filter(e => this.selectedDistrictNames.includes(e));
         },
 
         /**
@@ -117,6 +125,50 @@ export default {
         setDistricts () {
             this.setSelectedDistrictLevelId(this.selectedDistrictLevel.layerId);
             this.setDistrictsByName({districtNames: this.resultList});
+        },
+
+        /**
+         * Sets a new value in the array of operators and triggers new result computation.
+         * @param {Number} index - At which index of the array the value is to be updated.
+         * @param {String} operatorValue - "or" or "and"
+         * @returns {void}
+         */
+        updateOperator (index, operatorValue) {
+            this.operators[index] = operatorValue;
+            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
+                .filter(e => this.selectedDistrictNames.includes(e));
+        },
+
+        /**
+         * Gets the list of final results after applying the logical operators on the array of results.
+         * @param {String[[]]} arrayOfArrays - An array of string arrays.
+         * @param {String[]} operators - An array of logical operators.
+         * @returns {String[]} A flat array containing the final result list.
+         */
+        getResultList (arrayOfArrays, operators) {
+            if (
+                !Array.isArray(arrayOfArrays) ||
+                arrayOfArrays.length === 0 ||
+                arrayOfArrays.some(e => !Array.isArray(e)) ||
+                !Array.isArray(operators)
+            ) {
+                return [];
+            }
+
+            const remainingArrays = [...arrayOfArrays],
+                remainingOperators = [...operators];
+
+            remainingOperators.splice(arrayOfArrays.length - 1);
+
+            while (remainingOperators.includes("and")) {
+                const indexOfAnd = remainingOperators.indexOf("and");
+
+                remainingArrays[indexOfAnd] = remainingArrays[indexOfAnd].filter(e => remainingArrays[indexOfAnd + 1].includes(e));
+                remainingArrays.splice(indexOfAnd + 1, 1);
+                remainingOperators.splice(indexOfAnd, 1);
+            }
+
+            return [...new Set(remainingArrays.flat())];
         }
     }
 };
@@ -155,23 +207,36 @@ export default {
                 <h4 class="pt-4">
                     GebieteScan
                 </h4>
-                <label>
-                    Anzahl Bedingungen:
-                    <input
-                        v-model.number="numberOfConditions"
-                        type="number"
-                        min="1"
-                    >
-                </label>
-                <hr>
                 <div
-                    v-for="conditionId in numberOfConditions"
-                    :key="conditionId - 1"
+                    class="border border-primary"
                 >
                     <DistrictFinderCondition
-                        :condition-id="conditionId - 1"
+                        :condition-id="0"
                         @scanCompleted="updateResults"
                     />
+                </div>
+                <div
+                    v-for="conditionId in (numberOfConditions - 1)"
+                    :key="conditionId"
+                >
+                    <DistrictFinderOperator
+                        @change="value => updateOperator(conditionId - 1, value)"
+                    />
+                    <DistrictFinderCondition
+                        class="border border-primary"
+                        :condition-id="conditionId"
+                        @scanCompleted="updateResults"
+                    />
+                </div>
+                <div class="d-flex justify-content-center mt-1">
+                    <button
+                        class="btn btn-link"
+                        plain
+                        @click="numberOfConditions++"
+                    >
+                        <i class="bi bi-plus-circle" />
+                        Bedingung hinzufügen
+                    </button>
                 </div>
                 <ul>
                     <li
