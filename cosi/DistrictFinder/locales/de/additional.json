@@ -3,7 +3,21 @@
         "tools": {
             "cosi": {
                 "districtFinder": {
-                    "title": "Gebiete Finder"
+                    "title": "Gebiete Finder",
+                    "condition": "Bedingung",
+                    "showDetails": "Details einblenden",
+                    "hideDetails": "Details ausblenden",
+                    "label": {
+                        "year": "Jahr",
+                        "dataset": "Datensatz",
+                        "referenceValue": "Referenzwert",
+                        "rule": "Regel",
+                        "tolerance": "Toleranz +/-",
+                        "minimum": "Minimum",
+                        "meanValue": "Mittelwert",
+                        "maximum": "Maximum",
+                        "type": "Typ"
+                    }
                 }
             }
         }

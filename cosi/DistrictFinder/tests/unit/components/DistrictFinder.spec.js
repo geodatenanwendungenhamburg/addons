@@ -1,15 +1,20 @@
 import {config, shallowMount, createLocalVue, createWrapper} from "@vue/test-utils";
 import {expect} from "chai";
 import Vuex from "vuex";
+import Vuetify from "vuetify";
+import Vue from "vue";
 import DistrictFinder from "../../../components/DistrictFinder.vue";
 
 config.mocks.$t = key => key;
 
 const localVue = createLocalVue();
 
+Vue.use(Vuetify);
 localVue.use(Vuex);
 
 describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
+    let vuetify;
+
     const store = new Vuex.Store({
             namespaced: true,
             modules: {
@@ -46,10 +51,15 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                         };
                     },
                     store,
-                    localVue
+                    localVue,
+                    vuetify
                 });
             }
         };
+
+        beforeEach(() => {
+            vuetify = new Vuetify();
+        });
 
     describe("Component DOM", () => {
         it("should exist", () => {
@@ -70,6 +80,12 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                 districtSelectorFilterWrapper = wrapper.find("districtselectorfilter-stub");
 
             expect(districtSelectorFilterWrapper.exists()).to.be.true;
+        });
+        it("should find ContentCard component", () => {
+            const wrapper = factory.getShallowMount(),
+                contentCardWrapper = wrapper.find({name: "ContentCard"});
+
+            expect(contentCardWrapper.exists()).to.be.true;
         });
     });
 

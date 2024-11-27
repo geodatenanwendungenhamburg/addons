@@ -3,7 +3,21 @@
         "tools": {
             "cosi": {
                 "districtFinder": {
-                    "title": "District Finder"
+                    "title": "District Finder",
+                    "condition": "Condition",
+                    "showDetails": "Show details",
+                    "hideDetails": "Hide details",
+                    "label": {
+                        "year": "Year",
+                        "dataset": "Dataset",
+                        "referenceValue": "Reference Value",
+                        "rule": "Rule",
+                        "tolerance": "Tolerance +/-",
+                        "minimum": "Minimum",
+                        "meanValue": "Mean Value",
+                        "maximum": "Maximum",
+                        "type": "Type"
+                    }
                 }
             }
         }
