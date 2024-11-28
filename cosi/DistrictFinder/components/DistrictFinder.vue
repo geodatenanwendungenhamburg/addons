@@ -1,47 +1,50 @@
 <script>
-import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
-import DistrictSelectorLevel from "../../DistrictSelector/components/DistrictSelectorLevel.vue";
-import DistrictSelectorFilter from "../../DistrictSelector/components/DistrictSelectorFilter.vue";
-import {getComponent} from "../../../../src/utils/getComponent";
-import {mapGetters, mapActions, mapMutations} from "vuex";
-import getters from "../store/gettersDistrictFinder";
-import mutations from "../store/mutationsDistrictFinder";
+import AccordionItem from "../../components/AccordionItem.vue";
 import actions from "../store/actionsDistrictFinder";
-import {styleSelectedDistrictLevels} from "../../DistrictSelector/utils/styleSelectedDistrictLevels";
-import DistrictFinderCondition from "./DistrictFinderCondition.vue";
 import ContentCard from "../../components/ContentCard.vue";
+import DistrictFinderCondition from "./DistrictFinderCondition.vue";
 import DistrictFinderOperator from "./DistrictFinderOperator.vue";
+import DistrictSelectorFilter from "../../DistrictSelector/components/DistrictSelectorFilter.vue";
+import DistrictSelectorLevel from "../../DistrictSelector/components/DistrictSelectorLevel.vue";
+import {getComponent} from "../../../../src/utils/getComponent";
+import getters from "../store/gettersDistrictFinder";
+import {mapActions, mapGetters, mapMutations} from "vuex";
+import mutations from "../store/mutationsDistrictFinder";
+import {styleSelectedDistrictLevels} from "../../DistrictSelector/utils/styleSelectedDistrictLevels";
+import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
 
 export default {
     name: "DistrictFinder",
     components: {
-        Tool,
-        DistrictSelectorLevel,
-        DistrictSelectorFilter,
-        DistrictFinderCondition,
+        AccordionItem,
         ContentCard,
-        DistrictFinderOperator
+        DistrictFinderCondition,
+        DistrictFinderOperator,
+        DistrictSelectorFilter,
+        DistrictSelectorLevel,
+        Tool
     },
     data () {
         return {
+            dataChips: ["Fachdaten", "statistische Daten"],
+            datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
+            datasetStat: ["Beispiel1", "Beispiel2", "Beispiel3", "Beispiel4"],
+            expandDataInfo: true,
+            filterRules: ["gleich", "kleiner als", "größer als"],
+            maximum: 6340,
+            minimum: 0,
+            meanValue: 2000,
             numberOfConditions: 1,
+            prefilteredDistrictNames: [],
             resultNamesArray: [],
             resultList: [],
-            dataChips: ["Fachdaten", "statistische Daten"],
             selectedData: "statistische Daten",
-            years: ["2017", "2018", "2019", "2020", "2021", "2022"],
-            selectedYear: "2022",
-            filterRules: ["gleich", "kleiner als", "größer als"],
-            selectedFilter: "gleich",
-            datasetStat: ["Beispiel1", "Beispiel2", "Beispiel3", "Beispiel4"],
-            datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
             selectedDataset: null,
-            minimum: 0,
-            maximum: 6340,
-            meanValue: 2000,
+            selectedFilter: "gleich",
+            selectedYear: "2022",
             type: "absolut",
-            expandDataInfo: true,
-            operators: []
+            operators: [],
+            years: ["2017", "2018", "2019", "2020", "2021", "2022"]
         };
     },
     computed: {
@@ -92,10 +95,10 @@ export default {
         });
     },
     methods: {
-        ...mapMutations("Tools/DistrictFinder", Object.keys(mutations)),
         ...mapActions("Tools/DistrictFinder", Object.keys(actions)),
-        ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
+        ...mapMutations("Tools/DistrictFinder", Object.keys(mutations)),
+        ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
          * Emits the root event 'updateSelectedDistricts' with the given districts names.
@@ -104,39 +107,6 @@ export default {
          */
         emitSelectedDistricts (districtsNames) {
             this.$root.$emit("updateSelectedDistricts", districtsNames);
-        },
-
-        /**
-         * Updates the resulting district names when a conditions has been updated.
-         * @param {Number} conditionId - The id of the condition that is sending new results.
-         * @param {String[]} resultNames - The district names that have been found by the condition.
-         * @returns {void}
-         */
-        updateResults (conditionId, resultNames) {
-            this.resultNamesArray[conditionId] = resultNames;
-            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
-                .filter(e => this.selectedDistrictNames.includes(e));
-        },
-
-        /**
-         * Sets the currently found districts as selected districts.
-         * @returns {void}
-         */
-        setDistricts () {
-            this.setSelectedDistrictLevelId(this.selectedDistrictLevel.layerId);
-            this.setDistrictsByName({districtNames: this.resultList});
-        },
-
-        /**
-         * Sets a new value in the array of operators and triggers new result computation.
-         * @param {Number} index - At which index of the array the value is to be updated.
-         * @param {String} operatorValue - "or" or "and"
-         * @returns {void}
-         */
-        updateOperator (index, operatorValue) {
-            this.operators[index] = operatorValue;
-            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
-                .filter(e => this.selectedDistrictNames.includes(e));
         },
 
         /**
@@ -169,6 +139,39 @@ export default {
             }
 
             return [...new Set(remainingArrays.flat())];
+        },
+
+        /**
+         * Sets the currently found districts as selected districts.
+         * @returns {void}
+         */
+        setDistricts () {
+            this.setSelectedDistrictLevelId(this.selectedDistrictLevel.layerId);
+            this.setDistrictsByName({districtNames: this.resultList});
+        },
+
+        /**
+         * Sets a new value in the array of operators and triggers new result computation.
+         * @param {Number} index - At which index of the array the value is to be updated.
+         * @param {String} operatorValue - "or" or "and"
+         * @returns {void}
+         */
+        updateOperator (index, operatorValue) {
+            this.operators[index] = operatorValue;
+            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
+                .filter(e => this.selectedDistrictNames.includes(e));
+        },
+
+        /**
+         * Updates the resulting district names when a conditions has been updated.
+         * @param {Number} conditionId - The id of the condition that is sending new results.
+         * @param {String[]} resultNames - The district names that have been found by the condition.
+         * @returns {void}
+         */
+        updateResults (conditionId, resultNames) {
+            this.resultNamesArray[conditionId] = resultNames;
+            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
+                .filter(e => this.selectedDistrictNames.includes(e));
         }
     }
 };
@@ -189,20 +192,24 @@ export default {
             v-if="active"
             #toolBody
         >
-            <div
-                id="district-finder"
-                class="container"
-            >
-                <DistrictSelectorLevel
-                    :district-levels="districtLevels"
-                    :selected-level-id="selectedDistrictLevelId"
-                    @setSelectedDistrictLevelId="setSelectedDistrictLevelId"
-                />
-                <DistrictSelectorFilter
-                    :district-levels="districtLevels"
-                    :selected-level-id="selectedDistrictLevelId"
-                    @updateSelectedDistricts="emitSelectedDistricts"
-                />
+            <div id="district-finder">
+                <AccordionItem
+                    id="district-selection"
+                    :title="$t('additional:modules.tools.cosi.districtSelector.title')"
+                    icon="bi bi-plus-circle"
+                >
+                    <DistrictSelectorLevel
+                        :district-levels="districtLevels"
+                        :selected-level-id="selectedDistrictLevelId"
+                        @setSelectedDistrictLevelId="setSelectedDistrictLevelId"
+                    />
+                    <DistrictSelectorFilter
+                        :district-levels="districtLevels"
+                        :selected-level-id="selectedDistrictLevelId"
+                        @updateSelectedDistricts="emitSelectedDistricts"
+                    />
+                </AccordionItem>
+                <hr class="my-2 mx-0 text-black-50">
                 <div class="pt-5" />
                 <h4 class="pt-4">
                     GebieteScan

@@ -69,6 +69,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
             expect(wrapper.exists()).to.be.true;
         });
 
+        it("should find accordion component with id 'district-selection'", () => {
+            const wrapper = factory.getShallowMount(),
+                accordionWrapper = wrapper.find("accordionitem-stub#district-selection");
+
+            expect(accordionWrapper.exists()).to.be.true;
+        });
+
         it("should find district selector level component", () => {
             const wrapper = factory.getShallowMount(),
                 districtSelectorLevelWrapper = wrapper.find("districtselectorlevel-stub");
@@ -84,7 +91,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
         });
         it("should find ContentCard component", () => {
             const wrapper = factory.getShallowMount(),
-                contentCardWrapper = wrapper.find({name: "ContentCard"});
+                contentCardWrapper = wrapper.findComponent({name: "ContentCard"});
 
             expect(contentCardWrapper.exists()).to.be.true;
         });

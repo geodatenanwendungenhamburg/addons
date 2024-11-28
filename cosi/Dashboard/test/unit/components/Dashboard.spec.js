@@ -461,6 +461,110 @@ describe("addons/cosi/Dashboard/components/Dashboard.vue", () => {
             expect(selectedLabels).to.deep.equal(["Wolkenkuckucksheim (Statgebiet)"]);
         });
 
+        describe("getFixedHeader", async () => {
+            it("should return the default data", () => {
+                factory.initialize();
+
+                const def = ["Kategorie", "Jahr", "Gesamt", "Durchschnitt"];
+
+                expect(wrapper.vm.getFixedHeader("")).to.deep.equal(def);
+                expect(wrapper.vm.getFixedHeader(true)).to.deep.equal(def);
+                expect(wrapper.vm.getFixedHeader([])).to.deep.equal(def);
+                expect(wrapper.vm.getFixedHeader({})).to.deep.equal(def);
+                expect(wrapper.vm.getFixedHeader(0)).to.deep.equal(def);
+                expect(wrapper.vm.getFixedHeader({}, {})).to.deep.equal(def);
+            });
+
+            it("should return the correct data for header", () => {
+                factory.initialize();
+
+                const selectedDistrictNames = ["21002", "21003"],
+                    selectedColumns = [
+                        {
+                            "text": "21002",
+                            "value": "21002",
+                            "align": "end",
+                            "district": {},
+                            "districtLevel": "Statistische Gebiete",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "minimized": false
+                        },
+                        {
+                            "text": "21003",
+                            "value": "21003",
+                            "align": "end",
+                            "district": {},
+                            "districtLevel": "Statistische Gebiete",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "minimized": false,
+                            "divider": true
+                        },
+                        {
+                            "text": "Altona-Altstadt",
+                            "value": "Altona-Altstadt",
+                            "align": "end",
+                            "district": {},
+                            "districtLevel": "Stadtteile",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "minimized": false,
+                            "divider": true
+                        },
+                        {
+                            "text": "Altona",
+                            "value": "Altona",
+                            "align": "end",
+                            "district": {},
+                            "districtLevel": "Bezirke",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "minimized": false,
+                            "divider": true
+                        },
+                        {
+                            "text": "FHH",
+                            "value": "FHH",
+                            "align": "end",
+                            "district": {},
+                            "districtLevel": "Hamburg",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "minimized": false,
+                            "divider": true
+                        },
+                        {
+                            "text": "Gesamt",
+                            "value": "total",
+                            "align": "end",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "isAggregation": true
+                        },
+                        {
+                            "text": "Durchschnitt",
+                            "value": "average",
+                            "align": "end",
+                            "sortable": false,
+                            "groupable": false,
+                            "selected": false,
+                            "isAggregation": true
+                        }
+                    ],
+                    header = wrapper.vm.getFixedHeader(selectedDistrictNames, selectedColumns),
+                    expected = ["Kategorie", "Jahr", "21002", "21003", "Gesamt", "Durchschnitt"];
+
+                expect(header).to.deep.equal(expected);
+            });
+        });
+
         describe("handleOrientationColumn", () => {
             it("should not add a column for orientation values if no orientation values available", async () => {
                 await factory.initialize();

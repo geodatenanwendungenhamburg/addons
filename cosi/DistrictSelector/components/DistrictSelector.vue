@@ -20,7 +20,7 @@ import DistrictSelectorLevel from "./DistrictSelectorLevel.vue";
 import Feature from "ol/Feature";
 import {union} from "../../utils/geomUtils.js";
 import IconButton from "./IconButton.vue";
-import AccordionItem from "./AccordionItem.vue";
+import AccordionItem from "../../components/AccordionItem.vue";
 
 export default {
     name: "DistrictSelector",

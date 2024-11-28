@@ -592,17 +592,57 @@ export default {
                 return;
             }
 
-            fixedHeaderStart = iniHeader.includes("Gruppe") ? ["Kategorie", "Gruppe", "Datentyp"] : ["Kategorie", "Datentyp"];
-            fixedHeaderEnd = iniHeader.includes(this.getColumnHeader("orientationValue")) ? [this.getColumnHeader("orientationValue"), "Gesamt", "Durchschnitt", "Jahr"] : ["Gesamt", "Durchschnitt", "Jahr"];
-            header = fixedHeaderStart.concat(iniHeader.filter((value) => {
-                return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
-            }), fixedHeaderEnd);
-
+            if (!this.fixedHeader) {
+                fixedHeaderStart = iniHeader.includes("Gruppe") ? ["Kategorie", "Gruppe", "Datentyp"] : ["Kategorie", "Datentyp"];
+                fixedHeaderEnd = iniHeader.includes(this.getColumnHeader("orientationValue")) ? [this.getColumnHeader("orientationValue"), "Gesamt", "Durchschnitt", "Jahr"] : ["Gesamt", "Durchschnitt", "Jahr"];
+                header = fixedHeaderStart.concat(iniHeader.filter((value) => {
+                    return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
+                }), fixedHeaderEnd);
+            }
+            else {
+                header = this.getFixedHeader(this.selectedDistrictNames, this.selectedColumns);
+                exportedData = this.sanitizeData(JSON.parse(JSON.stringify(exportedData)), ["Datentyp"]);
+            }
             exportedData = this.getModifiedData(exportedData, modifiedKey);
 
             exportXlsx(header, exportedData, filename);
         },
 
+        /**
+         * Returns a fixed header
+         * @param {String[]} selectedDistrictNames - Selected district names.
+         * @param {Object[]} selectedColumns - Selected columns.
+         * @returns {String[]} The fixed header.
+         */
+        getFixedHeader(selectedDistrictNames, selectedColumns) {
+            if (!Array.isArray(selectedDistrictNames) || !Array.isArray(selectedColumns)) {
+                return ["Kategorie", "Jahr", "Gesamt", "Durchschnitt"];
+            }
+
+            const columns = [];
+
+            let header = ["Kategorie", "Jahr"];
+
+            if (selectedDistrictNames.length > 0) {
+                selectedDistrictNames.forEach(district => {
+                    header.push(district);
+                });
+            }
+
+            header.push("Gesamt", "Durchschnitt");
+
+            if (selectedColumns.length > 0) {
+                selectedColumns.forEach(column => {
+                    columns.push(column.text);
+                });
+            }
+
+            header.concat(columns.filter((value) => {
+                return !header.includes(value);
+            }));
+
+            return header;
+        },
         /**
          * Gets modified data by changing the key
          * @param {Object[]} data - the original data.
