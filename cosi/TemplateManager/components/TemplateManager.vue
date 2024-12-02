@@ -102,11 +102,6 @@ export default {
          * @returns {Number} The index.
          */
         activeTemplate () {
-            this.templates.forEach(templ => {
-                if (templ.meta.title !== this.activeTemplateName) {
-                    templ.meta.isActive = false;
-                }
-            });
             return this.templates.find(template => template.meta.title === this.activeTemplateName);
         },
         /**
@@ -579,7 +574,7 @@ export default {
                 this.openExportWindow(true);
             }
 
-            this.isTemplateActive = this.activeTemplateName === this.selectedTemplateName;
+            this.isTemplateActive = this.activeTemplates.includes(name);
         },
         /**
          * Sets the current activated template and loads it.
@@ -596,6 +591,13 @@ export default {
             }
 
             this.loadFromTemplate(this.activeTemplate, this.activeTemplateIndex, active);
+
+            if (active) {
+                this.setActiveTemplates([...this.activeTemplates, name]);
+            }
+            else {
+                this.setActiveTemplates(this.activeTemplates.filter(template => template !== name));
+            }
 
             if (!active && this.currentActiveTemplate === "") {
                 this.activeTemplateName = "";

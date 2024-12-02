@@ -2,6 +2,8 @@
  * User type definition
  * @typedef {Object} DistrictSelectorState
  * @property {Boolean} [active=false] - Is activated (will rendered) or not (config-param).
+ * @property {String[]} activeTemplates - the active templates.
+ * @property {String} currentActiveTemplate - the current active template name.
  * @property {Boolean} [deactivateGFI=false] - Deactivates the gfi if true (config-param).
  * @property {String} [icon="bi-folder2-open"] - Bootstrap icon class (config-param).
  * @property {String} id - The id of the district selector component.
@@ -13,16 +15,24 @@
  * @property {Boolean} [useTemplatesForMapping=false] - If true, the mapping is overwritten with the statistic data from the templates.
  * @property {Object} templateContents - The selected data from templates.
  * @property {String[]} defaultActiveLayerIds - the default active layer Ids in COSI.
- * @property {String} currentActiveTemplate - the current active template name.
+ * @property {Boolean} [multiTemplate=false] - If true, multiple templates are allowed to be active.
  */
 const state = {
     active: false,
+    activeTemplates: [],
+    currentActiveTemplate: "",
     deactivateGFI: false,
+    defaultActiveLayerIds: [],
     icon: "bi-folder2-open",
     id: "templateManager",
     isVisibleInMenu: true,
     importedTemplateNames: [],
+    multiTemplate: false,
     name: "Vorlagen",
+    readmeUrl: {
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015templates.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015vorlagen.md"
+    },
     renderToWindow: true,
     resizableWindow: true,
     templatePath: "./assets/templates",
@@ -30,15 +40,9 @@ const state = {
     templateFiles: [
         "Erhaltungsmanagement_Spielplaetze"
     ],
-    readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015templates.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/015vorlagen.md"
-    },
     toolToOpen: undefined,
     useImport: false,
-    useTemplatesForMapping: false,
-    defaultActiveLayerIds: [],
-    currentActiveTemplate: ""
+    useTemplatesForMapping: false
 };
 
 export default state;
