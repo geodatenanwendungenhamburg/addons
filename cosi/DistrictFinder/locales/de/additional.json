@@ -17,6 +17,11 @@
                         "meanValue": "Mittelwert",
                         "maximum": "Maximum",
                         "type": "Typ"
+                    },
+                    "button": {
+                        "addCondition": "Bedingung hinzufügen",
+                        "confirm": "Gebiete übernehmen",
+                        "import": "Filter importieren"
                     }
                 }
             }

@@ -1,7 +1,7 @@
 <script>
 
 export default {
-    name: "DistrictFinderOperator",
+    name: "DistrictFinderFilterOperator",
     props: {
         defaultOption: {
             type: String,

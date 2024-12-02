@@ -43,23 +43,25 @@ export default {
 </script>
 
 <template>
-    <button
-        :id="id"
-        tabindex="0"
-        class="btn d-flex align-items-center justify-items-center mb-auto"
-        type="button"
-        :title="aria"
-        :aria-label="aria"
-        :class="classArray"
-        :disabled="disabled"
-        @click="interaction"
-        @keydown.enter="interaction"
-    >
-        <i
-            :class="iconArray ? iconArray : icon"
-            role="img"
-        />
-    </button>
+    <div class="d-flex align-items-center justify-items-center mb-auto">
+        <button
+            :id="id"
+            tabindex="0"
+            class="btn"
+            type="button"
+            :title="aria"
+            :aria-label="aria"
+            :class="classArray"
+            :disabled="disabled"
+            @click="interaction"
+            @keydown.enter="interaction"
+        >
+            <i
+                :class="iconArray ? iconArray : icon"
+                role="img"
+            />
+        </button>
+    </div>
 </template>
 
 <style lang="scss" scoped>

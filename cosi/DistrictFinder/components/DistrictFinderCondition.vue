@@ -62,6 +62,7 @@ export default {
          * @returns {void}
          */
         async scan () {
+
             if (!this.selectedDataset || !this.selectedCategory) {
                 return;
             }

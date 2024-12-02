@@ -17,6 +17,11 @@
                         "meanValue": "Mean Value",
                         "maximum": "Maximum",
                         "type": "Type"
+                    },
+                    "button": {
+                        "addCondition": "Add condition",
+                        "confirm": "Confirm districts",
+                        "import": "Import filter"
                     }
                 }
             }
