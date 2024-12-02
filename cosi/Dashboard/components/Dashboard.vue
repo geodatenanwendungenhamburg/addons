@@ -563,7 +563,7 @@ export default {
          * @param {Object[]} currentItems - All current (visible) items in the table
          * @returns {void}
          */
-        exportTable (exportTimeline = false) {
+        async exportTable (exportTimeline = false) {
             let exportedData = null,
                 iniHeader = null,
                 fixedHeaderStart = null,
@@ -592,15 +592,118 @@ export default {
                 return;
             }
 
-            fixedHeaderStart = iniHeader.includes("Gruppe") ? ["Kategorie", "Gruppe", "Datentyp"] : ["Kategorie", "Datentyp"];
-            fixedHeaderEnd = iniHeader.includes(this.getColumnHeader("orientationValue")) ? [this.getColumnHeader("orientationValue"), "Gesamt", "Durchschnitt", "Jahr"] : ["Gesamt", "Durchschnitt", "Jahr"];
-            header = fixedHeaderStart.concat(iniHeader.filter((value) => {
-                return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
-            }), fixedHeaderEnd);
-
+            if (!this.fixedHeader) {
+                fixedHeaderStart = iniHeader.includes("Gruppe") ? ["Kategorie", "Gruppe", "Datentyp"] : ["Kategorie", "Datentyp"];
+                fixedHeaderEnd = iniHeader.includes(this.getColumnHeader("orientationValue")) ? [this.getColumnHeader("orientationValue"), "Gesamt", "Durchschnitt", "Jahr"] : ["Gesamt", "Durchschnitt", "Jahr"];
+                header = fixedHeaderStart.concat(iniHeader.filter((value) => {
+                    return !fixedHeaderStart.includes(value) && !fixedHeaderEnd.includes(value);
+                }), fixedHeaderEnd);
+            }
+            else {
+                header = await this.getFixedHeader(this.selectedDistrictNames, this.selectedColumns);
+                exportedData = this.sanitizeData(JSON.parse(JSON.stringify(exportedData)), ["Datentyp"]);
+            }
             exportedData = this.getModifiedData(exportedData, modifiedKey);
 
             exportXlsx(header, exportedData, filename);
+        },
+
+        /**
+         * Returns a fixed order header.
+         * @param {String[]} selectedDistrictNames - Selected district names.
+         * @param {Object[]} selectedColumns - Selected columns.
+         * @returns {Promise<String[]>|String[]} The fixed header.
+         */
+        async getFixedHeader (selectedDistrictNames, selectedColumns) {
+            if (!Array.isArray(selectedDistrictNames) || !Array.isArray(selectedColumns)) {
+                return ["Kategorie", "Jahr", "Gesamt", "Durchschnitt"];
+            }
+
+            return new Promise((resolve, reject) => {
+                const header = ["Kategorie", "Jahr"];
+
+                this.getDistrictNames(selectedDistrictNames).then((districtNames) => {
+                    if (Array.isArray(districtNames) && districtNames.length > 0) {
+
+                        if (districtNames.length > 0) {
+                            for (let i = 0; i < districtNames.length; i++) {
+                                header.push(districtNames[i]);
+                            }
+                        }
+
+                        header.push("Gesamt", "Durchschnitt");
+                    }
+
+                    this.getSelectedColumnTexts(selectedColumns).then((selectedColumnTexts) => {
+                        if (Array.isArray(selectedColumnTexts) && selectedColumnTexts.length > 0) {
+                            for (let i = 0; i < selectedColumnTexts.length; i++) {
+                                if (!header.includes(selectedColumnTexts[i])) {
+                                    header.push(selectedColumnTexts[i]);
+                                }
+                            }
+                        }
+
+                        if (Array.isArray(header)) {
+                            resolve(header);
+                        }
+                        else {
+                            reject("Error during generation of the header for export.");
+                        }
+                    });
+                });
+            });
+        },
+
+        /**
+         * Returns an array of selected district names.
+         * @param {String[]} selectedDistrictNames - Selected district names.
+         * @returns {Promise<String[]>|[]} - Array of district names, or empty array.
+         */
+        getDistrictNames (selectedDistrictNames) {
+            if (!Array.isArray(selectedDistrictNames) || selectedDistrictNames.length === 0) {
+                return [];
+            }
+
+            return new Promise((resolve, reject) => {
+                const header = [];
+
+                if (selectedDistrictNames.length > 0) {
+                    for (let i = 0; i < selectedDistrictNames.length; i++) {
+                        header.push(selectedDistrictNames[i]);
+                    }
+                }
+                if (header.length > 0) {
+                    resolve(header);
+                }
+                else {
+                    reject("Error during generation of the header for export.");
+                }
+            });
+        },
+
+        /**
+         * Returns an array of selected columns texts.
+         * @param {Object[]} selectedColumns - Array of selected columns objects.
+         * @returns {Promise<String[]>|[]} - Array of selected columns, or empty array.
+         */
+        getSelectedColumnTexts (selectedColumns) {
+            if (!Array.isArray(selectedColumns) || selectedColumns.length === 0) {
+                return [];
+            }
+
+            return new Promise((resolve, reject) => {
+                if (Array.isArray(selectedColumns) && selectedColumns.length > 0) {
+                    const columnTexts = [];
+
+                    for (let i = 0; i < selectedColumns.length; i++) {
+                        columnTexts.push(selectedColumns[i].text);
+                    }
+                    resolve(columnTexts);
+                }
+                else {
+                    reject("Error during generation of the header for export.");
+                }
+            });
         },
 
         /**
