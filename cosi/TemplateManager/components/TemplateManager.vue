@@ -24,14 +24,14 @@ export default {
     },
     data () {
         return {
-            templates: [],
-            selectedTemplateName: false,
             activeTemplateName: false,
             filters: [],
+            isTemplateActive: false,
+            saveTemplate: [],
+            selectedTemplateName: false,
             showExportWindow: false,
             showImportSection: true,
-            saveTemplate: [],
-            isTemplateActive: false
+            templates: []
         };
     },
     computed: {
@@ -348,16 +348,19 @@ export default {
 
             this.loadSessionData({template: _template, reset: !active});
             this.openTool(startingTool, active);
-            this.loadLayer(_template?.state?.Maps?.layerIds, active);
+            this.loadLayer(_template?.state?.Maps?.layerIds, active, this.templates);
         },
 
         /**
          * Loading the layers from id
          * @param {String[]} layerIds The layer Id list
          * @param {Boolean} active - Flag if it is activated.
+         * @param {Object[]} templates - The templates.
          * @returns {void}
          */
-        loadLayer (layerIds, active) {
+        loadLayer (layerIds, active, templates) {
+            const activeLayersId = this.getActiveLayerIds(templates);
+
             if (Array.isArray(layerIds) && layerIds.length) {
                 layerIds.forEach(layerId => {
                     if (!getModelByAttributes({id: layerId})) {
@@ -367,7 +370,7 @@ export default {
                     const model = getModelByAttributes({id: layerId});
 
                     if (model) {
-                        model.set("isSelected", !this.defaultActiveLayerIds.includes(layerId) ? active : true);
+                        model.set("isSelected", !this.defaultActiveLayerIds.includes(layerId) && !activeLayersId.includes(layerId) ? active : true);
                     }
                 });
             }
@@ -380,11 +383,15 @@ export default {
          * @returns {void}
          */
         openTool (startingTool, active) {
+            if (!active) {
+                return;
+            }
+
             if (typeof startingTool === "string") {
-                this.$store.dispatch("Tools/setToolActive", {id: startingTool, active: active});
+                this.$store.dispatch("Tools/setToolActive", {id: startingTool, active: true});
             }
             else if (typeof this.toolToOpen === "string") {
-                this.$store.dispatch("Tools/setToolActive", {id: this.toolToOpen, active: active});
+                this.$store.dispatch("Tools/setToolActive", {id: this.toolToOpen, active: true});
             }
         },
 
@@ -602,6 +609,9 @@ export default {
             if (!active && this.currentActiveTemplate === "") {
                 this.activeTemplateName = "";
                 this.setCurrentActiveTemplate("");
+                if (!this.activeTemplates.length) {
+                    this.setMapping(mapping);
+                }
             }
         },
 
@@ -618,6 +628,28 @@ export default {
             }
 
             return false;
+        },
+
+        /**
+         * Sets the current activated template and loads it.
+         * @param {Object[]} templates - All the loaded templates.
+         * @returns {String[]} the active layer Ids.
+         */
+        getActiveLayerIds (templates) {
+            if (!Array.isArray(templates) || !templates.length) {
+                return [];
+            }
+
+            const activeTemplates = templates.filter(template => template.meta.isActive),
+                activeLayerIds = [];
+
+            activeTemplates.forEach(template => {
+                if (Array.isArray(template.state?.Maps?.layerIds) && template.state?.Maps?.layerIds.length) {
+                    activeLayerIds.push(...template.state.Maps.layerIds);
+                }
+            });
+
+            return activeLayerIds;
         }
     }
 };
@@ -904,8 +936,8 @@ export default {
                                             multiple
                                         >
                                             <v-chip
-                                                v-for="category in getStatsCategories(selectedTemplate)"
-                                                :key="selectedTemplate?.meta?.title + category"
+                                                v-for="(category, indexCat) in getStatsCategories(selectedTemplate)"
+                                                :key="indexCat"
                                                 :value="category"
                                                 class="m-1"
                                                 variant="outlined"

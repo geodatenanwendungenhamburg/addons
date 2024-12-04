@@ -732,6 +732,59 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 expect(stubOpenExportWindow.calledOnce).to.be.false;
                 wrapper.destroy();
             });
-        })
+        });
+        describe("getActiveLayerIds", () => {
+            it("should return empty string", () => {
+                const wrapper = factory.getMount();
+
+                expect(wrapper.vm.getActiveLayerIds("")).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds(true)).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds(0)).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds(undefined)).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds(null)).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds({})).to.be.deep.equal([]);
+                expect(wrapper.vm.getActiveLayerIds([])).to.be.deep.equal([]);
+                wrapper.destroy();
+            });
+
+            it("should return layer Id list", () => {
+                const wrapper = factory.getMount(),
+                    templates = [
+                    {
+                        meta: {
+                          isActive: true
+                        },
+                        state: {
+                            Maps: {
+                                layerIds: [1, 2]
+                            }
+                        }
+                    },
+                    {
+                        meta: {
+                            isActive: true
+                        },
+                        state: {
+                            Maps: {
+                                layerIds: [3, 4]
+                            }
+                        }
+                    },
+                    {
+                        meta: {
+                            isActive: false
+                        },
+                        state: {
+                            Maps: {
+                                layerIds: [3, 4]
+                            }
+                        }
+                    }
+                ];
+
+                expect(wrapper.vm.getActiveLayerIds(templates)).to.be.deep.equal([1, 2, 3, 4]);
+                wrapper.destroy();
+            });
+        });
     });
 });
