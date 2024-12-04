@@ -140,10 +140,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             it("should return empty array in case of unexpected parameters", () => {
                 const wrapper = factory.getShallowMount();
 
-                expect(wrapper.vm.getResultList(null, [])).to.deep.equal([]);
-                expect(wrapper.vm.getResultList([[], null], ["or"])).to.deep.equal([]);
-                expect(wrapper.vm.getResultList([[], []], null)).to.deep.equal([]);
-                expect(wrapper.vm.getResultList([[], []], ["and", "and"])).to.deep.equal([]);
+                expect(wrapper.vm.getResultList()).to.deep.equal([]);
+                expect(wrapper.vm.getResultList(null, ["or"])).to.deep.equal([]);
+                expect(wrapper.vm.getResultList([["Hamm"], ["Schlump"]], null)).to.deep.equal([]);
+                expect(wrapper.vm.getResultList([], ["or"])).to.deep.equal([]);
             });
 
             it("should return expected result", () => {

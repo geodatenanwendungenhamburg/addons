@@ -1,5 +1,4 @@
 <script>
-import DistrictFinderCondition from "./DistrictFinderCondition.vue";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters} from "vuex";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
@@ -8,7 +7,6 @@ import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 export default {
     name: "DistrictFinderFilter",
     components: {
-        DistrictFinderCondition,
         DistrictFinderFilterCard,
         DistrictFinderFilterOperator,
         IconButton
@@ -50,7 +48,6 @@ export default {
             if (
                 !Array.isArray(arrayOfArrays) ||
                 arrayOfArrays.length === 0 ||
-                arrayOfArrays.some(e => !Array.isArray(e)) ||
                 !Array.isArray(operators)
             ) {
                 return [];
@@ -64,7 +61,7 @@ export default {
             while (remainingOperators.includes("and")) {
                 const indexOfAnd = remainingOperators.indexOf("and");
 
-                remainingArrays[indexOfAnd] = remainingArrays[indexOfAnd].filter(e => remainingArrays[indexOfAnd + 1].includes(e));
+                remainingArrays[indexOfAnd] = remainingArrays[indexOfAnd]?.filter(e => remainingArrays[indexOfAnd + 1].includes(e)) || [];
                 remainingArrays.splice(indexOfAnd + 1, 1);
                 remainingOperators.splice(indexOfAnd, 1);
             }
@@ -137,15 +134,19 @@ export default {
                 icon="bi bi-download"
             />
         </div>
-        <DistrictFinderFilterCard class="mx-4" />
         <div
-            v-for="conditionId in (numberOfConditions - 1)"
-            :key="conditionId"
+            v-for="conditionNumber in numberOfConditions"
+            :key="conditionNumber"
         >
             <DistrictFinderFilterOperator
-                @change="value => updateOperator(conditionId - 1, value)"
+                v-if="conditionNumber > 1"
+                @change="value => updateOperator(conditionNumber - 2, value)"
             />
-            <DistrictFinderFilterCard class="mx-4" />
+            <DistrictFinderFilterCard
+                class="mx-4"
+                :condition-id="conditionNumber - 1"
+                @scanCompleted="updateResults"
+            />
         </div>
         <div class="d-flex justify-content-center my-3">
             <button
@@ -158,33 +159,13 @@ export default {
         </div>
         <button
             class="btn btn-primary lh-1 fs-5"
+            @click="setDistricts"
         >
             <i class="bi bi-check pe-2" />
             {{ $t("additional:modules.tools.cosi.districtFinder.button.confirm") }}
         </button>
         <br>
         <div class="pb-5" />
-        <div
-            class="border border-primary"
-        >
-            <DistrictFinderCondition
-                :condition-id="0"
-                @scanCompleted="updateResults"
-            />
-        </div>
-        <div
-            v-for="conditionId in (numberOfConditions - 1)"
-            :key="conditionId"
-        >
-            <DistrictFinderFilterOperator
-                @change="value => updateOperator(conditionId - 1, value)"
-            />
-            <DistrictFinderCondition
-                class="border border-primary"
-                :condition-id="conditionId"
-                @scanCompleted="updateResults"
-            />
-        </div>
         <ul>
             <li
                 v-for="resultName in resultList"
@@ -193,10 +174,6 @@ export default {
                 {{ resultName }}
             </li>
         </ul>
-        <hr>
-        <button @click="setDistricts">
-            Hier klicken, um gefundene Gebiete als Gebietsauswahl zu setzen
-        </button>
     </div>
 </template>
 

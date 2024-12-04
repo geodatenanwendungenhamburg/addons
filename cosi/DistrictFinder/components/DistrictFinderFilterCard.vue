@@ -1,34 +1,103 @@
 <script>
 import ContentCard from "../../components/ContentCard.vue";
+import {getFeaturePOST} from "../../../../src/api/wfs/getFeature";
 import {mapGetters} from "vuex";
+import {WFS} from "ol/format.js";
 
 export default {
     name: "DistrictFinderFilterCard",
     components: {
         ContentCard
     },
+    props: {
+        conditionId: {
+            type: Number,
+            required: true
+        }
+    },
+    emits: ["scanCompleted"],
     data () {
         return {
             dataChips: ["Fachdaten", "statistische Daten"],
             datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
-            datasetStat: ["Beispiel1", "Beispiel2", "Beispiel3", "Beispiel4"],
             expandDataInfo: true,
             filterRules: ["gleich", "kleiner als", "größer als"],
             maximum: 6340,
             meanValue: 2000,
             minimum: 0,
-            resultList: [],
-            resultNamesArray: [],
+            referenceValue: 20000,
+            resultNames: [],
+            selectedCategory: null,
             selectedData: "statistische Daten",
-            selectedDataset: null,
             selectedFilter: "gleich",
             selectedYear: "2022",
+            tolerance: 5000,
             type: "absolut",
             years: ["2017", "2018", "2019", "2020", "2021", "2022"]
         };
     },
     computed: {
-        ...mapGetters("Language", ["currentLocale"])
+        ...mapGetters("Language", ["currentLocale"]),
+        ...mapGetters("Maps", ["projectionCode"]),
+        ...mapGetters("Tools/DistrictSelector", [
+            "keyOfAttrNameStats",
+            "mapping",
+            "selectedDistrictLevel"
+        ]),
+
+        /**
+         * Returns the statistical datasets for the current district level as defined in the mapping.
+         * @returns {Object[]} The mapping datasets or an empty array.
+         */
+        datasetStat () {
+            return this.mapping.filter(m => m[this.keyOfAttrNameStats]) || [];
+        },
+
+        /**
+         * Returns currently selected statistical dataset.
+         * @returns {Object} A single mapping dataset or undefined.
+         */
+        selectedDataset () {
+            return this.datasetStat.find(d => d.category === this.selectedCategory);
+        },
+
+        /**
+         * Returns the statistical layer matching the currently selected dataset.
+         * @returns {Object} A layer object or undefined.
+         */
+        selectedStatLayer () {
+            return this.selectedDistrictLevel?.stats?.layers?.find(
+                layer => layer.id === this.selectedDataset?.[this.keyOfAttrNameStats]);
+        }
+    },
+    methods: {
+        /**
+         * Performs WFS request to get the statistical features and emits matching district names.
+         * @emits scanCompleted - passing own condition id and the found district names.
+         * @returns {void}
+         */
+        async scan () {
+
+            if (!this.selectedDataset || !this.selectedStatLayer) {
+                return;
+            }
+
+            let features = await getFeaturePOST(
+                this.selectedStatLayer.url,
+                {
+                    featureTypes: [this.selectedStatLayer.featureType],
+                    srsName: this.projectionCode,
+                    propertyNames: [this.selectedCategory, this.keyOfAttrNameStats, "jahr"]
+                }
+            );
+
+            features = new WFS().readFeatures(features);
+            features = features.filter(f => f.get("jahr") === this.selectedYear
+                && Math.abs(f.get(this.selectedCategory) - this.referenceValue) <= this.tolerance);
+
+            this.resultNames = features.map(f => f.get(this.keyOfAttrNameStats));
+            this.$emit("scanCompleted", this.conditionId, this.resultNames);
+        }
     }
 };
 </script>
@@ -53,6 +122,7 @@ export default {
                         :stat-color="data === 'statistische Daten'"
                         :fachdata-color="data === 'Fachdaten'"
                         x-small
+                        :disabled="data === 'Fachdaten'"
                     >
                         {{ data }}
                     </v-chip>
@@ -63,7 +133,7 @@ export default {
             <div class="container px-2 py-1">
                 <div class="row">
                     <h4 class="d-flex align-items-center col-md-9 py-0 pb-0 pt-3">
-                        1. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
+                        {{ conditionId + 1 }}. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
                     </h4>
                     <div
                         v-if="selectedDataset !== null && selectedData === 'statistische Daten'"
@@ -82,6 +152,7 @@ export default {
                             outlined
                             hide-details
                             dense
+                            @change="scan"
                         />
                     </div>
                 </div>
@@ -93,12 +164,15 @@ export default {
                             {{ $t('additional:modules.tools.cosi.districtFinder.label.dataset') }}
                         </v-label>
                         <v-select
-                            v-model="selectedDataset"
+                            v-model="selectedCategory"
                             class="data-filter"
                             :items="selectedData === 'statistische Daten' ? datasetStat : datasetFachdaten"
+                            item-text="value"
+                            item-value="category"
                             outlined
                             hide-details
                             dense
+                            @change="scan"
                         />
                     </div>
                 </div>
@@ -114,11 +188,13 @@ export default {
                             {{ $t('additional:modules.tools.cosi.districtFinder.label.referenceValue') }}
                         </v-label>
                         <v-text-field
+                            v-model="referenceValue"
                             class="reference-filter"
                             outlined
                             hide-details
                             dense
                             type="number"
+                            @input="scan"
                         />
                     </div>
                     <div class="col-md-4 me-1 px-0 pt-1 pb-0">
@@ -135,6 +211,7 @@ export default {
                             outlined
                             hide-details
                             dense
+                            disabled
                         />
                     </div>
                     <div
@@ -148,11 +225,13 @@ export default {
                             {{ $t('additional:modules.tools.cosi.districtFinder.label.tolerance') }}
                         </v-label>
                         <v-text-field
+                            v-model="tolerance"
                             class="tolerance"
                             outlined
                             hide-details
                             dense
                             type="number"
+                            @input="scan"
                         />
                     </div>
                 </div>
