@@ -21,7 +21,6 @@ export default {
             dataChips: ["Fachdaten", "statistische Daten"],
             datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
             expandDataInfo: true,
-            filterRules: ["gleich", "kleiner als", "größer als"],
             maximum: 6340,
             meanValue: 2000,
             minimum: 0,
@@ -29,7 +28,7 @@ export default {
             resultNames: [],
             selectedCategory: null,
             selectedData: "statistische Daten",
-            selectedFilter: "gleich",
+            selectedFilter: "=",
             selectedYear: "2022",
             tolerance: 5000,
             type: "absolut",
@@ -44,6 +43,18 @@ export default {
             "mapping",
             "selectedDistrictLevel"
         ]),
+
+        /**
+         * Returns translated dropdown entries for filter rules.
+         * @returns {Object[]} dropdown entries with text and value keys.
+         */
+        filterRules () {
+            return [
+                {value: "=", text: this.$t("additional:modules.tools.cosi.districtFinder.comparison.equals")},
+                {value: "<", text: this.$t("additional:modules.tools.cosi.districtFinder.comparison.less")},
+                {value: ">", text: this.$t("additional:modules.tools.cosi.districtFinder.comparison.greater")}
+            ];
+        },
 
         /**
          * Returns the statistical datasets for the current district level as defined in the mapping.
@@ -93,10 +104,31 @@ export default {
 
             features = new WFS().readFeatures(features);
             features = features.filter(f => f.get("jahr") === this.selectedYear
-                && Math.abs(f.get(this.selectedCategory) - this.referenceValue) <= this.tolerance);
+                && this.comparisonFunction(this.selectedFilter, f.get(this.selectedCategory), this.referenceValue, this.tolerance));
 
             this.resultNames = features.map(f => f.get(this.keyOfAttrNameStats));
             this.$emit("scanCompleted", this.conditionId, this.resultNames);
+        },
+
+        /**
+         * Compares two numerical values.
+         * @param {String} mode The comparison operator to apply. One of "=", "<" or ">".
+         * @param {Number} value The main value to be evaluated.
+         * @param {Number} referenceValue The reference value to be evaluated.
+         * @param {Number} [tolerance=0] Tolerance for mode "=".
+         * @return {Boolean} Whether or not the values meet the chosen condition.
+         */
+        comparisonFunction (mode, value, referenceValue, tolerance = 0) {
+            if (mode === "<") {
+                return value < referenceValue;
+            }
+            if (mode === ">") {
+                return value > referenceValue;
+            }
+            if (mode === "=") {
+                return Math.abs(value - referenceValue) <= tolerance;
+            }
+            return false;
         }
     }
 };
@@ -211,11 +243,11 @@ export default {
                             outlined
                             hide-details
                             dense
-                            disabled
+                            @change="scan"
                         />
                     </div>
                     <div
-                        v-if="selectedFilter === 'gleich'"
+                        v-if="selectedFilter === '='"
                         class="col-md-3 px-0 pt-1 pb-0"
                     >
                         <v-label
