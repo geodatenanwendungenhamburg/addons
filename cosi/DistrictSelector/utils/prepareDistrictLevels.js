@@ -1,6 +1,7 @@
 import {describeFeatureType, getFeatureDescription} from "../../../../src/api/wfs/describeFeatureType.js";
 import rawLayerList from "@masterportal/masterportalapi/src/rawLayerList";
 import {getContainingDistrictForExtent} from "../../utils/geomUtils.js";
+import isObject from "../../../../src/utils/isObject";
 
 /**
  * Prepares the district level objects for the district selector.
@@ -25,7 +26,9 @@ export async function prepareDistrictLevels (districtLevels, layerList) {
             // the layer for the district level
             districtLevel.layer = getLayerById(layerList, districtLevel.layerId);
             // property names for the WFS GetFeature request for the stats features, without geometry
-            if (!districtLevel.propertyNameList && typeof districtLevel?.layer?.get === "function" && districtLevel.layer.get("typ") === "WFS") {
+            if (!districtLevel.propertyNameList &&
+                typeof districtLevel?.layer?.get === "function" &&
+                (districtLevel.layer.get("typ") === "WFS" || districtLevel.layer.get("typ") === "OAF")) {
                 const propertyNameList = await getPropertyNameList(districtLevel.stats.layers);
 
                 if (!districtLevel.propertyNameList && Array.isArray(propertyNameList) && propertyNameList.length > 0) {
@@ -249,17 +252,24 @@ export async function getPropertyNameList (layers) {
     for (let i = 0; i < layers.length; i++) {
         propertyNameList[i] = [];
 
-        // get the property names by the 'DescribeFeatureType' request
-        const json = await describeFeatureType(layers[i].url),
-            description = getFeatureDescription(json, layers[i].featureType);
+        if (layers[i].typ === "WFS") {
+            // get the property names by the 'DescribeFeatureType' request
+            const json = await describeFeatureType(layers[i].url),
+                description = getFeatureDescription(json, layers[i].featureType);
 
-        if (description) {
-            description.forEach(element => {
-                // "gml:" => geometry property
-                if (element.type.search("gml:") === -1) {
-                    propertyNameList[i].push(element.name);
-                }
-            });
+            if (description) {
+                description.forEach(element => {
+                    // "gml:" => geometry property
+                    if (element.type.search("gml:") === -1) {
+                        propertyNameList[i].push(element.name);
+                    }
+                });
+            }
+        }
+        else if (layers[i].typ === "OAF") {
+            if (isObject(layers[i].gfiAttributes) && Object.keys(layers[i].gfiAttributes).length > 0) {
+                propertyNameList[i] = Object.keys(layers[i].gfiAttributes);
+            }
         }
     }
 
