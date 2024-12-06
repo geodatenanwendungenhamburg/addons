@@ -5,6 +5,10 @@
                 "districtFinder": {
                     "title": "Gebiete Finder",
                     "condition": "Bedingung",
+                    "operators": {
+                      "or": "ODER",
+                      "and": "UND"
+                    },
                     "showDetails": "Details einblenden",
                     "hideDetails": "Details ausblenden",
                     "comparison": {

@@ -1,8 +1,9 @@
 <script>
-import IconButton from "../../components/IconButton.vue";
-import {mapActions, mapGetters} from "vuex";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
+import IconButton from "../../components/IconButton.vue";
+import {mapActions, mapGetters} from "vuex";
+import uniqueId from "../../../../src/utils/uniqueId";
 
 export default {
     name: "DistrictFinderFilter",
@@ -13,30 +14,64 @@ export default {
     },
     data () {
         return {
+            cardList: [{
+                id: uniqueId("card-"),
+                operator: "",
+                results: []
+            }],
             filterDate: "erstellt: 01.01.1999",
             filterTitle: "Filter",
-            numberOfConditions: 1,
-            operators: [],
-            resultList: [],
-            resultNamesArray: []
+            resultList: []
         };
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictNames"])
-    },
-    watch: {
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictNames"]),
+
         /**
-         * Deletes any saved results from conditions that have been removed.
-         * @returns {void}
+         * Gets the districts of all cards.
+         * @returns {String[]} The districts.
          */
-        numberOfConditions () {
-            this.resultNamesArray.splice(this.numberOfConditions);
-            this.operators.splice(this.numberOfConditions - 1);
+        allDistricts () {
+            return this.cardList.map(card => card.districts);
+        },
+
+        /**
+         * Gets the operators of all cards.
+         * @returns {String[]} The operators.
+         */
+        allOperators () {
+            return this.cardList.map(card => card.operator);
         }
     },
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
+
+        /**
+         * Adds a new card to the list of cards.
+         * @returns {void}
+         */
+        addCard () {
+            this.cardList.push({
+                id: uniqueId("card-"),
+                operator: "or",
+                districts: []
+            });
+        },
+
+        /**
+         * Deletes a card from the list of cards by the given id.
+         * @param {String} cardId - The id of the card to delete.
+         * @returns {void}
+         */
+        deleteCard (cardId) {
+            const indexOfCard = this.cardList.findIndex(card => card.id === cardId);
+
+            if (indexOfCard || indexOfCard === 0) {
+                this.cardList.splice(indexOfCard, 1);
+                this.updateResultList(this.allDistricts, this.allOperators);
+            }
+        },
 
         /**
          * Gets the list of final results after applying the logical operators on the array of results.
@@ -56,7 +91,7 @@ export default {
             const remainingArrays = [...arrayOfArrays],
                 remainingOperators = [...operators];
 
-            remainingOperators.splice(arrayOfArrays.length - 1);
+            remainingOperators.splice(0, 1);
 
             while (remainingOperators.includes("and")) {
                 const indexOfAnd = remainingOperators.indexOf("and");
@@ -70,6 +105,36 @@ export default {
         },
 
         /**
+         * Sets the value for the districts on a card.
+         * @param {String} cardId - The id of the card.
+         * @param {String[]} names - The Names of the district names.
+         * @returns {void}
+         */
+        setCardDistricts (cardId, names) {
+            const foundCard = this.cardList.find(card => card.id === cardId);
+
+            if (foundCard) {
+                foundCard.districts = names;
+                this.updateResultList(this.allDistricts, this.allOperators);
+            }
+        },
+
+        /**
+         * Sets the value of an operator on a card.
+         * @param {String} cardId - The id of the card.
+         * @param {String} operatorValue - The value ("or" or "and") to set.
+         * @returns {void}
+         */
+        setCardOperator (cardId, operatorValue) {
+            const foundCard = this.cardList.find(card => card.id === cardId);
+
+            if (foundCard) {
+                foundCard.operator = operatorValue;
+                this.updateResultList(this.allDistricts, this.allOperators);
+            }
+        },
+
+        /**
          * Sets the currently found districts as selected districts.
          * @returns {void}
          */
@@ -78,26 +143,13 @@ export default {
         },
 
         /**
-         * Updates the resulting district names when a conditions has been updated.
-         * @param {Number} conditionId - The id of the condition that is sending new results.
-         * @param {String[]} resultNames - The district names that have been found by the condition.
+         * Update the result list.
+         * @param {String[]} districts - The districts of all cards.
+         * @param {String[]} operators - The operators of all cards.
          * @returns {void}
          */
-        updateResults (conditionId, resultNames) {
-            this.resultNamesArray[conditionId] = resultNames;
-            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
-                .filter(e => this.selectedDistrictNames.includes(e));
-        },
-
-        /**
-         * Sets a new value in the array of operators and triggers new result computation.
-         * @param {Number} index - At which index of the array the value is to be updated.
-         * @param {String} operatorValue - "or" or "and"
-         * @returns {void}
-         */
-        updateOperator (index, operatorValue) {
-            this.operators[index] = operatorValue;
-            this.resultList = this.getResultList(this.resultNamesArray, this.operators)
+        updateResultList (districts, operators) {
+            this.resultList = this.getResultList(districts, operators)
                 .filter(e => this.selectedDistrictNames.includes(e));
         }
     }
@@ -106,7 +158,7 @@ export default {
 
 <template lang="html">
     <div id="district-finder-filter">
-        <h4 class="pt-4">
+        <h4 class="pt-2">
             GebieteScan
         </h4>
         <button
@@ -134,24 +186,30 @@ export default {
                 icon="bi bi-download"
             />
         </div>
-        <div
-            v-for="conditionNumber in numberOfConditions"
-            :key="conditionNumber"
-        >
-            <DistrictFinderFilterOperator
-                v-if="conditionNumber > 1"
-                @change="value => updateOperator(conditionNumber - 2, value)"
-            />
-            <DistrictFinderFilterCard
-                class="mx-4"
-                :condition-id="conditionNumber - 1"
-                @scanCompleted="updateResults"
-            />
-        </div>
+        <transition-group name="slide-fade">
+            <div
+                v-for="(card, index) in cardList"
+                :key="card.id"
+                class="list-item"
+            >
+                <DistrictFinderFilterOperator
+                    v-if="index !== 0"
+                    :id="card.id"
+                    @change="setCardOperator"
+                />
+                <DistrictFinderFilterCard
+                    :id="card.id"
+                    :card-number="index + 1"
+                    class="mx-4"
+                    @delete="deleteCard"
+                    @scanCompleted="setCardDistricts"
+                />
+            </div>
+        </transition-group>
         <div class="d-flex justify-content-center my-3">
             <button
                 class="btn btn-link lh-1 fs-5"
-                @click="numberOfConditions++"
+                @click="addCard"
             >
                 <i class="bi bi-plus-circle pe-2" />
                 {{ $t("additional:modules.tools.cosi.districtFinder.button.addCondition") }}
@@ -194,6 +252,14 @@ export default {
             background-color: $light_blue;
             color: $white;
        }
+
+        .slide-fade-enter-active, .slide-fade-leave-active {
+            transition: all 1s;
+        }
+        .slide-fade-enter, .slide-fade-leave-to /* .list-leave-active below version 2.1.8 */ {
+            opacity: 0;
+            transform: translateX(80px);
+        }
     }
 
 </style>

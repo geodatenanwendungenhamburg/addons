@@ -3,7 +3,7 @@ import {expect} from "chai";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import Vuex from "vuex";
-import DistrictFinderFilterCard from "../components/DistrictFinderFilterCard.vue";
+import DistrictFinderFilterCard from "../../../components/DistrictFinderFilterCard.vue";
 
 config.mocks.$t = key => key;
 

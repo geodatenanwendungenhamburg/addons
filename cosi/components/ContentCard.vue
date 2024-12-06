@@ -20,6 +20,13 @@ export default {
             type: String,
             required: false,
             default: "bi bi-x"
+        },
+        closeInteraction: {
+            type: Function,
+            required: false,
+            default: () => {
+                return true;
+            }
         }
     }
 };
@@ -27,15 +34,17 @@ export default {
 
 <template>
     <div
-        class="card pb-1"
+        class="card rounded shadow"
     >
-        <div
-            class="row"
-        >
-            <div class="col-11 pb-0">
+        <div class="d-flex align-items-center ms-4 me-2 mt-2">
+            <div class="me-auto">
                 <slot name="header" />
             </div>
-            <button class="col-1 close-button pt-1 pb-0">
+            <button
+                class="close-button fs-4"
+                @click="closeInteraction"
+                @keydown.enter="closeInteraction"
+            >
                 <i
                     class="close"
                     :class="closeIcon"
@@ -63,17 +72,10 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~/css/mixins.scss";
     @import "~variables";
 
-    .card {
-        border-radius: 5px;
-        box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
-    }
-
     .close-button i {
-        font-size: 16px;
-        color: #646262;
+        color: $secondary_icon_button;
     }
 
 </style>

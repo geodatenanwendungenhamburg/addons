@@ -7,6 +7,10 @@
                     "condition": "Condition",
                     "showDetails": "Show details",
                     "hideDetails": "Hide details",
+                    "operators": {
+                      "or": "OR",
+                      "and": "AND"
+                    },
                     "comparison": {
                         "equals": "equal to",
                         "less": "less than",

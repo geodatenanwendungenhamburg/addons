@@ -10,12 +10,16 @@ export default {
         ContentCard
     },
     props: {
-        conditionId: {
+        id: {
+            type: String,
+            required: true
+        },
+        cardNumber: {
             type: Number,
             required: true
         }
     },
-    emits: ["scanCompleted"],
+    emits: ["delete", "scanCompleted"],
     data () {
         return {
             dataChips: ["Fachdaten", "statistische Daten"],
@@ -83,6 +87,31 @@ export default {
     },
     methods: {
         /**
+         * Compares two numerical values.
+         * @param {String} mode The comparison operator to apply. One of "=", "<" or ">".
+         * @param {Number} value The main value to be evaluated.
+         * @param {Number} referenceValue The reference value to be evaluated.
+         * @param {Number} [tolerance=0] Tolerance for mode "=".
+         * @return {Boolean} Whether or not the values meet the chosen condition.
+         */
+        comparisonFunction (mode, value, referenceValue, tolerance = 0) {
+            if (mode === "<") {
+                return value < referenceValue;
+            }
+            if (mode === ">") {
+                return value > referenceValue;
+            }
+            if (mode === "=") {
+                return Math.abs(value - referenceValue) <= tolerance;
+            }
+            return false;
+        },
+
+        deleteCard () {
+            this.$emit("delete", this.id);
+        },
+
+        /**
          * Performs WFS request to get the statistical features and emits matching district names.
          * @emits scanCompleted - passing own condition id and the found district names.
          * @returns {void}
@@ -106,29 +135,9 @@ export default {
             features = features.filter(f => f.get("jahr") === this.selectedYear
                 && this.comparisonFunction(this.selectedFilter, f.get(this.selectedCategory), this.referenceValue, this.tolerance));
 
-            this.resultNames = features.map(f => f.get(this.keyOfAttrNameStats));
-            this.$emit("scanCompleted", this.conditionId, this.resultNames);
-        },
 
-        /**
-         * Compares two numerical values.
-         * @param {String} mode The comparison operator to apply. One of "=", "<" or ">".
-         * @param {Number} value The main value to be evaluated.
-         * @param {Number} referenceValue The reference value to be evaluated.
-         * @param {Number} [tolerance=0] Tolerance for mode "=".
-         * @return {Boolean} Whether or not the values meet the chosen condition.
-         */
-        comparisonFunction (mode, value, referenceValue, tolerance = 0) {
-            if (mode === "<") {
-                return value < referenceValue;
-            }
-            if (mode === ">") {
-                return value > referenceValue;
-            }
-            if (mode === "=") {
-                return Math.abs(value - referenceValue) <= tolerance;
-            }
-            return false;
+            this.resultNames = features.map(f => f.get(this.keyOfAttrNameStats));
+            this.$emit("scanCompleted", this.id, this.resultNames);
         }
     }
 };
@@ -138,34 +147,31 @@ export default {
     <ContentCard
         id="id"
         close-icon="bi bi-trash"
+        :close-interaction="deleteCard"
     >
         <template #header>
-            <div
-                class="pt-2 ps-2"
+            <v-chip-group
+                v-model="selectedData"
+                mandatory
             >
-                <v-chip-group
-                    v-model="selectedData"
-                    mandatory
+                <v-chip
+                    v-for="(data, index) in dataChips"
+                    :key="index"
+                    :value="data"
+                    :stat-color="data === 'statistische Daten'"
+                    :fachdata-color="data === 'Fachdaten'"
+                    x-small
+                    :disabled="data === 'Fachdaten'"
                 >
-                    <v-chip
-                        v-for="(data, id) in dataChips"
-                        :key="id"
-                        :value="data"
-                        :stat-color="data === 'statistische Daten'"
-                        :fachdata-color="data === 'Fachdaten'"
-                        x-small
-                        :disabled="data === 'Fachdaten'"
-                    >
-                        {{ data }}
-                    </v-chip>
-                </v-chip-group>
-            </div>
+                    {{ data }}
+                </v-chip>
+            </v-chip-group>
         </template>
         <template #body>
             <div class="container px-2 py-1">
                 <div class="row">
                     <h4 class="d-flex align-items-center col-md-9 py-0 pb-0 pt-3">
-                        {{ conditionId + 1 }}. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
+                        {{ cardNumber }}. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
                     </h4>
                     <div
                         v-if="selectedDataset !== null && selectedData === 'statistische Daten'"

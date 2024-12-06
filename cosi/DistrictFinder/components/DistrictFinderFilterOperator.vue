@@ -3,6 +3,10 @@
 export default {
     name: "DistrictFinderFilterOperator",
     props: {
+        id: {
+            type: String,
+            required: true
+        },
         defaultOption: {
             type: String,
             required: false,
@@ -10,9 +14,13 @@ export default {
         }
     },
     emits: ["change"],
-
-    mounted () {
-        this.$emit("change", this.defaultOption);
+    data () {
+        return {
+            options: [
+                {text: this.$t("additional:modules.tools.cosi.districtFinder.operators.or"), value: "or"},
+                {text: this.$t("additional:modules.tools.cosi.districtFinder.operators.and"), value: "and"}
+            ]
+        };
     }
 };
 </script>
@@ -28,16 +36,13 @@ export default {
         <v-row class="justify-content-center">
             <v-spacer />
             <v-select
-                :items="[
-                    {text: 'ODER', value: 'or'},
-                    {text: 'UND', value: 'and'}
-                ]"
+                :items="options"
                 :value="defaultOption"
                 dense
                 outlined
                 hide-details
                 class="conditionselect"
-                @change="value => $emit('change', value)"
+                @change="value => $emit('change', id, value)"
             />
             <v-spacer />
         </v-row>
