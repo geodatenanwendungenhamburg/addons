@@ -1,8 +1,8 @@
 <script>
 import ContentCard from "../../components/ContentCard.vue";
-import {getFeaturePOST} from "../../../../src/api/wfs/getFeature";
+import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
-import {WFS} from "ol/format.js";
+import {rawLayerList} from "@masterportal/masterportalapi";
 
 export default {
     name: "DistrictFinderFilterCard",
@@ -41,7 +41,6 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Maps", ["projectionCode"]),
         ...mapGetters("Tools/DistrictSelector", [
             "keyOfAttrNameStats",
             "mapping",
@@ -81,8 +80,10 @@ export default {
          * @returns {Object} A layer object or undefined.
          */
         selectedStatLayer () {
+            const selectedLayerName = rawLayerList.getLayerWhere({id: this.selectedDataset?.[this.keyOfAttrNameStats]})?.name;
+
             return this.selectedDistrictLevel?.stats?.layers?.find(
-                layer => layer.id === this.selectedDataset?.[this.keyOfAttrNameStats]);
+                layer => layer.name === selectedLayerName);
         }
     },
     methods: {
@@ -112,7 +113,7 @@ export default {
         },
 
         /**
-         * Performs WFS request to get the statistical features and emits matching district names.
+         * Performs OAF request to get the statistical features and emits matching district names.
          * @emits scanCompleted - passing own condition id and the found district names.
          * @returns {void}
          */
@@ -122,21 +123,21 @@ export default {
                 return;
             }
 
-            let features = await getFeaturePOST(
-                this.selectedStatLayer.url,
-                {
-                    featureTypes: [this.selectedStatLayer.featureType],
-                    srsName: this.projectionCode,
-                    propertyNames: [this.selectedCategory, this.keyOfAttrNameStats, "jahr"]
-                }
-            );
+            const features = await getOAFFeature.getOAFFeatureGet({
+                baseUrl: this.selectedStatLayer.url,
+                collection: this.selectedStatLayer.collection,
+                limit: 10000,
+                filter: `jahr = '${this.selectedYear}'`,
+                filterCrs: "http://www.opengis.net/def/crs/EPSG/0/25832",
+                crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
+                propertyNames: [this.selectedCategory, this.keyOfAttrNameStats],
+                skipGeometry: true
+            });
 
-            features = new WFS().readFeatures(features);
-            features = features.filter(f => f.get("jahr") === this.selectedYear
-                && this.comparisonFunction(this.selectedFilter, f.get(this.selectedCategory), this.referenceValue, this.tolerance));
+            this.resultNames = features
+                .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
+                .map(f => f.properties[this.keyOfAttrNameStats]);
 
-
-            this.resultNames = features.map(f => f.get(this.keyOfAttrNameStats));
             this.$emit("scanCompleted", this.id, this.resultNames);
         }
     }
