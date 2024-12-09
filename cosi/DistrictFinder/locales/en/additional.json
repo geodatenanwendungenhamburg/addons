@@ -3,14 +3,19 @@
         "tools": {
             "cosi": {
                 "districtFinder": {
-                    "title": "District Finder",
+                    "title": "District Screening",
+                    "newScreening": "Create new screening",
                     "condition": "Condition",
+                    "conditions": "Conditions",
                     "showDetails": "Show details",
                     "hideDetails": "Hide details",
                     "operators": {
                       "or": "OR",
                       "and": "AND"
                     },
+                    "foundArea": "Found area",
+                    "foundAreas": "Found areas",
+                    "copyClipboard": "Copy to clipboard!",
                     "comparison": {
                         "equals": "equal to",
                         "less": "less than",
@@ -30,7 +35,9 @@
                     "button": {
                         "addCondition": "Add condition",
                         "confirm": "Confirm districts",
-                        "import": "Import filter"
+                        "import": "Import conditions",
+                        "showMore": "....show more",
+                        "showLess": "....show less"
                     }
                 }
             }

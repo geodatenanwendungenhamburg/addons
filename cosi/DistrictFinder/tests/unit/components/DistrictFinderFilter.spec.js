@@ -87,6 +87,20 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
             expect(foundButton.exists()).to.be.true;
         });
+        it("should render results if areas were found", async () => {
+            const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({
+                    resultList: ["Gebiet1", "Gebiet2", "Gebiet3" ]
+                });
+
+            expect(wrapper.find(".found-areas").exists()).to.be.true;
+        });
+        it("should not render results if no areas were found", async () => {
+            const wrapper = factory.getShallowMount();
+
+            expect(wrapper.find(".found-areas").exists()).to.be.false;
+        });
     });
 
     describe("Computed Properties", () => {
@@ -224,6 +238,41 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 );
             })
         })
+        describe("getCommaSeparatedAreaNames", () => {
+            it("should return comma separated results", async () => {
+                const wrapper = factory.getShallowMount(),
+                    result="Gebiet1, Gebiet2, Gebiet3";
+
+                await wrapper.setData({
+                    resultList: ["Gebiet1", "Gebiet2", "Gebiet3" ]
+                });
+
+                expect(wrapper.vm.getCommaSeparatedAreaNames()).to.deep.equal(result);
+            }),
+            it("should return a limited number of areas if showMoreAreas is false", async () => {
+                const wrapper = factory.getShallowMount(),
+                    result="Gebiet1, Gebiet2, Gebiet3";
+
+                await wrapper.setData({
+                    numberOfLimitedAreas: 3,
+                    resultList: ["Gebiet1", "Gebiet2", "Gebiet3", "Gebiet4", "Gebiet5", "Gebiet6"]
+                });
+
+                expect(wrapper.vm.getCommaSeparatedAreaNames()).to.deep.equal(result);
+            }),
+            it("should return all areas if showMoreAreas is true", async () => {
+                const wrapper = factory.getShallowMount(),
+                    result="Gebiet1, Gebiet2, Gebiet3, Gebiet4, Gebiet5, Gebiet6";
+
+                await wrapper.setData({
+                    numberOfLimitedAreas: 3,
+                    showMoreAreas: true,
+                    resultList: ["Gebiet1", "Gebiet2", "Gebiet3", "Gebiet4", "Gebiet5", "Gebiet6"]
+                });
+
+                expect(wrapper.vm.getCommaSeparatedAreaNames()).to.deep.equal(result);
+            })
+        });
     });
 
     describe("User Interactions", () => {

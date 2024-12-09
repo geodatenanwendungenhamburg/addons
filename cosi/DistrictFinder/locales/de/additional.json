@@ -3,14 +3,19 @@
         "tools": {
             "cosi": {
                 "districtFinder": {
-                    "title": "Gebiete Finder",
+                    "title": "Gebiete Screening",
+                    "newScreening": "Neues Screening anlegen",
                     "condition": "Bedingung",
+                    "conditions": "Bedingungen",
+                    "showDetails": "Details einblenden",
+                    "hideDetails": "Details ausblenden",
                     "operators": {
                       "or": "ODER",
                       "and": "UND"
                     },
-                    "showDetails": "Details einblenden",
-                    "hideDetails": "Details ausblenden",
+                    "foundArea": "Gefundenes Gebiet",
+                    "foundAreas": "Gefundene Gebiete",
+                    "copyClipboard": "In Zwischenablage kopiert!",
                     "comparison": {
                         "equals": "gleich",
                         "less": "kleiner als",
@@ -30,7 +35,9 @@
                     "button": {
                         "addCondition": "Bedingung hinzufügen",
                         "confirm": "Gebiete übernehmen",
-                        "import": "Filter importieren"
+                        "import": "Bedingungen importieren",
+                        "showMore": "....mehr anzeigen",
+                        "showLess": "....weniger anzeigen"
                     }
                 }
             }

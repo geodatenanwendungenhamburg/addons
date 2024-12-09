@@ -19,9 +19,12 @@ export default {
                 operator: "",
                 results: []
             }],
-            filterDate: "erstellt: 01.01.1999",
-            filterTitle: "Filter",
-            resultList: []
+            copyValue: false,
+            conditionDate: "erstellt: 01.01.1999",
+            conditionTitle: this.$t("additional:modules.tools.cosi.districtFinder.conditions"),
+            numberOfLimitedAreas: 20,
+            resultList: [],
+            showMoreAreas: false
         };
     },
     computed: {
@@ -60,6 +63,16 @@ export default {
         },
 
         /**
+         * Copies all found areas to the clipboard.
+         * @param {String} names - all names of the found areas.
+         * @returns {void}
+         */
+        copyToClipboard (names) {
+            navigator.clipboard.writeText(names);
+            this.copyValue = true;
+        },
+
+        /**
          * Deletes a card from the list of cards by the given id.
          * @param {String} cardId - The id of the card to delete.
          * @returns {void}
@@ -71,6 +84,19 @@ export default {
                 this.cardList.splice(indexOfCard, 1);
                 this.updateResultList(this.allDistricts, this.allOperators);
             }
+        },
+
+        /**
+         * Gets all area results separated by commas.
+         * @returns {String} The results.
+         */
+        getCommaSeparatedAreaNames () {
+            if (this.resultList.length > this.numberOfLimitedAreas && !this.showMoreAreas) {
+                const limitedAreas = this.resultList.slice(0, this.numberOfLimitedAreas);
+
+                return limitedAreas.join(", ");
+            }
+            return this.resultList.join(", ");
         },
 
         /**
@@ -158,8 +184,8 @@ export default {
 
 <template lang="html">
     <div id="district-finder-filter">
-        <h4 class="pt-2">
-            GebieteScan
+        <h4 class="pt-4">
+            {{ $t("additional:modules.tools.cosi.districtFinder.newScreening") }}
         </h4>
         <button
             class="btn btn-outline lh-1 fs-5 mb-3"
@@ -169,9 +195,9 @@ export default {
         </button>
         <div class="d-flex align-items-center mb-3">
             <h4 class="filter-title me-auto">
-                {{ filterTitle }}
+                {{ conditionTitle }}
                 <br>
-                <span class="text-black-50 fs-6">{{ filterDate }}</span>
+                <span class="text-black-50 fs-6">{{ conditionDate }}</span>
             </h4>
             <IconButton
                 id="reset-button"
@@ -215,6 +241,46 @@ export default {
                 {{ $t("additional:modules.tools.cosi.districtFinder.button.addCondition") }}
             </button>
         </div>
+        <div
+            v-if="resultList.length"
+            class="found-areas mx-4"
+        >
+            <h5 class="result-headline">
+                {{ resultList.length }} {{ resultList.length === 1 ? $t("additional:modules.tools.cosi.districtFinder.foundArea") : $t("additional:modules.tools.cosi.districtFinder.foundAreas") }}
+            </h5>
+            <span> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.</span>
+            <div class="copy-box mb-4 container rounded">
+                <div class="row">
+                    <div class="col col-11 pe-0">
+                        {{ getCommaSeparatedAreaNames() }}
+                        <button
+                            v-if="resultList.length > numberOfLimitedAreas"
+                            class="btn btn-link lh-1 fs-6 ps-0"
+                            @click="showMoreAreas = !showMoreAreas"
+                        >
+                            {{ showMoreAreas ? $t("additional:modules.tools.cosi.districtFinder.button.showLess") : $t("additional:modules.tools.cosi.districtFinder.button.showMore") }}
+                        </button>
+                    </div>
+                    <div class="col col-1 text-end ps-0">
+                        <v-snackbar
+                            v-model="copyValue"
+                            :timeout="5000"
+                        >
+                            {{ $t("additional:modules.tools.cosi.districtFinder.copyClipboard") }}
+                        </v-snackbar>
+                        <button
+                            class="copy-button btn btn-link lh-1 fs-5 p-0"
+                            @click="copyToClipboard (resultList.join(', '))"
+                        >
+                            <i
+                                class="copy-icon"
+                                :class="copyValue ? 'bi bi-check2-all' : 'bi bi-back'"
+                            />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <button
             class="btn btn-primary lh-1 fs-5"
             @click="setDistricts"
@@ -222,16 +288,6 @@ export default {
             <i class="bi bi-check pe-2" />
             {{ $t("additional:modules.tools.cosi.districtFinder.button.confirm") }}
         </button>
-        <br>
-        <div class="pb-5" />
-        <ul>
-            <li
-                v-for="resultName in resultList"
-                :key="resultName"
-            >
-                {{ resultName }}
-            </li>
-        </ul>
     </div>
 </template>
 
@@ -243,15 +299,20 @@ export default {
             font-family: $font_family_accent;
         }
 
+        .result-headline {
+            font-family: $font_family_accent;
+        }
+
         .btn-outline {
             border-color: $light_blue;
             color: $light_blue;
         }
+
        .btn-outline:hover {
             cursor: pointer;
             background-color: $light_blue;
             color: $white;
-       }
+        }
 
         .slide-fade-enter-active, .slide-fade-leave-active {
             transition: all 1s;
@@ -260,6 +321,12 @@ export default {
             opacity: 0;
             transform: translateX(80px);
         }
+       .copy-box {
+            background-color: #dcdcdc;
+            .copy-icon {
+                font-size: 16px;
+            }
+       }
     }
 
 </style>
