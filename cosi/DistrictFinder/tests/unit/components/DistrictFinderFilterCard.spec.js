@@ -79,5 +79,28 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                 expect(wrapper.vm.comparisonFunction(">", 100, 99)).to.be.true;
             });
         });
+
+        describe("getYearsForTemporalExtent", () => {
+            it("should return an empty array in case of unexpected parameters", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.getYearsForTemporalExtent()).to.be.an("array").that.is.empty;
+                expect(wrapper.vm.getYearsForTemporalExtent([])).to.be.an("array").that.is.empty;
+                expect(wrapper.vm.getYearsForTemporalExtent([[]])).to.be.an("array").that.is.empty;
+                expect(wrapper.vm.getYearsForTemporalExtent([[new Date()]])).to.be.an("array").that.is.empty;
+                expect(wrapper.vm.getYearsForTemporalExtent([[new Date(), new Date(), new Date()]])).to.be.an("array").that.is.empty;
+            });
+            it("should return expected results", () => {
+                const wrapper = factory.getShallowMount(),
+                    extent = [
+                        [new Date("2000"), new Date("2000")],
+                        [new Date("2010"), new Date("2011")],
+                        [new Date("2020"), new Date("2022")]
+                    ],
+                    expectedResult = [2000, 2010, 2011, 2020, 2021, 2022];
+
+                expect(wrapper.vm.getYearsForTemporalExtent(extent)).to.deep.equal(expectedResult);
+            });
+        });
     });
 });

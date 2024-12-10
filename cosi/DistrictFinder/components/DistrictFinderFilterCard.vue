@@ -25,18 +25,18 @@ export default {
             dataChips: ["Fachdaten", "statistische Daten"],
             datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
             expandDataInfo: true,
+            features: [],
             maximum: 6340,
             meanValue: 2000,
             minimum: 0,
             referenceValue: 20000,
-            resultNames: [],
             selectedCategory: null,
             selectedData: "statistische Daten",
             selectedFilter: "=",
-            selectedYear: "2022",
+            selectedYear: new Date().getFullYear() - 1,
             tolerance: 5000,
             type: "absolut",
-            years: ["2017", "2018", "2019", "2020", "2021", "2022"]
+            years: new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i)
         };
     },
     computed: {
@@ -114,31 +114,96 @@ export default {
 
         /**
          * Performs OAF request to get the statistical features and emits matching district names.
-         * @emits scanCompleted - passing own condition id and the found district names.
-         * @returns {void}
+         * @param {Object} layer An oaf layer object containing at least url and collection.
+         * @param {Number|String} year The year to retrieve the data for.
+         * @param {String[]} propertyNames The property names that should be available in the returned features.
+         * @returns {Object[]} The retrieved features or an empty array.
          */
-        async scan () {
+        async fetchFeatures (layer, year, propertyNames) {
 
-            if (!this.selectedDataset || !this.selectedStatLayer) {
-                return;
+            if (!layer || !year || !propertyNames) {
+                return [];
             }
 
             const features = await getOAFFeature.getOAFFeatureGet({
-                baseUrl: this.selectedStatLayer.url,
-                collection: this.selectedStatLayer.collection,
+                baseUrl: layer.url,
+                collection: layer.collection,
                 limit: 10000,
-                filter: `jahr = '${this.selectedYear}'`,
+                filter: `jahr = '${year}'`,
                 filterCrs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
-                propertyNames: [this.selectedCategory, this.keyOfAttrNameStats],
+                propertyNames: propertyNames,
                 skipGeometry: true
             });
 
-            this.resultNames = features
+            return features;
+        },
+
+        /**
+         * Transforms an oaf temporal extent object into an array of years.
+         * @param {Date[][]} extent The temporal extent.
+         * @return {Number[]} An array of the years that are part of the extent.
+         */
+        getYearsForTemporalExtent (extent) {
+            if (!Array.isArray(extent)
+                || !extent.length
+                || !extent.every(interval => Array.isArray(interval))
+                || !extent.every(interval => interval.length === 2)
+                || !extent.every(interval => interval.every(date => date instanceof Date))
+            ) {
+                return [];
+            }
+
+            const years = new Set();
+
+            extent.forEach(interval => {
+                const firstYear = interval[0].getFullYear(),
+                    lastYear = interval[1].getFullYear(),
+                    yearsToAdd = new Array(lastYear - firstYear + 1).fill(firstYear).map((v, i) => v + i);
+
+                yearsToAdd.forEach(year => years.add(year));
+            });
+            return [...years];
+        },
+
+        /**
+         * Applies the current filter rules on the features and emits their names.
+         * @emits scanCompleted - passing own condition id and the found district names.
+         */
+        updateResults () {
+            const resultNames = this.features
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
                 .map(f => f.properties[this.keyOfAttrNameStats]);
 
-            this.$emit("scanCompleted", this.id, this.resultNames);
+            this.$emit("scanCompleted", this.id, resultNames);
+        },
+
+        /**
+         * Performs necessary updates when the selected category has changed.
+         * @returns {void}
+         */
+        async updateSelectedCategory () {
+            const years = this.getYearsForTemporalExtent(
+                await getOAFFeature.getTemporalExtent(this.selectedStatLayer.url, this.selectedStatLayer.collection)
+            );
+
+            this.years = years.length ? years.reverse()
+                : new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i);
+
+            this.selectedYear = this.years[0];
+            this.updateYear();
+        },
+
+        /**
+         * Performs necessary updates when the selected year has changed.
+         * @returns {void}
+         */
+        async updateYear () {
+            this.features = await this.fetchFeatures(
+                this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameStats]
+            );
+
+            this.updateResults();
         }
     }
 };
@@ -185,13 +250,13 @@ export default {
                             {{ $t('additional:modules.tools.cosi.districtFinder.label.year') }}
                         </v-label>
                         <v-select
+                            v-model="selectedYear"
                             class="year-filter"
                             :items="years"
-                            :value="selectedYear"
                             outlined
                             hide-details
                             dense
-                            @change="scan"
+                            @change="updateYear"
                         />
                     </div>
                 </div>
@@ -211,7 +276,7 @@ export default {
                             outlined
                             hide-details
                             dense
-                            @change="scan"
+                            @change="updateSelectedCategory"
                         />
                     </div>
                 </div>
@@ -233,7 +298,7 @@ export default {
                             hide-details
                             dense
                             type="number"
-                            @input="scan"
+                            @input="updateResults"
                         />
                     </div>
                     <div class="col-md-4 me-1 px-0 pt-1 pb-0">
@@ -250,7 +315,7 @@ export default {
                             outlined
                             hide-details
                             dense
-                            @change="scan"
+                            @change="updateResults"
                         />
                     </div>
                     <div
@@ -270,7 +335,7 @@ export default {
                             hide-details
                             dense
                             type="number"
-                            @input="scan"
+                            @input="updateResults"
                         />
                     </div>
                 </div>
