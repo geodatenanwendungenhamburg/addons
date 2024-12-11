@@ -17,7 +17,7 @@ export default {
             cardList: [{
                 id: uniqueId("card-"),
                 operator: "",
-                results: []
+                districts: []
             }],
             copyValue: false,
             conditionDate: "erstellt: 01.01.1999",
