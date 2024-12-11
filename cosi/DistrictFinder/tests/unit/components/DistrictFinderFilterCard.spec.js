@@ -22,7 +22,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                         DistrictSelector: {
                             namespaced: true,
                             mutations: {},
-                            getters: {}
+                            getters: {
+                                keyOfAttrNameStats: () => "stats",
+                                selectedDistrictNames: () => []
+                            }
                         }
                     }
                 }
@@ -38,7 +41,9 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                         };
                     },
                     props: {
-                        conditionId: 0
+                        id: 1,
+                        conditionId: 0,
+                        cardNumber: 0
                     },
                     store,
                     vuetify,
@@ -100,6 +105,32 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                     expectedResult = [2000, 2010, 2011, 2020, 2021, 2022];
 
                 expect(wrapper.vm.getYearsForTemporalExtent(extent)).to.deep.equal(expectedResult);
+            });
+            it("should return expected results", () => {
+                const wrapper = factory.getShallowMount(),
+                    extent = [
+                        [new Date("2000"), new Date("2000")],
+                        [new Date("2010"), new Date("2011")],
+                        [new Date("2020"), new Date("2022")]
+                    ],
+                    expectedResult = [2000, 2010, 2011, 2020, 2021, 2022];
+
+                expect(wrapper.vm.getYearsForTemporalExtent(extent)).to.deep.equal(expectedResult);
+            });
+        });
+
+        describe("sortedData", () => {
+            it("return sorted data for chart", async () => {
+                const wrapper = factory.getShallowMount(),
+                expectedSorting = [{"category": 200, "stats": "Gebiet3"},  {"category": 1000, "stats": "Gebiet2"}, {"category": 2000, "stats": "Gebiet1"}];
+
+            await wrapper.setData({
+                    features: [{properties: {"category": 2000, "stats": "Gebiet1"}}, {properties: {"category": 1000, "stats": "Gebiet2"}}, {properties: {"category": 200, "stats": "Gebiet3"}}],
+                    selectedCategory: "category"
+            });
+            wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.sortedData()).to.deep.equal(expectedSorting);
             });
         });
     });

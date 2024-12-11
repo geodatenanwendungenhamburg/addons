@@ -3,11 +3,13 @@ import ContentCard from "../../components/ContentCard.vue";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
 import {rawLayerList} from "@masterportal/masterportalapi";
+import BarchartItem from "../../../../src/share-components/charts/components/BarchartItem.vue";
 
 export default {
     name: "DistrictFinderFilterCard",
     components: {
-        ContentCard
+        ContentCard,
+        BarchartItem
     },
     props: {
         id: {
@@ -56,7 +58,44 @@ export default {
             selectedYear: new Date().getFullYear() - 1,
             tolerance: 5000,
             type: "absolut",
-            years: new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i)
+            years: new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i),
+            chartConfig: {
+                data: {
+                    datasets: [{
+                        data: []
+                    }],
+                    labels: []
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 4
+                            }
+                        },
+                        x: {
+                            display: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            },
+            chartOptions: {
+                barPercentage: 1.0,
+                categoryPercentage: 1.0,
+                borderWidth: 0,
+                backgroundColor: "rgba(0, 48, 99, 0.8)",
+                hoverBackgroundColor: "rgba(220, 226, 243, 1)"
+            }
+
         };
     },
     computed: {
@@ -64,7 +103,8 @@ export default {
         ...mapGetters("Tools/DistrictSelector", [
             "keyOfAttrNameStats",
             "mapping",
-            "selectedDistrictLevel"
+            "selectedDistrictLevel",
+            "selectedDistrictNames"
         ]),
 
         /**
@@ -106,7 +146,27 @@ export default {
                 layer => layer.name === selectedLayerName);
         }
     },
+    watch: {
+        features: {
+            handler () {
+                this.addChartData();
+            },
+            deep: true
+        }
+    },
     methods: {
+        /**
+         * Adds data and labels to the chart options.
+          * @returns {void}
+         */
+        addChartData () {
+            const sorted = this.sortedData(),
+                allData = sorted.map(data => data[this.selectedCategory]),
+                allLabels = sorted.map(label => label[this.keyOfAttrNameStats]);
+
+            this.chartConfig.data = Object.assign({}, this.chartConfig.data, {labels: allLabels, datasets: [{...this.chartOptions, data: allData}]});
+        },
+
         /**
          * Compares two numerical values.
          * @param {String} mode The comparison operator to apply. One of "=", "<" or ">".
@@ -184,6 +244,21 @@ export default {
                 yearsToAdd.forEach(year => years.add(year));
             });
             return [...years];
+        },
+
+        /**
+         * Sorts all areas in ascending order for chart.
+         * @return {Object} an Object of all sorted data and labels.
+         */
+        sortedData () {
+            const featureProperties = this.features.map(val => val.properties),
+                sortedFeatures = this.selectedDistrictNames.length !== 0 ? featureProperties.filter(e => this.selectedDistrictNames.includes(e[this.keyOfAttrNameStats])) : featureProperties;
+
+            sortedFeatures.forEach(v => {
+                v[this.selectedCategory] = v[this.selectedCategory] || 0;
+            });
+
+            return sortedFeatures.sort((a, b) => a[this.selectedCategory] - b[this.selectedCategory]);
         },
 
         /**
@@ -379,6 +454,15 @@ export default {
                 <div
                     v-if="selectedDataset !== null && expandDataInfo"
                 >
+                    <div
+                        v-if="features.length"
+                        class="chart-container"
+                    >
+                        <BarchartItem
+                            :given-options="chartConfig.options"
+                            :data="chartConfig.data"
+                        />
+                    </div>
                     <hr class="px-0 mx-0">
                     <div class="row">
                         <div class="col-3 pb-0">
@@ -429,6 +513,11 @@ export default {
 }
 .v-label {
     font-size: 11px;
+}
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 15vh;
 }
 
 </style>
