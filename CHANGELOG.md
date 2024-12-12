@@ -3,30 +3,24 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
-## 04-09-2024 v3.2.0
-### __Breaking Changes__
+## 2024-12-12 v3.3.3 (LTS)
+
+## 2024-09-04 v3.2.0 (LTS)
 
 ### Added
 - New tool WaterRiskCheck:
     - Implemented form ui.
 
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
 ---
 
-## 2024-08-07 v3.1.0
+## 2024-08-07 v3.1.0 (LTS)
+
 ### Changed
 - Eslint: no-undef eslint rule is switched on and changes to not return warnings/errors are applied.
 
 ---
 
-## 2024-06-27 v3.0.0
+## 2024-06-27 v3.0.0 (LTS)
 ### __Breaking Changes__
 Under the headline `deprecated` you can find several changes of removed deprecated properties and tools.
 In certain circumstances this means that you have to update your portal files (index.html, config.js and config.json) according to the new changes in order to use your portal furthermore.
