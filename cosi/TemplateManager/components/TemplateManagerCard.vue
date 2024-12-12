@@ -35,11 +35,11 @@ export default {
         }
     },
     computed: {
-        ...mapGetters("Tools/TemplateManager", ["currentActiveTemplate", "multiTemplate", "activeTemplates"]),
+        ...mapGetters("Tools/TemplateManager", ["currentActiveTemplate", "multiTemplate"]),
 
         checked: {
             get () {
-                return this.activeTemplates.includes(this.title);
+                return this.activeTemplate;
             },
             set (v) {
                 if (v) {

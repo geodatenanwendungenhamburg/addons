@@ -724,7 +724,7 @@ export default {
                                             :title="templateCard?.meta?.title"
                                             :created="templateCard?.meta?.created"
                                             :selected-template="selectedTemplate?.meta?.title === templateCard?.meta?.title"
-                                            :active-template="activeTemplateName === templateCard?.meta?.title"
+                                            :active-template="activeTemplates.includes(templateCard?.meta?.title)"
                                             :is-enabled="checkSelectedDistricts(saveTemplate[idx], selectedDistrictNames)"
                                             @showTemplate="selectCard"
                                             @activateTemplate="activeCard"
