@@ -7,6 +7,7 @@
                     "newScreening": "Create new screening",
                     "condition": "Condition",
                     "conditions": "Conditions",
+                    "conditionsExport": "Export conditions",
                     "showDetails": "Show details",
                     "hideDetails": "Hide details",
                     "operators": {
@@ -30,14 +31,17 @@
                         "minimum": "Minimum",
                         "meanValue": "Mean Value",
                         "maximum": "Maximum",
-                        "type": "Type"
+                        "type": "Type",
+                        "exportName": "Name",
+                        "exportAreas": "with selected areas"
                     },
                     "button": {
                         "addCondition": "Add condition",
                         "confirm": "Confirm districts",
                         "import": "Import conditions",
                         "showMore": "....show more",
-                        "showLess": "....show less"
+                        "showLess": "....show less",
+                        "export": "Export"
                     }
                 }
             }

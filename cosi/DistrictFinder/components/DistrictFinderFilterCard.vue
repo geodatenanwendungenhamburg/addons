@@ -17,6 +17,26 @@ export default {
         cardNumber: {
             type: Number,
             required: true
+        },
+        year: {
+            type: [Number, Boolean],
+            required: false,
+            default: false
+        },
+        rule: {
+            type: String,
+            required: false,
+            default: "="
+        },
+        ruleTolerance: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        statisticCategory: {
+            type: [String, Boolean],
+            required: false,
+            default: false
         }
     },
     emits: ["delete", "scanCompleted"],
@@ -175,7 +195,7 @@ export default {
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
                 .map(f => f.properties[this.keyOfAttrNameStats]);
 
-            this.$emit("scanCompleted", this.id, resultNames);
+            this.$emit("scanCompleted", this.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
         },
 
         /**

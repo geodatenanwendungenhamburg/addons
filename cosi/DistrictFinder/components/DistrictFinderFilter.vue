@@ -1,5 +1,7 @@
 <script>
+import dayjs from "dayjs";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
+import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters} from "vuex";
@@ -9,27 +11,32 @@ export default {
     name: "DistrictFinderFilter",
     components: {
         DistrictFinderFilterCard,
+        DistrictFinderFilterExport,
         DistrictFinderFilterOperator,
         IconButton
     },
     data () {
         return {
             cardList: [{
+                districts: [],
                 id: uniqueId("card-"),
                 operator: "",
-                districts: []
+                rule: "=",
+                ruleTolerance: 0,
+                year: false
             }],
             copyValue: false,
             conditionDate: "erstellt: 01.01.1999",
             conditionTitle: this.$t("additional:modules.tools.cosi.districtFinder.conditions"),
             numberOfLimitedAreas: 20,
-            resultList: [],
+            resultList: false,
+            showExportDialog: false,
             showMoreAreas: false
         };
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictNames"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictNames", "selectedDistrictLevelId"]),
 
         /**
          * Gets the districts of all cards.
@@ -47,6 +54,19 @@ export default {
             return this.cardList.map(card => card.operator);
         }
     },
+    watch: {
+        /**
+         * If no conditions exist, resultList is set to false.
+         * @returns {void}
+         */
+        cardList () {
+            if (this.cardList.length === 0) {
+                this.resultList = false;
+            }
+
+        }
+    },
+
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
 
@@ -56,9 +76,12 @@ export default {
          */
         addCard () {
             this.cardList.push({
+                districts: [],
                 id: uniqueId("card-"),
                 operator: "or",
-                districts: []
+                rule: "=",
+                ruleTolerance: 0,
+                year: false
             });
         },
 
@@ -87,6 +110,31 @@ export default {
         },
 
         /**
+         * Exports the conditions as JSON.
+         * @param {String} name - The file name.
+         * @param {Boolean} withAreas - A flag to controls whether the districts should be exported.
+         * @returns {void}
+         */
+        exportConditions (name, withAreas) {
+            const date = dayjs(new Date()).format("YYYY-MM-DD"),
+                data = this.getExportedData(name, date, withAreas, this.cardList),
+                filename = name + "-" + date + ".json",
+                jsonStr = JSON.stringify(data),
+                element = document.createElement("a");
+
+            element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(jsonStr));
+            element.setAttribute("download", filename);
+
+            element.style.display = "none";
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        },
+
+
+        /**
          * Gets all area results separated by commas.
          * @returns {String} The results.
          */
@@ -97,6 +145,31 @@ export default {
                 return limitedAreas.join(", ");
             }
             return this.resultList.join(", ");
+        },
+
+        /**
+         * Gets the exported data
+         * @param {String} name - The name of the conditions.
+         * @param {String} date - The creation date of the conditions.
+         * @param {Boolean} withAreas - A flag to controls whether the districts should be exported.
+         * @param {Object[]} conditionList - A list of the conditions.
+         * @returns {Object} the exported data
+         */
+        getExportedData (name, date, withAreas, conditionList) {
+            const selectedDistrictNames = withAreas ? this.selectedDistrictNames : [],
+                data = {
+                    meta: {
+                        name,
+                        date
+                    },
+                    districtSelector: {
+                        selectedDistrictLevelId: this.selectedDistrictLevelId,
+                        selectedDistrictNames
+                    },
+                    data: conditionList
+                };
+
+            return data;
         },
 
         /**
@@ -131,16 +204,26 @@ export default {
         },
 
         /**
-         * Sets the value for the districts on a card.
+         * Sets the values for the card.
          * @param {String} cardId - The id of the card.
          * @param {String[]} names - The Names of the district names.
+         * @param {Number} year - The year of the card.
+         * @param {String} category - The category of the card.
+         * @param {Number} referenceValue - The referenceValue of the card.
+         * @param {Number} tolerance - The tolerance of the card.
+         * @param {String} rule - The rule of the card.
          * @returns {void}
          */
-        setCardDistricts (cardId, names) {
+        setCardAttributes (cardId, names, year, category, referenceValue, tolerance, rule) {
             const foundCard = this.cardList.find(card => card.id === cardId);
 
             if (foundCard) {
                 foundCard.districts = names;
+                foundCard.year = year;
+                foundCard.statisticCategory = category;
+                foundCard.referenceValue = referenceValue;
+                foundCard.ruleTolerance = tolerance;
+                foundCard.rule = rule;
                 this.updateResultList(this.allDistricts, this.allOperators);
             }
         },
@@ -205,12 +288,22 @@ export default {
                 :class-array="['btn-primary', 'me-3']"
                 icon="bi bi-x-circle"
             />
-            <IconButton
-                id="export-button"
-                aria="exportieren"
-                :class-array="['btn-primary']"
-                icon="bi bi-download"
-            />
+            <div class="dropdown">
+                <IconButton
+                    id="export-button"
+                    aria="exportieren"
+                    class="dropdwon-toggle"
+                    :class-array="['btn-primary']"
+                    icon="bi bi-download"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    :disabled="resultList === false"
+                />
+                <DistrictFinderFilterExport
+                    v-show="resultList !== false"
+                    @exportConditions="exportConditions"
+                />
+            </div>
         </div>
         <transition-group name="slide-fade">
             <div
@@ -226,9 +319,13 @@ export default {
                 <DistrictFinderFilterCard
                     :id="card.id"
                     :card-number="index + 1"
+                    :year="card.year"
+                    :rule="card.rule"
+                    :rule-tolerance="card.tolerance"
+                    :statistic-category="card.category"
                     class="mx-4"
                     @delete="deleteCard"
-                    @scanCompleted="setCardDistricts"
+                    @scanCompleted="setCardAttributes"
                 />
             </div>
         </transition-group>
@@ -242,47 +339,50 @@ export default {
             </button>
         </div>
         <div
-            v-if="resultList.length"
+            v-if="resultList"
             class="found-areas mx-4"
         >
             <h5 class="result-headline">
                 {{ resultList.length }} {{ resultList.length === 1 ? $t("additional:modules.tools.cosi.districtFinder.foundArea") : $t("additional:modules.tools.cosi.districtFinder.foundAreas") }}
             </h5>
-            <span> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.</span>
-            <div class="copy-box mb-4 container rounded">
-                <div class="row">
-                    <div class="col col-11 pe-0">
-                        {{ getCommaSeparatedAreaNames() }}
-                        <button
-                            v-if="resultList.length > numberOfLimitedAreas"
-                            class="btn btn-link lh-1 fs-6 ps-0"
-                            @click="showMoreAreas = !showMoreAreas"
-                        >
-                            {{ showMoreAreas ? $t("additional:modules.tools.cosi.districtFinder.button.showLess") : $t("additional:modules.tools.cosi.districtFinder.button.showMore") }}
-                        </button>
-                    </div>
-                    <div class="col col-1 text-end ps-0">
-                        <v-snackbar
-                            v-model="copyValue"
-                            :timeout="5000"
-                        >
-                            {{ $t("additional:modules.tools.cosi.districtFinder.copyClipboard") }}
-                        </v-snackbar>
-                        <button
-                            class="copy-button btn btn-link lh-1 fs-5 p-0"
-                            @click="copyToClipboard (resultList.join(', '))"
-                        >
-                            <i
-                                class="copy-icon"
-                                :class="copyValue ? 'bi bi-check2-all' : 'bi bi-back'"
-                            />
-                        </button>
+            <template v-if="resultList.length > 0">
+                <span> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.</span>
+                <div class="copy-box mb-4 container rounded">
+                    <div class="row">
+                        <div class="col col-11 pe-0">
+                            {{ getCommaSeparatedAreaNames() }}
+                            <button
+                                v-if="resultList.length > numberOfLimitedAreas"
+                                class="btn btn-link lh-1 fs-6 ps-0"
+                                @click="showMoreAreas = !showMoreAreas"
+                            >
+                                {{ showMoreAreas ? $t("additional:modules.tools.cosi.districtFinder.button.showLess") : $t("additional:modules.tools.cosi.districtFinder.button.showMore") }}
+                            </button>
+                        </div>
+                        <div class="col col-1 text-end ps-0">
+                            <v-snackbar
+                                v-model="copyValue"
+                                :timeout="5000"
+                            >
+                                {{ $t("additional:modules.tools.cosi.districtFinder.copyClipboard") }}
+                            </v-snackbar>
+                            <button
+                                class="copy-button btn btn-link lh-1 fs-5 p-0"
+                                @click="copyToClipboard (resultList.join(', '))"
+                            >
+                                <i
+                                    class="copy-icon"
+                                    :class="copyValue ? 'bi bi-check2-all' : 'bi bi-back'"
+                                />
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
         <button
             class="btn btn-primary lh-1 fs-5"
+            :disabled="resultList === false || resultList.length === 0"
             @click="setDistricts"
         >
             <i class="bi bi-check pe-2" />
@@ -297,6 +397,10 @@ export default {
     #district-finder-filter {
         .filter-title {
             font-family: $font_family_accent;
+        }
+
+        #export-dialog {
+            min-width: 250px;
         }
 
         .result-headline {

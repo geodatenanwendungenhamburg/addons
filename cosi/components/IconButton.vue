@@ -43,7 +43,7 @@ export default {
 </script>
 
 <template>
-    <div class="d-flex align-items-center justify-items-center mb-auto">
+    <div class="d-flex align-items-center justify-items-center">
         <button
             :id="id"
             tabindex="0"

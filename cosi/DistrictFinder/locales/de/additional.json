@@ -7,6 +7,7 @@
                     "newScreening": "Neues Screening anlegen",
                     "condition": "Bedingung",
                     "conditions": "Bedingungen",
+                    "conditionsExport": "Bedingungen exportieren",
                     "showDetails": "Details einblenden",
                     "hideDetails": "Details ausblenden",
                     "operators": {
@@ -30,14 +31,17 @@
                         "minimum": "Minimum",
                         "meanValue": "Mittelwert",
                         "maximum": "Maximum",
-                        "type": "Typ"
+                        "type": "Typ",
+                        "exportName": "Name",
+                        "exportAreas": "mit ausgewählten Gebieten"
                     },
                     "button": {
                         "addCondition": "Bedingung hinzufügen",
                         "confirm": "Gebiete übernehmen",
                         "import": "Bedingungen importieren",
                         "showMore": "....mehr anzeigen",
-                        "showLess": "....weniger anzeigen"
+                        "showLess": "....weniger anzeigen",
+                        "export": "Exportieren"
                     }
                 }
             }

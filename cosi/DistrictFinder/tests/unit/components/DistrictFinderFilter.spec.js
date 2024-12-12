@@ -1,7 +1,7 @@
 import {config, shallowMount, createLocalVue} from "@vue/test-utils";
+import DistrictFinderFilter from "../../../components/DistrictFinderFilter.vue";
 import {expect} from "chai";
 import Vuex from "vuex";
-import DistrictFinderFilter from "../../../components/DistrictFinderFilter.vue";
 
 config.mocks.$t = key => key;
 
@@ -22,7 +22,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                                 setDistrictsByName: () => sinon.stub()
                             },
                             getters: {
-                                selectedDistrictNames: () => ["Altona", "Bergedorf", "Harburg"]
+                                selectedDistrictNames: () => ["Altona", "Bergedorf", "Harburg"],
+                                selectedDistrictLevelId: () => "Super Mario"
                             }
                         }
                     }
@@ -76,6 +77,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 iconButtonWrapper = wrapper.find("iconbutton-stub#export-button");
 
             expect(iconButtonWrapper.exists()).to.be.true;
+        });
+
+        it("should find export component with id 'export-dialog'", () => {
+            const wrapper = factory.getShallowMount(),
+                exportWrapper = wrapper.find("districtfinderfilterexport-stub");
+
+            expect(exportWrapper.exists()).to.be.true;
         });
 
         it("should find the button to add a condition'", () => {
@@ -174,7 +182,48 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 }]);
             });
         });
-        describe("setCardDistricts", () => {
+
+        describe("getExportedData", () => {
+            it("should return the right exported data without areas", () => {
+                const wrapper = factory.getShallowMount(),
+                    expectedData = {
+                        meta: {
+                            name: "Ross",
+                            date: "01.01.1999"
+                        },
+                        districtSelector: {
+                            selectedDistrictLevelId: "Super Mario",
+                            selectedDistrictNames: []
+                        },
+                        data: []
+                    },
+                    data = wrapper.vm.getExportedData("Ross", "01.01.1999", false, []);
+
+                wrapper.vm.getExportedData();
+                expect(data).to.deep.equal(expectedData);
+            });
+
+            it("should return the right exported data with areas ", () => {
+                const wrapper = factory.getShallowMount(),
+                    expectedData = {
+                        meta: {
+                            name: "Ross",
+                            date: "01.01.1999"
+                        },
+                        districtSelector: {
+                            selectedDistrictLevelId: "Super Mario",
+                            selectedDistrictNames: ["Altona", "Bergedorf", "Harburg"]
+                        },
+                        data: []
+                    },
+                    data = wrapper.vm.getExportedData("Ross", "01.01.1999", true, []);
+
+                wrapper.vm.getExportedData();
+                expect(data).to.deep.equal(expectedData);
+            });
+        });
+
+        describe("setCardAttributes", () => {
             it("should update results correctly", () => {
                 const wrapper = factory.getShallowMount({
                     cardList: [{
@@ -184,7 +233,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                     }]
                 });
 
-                wrapper.vm.setCardDistricts("0", ["Altona", "Harburg"]);
+                wrapper.vm.setCardAttributes("0", ["Altona", "Harburg"]);
 
                 expect(wrapper.vm.cardList[0].districts).to.deep.equal(["Altona", "Harburg"]);
                 expect(wrapper.vm.resultList).to.deep.equal(["Altona", "Harburg"]);
