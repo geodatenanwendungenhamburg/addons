@@ -2,7 +2,6 @@
 import ContentCard from "../../components/ContentCard.vue";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
-import {rawLayerList} from "@masterportal/masterportalapi";
 import BarchartItem from "../../../../src/share-components/charts/components/BarchartItem.vue";
 
 export default {
@@ -128,6 +127,19 @@ export default {
         },
 
         /**
+         * Returns the key to be used for the district name in the currently selected layer.
+         * (for example: "stat_gebiet", "statistisches_gebiet" or "stadtteil")
+         * @returns {String} The key.
+         */
+        keyOfAttrNameForSelectedLayer () {
+            return this.selectedDistrictLevel.stats.keyOfAttrName[
+                this.selectedDistrictLevel.stats.layerIds.indexOf(
+                    this.selectedStatLayer.id
+                )
+            ];
+        },
+
+        /**
          * Returns currently selected statistical dataset.
          * @returns {Object} A single mapping dataset or undefined.
          */
@@ -140,10 +152,8 @@ export default {
          * @returns {Object} A layer object or undefined.
          */
         selectedStatLayer () {
-            const selectedLayerName = rawLayerList.getLayerWhere({id: this.selectedDataset?.[this.keyOfAttrNameStats]})?.name;
-
             return this.selectedDistrictLevel?.stats?.layers?.find(
-                layer => layer.name === selectedLayerName);
+                layer => layer.id === this.selectedDataset?.[this.keyOfAttrNameStats]);
         }
     },
     watch: {
@@ -209,11 +219,11 @@ export default {
                 baseUrl: layer.url,
                 collection: layer.collection,
                 limit: 10000,
-                filter: `jahr = '${year}'`,
                 filterCrs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 propertyNames: propertyNames,
-                skipGeometry: true
+                skipGeometry: true,
+                literalFilters: {datetime: `${year}-01-01/${year}-12-31`}
             });
 
             return features;
@@ -268,7 +278,7 @@ export default {
         updateResults () {
             const resultNames = this.features
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
-                .map(f => f.properties[this.keyOfAttrNameStats]);
+                .map(f => f.properties[this.keyOfAttrNameForSelectedLayer]);
 
             this.$emit("scanCompleted", this.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
         },
@@ -278,6 +288,12 @@ export default {
          * @returns {void}
          */
         async updateSelectedCategory () {
+            if (!this.selectedStatLayer) {
+                console.warn("No layer found for selected category. Check categories and layer ids in config.json and mapping.json. Make also sure the required category (still) exists in the data schema.");
+                this.features = [];
+                return;
+            }
+
             const years = this.getYearsForTemporalExtent(
                 await getOAFFeature.getTemporalExtent(this.selectedStatLayer.url, this.selectedStatLayer.collection)
             );
@@ -295,7 +311,7 @@ export default {
          */
         async updateYear () {
             this.features = await this.fetchFeatures(
-                this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameStats]
+                this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer]
             );
 
             this.updateResults();
@@ -362,7 +378,7 @@ export default {
                         >
                             {{ $t('additional:modules.tools.cosi.districtFinder.label.dataset') }}
                         </v-label>
-                        <v-select
+                        <v-autocomplete
                             v-model="selectedCategory"
                             class="data-filter"
                             :items="selectedData === 'statistische Daten' ? datasetStat : datasetFachdaten"

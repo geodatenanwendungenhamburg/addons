@@ -355,28 +355,28 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                             value: "Bevölkerung insgesamt",
                             group: "Vielfalt für alle",
                             valueType: "absolute",
-                            stat_gebiet: "31231",
-                            stadtteil: "31241",
-                            bezirk: "31269"
+                            stat_gebiet: "31232",
+                            stadtteil: "31240",
+                            bezirk: "31271"
                         },
                         {
                             category: "bev_ab65",
                             value: "Bevölkerung ab 65 Jahren",
                             group: "Vielfalt für alle",
                             valueType: "absolute",
-                            stat_gebiet: "31231",
-                            stadtteil: "31241",
+                            stat_gebiet: "31232",
+                            stadtteil: "31240",
                             summable: true,
-                            bezirk: "31269"
+                            bezirk: "31271"
                         },
                         {
                             category: "bev_insgesamt",
                             value: "Bevölkerung insgesamt",
                             group: "Alle für alle",
                             valueType: "absolute",
-                            stat_gebiet: "31231",
-                            stadtteil: "31241",
-                            bezirk: "31269"
+                            stat_gebiet: "31232",
+                            stadtteil: "31240",
+                            bezirk: "31271"
                         }
                     ];
 
@@ -451,9 +451,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                             category: "bev_insgesamt",
                             value: "Bevölkerung insgesamt",
                             group: "Vielfalt für alle",
-                            stat_gebiet: "31231",
-                            stadtteil: "31241",
-                            bezirk: "31269",
+                            stat_gebiet: "31232",
+                            stadtteil: "31240",
+                            bezirk: "31271",
                             valueType: "absolute",
                             orientationValue: "123"
                         },
@@ -461,9 +461,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                             category: "bev_ab65",
                             value: "Bevölkerung ab 65 Jahren",
                             group: "Vielfalt für alle",
-                            stat_gebiet: "31231",
-                            stadtteil: "31241",
-                            bezirk: "31269",
+                            stat_gebiet: "31232",
+                            stadtteil: "31240",
+                            bezirk: "31271",
                             summable: true,
                             valueType: "absolute",
                             orientationValue: "456"
