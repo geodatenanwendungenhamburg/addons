@@ -11,6 +11,11 @@ export default {
         BarchartItem
     },
     props: {
+        active: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
         id: {
             type: String,
             required: true
@@ -347,7 +352,10 @@ export default {
         <template #body>
             <div class="container px-2 py-1">
                 <div class="row">
-                    <h4 class="d-flex align-items-center col-md-9 py-0 pb-0 pt-3">
+                    <h4
+                        class="d-flex align-items-center col-md-9 py-0 pb-0 pt-3"
+                        :class="active ? 'active' : ''"
+                    >
                         {{ cardNumber }}. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
                     </h4>
                     <div
@@ -537,6 +545,13 @@ export default {
     position: relative;
     margin: auto;
     height: 15vh;
+}
+
+h4 {
+    &.active {
+        font-family: $font_family_accent;
+        color: $primary;
+    }
 }
 
 </style>

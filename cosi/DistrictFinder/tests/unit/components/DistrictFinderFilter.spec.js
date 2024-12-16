@@ -322,6 +322,20 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 expect(wrapper.vm.getCommaSeparatedAreaNames()).to.deep.equal(result);
             })
         });
+
+        describe("toggleCardActive", () => {
+            it("should set the active id", async () => {
+                const wrapper = factory.getShallowMount();
+
+                await wrapper.setData({
+                    activeCardId: ""
+                });
+                wrapper.vm.toggleCardActive(0);
+                await wrapper.vm.$nextTick()
+
+                expect(wrapper.vm.activeCardId).to.be.equal(0);
+            });
+        });
     });
 
     describe("User Interactions", () => {

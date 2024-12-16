@@ -17,6 +17,7 @@ export default {
     },
     data () {
         return {
+            activeCardId: "",
             cardList: [{
                 districts: [],
                 id: uniqueId("card-"),
@@ -252,6 +253,15 @@ export default {
         },
 
         /**
+         * Sets the active card id by toggle the clicked card.
+         * @param {String} id - the clicked card id.
+         * @returns {void}
+         */
+        toggleCardActive (id) {
+            this.activeCardId = id;
+        },
+
+        /**
          * Update the result list.
          * @param {String[]} districts - The districts of all cards.
          * @param {String[]} operators - The operators of all cards.
@@ -316,17 +326,28 @@ export default {
                     :id="card.id"
                     @change="setCardOperator"
                 />
-                <DistrictFinderFilterCard
-                    :id="card.id"
-                    :card-number="index + 1"
-                    :year="card.year"
-                    :rule="card.rule"
-                    :rule-tolerance="card.tolerance"
-                    :statistic-category="card.category"
-                    class="mx-4"
-                    @delete="deleteCard"
-                    @scanCompleted="setCardAttributes"
-                />
+                <div
+                    class="card-section"
+                    :class="activeCardId === card.id? 'active' : ''"
+                    role="button"
+                    tabindex="0"
+                    @focusout="toggleCardActive('')"
+                    @click="toggleCardActive(card.id)"
+                    @keydown="toggleCardActive(card.id)"
+                >
+                    <DistrictFinderFilterCard
+                        :id="card.id"
+                        :card-number="index + 1"
+                        :year="card.year"
+                        :rule="card.rule"
+                        :rule-tolerance="card.tolerance"
+                        :statistic-category="card.category"
+                        :active="activeCardId === card.id"
+                        class="mx-4"
+                        @delete="deleteCard"
+                        @scanCompleted="setCardAttributes"
+                    />
+                </div>
             </div>
         </transition-group>
         <div class="d-flex justify-content-center my-3">
@@ -395,18 +416,6 @@ export default {
     @import "~variables";
 
     #district-finder-filter {
-        .filter-title {
-            font-family: $font_family_accent;
-        }
-
-        #export-dialog {
-            min-width: 250px;
-        }
-
-        .result-headline {
-            font-family: $font_family_accent;
-        }
-
         .btn-outline {
             border-color: $light_blue;
             color: $light_blue;
@@ -418,6 +427,43 @@ export default {
             color: $white;
         }
 
+        .copy-box {
+            background-color: #dcdcdc;
+            .copy-icon {
+                font-size: 16px;
+            }
+        }
+
+        #export-dialog {
+            min-width: 250px;
+        }
+
+        .list-item {
+            .card-section {
+                .card {
+                    border: 2px solid rgba(255, 255, 255, 0);
+                }
+                &:hover {
+                    .card {
+                        background-color: rgba(220, 226, 243, 0.5);
+                    }
+                }
+                &.active {
+                    .card {
+                        border: 2px solid #00437a;
+                    }
+                }
+            }
+        }
+
+        .filter-title {
+            font-family: $font_family_accent;
+        }
+
+        .result-headline {
+            font-family: $font_family_accent;
+        }
+
         .slide-fade-enter-active, .slide-fade-leave-active {
             transition: all 1s;
         }
@@ -425,12 +471,6 @@ export default {
             opacity: 0;
             transform: translateX(80px);
         }
-       .copy-box {
-            background-color: #dcdcdc;
-            .copy-icon {
-                font-size: 16px;
-            }
-       }
     }
 
 </style>
