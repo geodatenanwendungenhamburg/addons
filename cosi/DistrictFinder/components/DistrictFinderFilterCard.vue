@@ -51,12 +51,12 @@ export default {
             maximum: 6340,
             meanValue: 2000,
             minimum: 0,
-            referenceValue: 20000,
+            referenceValue: undefined,
             selectedCategory: null,
             selectedData: "statistische Daten",
             selectedFilter: "=",
             selectedYear: new Date().getFullYear() - 1,
-            tolerance: 5000,
+            tolerance: undefined,
             type: "absolut",
             years: new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i),
             chartConfig: {
@@ -335,7 +335,7 @@ export default {
                         {{ cardNumber }}. {{ $t('additional:modules.tools.cosi.districtFinder.condition') }}
                     </h4>
                     <div
-                        v-if="selectedDataset !== null && selectedData === 'statistische Daten'"
+                        v-if="typeof selectedDataset !== 'undefined' && selectedData === 'statistische Daten'"
                         class="col-md-3 p-0"
                     >
                         <v-label
@@ -376,7 +376,7 @@ export default {
                     </div>
                 </div>
                 <div
-                    v-if="selectedDataset !== null"
+                    v-if="typeof selectedDataset !== 'undefined' "
                     class="row gy-0 pt-0"
                 >
                     <div class="col-md-3 me-5 px-0 pt-1 pb-0">
@@ -396,7 +396,10 @@ export default {
                             @input="updateResults"
                         />
                     </div>
-                    <div class="col-md-4 me-1 px-0 pt-1 pb-0">
+                    <div
+                        v-if="typeof selectedDataset !== 'undefined'"
+                        class="col-md-4 me-1 px-0 pt-1 pb-0"
+                    >
                         <v-label
                             class="filter-label"
                             for="filter-rule"
@@ -414,7 +417,7 @@ export default {
                         />
                     </div>
                     <div
-                        v-if="selectedFilter === '='"
+                        v-if="typeof selectedDataset !== 'undefined' && selectedFilter === '='"
                         class="col-md-3 px-0 pt-1 pb-0"
                     >
                         <v-label
@@ -435,7 +438,7 @@ export default {
                     </div>
                 </div>
                 <div
-                    v-if="selectedDataset !== null"
+                    v-if="typeof selectedDataset !== 'undefined'"
                     class="p-0 d-md-flex justify-content-md-end"
                 >
                     <button
@@ -452,7 +455,7 @@ export default {
                     </button>
                 </div>
                 <div
-                    v-if="selectedDataset !== null && expandDataInfo"
+                    v-if="typeof selectedDataset !== 'undefined' && expandDataInfo"
                 >
                     <div
                         v-if="features.length"
