@@ -16,6 +16,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
     const store = new Vuex.Store({
             namespaced: true,
             modules: {
+                Language: {
+                    namespaced: true,
+                    mutations: {},
+                    getters: {
+                        currentLocale: () => "de"
+                    }
+                },
                 Tools: {
                     namespaced: true,
                     modules: {
@@ -24,6 +31,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             mutations: {},
                             getters: {
                                 keyOfAttrNameStats: () => "stats",
+                                mapping: () => {},
                                 selectedDistrictNames: () => []
                             }
                         }
@@ -58,6 +66,75 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
             const wrapper = factory.getShallowMount();
 
             expect(wrapper.exists()).to.be.true;
+        });
+    });
+
+    describe("Computed properties", () => {
+
+        describe("minimum", () => {
+
+            it("should return a hyphen as default", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.minimum).to.equal("-");
+            })
+
+            it("should return the expected result", () => {
+                const wrapper = factory.getShallowMount({
+                    selectedCategory: "cat",
+                    features: [
+                        {properties: {cat: 2}},
+                        {properties: {cat: 1}},
+                        {properties: {cat: 3}}
+                    ]
+                });
+                
+                expect(wrapper.vm.minimum).to.equal("1");
+            });
+        });
+
+        describe("meanValue", () => {
+
+            it("should return a hyphen as default", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.meanValue).to.equal("-");
+            })
+
+            it("should return the expected result", () => {
+                const wrapper = factory.getShallowMount({
+                    selectedCategory: "cat",
+                    features: [
+                        {properties: {cat: 1}},
+                        {properties: {cat: 1}},
+                        {properties: {cat: 4}}
+                    ]
+                });
+                
+                expect(wrapper.vm.meanValue).to.equal("2");
+            });
+        });
+
+        describe("maximum", () => {
+
+            it("should return a hyphen as default", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.maximum).to.equal("-");
+            })
+
+            it("should return the expected result", () => {
+                const wrapper = factory.getShallowMount({
+                    selectedCategory: "cat",
+                    features: [
+                        {properties: {cat: 2}},
+                        {properties: {cat: 3}},
+                        {properties: {cat: 1}}
+                    ]
+                });
+                
+                expect(wrapper.vm.maximum).to.equal("3");
+            });
         });
     });
 

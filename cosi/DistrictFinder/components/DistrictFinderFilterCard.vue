@@ -52,16 +52,12 @@ export default {
             datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
             expandDataInfo: true,
             features: [],
-            maximum: 6340,
-            meanValue: 2000,
-            minimum: 0,
             referenceValue: undefined,
             selectedCategory: null,
             selectedData: "statistische Daten",
             selectedFilter: "=",
             selectedYear: new Date().getFullYear() - 1,
             tolerance: undefined,
-            type: "absolut",
             years: new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i),
             chartConfig: {
                 data: {
@@ -112,6 +108,17 @@ export default {
         ]),
 
         /**
+         * Returns the selected features if a selection is made or all features.
+         * @returns {Object[]} The statistical features.
+         */
+        featuresToUse () {
+            return this.selectedDistrictNames?.length
+                ? this.features.filter(
+                    feature => this.selectedDistrictNames.includes(feature?.properties?.[this.keyOfAttrNameForSelectedLayer]))
+                : this.features;
+        },
+
+        /**
          * Returns translated dropdown entries for filter rules.
          * @returns {Object[]} dropdown entries with text and value keys.
          */
@@ -144,6 +151,42 @@ export default {
             ];
         },
 
+        /*
+         * Returns the maximum value for the chosen category in the features to be used.
+         * @returns {String} The maximum value or "-".
+         */
+        maximum () {
+            const max = Math.max(... this.featuresToUse.map(feature => feature?.properties?.[this.selectedCategory])
+                .filter(value => typeof value === "number")
+            );
+
+            return Number.isFinite(max) ? max.toLocaleString(this.currentLocale) : "-";
+        },
+
+        /**
+         * Returns the mean value for the chosen category in the features to be used.
+         * @returns {String} The mean value or "-".
+         */
+        meanValue () {
+            const values = this.featuresToUse.map(feature => feature?.properties?.[this.selectedCategory])
+                    .filter(value => typeof value === "number"),
+                mean = values.reduce((acc, curr) => acc + curr, 0) / values.length;
+
+            return Number.isFinite(mean) ? mean.toLocaleString(this.currentLocale, {maximumFractionDigits: 1}) : "-";
+        },
+
+        /**
+         * Returns the minimum value for the chosen category in the features to be used.
+         * @returns {String} The minimum value or "-".
+         */
+        minimum () {
+            const min = Math.min(... this.featuresToUse.map(feature => feature?.properties?.[this.selectedCategory])
+                .filter(value => typeof value === "number")
+            );
+
+            return Number.isFinite(min) ? min.toLocaleString(this.currentLocale) : "-";
+        },
+
         /**
          * Returns currently selected statistical dataset.
          * @returns {Object} A single mapping dataset or undefined.
@@ -159,6 +202,18 @@ export default {
         selectedStatLayer () {
             return this.selectedDistrictLevel?.stats?.layers?.find(
                 layer => layer.id === this.selectedDataset?.[this.keyOfAttrNameStats]);
+        },
+
+        /**
+         * Returns the type of the selected dataset.
+         * @returns {String} "absolut(e)", "relativ(e)", or "-".
+         */
+        type () {
+            if (typeof this.selectedDataset?.valueType !== "string") {
+                return "-";
+            }
+            return this.$t("additional:modules.tools.cosi.districtFinder.label.valueType",
+                {context: this.selectedDataset.valueType});
         }
     },
     watch: {

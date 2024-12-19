@@ -33,7 +33,9 @@
                         "maximum": "Maximum",
                         "type": "Type",
                         "exportName": "Name",
-                        "exportAreas": "with selected areas"
+                        "exportAreas": "with selected areas",
+                        "valueType_absolute": "absolute",
+                        "valueType_relative": "relative"
                     },
                     "button": {
                         "addCondition": "Add condition",
