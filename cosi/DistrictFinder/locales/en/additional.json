@@ -44,8 +44,13 @@
                         "showMore": "....show more",
                         "showLess": "....show less",
                         "export": "Export"
+                    },
+                    "errors": {
+                      "invalid": "File could not be read.",
+                      "wrongFileFormat": "The file is not in the correct format.",
+                      "attErr": " {{attribute}} node does not exist."
                     }
-                }
+                  }
             }
         }
     }

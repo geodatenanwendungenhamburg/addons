@@ -1,9 +1,10 @@
-import {config, shallowMount, createLocalVue} from "@vue/test-utils";
+import {config, createLocalVue, shallowMount} from "@vue/test-utils";
+import DistrictFinderFilterCard from "../../../components/DistrictFinderFilterCard.vue";
 import {expect} from "chai";
+import sinon from "sinon";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import Vuex from "vuex";
-import DistrictFinderFilterCard from "../../../components/DistrictFinderFilterCard.vue";
 
 config.mocks.$t = key => key;
 
@@ -48,9 +49,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             ...values
                         };
                     },
-                    props: {
-                        id: 1,
-                        conditionId: 0,
+                    propsData: {
+                        condition: {
+                            id: 1
+                        },
                         cardNumber: 0
                     },
                     store,
@@ -88,7 +90,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                         {properties: {cat: 3}}
                     ]
                 });
-                
+
                 expect(wrapper.vm.minimum).to.equal("1");
             });
         });
@@ -110,7 +112,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                         {properties: {cat: 4}}
                     ]
                 });
-                
+
                 expect(wrapper.vm.meanValue).to.equal("2");
             });
         });
@@ -132,9 +134,20 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                         {properties: {cat: 1}}
                     ]
                 });
-                
+
                 expect(wrapper.vm.maximum).to.equal("3");
             });
+        });
+    });
+
+    describe("Lifecycle Hooks", () => {
+        it("should call 'setConditionAttributes' if component is mounted", () => {
+            const spySetConditionAttributes = sinon.spy(DistrictFinderFilterCard.methods, "setConditionAttributes");
+
+            factory.getShallowMount();
+
+            expect(spySetConditionAttributes.calledOnce).to.be.true;
+            sinon.restore();
         });
     });
 
@@ -159,6 +172,17 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                 expect(wrapper.vm.comparisonFunction("<", 100, 99)).to.be.false;
                 expect(wrapper.vm.comparisonFunction(">", 99, 100)).to.be.false;
                 expect(wrapper.vm.comparisonFunction(">", 100, 99)).to.be.true;
+            });
+        });
+
+        describe("deleteCard", () => {
+            it("should emit 'delete' with the correct parameter", async () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.deleteCard();
+                await wrapper.vm.$nextTick();
+                expect(wrapper.emitted()).to.have.property("delete");
+                expect(wrapper.emitted().delete[0]).to.deep.equal([1]);
             });
         });
 
@@ -195,6 +219,19 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                 expect(wrapper.vm.getYearsForTemporalExtent(extent)).to.deep.equal(expectedResult);
             });
         });
+
+        describe("setConditionAttributes", () => {
+            it("should set the condition attributes correctly", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setConditionAttributes({year: "2025", referenceValue: "100"});
+                expect(wrapper.vm.selectedYear).to.equal("2025");
+                expect(wrapper.vm.referenceValue).to.equal("100");
+                expect(wrapper.vm.selectedCategory).to.be.null;
+                expect(wrapper.vm.selectedFilter).to.equal("=");
+                expect(wrapper.vm.tolerance).to.be.undefined;
+            });
+        })
 
         describe("sortedData", () => {
             it("return sorted data for chart", async () => {

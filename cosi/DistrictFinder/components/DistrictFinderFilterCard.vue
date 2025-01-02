@@ -1,14 +1,14 @@
 <script>
+import BarchartItem from "../../../../src/share-components/charts/components/BarchartItem.vue";
 import ContentCard from "../../components/ContentCard.vue";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
-import BarchartItem from "../../../../src/share-components/charts/components/BarchartItem.vue";
 
 export default {
     name: "DistrictFinderFilterCard",
     components: {
-        ContentCard,
-        BarchartItem
+        BarchartItem,
+        ContentCard
     },
     props: {
         active: {
@@ -16,33 +16,13 @@ export default {
             required: false,
             default: false
         },
-        id: {
-            type: String,
-            required: true
-        },
         cardNumber: {
             type: Number,
             required: true
         },
-        year: {
-            type: [Number, Boolean],
-            required: false,
-            default: false
-        },
-        rule: {
-            type: String,
-            required: false,
-            default: "="
-        },
-        ruleTolerance: {
-            type: Number,
-            required: false,
-            default: 0
-        },
-        statisticCategory: {
-            type: [String, Boolean],
-            required: false,
-            default: false
+        condition: {
+            type: Object,
+            required: true
         }
     },
     emits: ["delete", "scanCompleted"],
@@ -224,6 +204,9 @@ export default {
             deep: true
         }
     },
+    mounted () {
+        this.setConditionAttributes(this.condition);
+    },
     methods: {
         /**
          * Adds data and labels to the chart options.
@@ -259,7 +242,7 @@ export default {
         },
 
         deleteCard () {
-            this.$emit("delete", this.id);
+            this.$emit("delete", this.condition.id);
         },
 
         /**
@@ -317,6 +300,29 @@ export default {
         },
 
         /**
+         * Sets the attributes of this condition/card
+         * @param {Object} condition - The condition attributes
+         * @returns {void}
+         */
+        setConditionAttributes (condition) {
+            if (Object.prototype.hasOwnProperty.call(condition, "referenceValue")) {
+                this.referenceValue = condition.referenceValue;
+            }
+            if (Object.prototype.hasOwnProperty.call(condition, "rule")) {
+                this.selectedFilter = condition.rule;
+            }
+            if (Object.prototype.hasOwnProperty.call(condition, "ruleTolerance")) {
+                this.tolerance = condition.ruleTolerance;
+            }
+            if (Object.prototype.hasOwnProperty.call(condition, "statisticCategory")) {
+                this.selectedCategory = condition.statisticCategory;
+            }
+            if (Object.prototype.hasOwnProperty.call(condition, "year")) {
+                this.selectedYear = condition.year;
+            }
+        },
+
+        /**
          * Sorts all areas in ascending order for chart.
          * @return {Object} an Object of all sorted data and labels.
          */
@@ -340,7 +346,7 @@ export default {
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
                 .map(f => f.properties[this.keyOfAttrNameForSelectedLayer]);
 
-            this.$emit("scanCompleted", this.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
+            this.$emit("scanCompleted", this.condition.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
         },
 
         /**

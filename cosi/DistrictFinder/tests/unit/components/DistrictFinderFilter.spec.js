@@ -1,6 +1,7 @@
 import {config, shallowMount, createLocalVue} from "@vue/test-utils";
 import DistrictFinderFilter from "../../../components/DistrictFinderFilter.vue";
 import {expect} from "chai";
+import sinon from "sinon";
 import Vuex from "vuex";
 
 config.mocks.$t = key => key;
@@ -79,11 +80,18 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             expect(iconButtonWrapper.exists()).to.be.true;
         });
 
-        it("should find export component with id 'export-dialog'", () => {
+        it("should find filter export component", () => {
             const wrapper = factory.getShallowMount(),
                 exportWrapper = wrapper.find("districtfinderfilterexport-stub");
 
             expect(exportWrapper.exists()).to.be.true;
+        });
+
+        it("should find filter import component", () => {
+            const wrapper = factory.getShallowMount(),
+                importWrapper = wrapper.find("districtfinderfilterimport-stub");
+
+            expect(importWrapper.exists()).to.be.true;
         });
 
         it("should find the button to add a condition'", () => {
@@ -183,6 +191,15 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             });
         });
 
+        describe("resetCardList", () => {
+            it("should reset the card(condition) list", () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.resetCardList();
+                expect(wrapper.vm.cardList).to.be.an("array").that.is.empty;
+            });
+        });
+
         describe("getExportedData", () => {
             it("should return the right exported data without areas", () => {
                 const wrapper = factory.getShallowMount(),
@@ -240,6 +257,46 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             });
         });
 
+        describe("setCardList", () => {
+            it("should set the card(condition) list", async () => {
+                const wrapper = factory.getShallowMount(),
+                    cardList = [{
+                        id: "123",
+                        operator: "and",
+                        number: 1
+                    }, {
+                        id: "456",
+                        operator: "or",
+                        number: 2
+                    }];
+
+                wrapper.vm.setCardList(cardList);
+                await wrapper.vm.$nextTick();
+                expect(wrapper.vm.cardList).to.deep.equal(cardList);
+            });
+
+            it("should call 'resetCardList' and 'updateResultList'", async () => {
+                const wrapper = factory.getShallowMount(),
+                    spyResetCardList = sinon.spy(wrapper.vm, "resetCardList"),
+                    spyUpdateResultList = sinon.spy(wrapper.vm, "updateResultList"),
+                    cardList = [{
+                        id: "123",
+                        operator: "and",
+                        number: 1
+                    }, {
+                        id: "456",
+                        operator: "or",
+                        number: 2
+                    }];
+
+                wrapper.vm.setCardList(cardList);
+                await wrapper.vm.$nextTick();
+                expect(spyResetCardList.calledOnce).to.be.true;
+                expect(spyUpdateResultList.calledOnce).to.be.true;
+                sinon.restore();
+            });
+        });
+
         describe("setCardOperator", () => {
             it("should update component data correctly on operator change event", () => {
                 const wrapper = factory.getShallowMount({
@@ -261,6 +318,24 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 expect(wrapper.vm.cardList[0].operator).to.equal("or");
                 expect(wrapper.vm.cardList[1].operator).to.equal("and");
             })
+        });
+
+        describe("setConditionDate", () => {
+            it("should set the date of the condition/card", async () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setConditionDate("01.01.1999");
+                expect(wrapper.vm.conditionDate).to.equal("01.01.1999");
+            });
+        });
+
+        describe("setConditionTitle", () => {
+            it("should set the title of the condition/card", async () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setConditionTitle("Ho ho ho");
+                expect(wrapper.vm.conditionTitle).to.equal("Ho ho ho");
+            });
         });
 
         describe("getResultList", () => {

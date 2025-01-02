@@ -44,6 +44,11 @@
                         "showMore": "....mehr anzeigen",
                         "showLess": "....weniger anzeigen",
                         "export": "Exportieren"
+                    },
+                    "errors": {
+                      "invalid": "Datei konnte nicht gelesen werden.",
+                      "wrongFileFormat": "Die Datei hat nicht das richtige Format.",
+                      "attErr": " {{attribute}} Tag existiert nicht."
                     }
                 }
             }

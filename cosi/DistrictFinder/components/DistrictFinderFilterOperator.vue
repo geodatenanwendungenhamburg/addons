@@ -7,10 +7,9 @@ export default {
             type: String,
             required: true
         },
-        defaultOption: {
+        operator: {
             type: String,
-            required: false,
-            default: "or"
+            required: true
         }
     },
     emits: ["change"],
@@ -37,7 +36,7 @@ export default {
             <v-spacer />
             <v-select
                 :items="options"
-                :value="defaultOption"
+                :value="operator"
                 dense
                 outlined
                 hide-details

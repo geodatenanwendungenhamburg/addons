@@ -2,6 +2,7 @@
 import dayjs from "dayjs";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
+import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters} from "vuex";
@@ -12,6 +13,7 @@ export default {
     components: {
         DistrictFinderFilterCard,
         DistrictFinderFilterExport,
+        DistrictFinderFilterImport,
         DistrictFinderFilterOperator,
         IconButton
     },
@@ -205,6 +207,14 @@ export default {
         },
 
         /**
+         * Resets the cardList
+         * @returns {void}
+         */
+        resetCardList () {
+            this.cardList = [];
+        },
+
+        /**
          * Sets the values for the card.
          * @param {String} cardId - The id of the card.
          * @param {String[]} names - The Names of the district names.
@@ -245,6 +255,37 @@ export default {
         },
 
         /**
+         * First the list of cards/conditons is reset and then a new list of cards/conditons is set.
+         * @param {Object[]} cardList - The list of cards/conditions.
+         * @returns {void}
+         */
+        setCardList (cardList) {
+            this.resetCardList();
+            this.$nextTick(() => {
+                this.cardList = cardList;
+                this.updateResultList(this.allDistricts, this.allOperators);
+            });
+        },
+
+        /**
+         * Sets the date of the conditions.
+         * @param {String} date - The date of the conditions.
+         * @returns {void}
+         */
+        setConditionDate (date) {
+            this.conditionDate = date;
+        },
+
+        /**
+         * Sets the title of the conditions.
+         * @param {String} title - The title of the conditions.
+         * @returns {void}
+         */
+        setConditionTitle (title) {
+            this.conditionTitle = title;
+        },
+
+        /**
          * Sets the currently found districts as selected districts.
          * @returns {void}
          */
@@ -280,12 +321,11 @@ export default {
         <h4 class="pt-4">
             {{ $t("additional:modules.tools.cosi.districtFinder.newScreening") }}
         </h4>
-        <button
-            class="btn btn-outline lh-1 fs-5 mb-3"
-        >
-            <i class="bi bi-upload pe-2" />
-            {{ $t("additional:modules.tools.cosi.districtFinder.button.import") }}
-        </button>
+        <DistrictFinderFilterImport
+            @setCardList="setCardList"
+            @setConditionDate="setConditionDate"
+            @setConditionTitle="setConditionTitle"
+        />
         <div class="d-flex align-items-center mb-3">
             <h4 class="filter-title me-auto">
                 {{ conditionTitle }}
@@ -324,6 +364,7 @@ export default {
                 <DistrictFinderFilterOperator
                     v-if="index !== 0"
                     :id="card.id"
+                    :operator="card.operator"
                     @change="setCardOperator"
                 />
                 <div
@@ -336,12 +377,8 @@ export default {
                     @keydown="toggleCardActive(card.id)"
                 >
                     <DistrictFinderFilterCard
-                        :id="card.id"
+                        :condition="card"
                         :card-number="index + 1"
-                        :year="card.year"
-                        :rule="card.rule"
-                        :rule-tolerance="card.tolerance"
-                        :statistic-category="card.category"
                         :active="activeCardId === card.id"
                         class="mx-4"
                         @delete="deleteCard"
@@ -416,17 +453,6 @@ export default {
     @import "~variables";
 
     #district-finder-filter {
-        .btn-outline {
-            border-color: $light_blue;
-            color: $light_blue;
-        }
-
-       .btn-outline:hover {
-            cursor: pointer;
-            background-color: $light_blue;
-            color: $white;
-        }
-
         .copy-box {
             background-color: #dcdcdc;
             .copy-icon {
