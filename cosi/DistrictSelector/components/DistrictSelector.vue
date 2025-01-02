@@ -5,6 +5,7 @@ import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeatur
 import {prepareDistrictLevels} from "../utils/prepareDistrictLevels";
 import calculateExtent from "../../utils/features/calculateExtent.js";
 import getBoundingGeometry from "../../utils/getBoundingGeometry.js";
+import getMappingJson from "../../utils/getMappingJson";
 import {setBBoxToGeom} from "../../utils/setBBoxToGeom.js";
 import {mapGetters, mapActions, mapMutations, mapState} from "vuex";
 import getters from "../store/gettersDistrictSelector";
@@ -168,7 +169,7 @@ export default {
             }
         }
     },
-    created () {
+    async created () {
         this.$on("close", () => {
             this.setActive(false);
         });
@@ -176,6 +177,8 @@ export default {
         this.setSelectedDistrictLevelId(this.districtLevels[0].layerId);
         this.setNonReactiveData();
         this.initializeAdditionalInfoLayers();
+        this.setInitMapping(await getMappingJson());
+        this.setMapping(await getMappingJson());
     },
     mounted () {
         this.$root.$on("updateSelectedDistricts", this.updateSelectedFeatures);

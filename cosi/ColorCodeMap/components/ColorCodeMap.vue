@@ -7,7 +7,6 @@ import ColorCodeLegend from "./ColorCodeLegend.vue";
 import {Fill, Stroke, Style, Text} from "ol/style.js";
 import {generateColorScale} from "../../utils/colorScale.js";
 import groupMapping from "../../utils/groupMapping";
-import mapping from "../../assets/mapping.json";
 import ChartDataset from "../../ChartGenerator/classes/ChartDataset";
 import {mapDistrictNames} from "../../DistrictSelector/utils/prepareDistrictLevels";
 import {convertColor} from "../../../../src/utils/convertColor";
@@ -50,7 +49,7 @@ export default {
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/ColorCodeMap", Object.keys(getters)),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedFeatures", "label", "keyOfAttrName", "keyOfAttrNameStats", "loadend", "metadataUrls"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedFeatures", "label", "keyOfAttrName", "keyOfAttrNameStats", "loadend", "metadataUrls", "mapping"]),
         ...mapGetters("Tools/CalculateRatio", ["dataToColorCodeMap", "colorCodeMapDataset"]),
         _selectedFeature: {
             get () {
@@ -80,7 +79,7 @@ export default {
             return this.$store.getters["Tools/Dashboard/active"] || this.$store.getters["Tools/FeaturesList/active"];
         },
         statsMapping () {
-            return groupMapping(mapping);
+            return groupMapping(this.mapping);
         }
     },
     watch: {
@@ -152,6 +151,7 @@ export default {
         ...mapMutations("Tools/ColorCodeMap", Object.keys(mutations)),
         ...mapActions("Tools/ChartGenerator", ["channelGraphData"]),
         ...mapActions("Alerting", ["addSingleAlert", "cleanup"]),
+
         /**
          * @description Updates featuresList when selection of district changes and finds all available years for data.
          * @returns {void}
@@ -170,25 +170,27 @@ export default {
          * @returns {void}
          */
         updateFeaturesList () {
-            this.setSelectedFeature(mapping[0].value);
+            this.setSelectedFeature(this.mapping[0]?.value);
 
-            mapping.forEach(attr => {
-                if (attr[this.keyOfAttrNameStats]) {
-                    const findGrp = this.featuresList.find(el => el.group === attr.group);
+            if (Array.isArray(this.mapping) && this.mapping.length > 0) {
+                this.mapping.forEach(attr => {
+                    if (attr[this.keyOfAttrNameStats]) {
+                        const findGrp = this.featuresList.find(el => el.group === attr.group);
 
-                    if (findGrp) {
-                        findGrp.data.push(attr.value);
+                        if (findGrp) {
+                            findGrp.data.push(attr.value);
+                        }
+                        else {
+                            const createObj = {
+                                group: attr.group,
+                                data: [attr.value]
+                            };
+
+                            this.featuresList.push(createObj);
+                        }
                     }
-                    else {
-                        const createObj = {
-                            group: attr.group,
-                            data: [attr.value]
-                        };
-
-                        this.featuresList.push(createObj);
-                    }
-                }
-            });
+                });
+            }
 
             this.generateGraphData();
             this.renderVisualization();
@@ -388,16 +390,16 @@ export default {
          * @returns {void}
          */
         changeSelector (value) {
-            const index = mapping.map(e => e.value).indexOf(this.selectedFeature) + value;
+            const index = this.mapping.map(e => e.value).indexOf(this.selectedFeature) + value;
 
             if (index === -1) {
-                this.setSelectedFeature(mapping[mapping.length - 1].value);
+                this.setSelectedFeature(this.mapping[mapping.length - 1].value);
             }
-            else if (index === mapping.length) {
-                this.setSelectedFeature(mapping[0].value);
+            else if (index === this.mapping.length) {
+                this.setSelectedFeature(this.mapping[0].value);
             }
             else {
-                this.setSelectedFeature(mapping[index].value);
+                this.setSelectedFeature(this.mapping[index].value);
             }
             this.renderVisualization();
         },

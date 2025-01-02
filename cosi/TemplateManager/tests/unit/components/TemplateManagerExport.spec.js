@@ -495,7 +495,7 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 sinon.restore();
             });
         });
-        describe("getChartData", () => {
+        describe("getChartData", async () => {
             const items = [{
                 "48008": {
                     "kategorie": "Bevölkerung insgesamt",
@@ -524,12 +524,33 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                 areaColumnName = "Ausgewähltes Gebiet",
                 categoryInChart = [{"Bevölkerung": "Bevölkerung insgesamt"}];
 
-            it("should return empty array", () => {
-                const wrapper = factory.getShallowMount();
+            it("should return empty array", async () => {
+                const wrapper = factory.getShallowMount(),
+                    mappingJson = [
+                        {
+                            "category": "bev_insgesamt",
+                            "value": "Bevölkerung insgesamt",
+                            "group": "Bevölkerung",
+                            "stat_gebiet": "31232",
+                            "stadtteil": "31240",
+                            "bezirk": "31271",
+                            "valueType": "absolute"
+                        },
+                        {
+                            "category": "bev_weiblich",
+                            "value": "Bevölkerung weiblich",
+                            "group": "Bevölkerung",
+                            "stat_gebiet": "31232",
+                            "stadtteil": "31240",
+                            "bezirk": "31271",
+                            "valueType": "absolute"
+                        }
+                    ];
 
-                expect(wrapper.vm.getChartData(items, [], selectedDistrictNames, areaColumnName, categoryInChart)).to.be.deep.equal([]);
-                expect(wrapper.vm.getChartData(items, templateStatsCategories, [], areaColumnName, categoryInChart)).to.be.deep.equal([]);
-                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, [])).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, [], selectedDistrictNames, areaColumnName, categoryInChart, mappingJson)).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, [], areaColumnName, categoryInChart, mappingJson)).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, [], mappingJson)).to.be.deep.equal([]);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart, [], mappingJson)).to.be.deep.equal([]);
                 wrapper.destroy();
             });
 
@@ -553,9 +574,29 @@ describe("addons/cosi/TemplateManager/components/TemplateManagerExport.vue", () 
                                 }
                             ]
                         }
+                    ],
+                    mappingJson = [
+                        {
+                            "category": "bev_insgesamt",
+                            "value": "Bevölkerung insgesamt",
+                            "group": "Bevölkerung",
+                            "stat_gebiet": "31232",
+                            "stadtteil": "31240",
+                            "bezirk": "31271",
+                            "valueType": "absolute"
+                        },
+                        {
+                            "category": "bev_weiblich",
+                            "value": "Bevölkerung weiblich",
+                            "group": "Bevölkerung",
+                            "stat_gebiet": "31232",
+                            "stadtteil": "31240",
+                            "bezirk": "31271",
+                            "valueType": "absolute"
+                        }
                     ];
 
-                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart)).to.be.deep.equal(data);
+                expect(wrapper.vm.getChartData(items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart, mappingJson)).to.be.deep.equal(data);
                 wrapper.destroy();
             });
         });

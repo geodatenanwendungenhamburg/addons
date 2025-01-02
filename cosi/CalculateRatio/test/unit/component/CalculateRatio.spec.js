@@ -442,6 +442,9 @@ describe("CalculateRatio.vue", () => {
 
             const wrapper = await mount(true);
 
+            wrapper.vm.featuresList = [{value: "foo", text: "foo"}];
+            await wrapper.vm.$nextTick();
+
             wrapper.find("#switchA").trigger("click");
 
             sinon.assert.callCount(addSingleAlertStub, 1);
@@ -489,6 +492,9 @@ describe("CalculateRatio.vue", () => {
             selectedFeaturesStub.returns(new GeoJSON().readFeatures(features_stadtteile));
 
             const wrapper = await mount(true);
+
+            wrapper.vm.featuresList = [{value: "foo", text: "foo"}];
+            await wrapper.vm.$nextTick();
 
             let ms = wrapper.find("#feature_selector_A");
 

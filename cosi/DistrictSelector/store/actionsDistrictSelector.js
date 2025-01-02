@@ -1,5 +1,6 @@
 import {WFS} from "ol/format.js";
 import {getFeaturePOST as wfsGetFeature} from "../../../../src/api/wfs/getFeature.js";
+import getMappingJson from "../../utils/getMappingJson";
 import oafRequest from "../../../../src/api/oaf/getOAFFeature";
 import {parseFeatures} from "../utils/prepareStatsFeatures";
 import {mapDistrictNames} from "../utils/prepareDistrictLevels";
@@ -61,7 +62,7 @@ const actions = {
                         olFeatures = oafRequest.readAllOAFToGeoJSON(response);
                     }
                     if (olFeatures.length > 0) {
-                        parseFeatures(olFeatures, districts[i], districtLevel);
+                        await parseFeatures(olFeatures, districts[i], districtLevel);
                     }
                     else {
                         dispatch("Alerting/addSingleAlert", {
@@ -152,24 +153,16 @@ const actions = {
     },
 
     /**
-     * Loads the mapping of statistical categories from the configured path
-     * Defaults to the mapping.json for Hamburg, "/addons/cosi/assets/mapping.json"
+     * Loads the mapping of statistical categories from portalconfigs.
      * @param {Object} state - the DistrictSelector store state
-     * @param {String} path - the path to load from
      * @returns {void}
      */
     async loadMapping ({state, commit}) {
-        const path = state.mappingPath;
+        if (state.mapping === null) {
+            const mapping = await getMappingJson();
 
-        if (path) {
-            const
-                req = await fetch(path),
-                mapping = await req.json();
-
-            commit("setMappingInit", mapping);
+            commit("setMapping", mapping);
         }
-
-        commit("resetMapping");
     },
 
     /**

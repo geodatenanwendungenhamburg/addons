@@ -7,7 +7,6 @@ import {getComponent} from "../../../../src/utils/getComponent";
 import TemplateAdminForm from "./TemplateAdminForm.vue";
 import isObject from "../../../../src/utils/isObject";
 import {sort} from "../../../../src/utils/sort";
-import mapping from "../../assets/mapping.json";
 
 export default {
     name: "TemplateAdmin",
@@ -24,7 +23,7 @@ export default {
     },
     computed: {
         ...mapGetters("Tools/TemplateAdmin", Object.keys(getters)),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictLevelId", "selectedDistrictsCollection", "selectedDistrictNames"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictLevelId", "selectedDistrictsCollection", "selectedDistrictNames", "mapping"]),
         ...mapGetters("Tools", ["getConfiguredToolNames"]),
         ...mapState(["Tools"])
     },
@@ -34,7 +33,7 @@ export default {
                 const filteredPropertyNames = this.getFilteredPropertyNames(this.selectedDistrictLevel?.propertyNameList, this.ignorePropertyNames),
                     layers = Radio.request("Parser", "getItemsByAttributes", {type: "layer"});
 
-                this.statOptions = this.getMappedLabelByValue(filteredPropertyNames, mapping);
+                this.statOptions = this.getMappedLabelByValue(filteredPropertyNames, this.mapping);
                 this.dataOptions = this.getLayerNames(layers);
             }
         }

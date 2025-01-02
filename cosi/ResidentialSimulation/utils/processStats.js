@@ -1,5 +1,5 @@
 import {getLastAvailableYear} from "../../utils/getAvailableYears";
-import MappingJson from "../../assets/mapping.json";
+import getMappingJson from "../../utils/getMappingJson";
 
 /**
  * @todo ONLY PROTOTYPE!!!! refactor
@@ -12,7 +12,7 @@ import MappingJson from "../../assets/mapping.json";
  * @param {String} [mapping] - all statistical category objects (from DistrictSelector, Fallback from static files)
  * @returns {Object} - the base stats for the picked reference district
  */
-export default function processStats (districtName, districtLevel, statsFeatures, basePopulationProp, timelinePrefix, groupsList, mapping = MappingJson) {
+export default function processStats (districtName, districtLevel, statsFeatures, basePopulationProp, timelinePrefix, groupsList, mapping = getMappingJson()) {
     const
         stats = statsFeatures.map(feature => feature.getProperties()),
         latestYear = timelinePrefix + getLastAvailableYear(statsFeatures, timelinePrefix),

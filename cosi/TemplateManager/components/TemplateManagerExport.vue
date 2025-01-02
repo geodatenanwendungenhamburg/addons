@@ -4,7 +4,6 @@ import {mapGetters} from "vuex";
 import TemplateManagerExportProgressBar from "./TemplateManagerExportProgressBar.vue";
 import PDFMaker from "../js/createPdf";
 import {getTotal, getCulmulativeTotal} from "../../Dashboard/utils/operations";
-import mapping from "../../assets/mapping.json";
 import {createMapfishDialog} from "../../../valuationPrint/utils/createMapfishDialog";
 import {getCenter as getCenterOfExtent} from "ol/extent";
 import {startPrintProcess} from "../../../valuationPrint/utils/startPrintProcess.js";
@@ -73,7 +72,7 @@ export default {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/Dashboard", ["items"]),
         ...mapGetters("Tools/FeaturesList", ["featuresListItems"]),
-        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures"]),
+        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures", "initMapping"]),
         ...mapGetters(["getRestServiceById"]),
         ...mapGetters("Maps", ["projection", "getCurrentExtent"]),
 
@@ -206,11 +205,11 @@ export default {
          * @param {Object[]} items - Items from dashboard component.
          * @returns {void}
          */
-        addStatsToReport (items) {
+        async addStatsToReport (items) {
             if (!this.controlsReportComponent("statistische Datenübersicht")) {
                 return;
             }
-            const filteredMappingByCategories = mapping.filter(obj => {
+            const filteredMappingByCategories = this.initMapping.filter(obj => {
                     return this.templateStatsCategories.includes(obj.value);
                 }),
                 groupedMapping = Object.groupBy(filteredMappingByCategories, (obj) => obj.group);
@@ -504,7 +503,8 @@ export default {
             if (!this.controlsReportComponent("Datenvisualisierung")) {
                 return;
             }
-            const data = this.getChartData(this.items, this.templateStatsCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart),
+
+            const data = this.getChartData(this.items, this.templateStatsCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart, this.initMapping),
                 imageArr = [];
 
             if (!Array.isArray(data) || !data.length) {
@@ -569,16 +569,17 @@ export default {
          * @param {String[]} selectedDistrictNames - the selected district name in id.
          * @param {String} areaColumnName - the area name.
          * @param {Object[]} categoryInChart - the category to be used in chart.
+         * @param {Object[]} mappingJson - the mapping json.
          * @returns {Object} the data.
          */
-        getChartData (items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart) {
-            const filteredMappingByCategories = mapping.filter(obj => {
+        getChartData (items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart, mappingJson) {
+            const filteredMappingByCategories = mappingJson.filter(obj => {
                     return templateStatsCategories.includes(obj.value);
                 }),
                 groupedMapping = this.groupBy(filteredMappingByCategories, "group"),
                 categoryData = [];
 
-            if (!Array.isArray(items) || !items.length || !Array.isArray(templateStatsCategories) || !templateStatsCategories.length || !Array.isArray(selectedDistrictNames) || !selectedDistrictNames.length) {
+            if (!Array.isArray(mappingJson) || mappingJson.length === 0 || !Array.isArray(items) || !items.length || !Array.isArray(templateStatsCategories) || !templateStatsCategories.length || !Array.isArray(selectedDistrictNames) || !selectedDistrictNames.length) {
                 return categoryData;
             }
 

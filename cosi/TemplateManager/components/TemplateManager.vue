@@ -2,6 +2,7 @@
 import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
 import {getComponent} from "../../../../src/utils/getComponent";
 import {mapGetters, mapActions, mapMutations} from "vuex";
+import getMappingJson from "../../utils/getMappingJson";
 import getters from "../store/gettersTemplateManager";
 import mutations from "../store/mutationsTemplateManager";
 import actions from "../store/actionsTemplateManager";
@@ -9,7 +10,6 @@ import ToolInfo from "../../components/ToolInfo.vue";
 import TemplateManagerImport from "./TemplateManagerImport.vue";
 import TemplateManagerExport from "./TemplateManagerExport.vue";
 import axios from "axios";
-import mapping from "../../assets/mapping.json";
 import {getItemsByAttributes, addModelsByAttributes, getModelByAttributes} from "../../utils/radioBridge";
 import TemplateManagerCard from "./TemplateManagerCard.vue";
 
@@ -241,7 +241,9 @@ export default {
             }
         }
     },
-    created () {
+    async created () {
+        this.setMapping(await getMappingJson());
+
         /**
          * listens to the close event of the Tool Component
          * @listens #close
@@ -335,15 +337,17 @@ export default {
             return _template;
         },
 
-        loadFromTemplate (template, index, active) {
+        async loadFromTemplate (template, index, active) {
             template.meta.isActive = active;
 
             const _template = this.applyFilters(template, this.filters[index]),
-                startingTool = template?.state?.Tools?.toolToOpen;
+                startingTool = template?.state?.Tools?.toolToOpen,
+                time = new Date().getTime();
 
             if (this.useTemplatesForMapping) {
-                template.meta.time = new Date().getTime();
-                this.createMappingByTemplates(this.templates, mapping);
+                template.meta.time = time;
+
+                this.createMappingByTemplates(this.templates, await getMappingJson());
             }
 
             this.loadSessionData({template: _template, reset: !active});
@@ -492,7 +496,7 @@ export default {
             this.templateData(template);
         },
 
-        /*
+        /**
          * Creates a new mapping based on the statistical data in the templates.
          * The name of the template is used as the name of the group.
          * @param {Object[]} templates - All available templates.
@@ -500,6 +504,10 @@ export default {
          * @returns {void}
          */
         createMappingByTemplates (templates, initMapping) {
+            if (!Array.isArray(initMapping) || initMapping.length === 0) {
+                return;
+            }
+
             const activeTemplates = templates.filter(template => template.meta.isActive),
                 sortedTemplates = activeTemplates.sort((a, b) => b.meta.time - a.meta.time),
                 newMapping = [];
@@ -589,7 +597,7 @@ export default {
          * @param {Boolean} active - Flag if it is activated.
          * @returns {void}
          */
-        activeCard (name, active) {
+        async activeCard (name, active) {
             this.activeTemplateName = name;
             this.isTemplateActive = active;
 
@@ -610,7 +618,7 @@ export default {
                 this.activeTemplateName = "";
                 this.setCurrentActiveTemplate("");
                 if (!this.activeTemplates.length) {
-                    this.setMapping(mapping);
+                    this.setMapping(await getMappingJson());
                 }
             }
         },

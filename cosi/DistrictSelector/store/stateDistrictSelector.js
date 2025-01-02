@@ -1,5 +1,3 @@
-import MappingJson from "../../assets/mapping.json";
-
 /**
  * User type definition
  * @typedef {Object} DistrictSelectorState
@@ -37,9 +35,8 @@ const state = {
     id: "districtSelector",
     isVisibleInMenu: true,
     loadend: false,
+    initMapping: null,
     mapping: null,
-    mappingPath: undefined,
-    mappingInit: MappingJson,
     name: "Gebiet auswählen",
     readmeUrl: {
         "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018districtselector.md",

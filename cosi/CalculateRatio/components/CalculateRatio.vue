@@ -8,7 +8,7 @@ import utils from "../../utils";
 import exportXlsx from "../../utils/exportXlsx";
 import DataTable from "./DataTable.vue";
 import {exportAsGeoJson} from "../utils/exportResults";
-import mapping from "../../assets/mapping.json";
+import getMappingJson from "../../utils/getMappingJson";
 import ToolInfo from "../../components/ToolInfo.vue";
 import {getCenter} from "ol/extent";
 import {getLayerSource} from "../../utils/layer/getLayerSource";
@@ -252,34 +252,38 @@ export default {
          * @description Updates featuresList and sorting/ grouping it for display in multiselect.
          * @returns {void}
          */
-        updateFeaturesList () {
+        async updateFeaturesList () {
+            const mappingJson = await getMappingJson();
+
             this.featuresList = [];
             this.subFeaturesList = [];
 
-            mapping.forEach(attr => {
-                if (attr[this.keyOfAttrNameStats] && attr.valueType === "absolute") {
-                    const findGrp = this.featuresList.find(el => el.header === attr.group);
+            if (Array.isArray(mappingJson) && mappingJson.length > 0) {
+                mappingJson.forEach(attr => {
+                    if (attr[this.keyOfAttrNameStats] && attr.valueType === "absolute") {
+                        const findGrp = this.featuresList.find(el => el.header === attr.group);
 
-                    if (findGrp) {
-                        this.featuresList.push({value: attr.value, text: attr.value});
-                    }
-                    else {
-                        this.featuresList.push({header: attr.group});
-                        this.featuresList.push({value: attr.value, text: attr.value});
-                    }
-
-                    if (attr.summable) {
-                        if (this.subFeaturesList.length === 0) {
-                            this.subFeaturesList.push({header: "Aufsummierbar"});
-                            this.subFeaturesList.push({value: attr.value, text: attr.value});
+                        if (findGrp) {
+                            this.featuresList.push({value: attr.value, text: attr.value});
                         }
                         else {
-                            this.subFeaturesList.push({value: attr.value, text: attr.value});
+                            this.featuresList.push({header: attr.group});
+                            this.featuresList.push({value: attr.value, text: attr.value});
                         }
 
+                        if (attr.summable) {
+                            if (this.subFeaturesList.length === 0) {
+                                this.subFeaturesList.push({header: "Aufsummierbar"});
+                                this.subFeaturesList.push({value: attr.value, text: attr.value});
+                            }
+                            else {
+                                this.subFeaturesList.push({value: attr.value, text: attr.value});
+                            }
+
+                        }
                     }
-                }
-            });
+                });
+            }
 
             if (this.featuresList.length !== 0) {
                 this.BSwitch = false;
@@ -339,9 +343,10 @@ export default {
          * @param {String} letter String that determines which field is to be modified (A or B for FieldA or FieldB).
          * @returns {void} Function returns nothing.
          */
-        checkSumUp (letter) {
+        async checkSumUp (letter) {
             if (!this[letter + "Switch"]) {
-                const checkSumUp = mapping.find(x => x.value === this["selectedField" + letter].id);
+                const mappingJson = await getMappingJson(),
+                    checkSumUp = mappingJson.find(x => x.value === this["selectedField" + letter].id);
 
                 if (!this["aSumUpSwitch" + letter]) {
                     if (checkSumUp.summable) {
@@ -1206,238 +1211,238 @@ export default {
 
 
 <style lang="scss" scoped>
-    @import "../../utils/variables.scss";
+@import "../../utils/variables.scss";
 
-    #calculateratio {
-        background:rgba(255,255,255,0.95);
-        width:400px;
+#calculateratio {
+    background:rgba(255,255,255,0.95);
+    width:400px;
 
-        .info_button {
-            display:block;
-            width:30px;
-            height:30px;
-            background:#eee;
-            margin:0px 0px 0px auto;
+    .info_button {
+        display:block;
+        width:30px;
+        height:30px;
+        background:#eee;
+        margin:0px 0px 0px auto;
+    }
+
+    .section {
+
+        &.third {
+            border:1px solid #ddd;
         }
+    }
 
-        .section {
+    .select_wrapper {
+        display:flex;
+        flex-flow:row wrap;
+        justify-content:flex-start;
+        align-content:flex-start;
 
-            &.third {
-                    border:1px solid #ddd;
-                }
-        }
+        .button {
+            flex-basis:30%;
+            background:linear-gradient(180deg, #eee, #ddd);
+            border-radius:5px;
+            margin: 0px 5px 5px 0px;
 
-        .select_wrapper {
-            display:flex;
-            flex-flow:row wrap;
-            justify-content:flex-start;
-            align-content:flex-start;
-
-            .button {
-                flex-basis:30%;
-                background:linear-gradient(180deg, #eee, #ddd);
-                border-radius:5px;
-                margin: 0px 5px 5px 0px;
-
-                button {
-                    background: transparent;
-                    border:none;
-                    color:#222;
-                    font-size:90%;
-                }
-
-                &:hover {
-                    background:#ccc;
-                    cursor:pointer;
-                }
-            }
-            .selection {
-                flex: 1 1 66%;
-                margin:0px;
+            button {
+                background: transparent;
+                border:none;
+                color:#222;
+                font-size:90%;
             }
 
-            .subsection {
+            &:hover {
+                background:#ccc;
+                cursor:pointer;
+            }
+        }
+        .selection {
+            flex: 1 1 66%;
+            margin:0px;
+        }
+
+        .subsection {
+            width:100%;
+            margin:5px auto;
+
+            .sub_wrapper {
                 width:100%;
-                margin:5px auto;
+                display:flex;
+                flex-flow:row wrap;
+                justify-content: flex-start;
 
-                .sub_wrapper {
-                    width:100%;
+                .faktor_f {
                     display:flex;
-                    flex-flow:row wrap;
+                    flex-flow:row nowrap;
                     justify-content: flex-start;
+                    flex-basis:30%;
+                    margin-right:5px;
 
-                    .faktor_f {
-                        display:flex;
-                        flex-flow:row nowrap;
-                        justify-content: flex-start;
-                        flex-basis:30%;
-                        margin-right:5px;
+                    .btn {
+                        flex-basis:100%;
+                        margin:0;
+                        padding:0;
+                        height:40px;
 
-                        .btn {
-                            flex-basis:100%;
-                            margin:0;
-                            padding:0;
+                        button {
+                            width:100%;
                             height:40px;
-
-                            button {
-                                width:100%;
-                                height:40px;
-                                font-size:70%;
-                                font-weight:700;
-                                border:1px solid #ccc;
-                                border-radius:5px;
-                            }
-
-                            &.reduced {
-                                flex-basis:40px;
-                            }
+                            font-size:70%;
+                            font-weight:700;
+                            border:1px solid #ccc;
+                            border-radius:5px;
                         }
 
-                        .input {
-                            position:relative;
-                            flex-basis:calc(100% - 40px);
-                            flex-grow: 1;
-                            flex-shrink: 1;
-                            margin:1px 0px 0px -2px;
-
-                            input {
-                                width:100%;
-                                height:40px;
-                                text-align:center;
-                                font-weight:900;
-                                border:1px solid #ccc;
-                            }
+                        &.reduced {
+                            flex-basis:40px;
                         }
                     }
 
-                    .custom_wrapper {
-                        display:flex;
-                        flex-flow:row wrap;
-                        justify-content:center;
-                        width:100%;
-                        margin:0;
+                    .input {
+                        position:relative;
+                        flex-basis:calc(100% - 40px);
+                        flex-grow: 1;
+                        flex-shrink: 1;
+                        margin:1px 0px 0px -2px;
 
                         input {
-                            flex-basis: 33%;
-                            text-align:center;
+                            width:100%;
                             height:40px;
-                            font-weight:700;
-                            margin:0px 5px;
+                            text-align:center;
+                            font-weight:900;
                             border:1px solid #ccc;
                         }
-
-                        p {
-                            flex: 1 1 25%;
-                            line-height: 40px;
-                            margin: 0px;
-                            font-size: 80%;
-                            text-align: center;
-                        }
                     }
                 }
-            }
-        }
 
+                .custom_wrapper {
+                    display:flex;
+                    flex-flow:row wrap;
+                    justify-content:center;
+                    width:100%;
+                    margin:0;
 
-        &.expanded {
-            width:780px;
-
-            .info_button {
-                position:absolute;
-                top:10px;
-                right:25px;
-            }
-
-            .addon_wrapper {
-                display:flex;
-                flex-flow: row wrap;
-                justify-content:flex-start;
-
-                .section {
-                    flex:1 0 45%;
-                    margin:5px 0px;
-                }
-
-                .analysis-pagination {
-                    width: 100%;
-                    padding:5px;
-                    box-sizing:border-box;
-                    border:1px solid #ccc;
-                    background:#fafafa;
-                }
-
-                .data_table {
-                    flex-basis:100%;
-                    height:auto;
-                    margin:5px 0px;
-
-                    .head_wrapper {
-                        display:flex;
-                        flex-flow:row wrap;
-                        justify-content:flex-end;
-
-                        .xl_btn {
-                            height:40px;
-                            line-height:40px;
-                            width:auto;
-                            opacity:0.75;
-                            background: $green;
-                            color:white;
-                            padding: 0px 10px;
-                            margin:5px 0px;
-                            font-size: 12px;x
-
-                            span {
-                                margin-right:10px;
-                            }
-
-                            &:hover {
-                                opacity:1;
-                            }
-                        }
-
-                        button.ccm, button.cg {
-                            height:40px;
-                            width:40px;
-                            margin:5px 3px;
-                            background:#eee;
-                            border:1px solid #eee;
-
-                            &:hover {
-                                border:1px solid #aaa;
-                            }
-
-                            &.highlight {
-                                color:white;
-                                border:1px solid $brightblue;
-                                background: $brightblue;
-                            }
-                        }
-
-                        .column_selection {
-                            flex:0 0 160px;
-                            margin:5px 3px
-                        }
-
-                        .year_selector {
-                            width: 160px;
-                            margin: 5px 0px;
-                        }
+                    input {
+                        flex-basis: 33%;
+                        text-align:center;
+                        height:40px;
+                        font-weight:700;
+                        margin:0px 5px;
+                        border:1px solid #ccc;
                     }
 
-                    .forged_table {
-                        overflow:hidden;
-                    }
-
-                    .calc_ratio_results {
-                        display:none;
-
-                        &.active {
-                            display:block;
-                        }
+                    p {
+                        flex: 1 1 25%;
+                        line-height: 40px;
+                        margin: 0px;
+                        font-size: 80%;
+                        text-align: center;
                     }
                 }
             }
         }
     }
+
+
+    &.expanded {
+        width:780px;
+
+        .info_button {
+            position:absolute;
+            top:10px;
+            right:25px;
+        }
+
+        .addon_wrapper {
+            display:flex;
+            flex-flow: row wrap;
+            justify-content:flex-start;
+
+            .section {
+                flex:1 0 45%;
+                margin:5px 0px;
+            }
+
+            .analysis-pagination {
+                width: 100%;
+                padding:5px;
+                box-sizing:border-box;
+                border:1px solid #ccc;
+                background:#fafafa;
+            }
+
+            .data_table {
+                flex-basis:100%;
+                height:auto;
+                margin:5px 0px;
+
+                .head_wrapper {
+                    display:flex;
+                    flex-flow:row wrap;
+                    justify-content:flex-end;
+
+                    .xl_btn {
+                        height:40px;
+                        line-height:40px;
+                        width:auto;
+                        opacity:0.75;
+                        background: $green;
+                        color:white;
+                        padding: 0px 10px;
+                        margin:5px 0px;
+                        font-size: 12px;x
+
+                    span {
+                        margin-right:10px;
+                    }
+
+                        &:hover {
+                            opacity:1;
+                        }
+                    }
+
+                    button.ccm, button.cg {
+                        height:40px;
+                        width:40px;
+                        margin:5px 3px;
+                        background:#eee;
+                        border:1px solid #eee;
+
+                        &:hover {
+                            border:1px solid #aaa;
+                        }
+
+                        &.highlight {
+                            color:white;
+                            border:1px solid $brightblue;
+                            background: $brightblue;
+                        }
+                    }
+
+                    .column_selection {
+                        flex:0 0 160px;
+                        margin:5px 3px
+                    }
+
+                    .year_selector {
+                        width: 160px;
+                        margin: 5px 0px;
+                    }
+                }
+
+                .forged_table {
+                    overflow:hidden;
+                }
+
+                .calc_ratio_results {
+                    display:none;
+
+                    &.active {
+                        display:block;
+                    }
+                }
+            }
+        }
+    }
+}
 </style>

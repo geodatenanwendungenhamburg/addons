@@ -6,7 +6,7 @@ import TemplateManagerStore from "../../../store/indexTemplateManager";
 import Vuetify from "vuetify";
 import sinon from "sinon";
 import Vue from "vue";
-import mapping from "../../../../assets/mapping.json";
+import mapping from "./mock.mapping.json";
 
 config.mocks.$t = key => key;
 
@@ -108,26 +108,26 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
 
         it("should find template 'TemplateManagerExport'", async () => {
             const wrapper = factory.getMount(),
-            templates = [{
-                meta: {
-                    title: "one",
-                    isActive: false,
-                    created: "01.01."
-                }
-            },
-            {
-                meta: {
-                    title: "two",
-                    isActive: true,
-                    created: "01.01."
-                }
-            }],
-            saveTemplate = [
-                {
-                    name: "two",
-                    statsCategories: ["cat1"]
-                }
-            ];
+                templates = [{
+                    meta: {
+                        title: "one",
+                        isActive: false,
+                        created: "01.01."
+                    }
+                },
+                    {
+                        meta: {
+                            title: "two",
+                            isActive: true,
+                            created: "01.01."
+                        }
+                    }],
+                saveTemplate = [
+                    {
+                        name: "two",
+                        statsCategories: ["cat1"]
+                    }
+                ];
 
             await wrapper.setData({
                 showExportWindow: true,
@@ -142,25 +142,25 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         it("should find TemplateManagerCard Component", async () => {
             const wrapper = factory.getMount(),
                 templates = [{
-                meta: {
-                    title: "one",
-                    isActive: false,
-                    created: "01.01."
-                }
-            },
-            {
-                meta: {
-                    title: "two",
-                    isActive: true,
-                    created: "01.01."
-                }
-            }],
-            saveTemplate = [
-                {
-                    name: "two",
-                    statsCategories: ["cat1"]
-                }
-            ];
+                    meta: {
+                        title: "one",
+                        isActive: false,
+                        created: "01.01."
+                    }
+                },
+                    {
+                        meta: {
+                            title: "two",
+                            isActive: true,
+                            created: "01.01."
+                        }
+                    }],
+                saveTemplate = [
+                    {
+                        name: "two",
+                        statsCategories: ["cat1"]
+                    }
+                ];
 
             await wrapper.setData({
                 showExportWindow: true,
@@ -172,20 +172,20 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         });
         it("should not render export view if selected template is not activated but showExportView is true", async () => {
             const wrapper = factory.getMount(),
-            templates = [{
-                meta: {
-                    title: "one",
-                    isActive: false,
-                    created: "01.01."
-                }
-            },
-            {
-                meta: {
-                    title: "two",
-                    isActive: true,
-                    created: "01.01."
-                }
-            }];
+                templates = [{
+                    meta: {
+                        title: "one",
+                        isActive: false,
+                        created: "01.01."
+                    }
+                },
+                    {
+                        meta: {
+                            title: "two",
+                            isActive: true,
+                            created: "01.01."
+                        }
+                    }];
 
             await wrapper.setData({
                 showExportWindow: true,
@@ -206,13 +206,13 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 created: "01.01."
             }
         },
-        {
-            meta: {
-                title: "two",
-                isActive: false,
-                created: "01.01."
-            }
-        }];
+            {
+                meta: {
+                    title: "two",
+                    isActive: false,
+                    created: "01.01."
+                }
+            }];
 
         it("should update 'hasTemplates' if 'templates' was changed", async () => {
             const wrapper = factory.getMount();
@@ -253,9 +253,9 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
                 templates
             });
 
-           wrapper.vm.activeTemplateName = "two";
+            wrapper.vm.activeTemplateName = "two";
 
-           wrapper.vm.$nextTick();
+            wrapper.vm.$nextTick();
 
             expect(wrapper.vm.activeTemplate).to.deep.equal(wrapper.vm.templates[1]);
         });
@@ -551,43 +551,43 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         });
         describe("getAllSelectedDataFromTemplate", () => {
             const templateData = [
-                {
-                    activeLayer: {
-                        "first": {"name": "active1", "id": "123"},
-                        "second": {"name": "active2", "id": "456"}
+                    {
+                        activeLayer: {
+                            "first": {"name": "active1", "id": "123"},
+                            "second": {"name": "active2", "id": "456"}
+                        },
+                        name: "First",
+                        category: {
+                            "0": "Bevölkerung insgesamt",
+                            "1": "Bevölkerung ab 65 Jahren"
+                        }
                     },
-                    name: "First",
-                    category: {
-                        "0": "Bevölkerung insgesamt",
-                        "1": "Bevölkerung ab 65 Jahren"
+                    {
+                        activeLayer: {
+                            "third": {"name": "active3", "id": "123"},
+                            "fourth": {"name": "active4", "id": "456"}
+                        },
+                        name: "Second",
+                        category: {
+                            "0": "Bevölkerung insgesamt",
+                            "1": "Bevölkerung ab 65 Jahren"
+                        }
+                    }
+                ],
+                templates = [{
+                    meta: {
+                        title: "First",
+                        isActive: false,
+                        created: "01.01."
                     }
                 },
-                {
-                    activeLayer: {
-                        "third": {"name": "active3", "id": "123"},
-                        "fourth": {"name": "active4", "id": "456"}
-                    },
-                    name: "Second",
-                    category: {
-                        "0": "Bevölkerung insgesamt",
-                        "1": "Bevölkerung ab 65 Jahren"
-                    }
-                }
-            ],
-            templates = [{
-                meta: {
-                    title: "First",
-                    isActive: false,
-                    created: "01.01."
-                }
-            },
-            {
-                meta: {
-                    title: "Second",
-                    isActive: true,
-                    created: "01.01."
-                }
-            }];
+                    {
+                        meta: {
+                            title: "Second",
+                            isActive: true,
+                            created: "01.01."
+                        }
+                    }];
 
             it("should return all data from one type", async () => {
                 const wrapper = factory.getMount();
@@ -646,19 +646,19 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
         });
         describe("setSelectedData", () => {
             const templateData = [
-                {
-                    activeLayer: {
-                        "first": {"name": "active1", "id": "123"},
-                        "second": {"name": "active2", "id": "456"}
-                    },
-                    name: "First",
-                    category: {
-                        "0": "Bevölkerung insgesamt",
-                        "1": "Bevölkerung ab 65 Jahren"
+                    {
+                        activeLayer: {
+                            "first": {"name": "active1", "id": "123"},
+                            "second": {"name": "active2", "id": "456"}
+                        },
+                        name: "First",
+                        category: {
+                            "0": "Bevölkerung insgesamt",
+                            "1": "Bevölkerung ab 65 Jahren"
+                        }
                     }
-                }
-            ],
-            selected = {"first": {"name": "active1", "id": "123"}};
+                ],
+                selected = {"first": {"name": "active1", "id": "123"}};
 
             it("should set selected data", async () => {
                 const wrapper = factory.getMount();
@@ -750,37 +750,37 @@ describe("addons/cosi/TemplateManager/components/TemplateManager.vue", () => {
             it("should return layer Id list", () => {
                 const wrapper = factory.getMount(),
                     templates = [
-                    {
-                        meta: {
-                          isActive: true
+                        {
+                            meta: {
+                                isActive: true
+                            },
+                            state: {
+                                Maps: {
+                                    layerIds: [1, 2]
+                                }
+                            }
                         },
-                        state: {
-                            Maps: {
-                                layerIds: [1, 2]
+                        {
+                            meta: {
+                                isActive: true
+                            },
+                            state: {
+                                Maps: {
+                                    layerIds: [3, 4]
+                                }
+                            }
+                        },
+                        {
+                            meta: {
+                                isActive: false
+                            },
+                            state: {
+                                Maps: {
+                                    layerIds: [3, 4]
+                                }
                             }
                         }
-                    },
-                    {
-                        meta: {
-                            isActive: true
-                        },
-                        state: {
-                            Maps: {
-                                layerIds: [3, 4]
-                            }
-                        }
-                    },
-                    {
-                        meta: {
-                            isActive: false
-                        },
-                        state: {
-                            Maps: {
-                                layerIds: [3, 4]
-                            }
-                        }
-                    }
-                ];
+                    ];
 
                 expect(wrapper.vm.getActiveLayerIds(templates)).to.be.deep.equal([1, 2, 3, 4]);
                 wrapper.destroy();

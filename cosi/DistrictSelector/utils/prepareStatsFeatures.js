@@ -1,5 +1,5 @@
-import mapping from "../../assets/mapping.json";
 import Feature from "ol/Feature";
+import getMappingJson from "../../utils/getMappingJson";
 
 /**
  * Parses the stats from olFeatures to the district object
@@ -8,17 +8,17 @@ import Feature from "ol/Feature";
  * @param {Object} districtLevel - the current districtLevel
  * @returns {void}
  */
-export function parseFeatures (olFeatures, district, districtLevel) {
+export async function parseFeatures (olFeatures, district, districtLevel) {
     /**
      * parse LTF
      * @todo refactor
      */
     if (olFeatures.every(feature => feature.get("jahr"))) {
         if (district.statFeatures.length > 0) {
-            updateStatFeaturesFromLTF(olFeatures, district.statFeatures);
+            await updateStatFeaturesFromLTF(olFeatures, district.statFeatures);
         }
         else {
-            const features = createStatFeaturesFromLTF(olFeatures, districtLevel, district);
+            const features = await createStatFeaturesFromLTF(olFeatures, districtLevel, district);
 
             // add statFeatures to district
             district.statFeatures.push(...features);
@@ -42,11 +42,12 @@ export function parseFeatures (olFeatures, district, districtLevel) {
 
 /**
  * Sets necessary properties on the feature, beautifies keys.
- * @param {module:ol/feature} feature -
+ * @param {module:ol/feature} feature - The feature.
+ * @param {Object[]|null} mappingJson - The mapping json data or null.
  * @returns {void}
  */
-export function prepareStatsFeatures (feature) {
-    const mappingObject = findMappingObjectByCategory(feature.get("kategorie"));
+export async function prepareStatsFeatures (feature, mappingJson = null) {
+    const mappingObject = await findMappingObjectByCategory(feature.get("kategorie"), mappingJson ? mappingJson : await getMappingJson());
 
     feature.unset("geom"); // fallback for accidentially loaded geometries
     if (typeof mappingObject !== "undefined") {
@@ -61,25 +62,27 @@ export function prepareStatsFeatures (feature) {
  * @param {Object} districtLevel - the current districtLevel
  * @returns {module:ol/feature[]} The statistical features.
  */
-export function createStatFeaturesFromLTF (ltfFeatures, districtLevel) {
-    const statFeatureList = [];
+export async function createStatFeaturesFromLTF (ltfFeatures, districtLevel) {
+    const statFeatureList = [],
+        mappingJson = await getMappingJson();
 
+    if (Array.isArray(mappingJson) && mappingJson.length > 0) {
+        mappingJson.forEach(obj => {
+            const statFeature = new Feature({
+                kategorie: obj.value,
+                group: obj.group
+            });
 
-    mapping.forEach(obj => {
-        const statFeature = new Feature({
-            kategorie: obj.value,
-            group: obj.group
+            statFeature.set(districtLevel.stats.keyOfAttrName[0], ltfFeatures[0].get(districtLevel.stats.keyOfAttrName[0]));
+            if (districtLevel.referenceLevel) {
+                statFeature.set(districtLevel.referenceLevel.stats.keyOfAttrName[0], ltfFeatures[0].get(districtLevel.referenceLevel.stats.keyOfAttrName[0]));
+            }
+            ltfFeatures.forEach(feature => {
+                statFeature.set("jahr_" + feature.get("jahr"), feature.get(obj.category));
+            });
+            statFeatureList.push(statFeature);
         });
-
-        statFeature.set(districtLevel.stats.keyOfAttrName[0], ltfFeatures[0].get(districtLevel.stats.keyOfAttrName[0]));
-        if (districtLevel.referenceLevel) {
-            statFeature.set(districtLevel.referenceLevel.stats.keyOfAttrName[0], ltfFeatures[0].get(districtLevel.referenceLevel.stats.keyOfAttrName[0]));
-        }
-        ltfFeatures.forEach(feature => {
-            statFeature.set("jahr_" + feature.get("jahr"), feature.get(obj.category));
-        });
-        statFeatureList.push(statFeature);
-    });
+    }
 
     return statFeatureList;
 }
@@ -90,31 +93,34 @@ export function createStatFeaturesFromLTF (ltfFeatures, districtLevel) {
  * @param {ol/Feature[]} statFeatures - The statistical features of a district.
  * @returns {void}
  */
-export function updateStatFeaturesFromLTF (ltfFeatures, statFeatures) {
-    const lftFeatureKeys = Object.keys(ltfFeatures[0].getProperties());
+export async function updateStatFeaturesFromLTF (ltfFeatures, statFeatures) {
+    const lftFeatureKeys = Object.keys(ltfFeatures[0].getProperties()),
+        mappingJson = await getMappingJson();
 
-
-    mapping.forEach((obj, i) => {
-        if (lftFeatureKeys.includes(obj.category)) {
-            ltfFeatures.forEach(feature => {
-                statFeatures[i].set("jahr_" + feature.get("jahr"), feature.get(obj.category));
-            });
-        }
-    });
+    if (Array.isArray(mappingJson) && mappingJson.length > 0) {
+        mappingJson.forEach((obj, i) => {
+            if (lftFeatureKeys.includes(obj.category)) {
+                ltfFeatures.forEach(feature => {
+                    statFeatures[i].set("jahr_" + feature.get("jahr"), feature.get(obj.category));
+                });
+            }
+        });
+    }
 }
 
 /**
  * Finds a mapping object by its category.
  * @param {String} value - The category to search by.
+ * @param {Object[]} mappingJson - The mapping json data or null.
  * @returns {object} The mapping object.
  */
-export function findMappingObjectByCategory (value) {
-    if (typeof value !== "string") {
+export async function findMappingObjectByCategory (value, mappingJson) {
+    if (typeof value !== "string" || mappingJson === null) {
         console.error(`prepareStatFeatures.findMappingObjectByCategory: ${value} has to be defined and a string.`);
         return undefined;
     }
 
-    return mapping.find(obj => {
+    return mappingJson.find(obj => {
         return obj.category === value;
     });
 }

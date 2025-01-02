@@ -46,14 +46,6 @@ const mutations = {
         state.mapping = state.mapping.filter(el => !(el.value === category && el.group === group));
     },
 
-    /**
-     * @description resets the mapping to the original json
-     * @param {Object} state - the DistrictSelector store state
-     * @returns {void}
-     */
-    resetMapping (state) {
-        state.mapping = state.mappingInit;
-    },
     addRemoteMetadata (state, {layerId, metadata}) {
         state.remoteMetadata[layerId] = metadata;
     }
