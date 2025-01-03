@@ -931,6 +931,7 @@ export default {
                                 <div class="accordion-body pt-0">
                                     <div id="selected-template-statistics">
                                         <v-chip-group
+                                            :key="selectedTemplateIndex"
                                             v-model="selectedStatsCategories"
                                             column
                                             multiple
