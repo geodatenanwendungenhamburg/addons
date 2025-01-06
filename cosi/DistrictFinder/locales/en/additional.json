@@ -48,7 +48,10 @@
                     "errors": {
                       "invalid": "File could not be read.",
                       "wrongFileFormat": "The file is not in the correct format.",
-                      "attErr": " {{attribute}} node does not exist."
+                      "attErr": " {{attribute}} node does not exist.",
+                      "numErr": " Reference Value or Tolerance is not in number format under Id {{id}}",
+                      "relNumErr": " For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100 under Id {{id}}",
+                      "relativErr": "For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100."
                     }
                   }
             }

@@ -31,6 +31,7 @@ export default {
             copyValue: false,
             conditionDate: "erstellt: 01.01.1999",
             conditionTitle: this.$t("additional:modules.tools.cosi.districtFinder.conditions"),
+            isFieldValidated: true,
             numberOfLimitedAreas: 20,
             resultList: false,
             showExportDialog: false,
@@ -294,6 +295,15 @@ export default {
         },
 
         /**
+         * Sets the value of isFieldValidated.
+         * @param {Boolean} val - true or false.
+         * @returns {void}
+         */
+        setFieldValidated (val) {
+            this.isFieldValidated = val;
+        },
+
+        /**
          * Sets the active card id by toggle the clicked card.
          * @param {String} id - the clicked card id.
          * @returns {void}
@@ -347,7 +357,7 @@ export default {
                     icon="bi bi-download"
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
-                    :disabled="resultList === false"
+                    :disabled="resultList === false || !isFieldValidated"
                 />
                 <DistrictFinderFilterExport
                     v-show="resultList !== false"
@@ -383,6 +393,7 @@ export default {
                         class="mx-4"
                         @delete="deleteCard"
                         @scanCompleted="setCardAttributes"
+                        @validateField="setFieldValidated"
                     />
                 </div>
             </div>

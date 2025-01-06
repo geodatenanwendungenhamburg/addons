@@ -48,7 +48,10 @@
                     "errors": {
                       "invalid": "Datei konnte nicht gelesen werden.",
                       "wrongFileFormat": "Die Datei hat nicht das richtige Format.",
-                      "attErr": " {{attribute}} Tag existiert nicht."
+                      "attErr": " {{attribute}} Tag existiert nicht.",
+                      "numErr": " Referenzwert oder Toleranz ist nicht im Zahlenformat unter Id {{id}}",
+                      "relNumErr": " Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 unter Id {{id}} zulässig",
+                      "relativErr": "Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 zulässig."
                     }
                 }
             }

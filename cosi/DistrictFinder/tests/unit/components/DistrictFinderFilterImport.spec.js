@@ -21,6 +21,27 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                     actions: {
                         addSingleAlert: stubAddSingleAlert
                     }
+                },
+                Tools: {
+                    namespaced: true,
+                    modules: {
+                        DistrictSelector: {
+                            namespaced: true,
+                            mutations: {},
+                            getters: {
+                                mapping: () => [
+                                    {
+                                        "category": "hau_haushalte_mit_kindern_proz",
+                                        "value": "Anteil der Haushalte mit Kindern",
+                                        "group": "Haushalte",
+                                        "stat_gebiet": "31232",
+                                        "stadtteil": "31240",
+                                        "bezirk": "31271",
+                                        "valueType": "relative"
+                                    }]
+                            }
+                        }
+                    }
                 }
             }
         }),
@@ -37,6 +58,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                     });
                 }
             };
+
+    afterEach(() => {
+        sinon.restore();
+    });
 
     describe("Component DOM", () => {
         it("should exist", () => {
@@ -62,16 +87,6 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
     });
 
     describe("Methdos", () => {
-        describe("triggerFileInput", () => {
-            it("should call the 'click' method of the input if this function is called", () => {
-                const wrapper = factory.getShallowMount(),
-                    spyInputClick = sinon.spy(wrapper.vm.$el.querySelector("#file-input"), "click");
-
-                wrapper.vm.triggerFileInput();
-                expect(spyInputClick.calledOnce).to.be.true;
-            });
-        });
-
         describe("loadFiles", () => {
             it("should call 'addSingleAlert' if type(MIME) is not 'application/json'", () => {
                 const obj = {
@@ -87,6 +102,87 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                 wrapper.vm.loadFiles(obj);
 
                 expect(stubAddSingleAlert.calledOnce).to.be.true;
+            });
+        });
+
+        describe("checkNumberOfValue", () => {
+            it("should return false if data is not a non-empty Array.", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue(null)).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue("test")).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue(false)).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue({})).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue(undefined)).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue(0)).to.be.false;
+            });
+
+            it("should return false if the element in data is not object", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue([null])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue(["test"])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([false])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([[]])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([undefined])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([0])).to.be.false;
+            });
+
+
+            it("should return false if the element does not have attribute referenceValue and ruleTolerance", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue([{}])).to.be.false;
+            });
+
+            it("should return false if the referenceValue or tolerance is not in number format", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "test", "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": null, "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": undefined, "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": false, "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": [], "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": {}, "referenceValue": "10"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": "test"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": null}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": undefined}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": false}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": []}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": {}}])).to.be.false;
+            });
+
+            it("should return false if the referenceValue or tolerance is not in the range", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": -10, "referenceValue": "10", "statisticCategory": "hau_haushalte_mit_kindern_proz"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": 101, "referenceValue": "10", "statisticCategory": "hau_haushalte_mit_kindern_proz"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": -10, "statisticCategory": "hau_haushalte_mit_kindern_proz"}])).to.be.false;
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": 101, "statisticCategory": "hau_haushalte_mit_kindern_proz"}])).to.be.false;
+            });
+
+            it("should return true", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": 10, "referenceValue": 10, "statisticCategory": "hau_haushalte_mit_kindern_proz", "id": "card-53"}])).to.be.true;
+            });
+        });
+
+        describe("isNumberInRange", () => {
+            it("should return false", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.isNumberInRange(-10)).to.be.false;
+                expect(wrapper.vm.isNumberInRange(102,6)).to.be.false;
+            });
+
+            it("should return true", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.isNumberInRange(0)).to.be.true;
+                expect(wrapper.vm.isNumberInRange(12.5)).to.be.true;
+                expect(wrapper.vm.isNumberInRange(12,6)).to.be.true;
             });
         });
 
@@ -155,7 +251,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
             it("should emit the right events with the right data", () => {
                 const obj = {
                         target: {
-                            result: JSON.stringify({meta: {name: "title", date: "heute"}, data: "Meine Daten"})
+                            result: JSON.stringify({meta: {name: "title", date: "heute"}, data: [{"id": "card-53", "operator": "and", "rule": "<", "ruleTolerance": 0, "year": 2023, "statisticCategory": "hau_haushalte_mit_kindern_proz", "referenceValue": "20"}]})
                         }
                     },
                     wrapper = factory.getShallowMount();
@@ -166,7 +262,25 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                 expect(wrapper.emitted()).to.have.property("setCardList");
                 expect(wrapper.emitted().setConditionDate[0]).to.deep.equal(["heute"]);
                 expect(wrapper.emitted().setConditionTitle[0]).to.deep.equal(["title"]);
-                expect(wrapper.emitted().setCardList[0]).to.deep.equal(["Meine Daten"]);
+                expect(wrapper.emitted().setCardList[0]).to.deep.equal([[{
+                    "id": "card-53",
+                    "operator": "and",
+                    "rule": "<",
+                    "ruleTolerance": 0,
+                    "year": 2023,
+                    "statisticCategory": "hau_haushalte_mit_kindern_proz",
+                    "referenceValue": "20"
+                }]]);
+            });
+        });
+
+        describe("triggerFileInput", () => {
+            it("should call the 'click' method of the input if this function is called", () => {
+                const wrapper = factory.getShallowMount(),
+                    spyInputClick = sinon.spy(wrapper.vm.$el.querySelector("#file-input"), "click");
+
+                wrapper.vm.triggerFileInput();
+                expect(spyInputClick.calledOnce).to.be.true;
             });
         });
     });

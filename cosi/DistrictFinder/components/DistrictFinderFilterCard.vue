@@ -25,7 +25,7 @@ export default {
             required: true
         }
     },
-    emits: ["delete", "scanCompleted"],
+    emits: ["delete", "scanCompleted", "validateField"],
     data () {
         return {
             dataChips: ["Fachdaten", "statistische Daten"],
@@ -116,6 +116,14 @@ export default {
          */
         datasetStat () {
             return this.mapping.filter(m => m[this.keyOfAttrNameStats]) || [];
+        },
+
+        /**
+         * Returns if the reference value and tolerance is validated.
+         * @returns {Boolean} true if the reference value and tolerance is validated.
+         */
+        isFieldValidated () {
+            return this.checkInRange(this.selectedDataset?.valueType, this.referenceValue) && this.checkInRange(this.selectedDataset?.valueType, this.tolerance);
         },
 
         /**
@@ -218,6 +226,20 @@ export default {
                 allLabels = sorted.map(label => label[this.keyOfAttrNameForSelectedLayer]);
 
             this.chartConfig.data = Object.assign({}, this.chartConfig.data, {labels: allLabels, datasets: [{...this.chartOptions, data: allData}]});
+        },
+
+        /**
+         * Checks if the value is in range.
+         * @param {String} type The type of stats.
+         * @param {Number} value The main value to be evaluated.
+         * @return {Boolean} if the value is in range.
+         */
+        checkInRange (type, value) {
+            if (type === "relative" && (value < 0 || value > 100)) {
+                return false;
+            }
+
+            return true;
         },
 
         /**
@@ -339,6 +361,7 @@ export default {
         /**
          * Applies the current filter rules on the features and emits their names.
          * @emits scanCompleted - passing own condition id and the found district names.
+         * @emits validateField - passing if the field is validated.
          */
         updateResults () {
             const resultNames = this.features
@@ -346,6 +369,7 @@ export default {
                 .map(f => f.properties[this.keyOfAttrNameForSelectedLayer]);
 
             this.$emit("scanCompleted", this.condition.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
+            this.$emit("validateField", this.isFieldValidated);
         },
 
         /**
@@ -473,6 +497,7 @@ export default {
                         <v-text-field
                             v-model="referenceValue"
                             class="reference-filter"
+                            :class="!checkInRange(selectedDataset?.valueType, referenceValue) ? 'invalid' : ''"
                             outlined
                             hide-details
                             dense
@@ -513,6 +538,7 @@ export default {
                         <v-text-field
                             v-model="tolerance"
                             class="tolerance"
+                            :class="!checkInRange(selectedDataset?.valueType, tolerance) ? 'invalid' : ''"
                             outlined
                             hide-details
                             dense
@@ -520,6 +546,12 @@ export default {
                             @input="updateResults"
                         />
                     </div>
+                </div>
+                <div
+                    v-if="!isFieldValidated"
+                    class="hint row gy-0 pt-0"
+                >
+                    {{ $t("additional:modules.tools.cosi.districtFinder.errors.relativErr") }}
                 </div>
                 <div
                     v-if="typeof selectedDataset !== 'undefined'"
@@ -612,6 +644,18 @@ h4 {
         font-family: $font_family_accent;
         color: $primary;
     }
+}
+
+.invalid {
+    border: 0;
+    outline: 0;
+    box-shadow: inset 0 1px 2px rgba(225, 0, 25, 0.075), 0 0 0 0.25rem rgba(225, 0, 25, 0.25);
+}
+
+.hint {
+    display: block;
+    color: #e10019;
+    margin-top: 30px;
 }
 
 </style>

@@ -152,6 +152,29 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
     });
 
     describe("Methods", () => {
+        describe("checkInRange", () => {
+            it("should return true if the type is not relative", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkInRange()).to.be.true;
+                expect(wrapper.vm.checkInRange("absolute")).to.be.true;
+            });
+
+            it("should return true if the value is in range", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkInRange("relative", 0)).to.be.true;
+                expect(wrapper.vm.checkInRange("relative", 100)).to.be.true;
+                expect(wrapper.vm.checkInRange("relative", 50)).to.be.true;
+            });
+
+            it("should return false if the value is not in range", () => {
+                const wrapper = factory.getShallowMount();
+
+                expect(wrapper.vm.checkInRange("relative", -10)).to.be.false;
+                expect(wrapper.vm.checkInRange("relative", 150)).to.be.false;
+            });
+        });
 
         describe("comparisonFunction", () => {
 

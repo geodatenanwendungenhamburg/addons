@@ -1,11 +1,96 @@
 <script>
-import {mapActions} from "vuex";
+import isNumber from "../../../../src/utils/isNumber";
+import isObject from "../../../../src/utils/isObject";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
     name: "DistrictFinderFilterImport",
     emits: ["setConditionDate", "setConditionTitle", "setCardList"],
+    computed: {
+        ...mapGetters("Tools/DistrictSelector", ["mapping"])
+    },
     methods: {
         ...mapActions("Alerting", ["addSingleAlert"]),
+
+        /**
+         * Checks if the value is in right number format
+         * @param {Object[]} data - data in content.
+         * @returns {Boolean} true if the value is in right format
+         */
+        checkNumberOfValue (data) {
+            if (!Array.isArray(data) || !data.length) {
+                return false;
+            }
+
+            let valid = true;
+
+            data.forEach(element => {
+                if (!isObject(element)) {
+                    valid = false;
+                    return;
+                }
+
+                if (!Object.prototype.hasOwnProperty.call(element, "referenceValue")) {
+                    const attribute = "referenceValue";
+
+                    this.addSingleAlert({
+                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.attErr", {attribute})}`,
+                        category: "Warning",
+                        displayClass: "warning"
+                    });
+                    valid = false;
+                    return;
+                }
+
+                if (!Object.prototype.hasOwnProperty.call(element, "ruleTolerance")) {
+                    const attribute = "ruleTolerance";
+
+                    this.addSingleAlert({
+                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.attErr", {attribute})}`,
+                        category: "Warning",
+                        displayClass: "warning"
+                    });
+                    valid = false;
+                    return;
+                }
+
+                if (!isNumber(element.referenceValue) || !isNumber(element.ruleTolerance)) {
+                    const id = element.id;
+
+                    this.addSingleAlert({
+                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.numErr", {id})}`,
+                        category: "Warning",
+                        displayClass: "warning"
+                    });
+                    valid = false;
+                    return;
+                }
+
+                const valueType = this.mapping.find(stats => stats.category === element.statisticCategory).valueType;
+
+                if (valueType === "relative" && (!this.isNumberInRange(element.referenceValue) || !this.isNumberInRange(element.ruleTolerance))) {
+                    const id = element.id;
+
+                    this.addSingleAlert({
+                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.relNumErr", {id})}`,
+                        category: "Warning",
+                        displayClass: "warning"
+                    });
+                    valid = false;
+                }
+            });
+
+            return valid;
+        },
+
+        /**
+         * Checks if the number is in a range.
+         * @param {Number} val - the checked number.
+         * @returns {Boolean} true if the value is in a range.
+         */
+        isNumberInRange (val) {
+            return Math.floor(parseFloat(val)) >= 0 && Math.floor(parseFloat(val)) <= 100;
+        },
 
         /**
          * Loading the data from files.
@@ -88,6 +173,9 @@ export default {
                     category: "Warning",
                     displayClass: "warning"
                 });
+                return;
+            }
+            if (!this.checkNumberOfValue(filter.data)) {
                 return;
             }
 
