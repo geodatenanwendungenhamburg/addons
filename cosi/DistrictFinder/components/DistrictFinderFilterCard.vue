@@ -215,7 +215,7 @@ export default {
         addChartData () {
             const sorted = this.sortedData(),
                 allData = sorted.map(data => data[this.selectedCategory]),
-                allLabels = sorted.map(label => label[this.keyOfAttrNameStats]);
+                allLabels = sorted.map(label => label[this.keyOfAttrNameForSelectedLayer]);
 
             this.chartConfig.data = Object.assign({}, this.chartConfig.data, {labels: allLabels, datasets: [{...this.chartOptions, data: allData}]});
         },
@@ -327,8 +327,7 @@ export default {
          * @return {Object} an Object of all sorted data and labels.
          */
         sortedData () {
-            const featureProperties = this.features.map(val => val.properties),
-                sortedFeatures = this.selectedDistrictNames.length !== 0 ? featureProperties.filter(e => this.selectedDistrictNames.includes(e[this.keyOfAttrNameStats])) : featureProperties;
+            const sortedFeatures = this.featuresToUse.map(feature => feature.properties);
 
             sortedFeatures.forEach(v => {
                 v[this.selectedCategory] = v[this.selectedCategory] || 0;
