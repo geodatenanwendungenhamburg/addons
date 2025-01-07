@@ -254,6 +254,22 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                 expect(wrapper.vm.selectedFilter).to.equal("=");
                 expect(wrapper.vm.tolerance).to.be.undefined;
             });
+            it("should set a latest year if 'latestYear' is true", async () => {
+                const spyUpdateSelectedCategory = sinon.spy(DistrictFinderFilterCard.methods, "updateSelectedCategory"),
+                    wrapper = factory.getShallowMount();
+
+                await wrapper.setProps({
+                    changeToLatestYear: true
+                });
+
+                wrapper.vm.setConditionAttributes({year: "2025", referenceValue: "100"});
+
+                wrapper.vm.$nextTick();
+                wrapper.vm.$nextTick();
+
+                expect(spyUpdateSelectedCategory.calledOnce).to.be.true;
+                sinon.restore();
+            });
         })
 
         describe("sortedData", () => {

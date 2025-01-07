@@ -5,7 +5,12 @@ import {mapActions, mapGetters} from "vuex";
 
 export default {
     name: "DistrictFinderFilterImport",
-    emits: ["setConditionDate", "setConditionTitle", "setCardList"],
+    emits: ["setConditionDate", "setConditionTitle", "setCardList", "setLatestYear"],
+    data () {
+        return {
+            latestData: false
+        };
+    },
     computed: {
         ...mapGetters("Tools/DistrictSelector", ["mapping"])
     },
@@ -179,6 +184,7 @@ export default {
                 return;
             }
 
+            this.$emit("setLatestYear", this.latestData);
             this.$emit("setConditionDate", filter.meta.date);
             this.$emit("setConditionTitle", filter.meta.name);
             this.$emit("setCardList", filter.data);
@@ -190,30 +196,70 @@ export default {
          */
         triggerFileInput () {
             this.$el.querySelector("#file-input").click();
+            this.$el.querySelector("#district-finder-import").classList.remove("show");
         }
     }
 };
 </script>
 
 <template lang="html">
-    <div id="district-finder-import">
+    <div
+        id="district-finder-import"
+        class="dropdown"
+    >
         <button
-            class="btn btn-outline lh-1 fs-5 mb-3"
-            @click="triggerFileInput"
+            class="dropdown-toggle btn btn-outline lh-1 fs-5 mb-3"
+            dropdown-toggle
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            data-bs-auto-close="outside"
         >
             <i class="bi bi-upload pe-2" />
-            {{ $t("additional:modules.tools.cosi.districtFinder.button.import") }}
+            {{ $t("additional:modules.tools.cosi.districtFinder.button.importConditions") }}
         </button>
-        <form ref="form">
-            <label for="file-input">
+        <div
+            id="district-finder-import"
+            class="dropdown-menu p-3 rounded"
+        >
+            <h5 class="mt-0 mb-0">
+                {{ $t("additional:modules.tools.cosi.districtFinder.button.importConditions") }}
+            </h5>
+            <form ref="form">
+                <label for="file-input">
+                    <input
+                        id="file-input"
+                        type="file"
+                        class="d-none"
+                        @change="loadFiles"
+                    >
+                </label>
+            </form>
+            <p class="pt-0 pb-2">
+                {{ $t("additional:modules.tools.cosi.districtFinder.importLatestData") }}
+            </p>
+            <div class="mb-3 form-check">
                 <input
-                    id="file-input"
-                    type="file"
-                    class="d-none"
-                    @change="loadFiles"
+                    id="import-latest-data"
+                    v-model="latestData"
+                    type="checkbox"
+                    class="form-check-input"
                 >
-            </label>
-        </form>
+                <label
+                    class="form-check-label"
+                    for="import-latest-data"
+                >
+                    {{ $t("additional:modules.tools.cosi.districtFinder.label.latestData") }}
+                </label>
+            </div>
+            <button
+                class="btn btn-primary lh-1 fs-5"
+                @click="triggerFileInput"
+            >
+                <i class="bi bi-upload pe-2" />
+                {{ $t("additional:modules.tools.cosi.districtFinder.button.import") }}
+            </button>
+        </div>
     </div>
 </template>
 
@@ -222,6 +268,7 @@ export default {
 
     #district-finder-import {
         font-family: $font_family_default;
+        width: 450px;
 
         .btn-outline {
             border-color: $light_blue;
@@ -232,10 +279,10 @@ export default {
             background-color: $light_blue;
             color: $white;
        }
+       h5 {
+            font-family: $font_family_accent;
+        }
 
-       form {
-            height: 0;
-       }
     }
 
 </style>

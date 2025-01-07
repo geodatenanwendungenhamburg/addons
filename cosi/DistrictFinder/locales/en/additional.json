@@ -22,6 +22,8 @@
                         "less": "less than",
                         "greater": "greater than"
                     },
+                    "importLatestData": "Actuality of the datasets.",
+                    "changeToLatestYear": "A newer data set was found and is being used.",
                     "label": {
                         "year": "Year",
                         "dataset": "Dataset",
@@ -35,12 +37,14 @@
                         "exportName": "Name",
                         "exportAreas": "with selected areas",
                         "valueType_absolute": "absolute",
-                        "valueType_relative": "relative"
+                        "valueType_relative": "relative",
+                        "latestData": "For all conditions, use the data from the most recent year available."
                     },
                     "button": {
                         "addCondition": "Add condition",
                         "confirm": "Confirm districts",
-                        "import": "Import conditions",
+                        "importConditions": "Import conditions",
+                        "import": "Import",
                         "showMore": "....show more",
                         "showLess": "....show less",
                         "export": "Export"

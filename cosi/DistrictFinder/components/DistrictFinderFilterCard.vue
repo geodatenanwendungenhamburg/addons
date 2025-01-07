@@ -23,6 +23,11 @@ export default {
         condition: {
             type: Object,
             required: true
+        },
+        changeToLatestYear: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     emits: ["delete", "scanCompleted", "validateField"],
@@ -74,7 +79,8 @@ export default {
                 borderWidth: 0,
                 backgroundColor: "rgba(0, 48, 99, 0.8)",
                 hoverBackgroundColor: "rgba(220, 226, 243, 1)"
-            }
+            },
+            showHint: false
 
         };
     },
@@ -326,7 +332,7 @@ export default {
          * @param {Object} condition - The condition attributes
          * @returns {void}
          */
-        setConditionAttributes (condition) {
+        async setConditionAttributes (condition) {
             if (Object.prototype.hasOwnProperty.call(condition, "referenceValue")) {
                 this.referenceValue = condition.referenceValue;
             }
@@ -340,7 +346,10 @@ export default {
                 this.selectedCategory = condition.statisticCategory;
             }
             if (Object.prototype.hasOwnProperty.call(condition, "year")) {
-                this.selectedYear = condition.year;
+                this.changeToLatestYear ? await this.updateSelectedCategory() : this.selectedYear = condition.year;
+                if (this.selectedYear !== condition.year) {
+                    this.showHint = true;
+                }
             }
         },
 
@@ -618,6 +627,13 @@ export default {
                         </div>
                     </div>
                 </div>
+                <v-snackbar
+                    v-model="showHint"
+                    class="hint"
+                    :timeout="5000"
+                >
+                    {{ $t("additional:modules.tools.cosi.districtFinder.changeToLatestYear") }}
+                </v-snackbar>
             </div>
         </template>
     </ContentCard>

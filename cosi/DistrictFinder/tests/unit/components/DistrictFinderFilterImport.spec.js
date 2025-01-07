@@ -257,6 +257,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                     wrapper = factory.getShallowMount();
 
                 wrapper.vm.parseFileContent(obj);
+                expect(wrapper.emitted()).to.have.property("setLatestYear");
                 expect(wrapper.emitted()).to.have.property("setConditionDate");
                 expect(wrapper.emitted()).to.have.property("setConditionTitle");
                 expect(wrapper.emitted()).to.have.property("setCardList");

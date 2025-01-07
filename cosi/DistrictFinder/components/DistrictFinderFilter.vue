@@ -35,7 +35,9 @@ export default {
             numberOfLimitedAreas: 20,
             resultList: false,
             showExportDialog: false,
-            showMoreAreas: false
+            showMoreAreas: false,
+            latestYear: false,
+            showHint: false
         };
     },
     computed: {
@@ -267,6 +269,14 @@ export default {
                 this.updateResultList(this.allDistricts, this.allOperators);
             });
         },
+        /**
+         * Sets if a newer dataset should be used or not.
+         * @param {Boolean} latest - True if a newer dataset should be used.
+         * @returns {void}
+         */
+        setLatestYear (latest) {
+            this.latestYear = latest;
+        },
 
         /**
          * Sets the date of the conditions.
@@ -332,6 +342,7 @@ export default {
             {{ $t("additional:modules.tools.cosi.districtFinder.newScreening") }}
         </h4>
         <DistrictFinderFilterImport
+            @setLatestYear="setLatestYear"
             @setCardList="setCardList"
             @setConditionDate="setConditionDate"
             @setConditionTitle="setConditionTitle"
@@ -390,6 +401,7 @@ export default {
                         :condition="card"
                         :card-number="index + 1"
                         :active="activeCardId === card.id"
+                        :change-to-latest-year="latestYear"
                         class="mx-4"
                         @delete="deleteCard"
                         @scanCompleted="setCardAttributes"

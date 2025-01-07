@@ -22,6 +22,8 @@
                         "less": "kleiner als",
                         "greater": "größer als"
                     },
+                    "importLatestData": "Aktualität der Datensätze",
+                    "changeToLatestYear": "Ein neuerer Datensatz wurde gefunden und wird verwendet.",
                     "label": {
                         "year": "Jahr",
                         "dataset": "Datensatz",
@@ -35,12 +37,14 @@
                         "exportName": "Name",
                         "exportAreas": "mit ausgewählten Gebieten",
                         "valueType_absolute": "absolut",
-                        "valueType_relative": "relativ"
+                        "valueType_relative": "relativ",
+                        "latestData": "Für alle Bedingungen die Daten aus dem aktuellsten verfügbaren Jahr verwenden."
                     },
                     "button": {
                         "addCondition": "Bedingung hinzufügen",
                         "confirm": "Gebiete übernehmen",
-                        "import": "Bedingungen importieren",
+                        "importConditions": "Bedingungen importieren",
+                        "import": "Importieren",
                         "showMore": "....mehr anzeigen",
                         "showLess": "....weniger anzeigen",
                         "export": "Exportieren"
