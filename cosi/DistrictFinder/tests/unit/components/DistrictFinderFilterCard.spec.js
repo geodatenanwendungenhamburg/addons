@@ -31,9 +31,14 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             namespaced: true,
                             mutations: {},
                             getters: {
+                                mapping: () => {}
+                            }
+                        },
+                        DistrictFinder: {
+                            namespaced: true,
+                            getters: {
                                 keyOfAttrNameStats: () => "stats",
-                                mapping: () => {},
-                                selectedDistrictNames: () => []
+                                selectedDistricts: () => []
                             }
                         }
                     }

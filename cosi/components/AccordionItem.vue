@@ -11,8 +11,9 @@ export default {
             required: true
         },
         icon: {
-            type: String,
-            required: true
+            type: [Boolean, String],
+            required: false,
+            default: false
         },
         isOpen: {
             type: Boolean,
@@ -42,7 +43,10 @@ export default {
                     aria-expanded="true"
                     :aria-controls="`#flush-collapse-${id}`"
                 >
-                    <i :class="`${icon} mt-1 me-3`" />
+                    <i
+                        v-if="icon"
+                        :class="`${icon} mt-1 me-3`"
+                    />
                     {{ title }}
                 </button>
             </div>

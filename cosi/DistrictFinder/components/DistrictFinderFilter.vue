@@ -42,7 +42,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictNames", "selectedDistrictLevelId"]),
+        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId", "selectedDistricts"]),
 
         /**
          * Gets the districts of all cards.
@@ -162,14 +162,14 @@ export default {
          * @returns {Object} the exported data
          */
         getExportedData (name, date, withAreas, conditionList) {
-            const selectedDistrictNames = withAreas ? this.selectedDistrictNames : [],
+            const selectedDistrictNames = withAreas ? this.selectedDistricts : [],
                 data = {
                     meta: {
                         name,
                         date
                     },
                     districtSelector: {
-                        selectedDistrictLevelId: this.selectedDistrictLevelId,
+                        selectedLevelId: this.selectedLevelId,
                         selectedDistrictNames
                     },
                     data: conditionList
@@ -350,7 +350,7 @@ export default {
          */
         updateResultList (districts, operators) {
             this.resultList = this.getResultList(districts, operators)
-                .filter(e => this.selectedDistrictNames.includes(e));
+                .filter(e => this.selectedDistricts.includes(e));
         }
     }
 };

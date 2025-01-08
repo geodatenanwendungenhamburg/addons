@@ -26,6 +26,7 @@
                     "importLatestData": "Aktualität der Datensätze",
                     "changeToLatestYear": "Ein neuerer Datensatz wurde gefunden und wird verwendet.",
                     "label": {
+                        "districtLevel": "Bezugsrahmen",
                         "year": "Jahr",
                         "dataset": "Datensatz",
                         "referenceValue": "Referenzwert",
@@ -57,6 +58,14 @@
                       "numErr": " Referenzwert oder Toleranz ist nicht im Zahlenformat unter Id {{id}}",
                       "relNumErr": " Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 unter Id {{id}} zulässig",
                       "relativErr": "Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 zulässig."
+                    },
+                    "selector": {
+                      "title": "Gebiete eingrenzen",
+                      "info": "Wählen Sie zuerst die gewünschte Bezugsebene aus, auf der das Screening erfolgen soll. Anschließend können Sie die Gebiete der Bezugsebene eingrenzen.",
+                      "subtitle": "{{selectedScreeningLevelLabel}} eingrenzen",
+                      "label": {
+                        "level": "Bezugsebene"
+                      }
                     }
                 }
             }

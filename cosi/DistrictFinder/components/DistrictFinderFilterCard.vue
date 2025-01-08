@@ -106,12 +106,10 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["referenceLineColor"]),
+        ...mapGetters("Tools/DistrictFinder", ["referenceLineColor", "selectedLevelId", "selectedDistricts"]),
         ...mapGetters("Tools/DistrictSelector", [
-            "keyOfAttrNameStats",
             "mapping",
-            "selectedDistrictLevel",
-            "selectedDistrictNames"
+            "districtLevels"
         ]),
 
         /**
@@ -119,9 +117,9 @@ export default {
          * @returns {Object[]} The statistical features.
          */
         featuresToUse () {
-            return this.selectedDistrictNames?.length
+            return this.selectedDistricts?.length
                 ? this.features.filter(
-                    feature => this.selectedDistrictNames.includes(feature?.properties?.[this.keyOfAttrNameForSelectedLayer]))
+                    feature => this.selectedDistricts.includes(feature?.properties?.[this.keyOfAttrNameForSelectedLayer]))
                 : this.features;
         },
 
@@ -164,6 +162,14 @@ export default {
                     this.selectedStatLayer?.id
                 )
             ];
+        },
+
+        /**
+         * Gets the key for the attribute "name" of the regional statistical data features.
+         * @returns {String} The name of the attribute.
+         */
+        keyOfAttrNameStats () {
+            return this.selectedDistrictLevel.stats.keyOfAttrName[0];
         },
 
         /*
@@ -211,6 +217,14 @@ export default {
         },
 
         /**
+         * Gets the districts level at which the screening is running.
+         * @returns {Object} The selected district level.
+         */
+        selectedDistrictLevel () {
+            return this.districtLevels.find(district => district.layerId === this.selectedLevelId);
+        },
+
+        /**
          * Returns the statistical layer matching the currently selected dataset.
          * @returns {Object} A layer object or undefined.
          */
@@ -249,6 +263,17 @@ export default {
                     }
                 }}}}}
             ));
+        },
+
+        /**
+         * Updates the condition and its chart whenever the district selection changes.
+         * @returns {void}
+         */
+        selectedDistricts () {
+            if (this.selectedDataset) {
+                this.updateYear();
+                this.addChartData();
+            }
         }
     },
     mounted () {

@@ -66,31 +66,18 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
             expect(accordionWrapper.exists()).to.be.true;
         });
 
-        it("should find district selector level component", () => {
+        it("should find district finder selector component", () => {
             const wrapper = factory.getShallowMount(),
-                districtSelectorLevelWrapper = wrapper.find("districtselectorlevel-stub");
+                districtSelectorLevelWrapper = wrapper.find("districtfinderselector-stub");
 
             expect(districtSelectorLevelWrapper.exists()).to.be.true;
         });
 
         it("should find district selector filter component", () => {
             const wrapper = factory.getShallowMount(),
-                districtSelectorFilterWrapper = wrapper.find("districtselectorfilter-stub");
+                districtSelectorFilterWrapper = wrapper.find("districtfinderfilter-stub");
 
             expect(districtSelectorFilterWrapper.exists()).to.be.true;
-        });
-    });
-
-    describe("Methods", () => {
-        describe("emitSelectedDistricts", () => {
-            it("should emit 'updateSelectedDistricts' correctly to root", () => {
-                const wrapper = factory.getShallowMount(),
-                    rootWrapper = createWrapper(wrapper.vm.$root);
-
-                wrapper.vm.emitSelectedDistricts(["Altona"]);
-                expect(rootWrapper.emitted()).to.have.property("updateSelectedDistricts");
-                expect(rootWrapper.emitted()["updateSelectedDistricts"][0]).to.deep.equal([["Altona"]]);
-            });
         });
     });
 });

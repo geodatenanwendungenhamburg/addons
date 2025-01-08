@@ -26,6 +26,7 @@
                     "importLatestData": "Actuality of the datasets.",
                     "changeToLatestYear": "A newer data set was found and is being used.",
                     "label": {
+                        "districtLevel": "Administrative Level",
                         "year": "Year",
                         "dataset": "Dataset",
                         "referenceValue": "Reference Value",
@@ -57,6 +58,14 @@
                       "numErr": " Reference Value or Tolerance is not in number format under Id {{id}}",
                       "relNumErr": " For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100 under Id {{id}}",
                       "relativErr": "For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100."
+                    },
+                    "selector": {
+                      "title": "Limit districts",
+                      "info": "First select the desired reference level on which the screening is to be performed. You can then limit the districts of the reference level.",
+                      "subtitle": "Limit {{selectedScreeningLevelLabel}}",
+                      "label": {
+                        "level": "Reference level"
+                      }
                     }
                   }
             }

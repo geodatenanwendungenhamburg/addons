@@ -10,6 +10,9 @@
  * @property {String} [name="additional:modules.tools.cosi.districtFinder.title"] - The name of the tool (config-param).
  * @property {Boolean} [renderToWindow=true] - Renders tool in a window if true, otherwise in the sidebar (config-param).
  * @property {Boolean} [resizableWindow=false] - If True, window is resizable (config-param).
+ * @property {Number} [numberOfSelectableLevels=2] - The number of possible selectable district levels. Starts at the lowest level.
+ * @property {String} [selectedLevelId=""] - The id of the selected level.
+ * @property {Object[]} [selectedDistricts=[]] - The districts on which the screening is executed.
  */
 const state = {
     active: false,
@@ -20,7 +23,9 @@ const state = {
     name: "additional:modules.tools.cosi.districtFinder.title",
     referenceLineColor: "rgba(255, 0, 0, 0.5)",
     renderToWindow: true,
-    resizableWindow: false
+    resizableWindow: false,
+    selectedLevelId: "",
+    selectedDistricts: []
 };
 
 export default state;

@@ -21,10 +21,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                             namespaced: true,
                             mutations: {
                                 setDistrictsByName: () => sinon.stub()
-                            },
+                            }
+                        },
+                        DistrictFinder: {
+                            namespaced: true,
                             getters: {
-                                selectedDistrictNames: () => ["Altona", "Bergedorf", "Harburg"],
-                                selectedDistrictLevelId: () => "Super Mario"
+                                selectedDistricts: () => ["Altona", "Bergedorf", "Harburg"],
+                                selectedLevelId: () => "Super Mario"
                             }
                         }
                     }
@@ -209,7 +212,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                             date: "01.01.1999"
                         },
                         districtSelector: {
-                            selectedDistrictLevelId: "Super Mario",
+                            selectedLevelId: "Super Mario",
                             selectedDistrictNames: []
                         },
                         data: []
@@ -228,7 +231,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                             date: "01.01.1999"
                         },
                         districtSelector: {
-                            selectedDistrictLevelId: "Super Mario",
+                            selectedLevelId: "Super Mario",
                             selectedDistrictNames: ["Altona", "Bergedorf", "Harburg"]
                         },
                         data: []
