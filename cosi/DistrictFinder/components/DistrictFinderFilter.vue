@@ -63,13 +63,13 @@ export default {
     watch: {
         /**
          * If no conditions exist, resultList is set to false.
+         * @param {Object[]} val - the card list.
          * @returns {void}
          */
-        cardList () {
-            if (this.cardList.length === 0) {
+        cardList (val) {
+            if (Array.isArray(val) && !val.length) {
                 this.resultList = false;
             }
-
         }
     },
 
@@ -218,6 +218,22 @@ export default {
         },
 
         /**
+         * Resets the cardList to original status.
+         * @returns {void}
+         */
+        resetToOrigin () {
+            this.cardList = [{
+                districts: [],
+                id: uniqueId("card-"),
+                operator: "",
+                rule: "=",
+                ruleTolerance: 0,
+                year: false
+            }];
+            this.resultList = false;
+        },
+
+        /**
          * Sets the values for the card.
          * @param {String} cardId - The id of the card.
          * @param {String[]} names - The Names of the district names.
@@ -358,6 +374,8 @@ export default {
                 aria="zurücksetzen"
                 :class-array="['btn-primary', 'me-3']"
                 icon="bi bi-x-circle"
+                :interaction="() => resetToOrigin()"
+                :disabled="resultList === false"
             />
             <div class="dropdown">
                 <IconButton
