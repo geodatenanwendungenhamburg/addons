@@ -8,6 +8,7 @@
                     "condition": "Bedingung",
                     "conditions": "Bedingungen",
                     "conditionsExport": "Bedingungen exportieren",
+                    "created": "erstellt: ",
                     "showDetails": "Details einblenden",
                     "hideDetails": "Details ausblenden",
                     "operators": {

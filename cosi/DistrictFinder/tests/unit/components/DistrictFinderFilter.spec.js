@@ -321,10 +321,27 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
         });
 
         describe("setConditionDate", () => {
+            it("should not set the date of the condition/card", async () => {
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setConditionDate(0);
+                expect(wrapper.vm.conditionDate).to.equal("");
+                wrapper.vm.setConditionDate(null);
+                expect(wrapper.vm.conditionDate).to.equal("");
+                wrapper.vm.setConditionDate(false);
+                expect(wrapper.vm.conditionDate).to.equal("");
+                wrapper.vm.setConditionDate(undefined);
+                expect(wrapper.vm.conditionDate).to.equal("");
+                wrapper.vm.setConditionDate({});
+                expect(wrapper.vm.conditionDate).to.equal("");
+                wrapper.vm.setConditionDate([]);
+                expect(wrapper.vm.conditionDate).to.equal("");
+            });
+
             it("should set the date of the condition/card", async () => {
                 const wrapper = factory.getShallowMount();
 
-                wrapper.vm.setConditionDate("01.01.1999");
+                wrapper.vm.setConditionDate("1999-01-01");
                 expect(wrapper.vm.conditionDate).to.equal("01.01.1999");
             });
         });

@@ -29,7 +29,7 @@ export default {
                 year: false
             }],
             copyValue: false,
-            conditionDate: "erstellt: 01.01.1999",
+            conditionDate: "",
             conditionTitle: this.$t("additional:modules.tools.cosi.districtFinder.conditions"),
             isFieldValidated: true,
             numberOfLimitedAreas: 20,
@@ -300,7 +300,11 @@ export default {
          * @returns {void}
          */
         setConditionDate (date) {
-            this.conditionDate = date;
+            if (typeof date !== "string") {
+                return;
+            }
+
+            this.conditionDate = dayjs(date).format("DD.MM.YYYY");
         },
 
         /**
@@ -367,7 +371,12 @@ export default {
             <h4 class="filter-title me-auto">
                 {{ conditionTitle }}
                 <br>
-                <span class="text-black-50 fs-6">{{ conditionDate }}</span>
+                <span
+                    v-if="conditionDate !== ''"
+                    class="text-black-50 fs-6"
+                >
+                    {{ $t("additional:modules.tools.cosi.districtFinder.created") }} {{ conditionDate }}
+                </span>
             </h4>
             <IconButton
                 id="reset-button"

@@ -8,6 +8,7 @@
                     "condition": "Condition",
                     "conditions": "Conditions",
                     "conditionsExport": "Export conditions",
+                    "created": "Created: ",
                     "showDetails": "Show details",
                     "hideDetails": "Hide details",
                     "operators": {
