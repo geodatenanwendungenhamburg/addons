@@ -26,33 +26,34 @@ import MappingJson from "../../assets/mapping.json";
  */
 const state = {
     active: false,
+    additionalInfoLayers: {},
+    boundingGeometry: undefined,
+    bufferValue: 0,
     deactivateGFI: true,
     districtLevels: [],
+    enableBuffer: true,
     extent: [],
-    boundingGeometry: undefined,
     icon: "bi-image",
     id: "districtSelector",
     isVisibleInMenu: true,
+    loadend: false,
+    mapping: null,
+    mappingPath: undefined,
+    mappingInit: MappingJson,
     name: "Gebiet auswählen",
+    readmeUrl: {
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018districtselector.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018gebietsauswahl.md"
+    },
+    remoteMetadata: {}, // after data is loaded, we also pull metadata remotely and store it here.
     renderToWindow: true,
     resizableWindow: false,
     selectedDistrictLevel: {},
     selectedDistrictLevelId: "",
     selectedDistrictsCollection: null,
     selectedDistrictNames: [],
-    additionalInfoLayers: {},
-    bufferValue: 0,
-    loadend: false,
-    mapping: null,
-    mappingPath: undefined,
-    mappingInit: MappingJson,
-    readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018districtselector.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018gebietsauswahl.md"
-    },
-    remoteMetadata: {}, // after data is loaded, we also pull metadata remotely and store it here.
-    toolToOpen: undefined,
-    enableBuffer: true
+    showSelectedWarning: true,
+    toolToOpen: undefined
 };
 
 export default state;

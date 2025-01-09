@@ -467,7 +467,9 @@ export default {
                 this.setBoundingGeometry(undefined);
                 setBBoxToGeom.call(this, this.areaSelectorGeom || undefined);
                 this.setFilterGeometry(this.areaSelectorGeom || false);
-                this.showAlert(this.$t("additional:modules.tools.cosi.districtSelector.warning"), "Warnung", "warning");
+                if (this.showSelectedWarning) {
+                    this.showAlert(this.$t("additional:modules.tools.cosi.districtSelector.warning"), "Warnung", "warning");
+                }
             }
         },
 
