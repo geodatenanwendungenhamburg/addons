@@ -1,6 +1,7 @@
 <script>
-import BarchartItem from "../../../../src/share-components/charts/components/BarchartItem.vue";
+import BarchartItemAnnotated from "../../components/BarchartItemAnnotated.vue";
 import ContentCard from "../../components/ContentCard.vue";
+import deepAssign from "../../../../src/utils/deepAssign";
 import DistrictFinderLoadingSpinner from "./DistrictFinderLoadingSpinner.vue";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
@@ -8,7 +9,7 @@ import {mapGetters} from "vuex";
 export default {
     name: "DistrictFinderFilterCard",
     components: {
-        BarchartItem,
+        BarchartItemAnnotated,
         ContentCard,
         DistrictFinderLoadingSpinner
     },
@@ -73,6 +74,23 @@ export default {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        annotation: {
+                            annotations: {
+                                referenceLine: {
+                                    type: "line",
+                                    scaleID: "y",
+                                    label: {},
+                                    enter ({element}) {
+                                        element.label.options.display = true;
+                                        return true;
+                                    },
+                                    leave ({element}) {
+                                        element.label.options.display = false;
+                                        return true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -88,6 +106,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
+        ...mapGetters("Tools/DistrictFinder", ["referenceLineColor"]),
         ...mapGetters("Tools/DistrictSelector", [
             "keyOfAttrNameStats",
             "mapping",
@@ -218,6 +237,18 @@ export default {
                 this.addChartData();
             },
             deep: true
+        },
+
+        referenceValue (val) {
+            this.chartConfig.options = Object.assign({}, deepAssign(this.chartConfig.options,
+                {plugins: {annotation: {annotations: {referenceLine: {
+                    borderColor: this.referenceLineColor,
+                    value: typeof val === "number" ? val : undefined,
+                    label: {
+                        content: this.$t("additional:modules.tools.cosi.districtFinder.label.referenceValue")
+                    }
+                }}}}}
+            ));
         }
     },
     mounted () {
@@ -509,7 +540,7 @@ export default {
                                 {{ $t('additional:modules.tools.cosi.districtFinder.label.referenceValue') }}
                             </v-label>
                             <v-text-field
-                                v-model="referenceValue"
+                                v-model.number="referenceValue"
                                 class="reference-filter"
                                 :class="!checkInRange(selectedDataset?.valueType, referenceValue) ? 'invalid' : ''"
                                 outlined
@@ -550,7 +581,7 @@ export default {
                                 {{ $t('additional:modules.tools.cosi.districtFinder.label.tolerance') }}
                             </v-label>
                             <v-text-field
-                                v-model="tolerance"
+                                v-model.number="tolerance"
                                 class="tolerance"
                                 :class="!checkInRange(selectedDataset?.valueType, tolerance) ? 'invalid' : ''"
                                 outlined
@@ -591,7 +622,7 @@ export default {
                             v-if="features.length"
                             class="chart-container"
                         >
-                            <BarchartItem
+                            <BarchartItemAnnotated
                                 :given-options="chartConfig.options"
                                 :data="chartConfig.data"
                             />
