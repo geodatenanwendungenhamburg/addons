@@ -13,6 +13,7 @@
  * @property {Number} [numberOfSelectableLevels=2] - The number of possible selectable district levels. Starts at the lowest level.
  * @property {String} [selectedLevelId=""] - The id of the selected level.
  * @property {Object[]} [selectedDistricts=[]] - The districts on which the screening is executed.
+ * @property {Object} [chartColors= conditionFalse: "rgb(220, 226, 243, 1)", conditionTrue: "rgb(0, 67, 122, 1)"] - Colors for the diagram depending on whether a condition is true or false
  */
 const state = {
     active: false,
@@ -25,7 +26,11 @@ const state = {
     renderToWindow: true,
     resizableWindow: false,
     selectedLevelId: "",
-    selectedDistricts: []
+    selectedDistricts: [],
+    chartColors: {
+        conditionFalse: "rgb(220, 226, 243, 1)",
+        conditionTrue: "rgb(0, 67, 122, 1)"
+    }
 };
 
 export default state;

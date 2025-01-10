@@ -38,7 +38,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             namespaced: true,
                             getters: {
                                 keyOfAttrNameStats: () => "stats",
-                                selectedDistricts: () => []
+                                selectedDistricts: () => [],
+                                chartColors: () => ({conditionFalse: "rgb(255, 255, 255, 1)", conditionTrue: "rgb(255, 0, 0, 1)"})
                             }
                         }
                     }
@@ -294,10 +295,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
         describe("sortedData", () => {
             it("return sorted data for chart", async () => {
                 const wrapper = factory.getShallowMount(),
-                expectedSorting = [{"category": 200, "stats": "Gebiet3"},  {"category": 1000, "stats": "Gebiet2"}, {"category": 2000, "stats": "Gebiet1"}];
+                expectedSorting = [{"category": 200, "stadtteil": "Gebiet3"},  {"category": 1000, "stadtteil": "Gebiet2"}, {"category": 2000, "stadtteil": "Gebiet1"}];
 
             await wrapper.setData({
-                    features: [{properties: {"category": 2000, "stats": "Gebiet1"}}, {properties: {"category": 1000, "stats": "Gebiet2"}}, {properties: {"category": 200, "stats": "Gebiet3"}}],
+                    features: [{properties: {"category": 2000, "stadtteil": "Gebiet1"}}, {properties: {"category": 1000, "stadtteil": "Gebiet2"}}, {properties: {"category": 200, "stadtteil": "Gebiet3"}}],
                     selectedCategory: "category"
             });
             wrapper.vm.$nextTick();
@@ -305,5 +306,24 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
             expect(wrapper.vm.sortedData()).to.deep.equal(expectedSorting);
             });
         });
+        describe("getChartColors", () => {
+            it("returns an array with colors for conditions that match", async () => {
+
+               sinon.stub(DistrictFinderFilterCard.methods, "sortedData").returns([{"category": 200, "stadtteil": "Altona"}, {"category": 1000, "stadtteil": "Bahrenfeld"}, {"category": 2000, "stadtteil": "Curslack"}]);
+                const wrapper = factory.getShallowMount(),
+                expectedColors = ["rgb(255, 0, 0, 1)", "rgb(255, 0, 0, 1)", "rgb(255, 255, 255, 1)"];
+
+            await wrapper.setData({
+                resultNames: ["Altona", "Bahrenfeld"],
+                referenceValue: 10000
+            });
+
+            wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.getChartColors("stadtteil")).to.deep.equal(expectedColors);
+            sinon.restore();
+            });
+        });
+
     });
 });

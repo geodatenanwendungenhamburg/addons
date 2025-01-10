@@ -41,6 +41,7 @@ export default {
             expandDataInfo: true,
             features: [],
             isLoading: false,
+            resultNames: [],
             referenceValue: undefined,
             selectedCategory: null,
             selectedData: "statistische Daten",
@@ -99,14 +100,13 @@ export default {
                 barPercentage: 1.0,
                 categoryPercentage: 1.0,
                 borderWidth: 0,
-                backgroundColor: "rgba(0, 48, 99, 0.8)",
                 hoverBackgroundColor: "rgba(220, 226, 243, 1)"
             }
         };
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["referenceLineColor", "selectedLevelId", "selectedDistricts"]),
+        ...mapGetters("Tools/DistrictFinder", ["chartColors", "referenceLineColor", "selectedLevelId", "selectedDistricts"]),
         ...mapGetters("Tools/DistrictSelector", [
             "mapping",
             "districtLevels"
@@ -252,7 +252,6 @@ export default {
             },
             deep: true
         },
-
         referenceValue (val) {
             this.chartConfig.options = Object.assign({}, deepAssign(this.chartConfig.options,
                 {plugins: {annotation: {annotations: {referenceLine: {
@@ -264,24 +263,30 @@ export default {
                 }}}}}
             ));
         },
-
-        /**
+        resultNames: {
+            handler () {
+                this.addChartData();
+            },
+            deep: true
+        }
+    },
+    /**
          * Updates the condition and its chart whenever the district selection changes.
          * @returns {void}
          */
-        selectedDistricts () {
-            if (this.selectedDataset) {
-                this.updateYear();
-                this.addChartData();
-            }
+    selectedDistricts () {
+        if (this.selectedDataset) {
+            this.updateYear();
+            this.addChartData();
         }
     },
+
     mounted () {
         this.setConditionAttributes(this.condition);
     },
     methods: {
         /**
-         * Adds data and labels to the chart options.
+         * Adds data, labels and colors to the chart options.
           * @returns {void}
          */
         addChartData () {
@@ -289,7 +294,7 @@ export default {
                 allData = sorted.map(data => data[this.selectedCategory]),
                 allLabels = sorted.map(label => label[this.keyOfAttrNameForSelectedLayer]);
 
-            this.chartConfig.data = Object.assign({}, this.chartConfig.data, {labels: allLabels, datasets: [{...this.chartOptions, data: allData}]});
+            this.chartConfig.data = Object.assign({}, this.chartConfig.data, {labels: allLabels, datasets: [{...this.chartOptions, data: allData, backgroundColor: this.getChartColors(this.keyOfAttrNameForSelectedLayer)}]});
         },
 
         /**
@@ -356,6 +361,24 @@ export default {
             });
 
             return features;
+        },
+        /**
+         * Gets the chart colors depending on whether the condition is true or not.
+         * @param {String} key The key to be used for the district name.
+         * @returns {String[]} An array of the chart colors.
+         */
+        getChartColors (key) {
+            colorValues = [];
+
+            this.sortedData().forEach(district => {
+                if (typeof this.referenceValue !== "string") {
+                    this.resultNames?.includes(district[key]) ? colorValues.push(this.chartColors.conditionTrue) : colorValues.push(this.chartColors.conditionFalse);
+                }
+                else {
+                    colorValues.push(this.chartColors.conditionFalse);
+                }
+            });
+            return colorValues;
         },
 
         /**
@@ -435,11 +458,11 @@ export default {
          * @emits validateField - passing if the field is validated.
          */
         updateResults () {
-            const resultNames = this.features
+            this.resultNames = this.features
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
                 .map(f => f.properties[this.keyOfAttrNameForSelectedLayer]);
 
-            this.$emit("scanCompleted", this.condition.id, resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
+            this.$emit("scanCompleted", this.condition.id, this.resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
             this.$emit("validateField", this.isFieldValidated);
             this.isLoading = false;
         },
