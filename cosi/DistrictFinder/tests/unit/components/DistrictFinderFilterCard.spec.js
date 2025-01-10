@@ -276,7 +276,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                     changeToLatestYear: true
                 });
 
-                wrapper.vm.setConditionAttributes({year: "2025", referenceValue: "100"});
+                wrapper.vm.setConditionAttributes({year: "2025", statisticCategory: "Kategorie"});
 
                 wrapper.vm.$nextTick();
                 wrapper.vm.$nextTick();

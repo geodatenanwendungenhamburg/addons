@@ -161,7 +161,7 @@ export default {
         keyOfAttrNameForSelectedLayer () {
             return this.selectedDistrictLevel.stats.keyOfAttrName[
                 this.selectedDistrictLevel.stats.layerIds.indexOf(
-                    this.selectedStatLayer.id
+                    this.selectedStatLayer?.id
                 )
             ];
         },
@@ -377,11 +377,15 @@ export default {
             }
             if (Object.prototype.hasOwnProperty.call(condition, "statisticCategory")) {
                 this.selectedCategory = condition.statisticCategory;
+                await this.updateSelectedCategory();
             }
             if (Object.prototype.hasOwnProperty.call(condition, "year")) {
-                this.changeToLatestYear ? await this.updateSelectedCategory() : this.selectedYear = condition.year;
-                if (this.selectedYear !== condition.year) {
-                    this.showHint = true;
+                if (this.changeToLatestYear) {
+                    this.showHint = this.selectedYear !== condition.year;
+                }
+                else if (this.selectedYear !== condition.year) {
+                    this.selectedYear = condition.year;
+                    this.updateYear();
                 }
             }
         },
