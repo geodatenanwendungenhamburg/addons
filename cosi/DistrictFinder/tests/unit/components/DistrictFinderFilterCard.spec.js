@@ -63,11 +63,25 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
         };
 
     describe("Component DOM", () => {
-
         it("exists", () => {
             const wrapper = factory.getShallowMount();
 
             expect(wrapper.exists()).to.be.true;
+        });
+
+        it("should not find component DistrictFinderLoadingSpinner", () => {
+            const wrapper = factory.getShallowMount();
+
+            expect(wrapper.findComponent({name: "DistrictFinderLoadingSpinner"}).exists()).to.be.false;
+        });
+
+        it("should find component DistrictFinderLoadingSpinner", async () => {
+            const wrapper = factory.getShallowMount();
+
+            wrapper.setData({ isLoading: true })
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.findComponent({name: "DistrictFinderLoadingSpinner"}).exists()).to.be.true;
         });
     });
 
