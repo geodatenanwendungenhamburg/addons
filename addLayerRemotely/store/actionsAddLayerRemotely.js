@@ -1,6 +1,7 @@
 import {getFeatureIds, returnGeoJSONLayerObject} from "../js/addGeoJsonRemotely";
 import importLayers from "../js/addWMSRemotely";
 import styleList from "@masterportal/masterportalapi/src/vectorStyle/styleList";
+import store from "../../../src/app-store";
 
 export default {
     /**
@@ -17,7 +18,7 @@ export default {
      * @param {String} mouseHoverField name of the field to be shown on mouse hover
      * @returns {void}
      */
-    addGeoJson ({rootState}, {name, id, geoJSON, styleId, folderName, gfiAttributes, zoomTo = true, clusterDistance = undefined, gfiTheme = "default", mouseHoverField = undefined}) {
+    addGeoJson ({rootState, rootGetters}, {name, id, geoJSON, styleId, folderName, gfiAttributes, zoomTo = true, clusterDistance = undefined, gfiTheme = "default", mouseHoverField = undefined}) {
         const treeType = Radio.request("Parser", "getTreeType"),
             map = mapCollection.getMap("2D"),
             layer = map ? map.getLayers().getArray().find(l => {
@@ -28,7 +29,16 @@ export default {
 
         if (!layer) {
             if (geoJSON?.styles) {
-                styleList.addToStyleList(geoJSON.styles);
+                if (rootGetters?.styleListLoaded) {
+                    styleList.addToStyleList(geoJSON.styles);
+                }
+                else {
+                    store.watch(() => rootGetters?.styleListLoaded, value => {
+                        if (value) {
+                            styleList.addToStyleList(geoJSON.styles);
+                        }
+                    });
+                }
             }
         }
         else {

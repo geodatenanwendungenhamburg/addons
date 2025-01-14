@@ -13,9 +13,9 @@ const apiEndpointService = {
      */
     async receiveActivities (locationId, date = null, dateTo = null) {
         const
-            url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/daily-aggregated/`,
+            url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/daily_aggregated/`,
             query = {
-                "location_id": locationId,
+                "zone_id": locationId,
                 "group_by[date]": null,
                 "aggregate[Sum]": "num_visitors",
                 "transportation": "pedestrian",
@@ -46,8 +46,7 @@ const apiEndpointService = {
         const
             url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/dwell-times/`,
             query = {
-                "location_id": locationId,
-                "group_by[date]": null,
+                "zone_id": locationId,
                 "group_by[DwellTime]": null,
                 "aggregate[Sum]": "num_visitors",
                 "format": "agg",
@@ -74,8 +73,7 @@ const apiEndpointService = {
         const
             url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/ages/`,
             query = {
-                "location_id": locationId,
-                "group_by[date]": null,
+                "zone_id": locationId,
                 "group_by[age_group]": null,
                 "aggregate[Sum]": "num_visitors",
                 "format": "agg",
@@ -102,8 +100,7 @@ const apiEndpointService = {
         const
             url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/visitor-types/`,
             query = {
-                "location_id": locationId,
-                "group_by[date]": null,
+                "zone_id": locationId,
                 "group_by[VisitorType]": null,
                 "aggregate[Sum]": "num_visitors",
                 "format": "agg",
@@ -131,7 +128,7 @@ const apiEndpointService = {
         const
             url = `${Config.whatalocationApi.host}${Config.whatalocationApi.basepath}/daily/`,
             query = {
-                "location_id": locationId,
+                "zone_id": locationId,
                 "group_by[date__hour]": null,
                 "aggregate[Sum]": "num_visitors",
                 "ReiseArt__in": "eingehend,ausgehend",

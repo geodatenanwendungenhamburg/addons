@@ -22,7 +22,8 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = {};
+            result = {},
+            currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -67,6 +68,24 @@ const mutations = {
             });
         });
 
+        // check if already data for current year available, otherwise add an empty dataset
+        if (!result[currentYear]) {
+            result[currentYear] = [
+                {index: "0", avg: "n/a", sum: "n/a"},
+                {index: "1", avg: "n/a", sum: "n/a"},
+                {index: "2", avg: "n/a", sum: "n/a"},
+                {index: "3", avg: "n/a", sum: "n/a"},
+                {index: "4", avg: "n/a", sum: "n/a"},
+                {index: "5", avg: "n/a", sum: "n/a"},
+                {index: "6", avg: "n/a", sum: "n/a"},
+                {index: "7", avg: "n/a", sum: "n/a"},
+                {index: "8", avg: "n/a", sum: "n/a"},
+                {index: "9", avg: "n/a", sum: "n/a"},
+                {index: "10", avg: "n/a", sum: "n/a"},
+                {index: "11", avg: "n/a", sum: "n/a"}
+            ];
+        }
+
         state.sumVisitorsPerMonth = result;
     },
     /**
@@ -79,7 +98,8 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = {};
+            result = {},
+            currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -108,6 +128,13 @@ const mutations = {
             aggregated[year][month][label].totalNumberOfWeekdaysInMonthsOverYears++;
 
         });
+
+        // check if already data for current year available, otherwise add an empty dataset
+        if (!aggregated[currentYear]) {
+            aggregated[currentYear] = [
+                [], [], [], [], [], [], [], [], [], [], [], []
+            ];
+        }
 
         // Ceil up to 100, e.g. 18318 becomes 18400
         Object.keys(aggregated).forEach(year => {
@@ -156,7 +183,8 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = [];
+            result = [],
+            currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -170,11 +198,16 @@ const mutations = {
             aggregated[label] += item.sum_num_visitors;
         });
 
+        // check if already data for current year available, otherwise add an empty dataset
+        if (!aggregated[currentYear]) {
+            aggregated[currentYear] = null;
+        }
+
         // Ceil up to 100, e.g. 18318 becomes 18400
         Object.keys(aggregated).forEach(key => {
             result.push({
                 date__year: key,
-                avg: Math.ceil(aggregated[key] / 100) * 100
+                avg: aggregated[key] ? Math.ceil(aggregated[key] / 100) * 100 : "n/a"
             });
         });
 
@@ -207,7 +240,8 @@ const mutations = {
             featureJSON = {
                 type: "Feature",
                 id: feature.location.id,
-                geometry: feature.location.point,
+                // /// geometry: feature.location.point,
+                geometry: feature.location.polygon,
                 properties: {
                     street: feature.location.street,
                     id: feature.location.id
@@ -251,17 +285,19 @@ const mutations = {
                 rules: [
                     {
                         style: {
-                            circleStrokeColor: [
+                            // ///circleStrokeColor: [
+                            polygonStrokeColor: [
                                 255,
                                 0,
                                 0,
                                 1
                             ],
-                            circleFillColor: [
+                            // ///circleFillColor: [
+                            polygonFillColor: [
                                 255,
                                 0,
                                 0,
-                                0.5
+                                0.2
                             ]
                         }
                     }

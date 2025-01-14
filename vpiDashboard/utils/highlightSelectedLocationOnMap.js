@@ -1,4 +1,4 @@
-import {Circle, Fill, Stroke, Style} from "ol/style.js";
+import {Fill, Stroke, Style} from "ol/style.js";
 
 /**
  * Selects the current location and deselects the previous selected location on the map
@@ -21,31 +21,23 @@ export function highlightSelectedLocationOnMap (newLocationID, oldLocationID) {
         if (oldLocationID && oldLocationID !== "clear") {
             if (feat.getId().toString() === oldLocationID) {
                 feat.setStyle(new Style({
-                    image: new Circle({
-                        radius: 10,
-                        fill: new Fill({color: [255, 0, 0, 0.5]}),
-                        stroke: new Stroke({color: "#fa0505", width: 2})
-                    })
+                    stroke: new Stroke({color: "#fa0505", width: 1}),
+                    fill: new Fill({color: [255, 0, 0, 0.2]})
                 }));
             }
         }
         else if (oldLocationID === "clear") {
             feat.setStyle(new Style({
-                image: new Circle({
-                    radius: 10,
-                    fill: new Fill({color: [255, 0, 0, 0.5]}),
-                    stroke: new Stroke({color: "#fa0505", width: 2})
-                })
+                fill: new Fill({color: [255, 0, 0, 0.2]}),
+                stroke: new Stroke({color: "#fa0505", width: 1})
             }));
+
         }
 
         if (newLocationID && feat.getId().toString() === newLocationID) {
             feat.setStyle(new Style({
-                image: new Circle({
-                    radius: 12,
-                    fill: new Fill({color: [255, 0, 0, 0.5]}),
-                    stroke: new Stroke({color: [0, 240, 230], width: 5})
-                })
+                fill: new Fill({color: [0, 240, 230, 0.5]}),
+                stroke: new Stroke({color: [0, 240, 230], width: 2})
             }));
         }
     });

@@ -88,6 +88,12 @@ export default {
          * @returns {void}  -
          */
         resetChart (data) {
+            // getChartJsOptions does not allow to overwrite scales
+            // this workaround allows to overwrite the scales completely
+            if (this.givenScales) {
+                this.defaultOptions.scales = this.givenScales;
+            }
+
             const ctx = this.$el.getContext("2d"),
                 config = {
                     type: "bar",

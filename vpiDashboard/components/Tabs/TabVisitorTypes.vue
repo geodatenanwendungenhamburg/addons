@@ -159,17 +159,17 @@ export default {
                             <BarchartItem
                                 :data="chartdata.bar"
                                 :given-scales="{
-                                    xAxes: [{
+                                    x: {
                                         stacked: true
-                                    }],
-                                    yAxes: [{
+                                    },
+                                    y: {
                                         stacked: true,
                                         ticks: {
                                             callback: function(value, index, values) {
                                                 return value.toLocaleString(currentLocale);
                                             }
                                         }
-                                    }]
+                                    }
                                 }"
                                 :given-options="{
                                     animation: false
