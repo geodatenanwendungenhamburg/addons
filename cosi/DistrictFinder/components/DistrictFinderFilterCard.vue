@@ -357,7 +357,7 @@ export default {
                 crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 propertyNames: propertyNames,
                 skipGeometry: true,
-                literalFilters: {datetime: `${year}-01-01/${year}-12-31`}
+                literalFilters: {jahr: `${year}`}
             });
 
             return features;
