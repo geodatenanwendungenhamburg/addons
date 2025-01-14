@@ -63,6 +63,14 @@ export default {
     },
 
     mounted () {
+        if (this.selectedDistrictNamesByMap.length) {
+            this.districtLevels.forEach(level => {
+                level.selectedValues = [];
+            });
+            this.addSelectedValues(this.selectedDistrictNamesByMap,
+                this.levelsForFilter.find(level => level.layerId === this.selectedLevelId));
+            this.forceRerender();
+        }
         /**
          * A small hack to make sure that all features of the lowest level
          * are loaded and processed so that the filter can be set up correctly.

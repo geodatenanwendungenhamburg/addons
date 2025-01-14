@@ -5,7 +5,7 @@ import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 import IconButton from "../../components/IconButton.vue";
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
 
 export default {
@@ -75,6 +75,7 @@ export default {
 
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
+        ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
          * Adds a new card to the list of cards.
@@ -320,7 +321,9 @@ export default {
          * Sets the currently found districts as selected districts.
          * @returns {void}
          */
-        setDistricts () {
+        async setDistricts () {
+            this.setSelectedDistrictLevelId(this.selectedLevelId);
+            await this.$nextTick();
             this.setDistrictsByName({districtNames: this.resultList});
         },
 
