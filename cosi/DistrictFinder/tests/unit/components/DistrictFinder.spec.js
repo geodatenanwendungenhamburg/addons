@@ -23,15 +23,14 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                                 active: () => true,
                                 icon: () => "small",
                                 renderToWindow: () => false,
-                                resizableWindow: () => false
+                                resizableWindow: () => false,
+                                selectedDistricts: () => []
                             }
                         },
                         DistrictSelector: {
                             namespaced: true,
                             getters: {
-                                districtLevels: () => [],
-                                selectedDistrictLevelId: () => "123",
-                                selectedDistrictNames: () => ["Altona", "Bergedorf", "Harburg"]
+                                districtLevels: () => []
                             }
                         }
                     }

@@ -73,6 +73,7 @@ export default {
                 <AccordionItem
                     id="district-selection"
                     :title="$t('additional:modules.tools.cosi.districtFinder.selector.title')"
+                    :title-badge="selectedDistricts.length"
                 >
                     <DistrictFinderSelector />
                 </AccordionItem>
