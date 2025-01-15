@@ -232,6 +232,9 @@ export default {
                 year: false
             }];
             this.resultList = false;
+            this.conditionTitle = this.$t("additional:modules.tools.cosi.districtFinder.conditions");
+            this.conditionDate = "";
+            this.setLatestYear(false);
         },
 
         /**
