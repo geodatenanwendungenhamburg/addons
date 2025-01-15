@@ -222,7 +222,9 @@ export default {
          * Resets the cardList to original status.
          * @returns {void}
          */
-        resetToOrigin () {
+        async resetToOrigin () {
+            this.resetCardList();
+            await this.$nextTick();
             this.cardList = [{
                 districts: [],
                 id: uniqueId("card-"),
