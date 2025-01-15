@@ -4,6 +4,8 @@ import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
+import {Fill, Style} from "ol/style.js";
+import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
@@ -21,7 +23,9 @@ export default {
         return {
             activeCardId: "",
             copyValue: false,
+            features: [],
             isFieldValidated: true,
+            keyOfAttrNameForSelectedLayer: "",
             numberOfLimitedAreas: 20,
             resultList: false,
             showExportDialog: false,
@@ -32,7 +36,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["cardList", "conditionDate", "conditionTitle", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["cardList", "conditionDate", "conditionTitle", "filteredLayer", "mapColors", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
 
         /**
          * Gets the districts of all cards.
@@ -80,10 +84,16 @@ export default {
             this.setConditionTitle(this.$t("additional:modules.tools.cosi.districtFinder.conditions"));
         }
     },
-
+    async created () {
+        this.setFilteredLayer(await this.addNewLayerIfNotExists({layerName: "filteredLayer"}));
+    },
+    beforeDestroy () {
+        this.resetFilteredLayer();
+    },
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
-        ...mapMutations("Tools/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle"]),
+        ...mapActions("Maps", ["addNewLayerIfNotExists"]),
+        ...mapMutations("Tools/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle", "setFilteredLayer"]),
         ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
@@ -242,6 +252,7 @@ export default {
          * @returns {void}
          */
         async resetToOrigin () {
+            this.resetFilteredLayer();
             this.resetCardList();
             await this.$nextTick();
             this.addCard();
@@ -249,6 +260,16 @@ export default {
             this.setConditionTitle(this.$t("additional:modules.tools.cosi.districtFinder.conditions"));
             this.setConditionDate("");
             this.setLatestYear(false);
+        },
+
+        /**
+         * Resets the filtered layer.
+         * @returns {void}
+         */
+        resetFilteredLayer () {
+            if (typeof this.filteredLayer?.getSource() !== "undefined") {
+                this.filteredLayer.getSource().clear();
+            }
         },
 
         /**
@@ -287,7 +308,10 @@ export default {
 
             if (foundCard) {
                 foundCard.operator = operatorValue;
-                this.updateResultList(this.allDistricts, this.allOperators);
+
+                if (foundCard.statisticCategory) {
+                    this.updateResultList(this.allDistricts, this.allOperators);
+                }
             }
         },
 
@@ -342,6 +366,50 @@ export default {
             this.setSelectedDistrictLevelId(this.selectedLevelId);
             await this.$nextTick();
             this.setDistrictsByName({districtNames: this.resultList});
+            this.resetFilteredLayer();
+        },
+
+        /**
+         * Sets the style of filtered features and the rest features.
+         * @param {Object[]} features - The selected features from district level.
+         * @param {String} key The key to be used for the district name.
+         * @param {String[]} resultList - The result names as list.
+         * @returns {void}
+         */
+        setFeatureStyle (features, key, resultList = this.resultList) {
+            if (typeof this.filteredLayer?.getSource() === "undefined" || !Array.isArray(resultList)) {
+                return;
+            }
+
+            this.filteredLayer.getSource().clear();
+
+            this.features = features;
+            this.keyOfAttrNameForSelectedLayer = key;
+            const filteredFeatures = getOAFFeature.readAllOAFToGeoJSON(features.filter(feature => resultList?.includes(feature?.properties?.[key]))),
+                restFeatures = getOAFFeature.readAllOAFToGeoJSON(features.filter(feature => !resultList?.includes(feature?.properties?.[key])));
+
+            filteredFeatures.forEach(feature => {
+                feature.setStyle(() => {
+                    return new Style({
+                        fill: new Fill({
+                            color: this.mapColors.conditionTrue
+                        })
+                    });
+                });
+            });
+
+            restFeatures.forEach(feature => {
+                feature.setStyle(() => {
+                    return new Style({
+                        fill: new Fill({
+                            color: this.mapColors.conditionFalse
+                        })
+                    });
+                });
+            });
+
+            this.filteredLayer.getSource().addFeatures(filteredFeatures);
+            this.filteredLayer.getSource().addFeatures(restFeatures);
         },
 
         /**
@@ -379,6 +447,12 @@ export default {
         updateResultList (districts, operators) {
             this.resultList = this.getResultList(districts, operators)
                 .filter(e => this.selectedDistricts.includes(e));
+
+            this.resetFilteredLayer();
+
+            if (Array.isArray(this.resultList)) {
+                this.setFeatureStyle(this.features, this.keyOfAttrNameForSelectedLayer, this.resultList);
+            }
         }
     }
 };
@@ -463,6 +537,7 @@ export default {
                         class="mx-4"
                         @delete="deleteCard"
                         @scanCompleted="setCardAttributes"
+                        @setFeatureStyle="setFeatureStyle"
                         @validateField="setFieldValidated"
                         @showHint="showLatestYear"
                     />

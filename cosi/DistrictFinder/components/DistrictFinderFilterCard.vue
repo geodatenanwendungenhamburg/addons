@@ -34,7 +34,7 @@ export default {
             default: false
         }
     },
-    emits: ["delete", "scanCompleted", "validateField", "showHint"],
+    emits: ["delete", "scanCompleted", "setFeatureStyle", "validateField", "showHint"],
     data () {
         return {
             dataChips: ["statistische Daten"],
@@ -108,10 +108,10 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["chartColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["chartColors", "mapColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
         ...mapGetters("Tools/DistrictSelector", [
-            "mapping",
-            "districtLevels"
+            "districtLevels",
+            "mapping"
         ]),
 
         /**
@@ -251,6 +251,13 @@ export default {
         features: {
             handler () {
                 this.addChartData();
+
+            },
+            deep: true
+        },
+        featuresToUse: {
+            handler (value) {
+                this.$emit("setFeatureStyle", value, this.keyOfAttrNameForSelectedLayer);
             },
             deep: true
         },
@@ -293,7 +300,6 @@ export default {
             this.updateSelectedCategory();
         }
     },
-
     mounted () {
         this.setConditionAttributes(this.condition);
     },
@@ -373,8 +379,8 @@ export default {
                 filterCrs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 propertyNames: propertyNames,
-                skipGeometry: true,
                 filter: filter,
+                skipGeometry: false,
                 literalFilters: {jahr: `${year}`}
             });
 
@@ -386,7 +392,7 @@ export default {
          * @returns {String[]} An array of the chart colors.
          */
         getChartColors (key) {
-            colorValues = [];
+            const colorValues = [];
 
             this.sortedData().forEach(district => {
                 if (typeof this.referenceValue !== "string") {
@@ -480,8 +486,12 @@ export default {
                 .filter(f => this.comparisonFunction(this.selectedFilter, f.properties[this.selectedCategory], this.referenceValue, this.tolerance))
                 .map(f => f.properties[this.keyOfAttrNameForSelectedLayer]);
 
-            this.$emit("scanCompleted", this.condition.id, this.resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
-            this.$emit("validateField", this.isFieldValidated);
+            if (this.selectedCategory !== null && typeof this.referenceValue !== "undefined") {
+                this.$emit("scanCompleted", this.condition.id, this.resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
+                this.$emit("setFeatureStyle", this.featuresToUse, this.keyOfAttrNameForSelectedLayer);
+                this.$emit("validateField", this.isFieldValidated);
+            }
+
             this.isLoading = false;
         },
 
