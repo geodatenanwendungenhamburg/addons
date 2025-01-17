@@ -61,22 +61,32 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
                         DistrictSelector: {
                             namespaced: true,
                             getters: {
-                                districtLevels: () => [districtOne, districtTwo, districtThree],
+                                districtLevels: () => [districtOne, districtTwo, districtThree]
                             }
                         },
                         DistrictFinder: {
                             namespaced: true,
                             state: {
-                                selectedLevelId: "Luigi"
+                                selectedLevelId: "Luigi",
+                                subLevelSelection: [],
+                                topLevelSelection: []
                             },
                             mutations: {
                                 setSelectedDistricts: () => sinon.stub(),
                                 setSelectedLevelId (state, value) {
                                     state.selectedLevelId = value;
+                                },
+                                setTopLevelSelection(state, value) {
+                                    state.topLevelSelection = value
+                                },
+                                setSubLevelSelection (state, value) {
+                                    state.subLevelSelection = value
                                 }
                             },
                             getters: {
-                                selectedLevelId: (state) => state.selectedLevelId
+                                selectedLevelId: (state) => state.selectedLevelId,
+                                topLevelSelection: (state) => state.topLevelSelection,
+                                subLevelSelection: (state) => state.subLevelSelection
                             }
                         }
                     }
@@ -204,10 +214,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             const spyCollectSelectedDistricts = sinon.spy(DistrictFinderSelector.methods, "collectSelectedDistricts"),
                 wrapper = factory.getShallowMount();
 
-            await wrapper.setData({
-                subLevelSelection: ["big in japan"]
-            });
-
+            wrapper.vm.setSubLevelSelection(["big in japan"]);
+            await wrapper.vm.$nextTick();
             expect(spyCollectSelectedDistricts.called).to.be.true;
             spyCollectSelectedDistricts.restore();
         });
@@ -216,9 +224,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             const spyCollectSelectedDistricts = sinon.spy(DistrictFinderSelector.methods, "collectSelectedDistricts"),
                 wrapper = factory.getShallowMount();
 
-            await wrapper.setData({
-                topLevelSelection: ["wake me up before you"]
-            });
+            wrapper.vm.setTopLevelSelection(["wake me up before you"]);
+            await wrapper.vm.$nextTick();
 
             expect(spyCollectSelectedDistricts.called).to.be.true;
             spyCollectSelectedDistricts.restore();
@@ -228,13 +235,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             const spyAddSubLevelDistricts = sinon.spy(DistrictFinderSelector.methods, "addSubLevelDistricts"),
                 wrapper = factory.getShallowMount();
 
-            await wrapper.setData({
-                topLevelSelection: ["wake me up before you"]
-            });
-            await wrapper.setData({
-                topLevelSelection: ["wake me up before you", "big in japan"]
-            });
-
+            wrapper.vm.setTopLevelSelection(["wake me up before you"]);
+            await wrapper.vm.$nextTick();
+            wrapper.vm.setTopLevelSelection(["wake me up before you", "big in japan"]);
+            await wrapper.vm.$nextTick();
             expect(spyAddSubLevelDistricts.calledOnce).to.be.true;
             spyAddSubLevelDistricts.restore();
         });
@@ -243,12 +247,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             const spyRemoveSubLevelDistricts = sinon.spy(DistrictFinderSelector.methods, "removeSubLevelDistricts"),
                 wrapper = factory.getShallowMount();
 
-            await wrapper.setData({
-                topLevelSelection: ["wake me up before you", "big in japan"]
-            });
-            await wrapper.setData({
-                topLevelSelection: ["wake me up before you"]
-            });
+            wrapper.vm.setTopLevelSelection(["wake me up before you", "big in japan"]);
+            await wrapper.vm.$nextTick();
+            wrapper.vm.setTopLevelSelection(["wake me up before you"]);
+            await wrapper.vm.$nextTick();
 
             expect(spyRemoveSubLevelDistricts.calledOnce).to.be.true;
             spyRemoveSubLevelDistricts.restore();
@@ -267,8 +269,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             spySetSelectedLevelId.restore();
         });
 
-        it("should call 'removeElementFromArray' if user deselect an item in the autocomplete dropdown", async () => {
-            const spyRemoveElementFromArray = sinon.spy(DistrictFinderSelector.methods, "removeElementFromArray"),
+        it("should call 'removeFromSubLevelSelection' if user deselect an item in the autocomplete dropdown", async () => {
+            const spyRemoveFromSubLevelSelection = sinon.spy(DistrictFinderSelector.methods, "removeFromSubLevelSelection"),
                 wrapper = factory.getMount(),
                 chipsWrapperClick = wrapper.findAll(".v-chip--clickable");
 
@@ -277,8 +279,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
             await chipsWrapperClick.at(1).trigger("click");
             chipsWrapperRemove = wrapper.findAll(".v-chip--removable button");
             await chipsWrapperRemove.at(0).trigger("click");;
-            expect(spyRemoveElementFromArray.calledOnce).to.be.true;
-            spyRemoveElementFromArray.restore();
+            expect(spyRemoveFromSubLevelSelection.calledOnce).to.be.true;
+            spyRemoveFromSubLevelSelection.restore();
         });
 
     });

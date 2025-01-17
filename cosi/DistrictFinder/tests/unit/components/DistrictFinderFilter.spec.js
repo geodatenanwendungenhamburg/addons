@@ -27,6 +27,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                             namespaced: true,
                             getters: {
                                 selectedDistricts: () => ["Altona", "Bergedorf", "Harburg"],
+                                topLevelSelection: () => ["Altona", "Bergedorf", "Harburg"],
+                                subLevelSelection: () => ["Altona1", "Bergedorf1", "Harburg1"],
                                 selectedLevelId: () => "Super Mario"
                             }
                         }
@@ -212,14 +214,12 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                             date: "01.01.1999"
                         },
                         districtSelector: {
-                            selectedLevelId: "Super Mario",
-                            selectedDistrictNames: []
+                            selectedLevelId: "Super Mario"
                         },
                         data: []
                     },
                     data = wrapper.vm.getExportedData("Ross", "01.01.1999", false, []);
 
-                wrapper.vm.getExportedData();
                 expect(data).to.deep.equal(expectedData);
             });
 
@@ -232,14 +232,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                         },
                         districtSelector: {
                             selectedLevelId: "Super Mario",
-                            selectedDistrictNames: ["Altona", "Bergedorf", "Harburg"]
+                            selectedTopLevels: ["Altona", "Bergedorf", "Harburg"],
+                            selectedSubLevels: ["Altona1", "Bergedorf1", "Harburg1"]
                         },
                         data: []
-                    },
-                    data = wrapper.vm.getExportedData("Ross", "01.01.1999", true, []);
+                    };
 
-                wrapper.vm.getExportedData();
-                expect(data).to.deep.equal(expectedData);
+                expect(wrapper.vm.getExportedData("Ross", "01.01.1999", true, [])).to.deep.equal(expectedData);
             });
         });
 

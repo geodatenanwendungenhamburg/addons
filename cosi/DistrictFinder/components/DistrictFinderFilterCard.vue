@@ -267,16 +267,15 @@ export default {
                 this.addChartData();
             },
             deep: true
-        }
-    },
-    /**
+        },
+        /**
          * Updates the condition and its chart whenever the district selection changes.
          * @returns {void}
          */
-    selectedDistricts () {
-        if (this.selectedDataset) {
-            this.updateYear();
-            this.addChartData();
+        selectedDistricts () {
+            if (this.selectedDataset) {
+                this.updateYear();
+            }
         }
     },
 

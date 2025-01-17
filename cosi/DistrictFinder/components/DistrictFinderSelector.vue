@@ -6,14 +6,12 @@ export default {
     name: "DistrictFinderSelector",
     data () {
         return {
-            subLevelDistricts: [],
-            subLevelSelection: [],
-            topLevelSelection: []
+            subLevelDistricts: []
         };
     },
     computed: {
         ...mapGetters("Tools/DistrictSelector", ["districtLevels"]),
-        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId"]),
+        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId", "subLevelSelection", "topLevelSelection"]),
 
         /**
          * Gets the levels on which the screening can run.
@@ -104,7 +102,7 @@ export default {
 
             if (oldSelection.length === 0) {
                 this.subLevelDistricts = this.subLevel.districts.map(district => district.getName()).sort();
-                this.subLevelSelection = this.subLevelDistricts;
+                this.setSubLevelSelection(this.subLevelDistricts);
                 this.setSelectedDistricts(this.collectSelectedDistricts());
                 return;
             }
@@ -120,11 +118,11 @@ export default {
         }
     },
     mounted () {
-        this.topLevelSelection = this.topLevelDistricts;
+        this.setTopLevelSelection(this.topLevelDistricts);
     },
 
     methods: {
-        ...mapMutations("Tools/DistrictFinder", ["setSelectedDistricts", "setSelectedLevelId"]),
+        ...mapMutations("Tools/DistrictFinder", ["setSelectedDistricts", "setSelectedLevelId", "setSubLevelSelection", "setTopLevelSelection"]),
 
         /**
          * Adds districts to the subLevel by the refernce district.
@@ -136,7 +134,7 @@ export default {
             const districtsToAdd = this.getDistrictsByReference(districts, referenceDistrict);
 
             this.subLevelDistricts = this.subLevelDistricts.concat(districtsToAdd).sort();
-            this.subLevelSelection = this.subLevelSelection.concat(districtsToAdd).sort();
+            this.setSubLevelSelection(this.subLevelSelection.concat(districtsToAdd).sort());
         },
 
         /**
@@ -190,14 +188,27 @@ export default {
          * @returns {void}
          */
         removeSubLevelDistricts (districts, referenceDistrict) {
-            const districtsToRemove = this.getDistrictsByReference(districts, referenceDistrict);
+            const districtsToRemove = this.getDistrictsByReference(districts, referenceDistrict),
+                tmpSubLevelDistricts = [...this.subLevelDistricts],
+                tmpSublLevelSelection = [...this.subLevelSelection];
 
             districtsToRemove.forEach(district => {
-                this.removeElementFromArray(district, this.subLevelDistricts);
+                this.removeElementFromArray(district, tmpSubLevelDistricts);
+                this.removeElementFromArray(district, tmpSublLevelSelection);
             });
-            districtsToRemove.forEach(district => {
-                this.removeElementFromArray(district, this.subLevelSelection);
-            });
+            this.subLevelDistricts = tmpSubLevelDistricts;
+            this.setSubLevelSelection(tmpSublLevelSelection);
+        },
+        /**
+        * Removes the given item from the subLevelSelection.
+        * @param {String} item The item to remove
+        * @returns {void}
+        */
+        removeFromSubLevelSelection (item) {
+            const subLevelSelection = [...this.subLevelSelection];
+
+            this.removeElementFromArray(item, subLevelSelection);
+            this.setSubLevelSelection(subLevelSelection);
         }
     }
 };
@@ -233,11 +244,12 @@ export default {
             {{ topLevel.label }}
         </label>
         <v-chip-group
-            v-model="topLevelSelection"
+            :value="topLevelSelection"
             column
             mandatory
             multiple
             class="mb-2"
+            @change="setTopLevelSelection"
         >
             <v-chip
                 v-for="tag in topLevelDistricts"
@@ -257,7 +269,7 @@ export default {
                 {{ subLevel.label }}
             </label>
             <v-autocomplete
-                v-model="subLevelSelection"
+                :value="subLevelSelection"
                 :items="subLevelDistricts"
                 outlined
                 chips
@@ -266,13 +278,14 @@ export default {
                 small-chips
                 dense
                 hide-details
+                @change="setSubLevelSelection"
             >
                 <template #selection="{ item, index }">
                     <v-chip
                         v-if="index < 2"
                         close
                         :input-value="true"
-                        @click:close="removeElementFromArray(item, subLevelSelection)"
+                        @click:close="removeFromSubLevelSelection(item)"
                     >
                         <span>{{ item }}</span>
                     </v-chip>

@@ -13,6 +13,12 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
     const store = new Vuex.Store({
             namespaced: true,
             modules: {
+                Language: {
+                    namespaced: true,
+                    getters: {
+                        currentLocale: () => "de-DE"
+                    }
+                },
                 Tools: {
                     namespaced: true,
                     modules: {
@@ -24,7 +30,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinder.vue", () => {
                                 icon: () => "small",
                                 renderToWindow: () => false,
                                 resizableWindow: () => false,
-                                selectedDistricts: () => []
+                                selectedDistricts: () => [],
+                                readmeUrl: () => ""
                             }
                         },
                         DistrictSelector: {

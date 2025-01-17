@@ -1,10 +1,10 @@
 <script>
 import isObject from "../../../../src/utils/isObject";
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 
 export default {
     name: "DistrictFinderFilterImport",
-    emits: ["setConditionDate", "setConditionTitle", "setCardList", "setLatestYear"],
+    emits: ["setConditionDate", "setConditionTitle", "setCardList", "setLatestYear", "setDistrictSelector"],
     data () {
         return {
             latestData: false
@@ -15,6 +15,7 @@ export default {
     },
     methods: {
         ...mapActions("Alerting", ["addSingleAlert"]),
+        ...mapMutations("Tools/DistrictFinder", ["setSubLevelSelection", "setSelectedLevelId", "setTopLevelSelection"]),
 
         /**
          * Checks if the value is in right number format
@@ -145,6 +146,17 @@ export default {
             }
             if (!this.checkNumberOfValue(filter.data)) {
                 return;
+            }
+            if (isObject(filter.districtSelector)) {
+                if (Object.prototype.hasOwnProperty.call(filter.districtSelector, "selectedLevelId")) {
+                    this.setSelectedLevelId(filter.districtSelector.selectedLevelId);
+                }
+                if (Array.isArray(filter.districtSelector.selectedTopLevels) && filter.districtSelector.selectedTopLevels.length) {
+                    this.setTopLevelSelection(filter.districtSelector.selectedTopLevels);
+                }
+                if (Array.isArray(filter.districtSelector.selectedSubLevels) && filter.districtSelector.selectedSubLevels.length) {
+                    this.setSubLevelSelection(filter.districtSelector.selectedSubLevels);
+                }
             }
 
             this.$emit("setLatestYear", this.latestData);

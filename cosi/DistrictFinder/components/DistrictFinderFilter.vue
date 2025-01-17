@@ -42,7 +42,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId", "selectedDistricts"]),
+        ...mapGetters("Tools/DistrictFinder", ["topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
 
         /**
          * Gets the districts of all cards.
@@ -69,6 +69,15 @@ export default {
         cardList (val) {
             if (Array.isArray(val) && !val.length) {
                 this.resultList = false;
+            }
+        },
+        /**
+         * If the selected districts changes the result list should update.
+         * @returns {void}
+         */
+        selectedDistricts () {
+            if (Array.isArray(this.resultList)) {
+                this.updateResultList(this.allDistricts, this.allOperators);
             }
         }
     },
@@ -163,18 +172,23 @@ export default {
          * @returns {Object} the exported data
          */
         getExportedData (name, date, withAreas, conditionList) {
-            const selectedDistrictNames = withAreas ? this.selectedDistricts : [],
-                data = {
-                    meta: {
-                        name,
-                        date
-                    },
-                    districtSelector: {
-                        selectedLevelId: this.selectedLevelId,
-                        selectedDistrictNames
-                    },
-                    data: conditionList
-                };
+            const data = {
+                meta: {
+                    name,
+                    date
+                },
+                districtSelector: {
+                    selectedLevelId: this.selectedLevelId
+                },
+                data: conditionList
+            };
+
+            if (withAreas) {
+                Object.assign(data.districtSelector, {
+                    selectedTopLevels: this.topLevelSelection,
+                    selectedSubLevels: this.subLevelSelection
+                });
+            }
 
             return data;
         },
