@@ -129,30 +129,6 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterImport.vue",
                 expect(wrapper.vm.checkNumberOfValue([0])).to.be.false;
             });
 
-
-            it("should return false if the element does not have attribute referenceValue and ruleTolerance", () => {
-                const wrapper = factory.getShallowMount();
-
-                expect(wrapper.vm.checkNumberOfValue([{}])).to.be.false;
-            });
-
-            it("should return false if the referenceValue or tolerance is not in number format", () => {
-                const wrapper = factory.getShallowMount();
-
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "test", "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": null, "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": undefined, "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": false, "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": [], "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": {}, "referenceValue": "10"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": "test"}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": null}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": undefined}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": false}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": []}])).to.be.false;
-                expect(wrapper.vm.checkNumberOfValue([{"ruleTolerance": "10", "referenceValue": {}}])).to.be.false;
-            });
-
             it("should return false if the referenceValue or tolerance is not in the range", () => {
                 const wrapper = factory.getShallowMount();
 

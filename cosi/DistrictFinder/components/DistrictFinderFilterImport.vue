@@ -1,5 +1,4 @@
 <script>
-import isNumber from "../../../../src/utils/isNumber";
 import isObject from "../../../../src/utils/isObject";
 import {mapActions, mapGetters} from "vuex";
 
@@ -31,42 +30,6 @@ export default {
 
             data.forEach(element => {
                 if (!isObject(element)) {
-                    valid = false;
-                    return;
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(element, "referenceValue")) {
-                    const attribute = "referenceValue";
-
-                    this.addSingleAlert({
-                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.attErr", {attribute})}`,
-                        category: "Warning",
-                        displayClass: "warning"
-                    });
-                    valid = false;
-                    return;
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(element, "ruleTolerance")) {
-                    const attribute = "ruleTolerance";
-
-                    this.addSingleAlert({
-                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.attErr", {attribute})}`,
-                        category: "Warning",
-                        displayClass: "warning"
-                    });
-                    valid = false;
-                    return;
-                }
-
-                if (!isNumber(element.referenceValue) || !isNumber(element.ruleTolerance)) {
-                    const id = element.id;
-
-                    this.addSingleAlert({
-                        content: `${this.$t("additional:modules.tools.cosi.districtFinder.errors.invalid")} ${this.$t("additional:modules.tools.cosi.districtFinder.errors.numErr", {id})}`,
-                        category: "Warning",
-                        displayClass: "warning"
-                    });
                     valid = false;
                     return;
                 }
