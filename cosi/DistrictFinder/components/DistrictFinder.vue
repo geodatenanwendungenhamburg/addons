@@ -1,11 +1,12 @@
 <script>
+import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
+import ToolInfo from "../../components/ToolInfo.vue";
 import AccordionItem from "../../components/AccordionItem.vue";
 import DistrictFinderFilter from "./DistrictFinderFilter.vue";
 import DistrictFinderSelector from "./DistrictFinderSelector.vue";
 import {getComponent} from "../../../../src/utils/getComponent";
 import getters from "../store/gettersDistrictFinder";
 import {mapGetters, mapMutations} from "vuex";
-import Tool from "../../../../src/modules/tools/ToolTemplate.vue";
 
 export default {
     name: "DistrictFinder",
@@ -13,7 +14,8 @@ export default {
         AccordionItem,
         DistrictFinderFilter,
         DistrictFinderSelector,
-        Tool
+        Tool,
+        ToolInfo
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
@@ -70,6 +72,11 @@ export default {
                 id="district-finder"
                 class="container"
             >
+                <ToolInfo
+                    :url="readmeUrl"
+                    :locale="currentLocale"
+                    :summary="$t('additional:modules.tools.cosi.districtFinder.description')"
+                />
                 <AccordionItem
                     id="district-selection"
                     :title="$t('additional:modules.tools.cosi.districtFinder.selector.title')"

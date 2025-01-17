@@ -33,11 +33,10 @@ export default {
             default: false
         }
     },
-    emits: ["delete", "scanCompleted", "validateField"],
+    emits: ["delete", "scanCompleted", "validateField", "showHint"],
     data () {
         return {
-            dataChips: ["Fachdaten", "statistische Daten"],
-            datasetFachdaten: ["Beispiel5", "Beispiel6", "Beispiel7", "Beispiel8"],
+            dataChips: ["statistische Daten"],
             expandDataInfo: true,
             features: [],
             isLoading: false,
@@ -100,7 +99,7 @@ export default {
                 barPercentage: 1.0,
                 categoryPercentage: 1.0,
                 borderWidth: 0,
-                hoverBackgroundColor: "rgba(220, 226, 243, 1)"
+                hoverBackgroundColor: "rgb(49, 119, 177, 1)"
             }
         };
     },
@@ -432,7 +431,7 @@ export default {
             }
             if (Object.prototype.hasOwnProperty.call(condition, "year")) {
                 if (this.changeToLatestYear) {
-                    this.showHint = this.selectedYear !== condition.year;
+                    this.$emit("showHint", this.selectedYear !== condition.year);
                 }
                 else if (this.selectedYear !== condition.year) {
                     this.selectedYear = condition.year;
@@ -564,7 +563,7 @@ export default {
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-12 p-0">
+                        <div class="col-12 py-0 pe-0">
                             <v-label
                                 for="data-filter"
                             >
@@ -585,9 +584,29 @@ export default {
                     </div>
                     <div
                         v-if="typeof selectedDataset !== 'undefined' "
-                        class="row gy-0 pt-0"
+                        class="row row-cols-auto"
                     >
-                        <div class="col-md-3 me-5 px-0 pt-1 pb-0">
+                        <div
+                            v-if="typeof selectedDataset !== 'undefined'"
+                            class="col-5 pt-1 pb-0 pe-1"
+                        >
+                            <v-label
+                                class="filter-label"
+                                for="filter-rule"
+                            >
+                                {{ $t('additional:modules.tools.cosi.districtFinder.label.rule') }}
+                            </v-label>
+                            <v-select
+                                v-model="selectedFilter"
+                                class="filter-rule"
+                                :items="filterRules"
+                                outlined
+                                hide-details
+                                dense
+                                @change="updateResults"
+                            />
+                        </div>
+                        <div class="col pt-1 pb-0 pe-1 ps-1">
                             <v-label
                                 class="filter-label"
                                 for="reference-filter"
@@ -606,28 +625,8 @@ export default {
                             />
                         </div>
                         <div
-                            v-if="typeof selectedDataset !== 'undefined'"
-                            class="col-md-4 me-1 px-0 pt-1 pb-0"
-                        >
-                            <v-label
-                                class="filter-label"
-                                for="filter-rule"
-                            >
-                                {{ $t('additional:modules.tools.cosi.districtFinder.label.rule') }}
-                            </v-label>
-                            <v-select
-                                v-model="selectedFilter"
-                                class="filter-rule"
-                                :items="filterRules"
-                                outlined
-                                hide-details
-                                dense
-                                @change="updateResults"
-                            />
-                        </div>
-                        <div
-                            v-if="typeof selectedDataset !== 'undefined' && selectedFilter === '='"
-                            class="col-md-3 px-0 pt-1 pb-0"
+                            class="col pt-1 pb-0 pe-0 ps-1"
+                            :class="typeof selectedDataset !== 'undefined' && selectedFilter === '=' ? '' : 'invisible'"
                         >
                             <v-label
                                 class="filter-label"
@@ -641,6 +640,7 @@ export default {
                                 :disabled="typeof referenceValue !== 'number'"
                                 class="tolerance"
                                 :class="{invalid: tolerance === '' || !checkInRange(selectedDataset?.valueType, tolerance)}"
+                                prefix="±"
                                 outlined
                                 hide-details
                                 dense
@@ -658,12 +658,12 @@ export default {
                     </div>
                     <div
                         v-if="typeof selectedDataset !== 'undefined'"
-                        class="p-0 d-md-flex justify-content-md-end"
+                        class="ps-0 pt-4 pb-1"
                     >
                         <button
                             id="details-button"
                             type="button"
-                            class="btn btn-link btn-sm pt-3 pb-0"
+                            class="btn btn-link btn-sm pb-0 ps-0"
                             @click="expandDataInfo = !expandDataInfo"
                         >
                             <i
@@ -721,13 +721,6 @@ export default {
                             </div>
                         </div>
                     </div>
-                    <v-snackbar
-                        v-model="showHint"
-                        class="hint"
-                        :timeout="5000"
-                    >
-                        {{ $t("additional:modules.tools.cosi.districtFinder.changeToLatestYear") }}
-                    </v-snackbar>
                 </div>
             </template>
         </ContentCard>
@@ -783,6 +776,10 @@ h4 {
     box-shadow: inset 0 1px 2px rgba(225, 0, 25, 0.075), 0 0 0 0.25rem rgba(225, 0, 25, 0.25);
 }
 
+.data-filter {
+    font-family: $font_family_accent;
+}
+
 .v-label {
     font-size: 11px;
 }
@@ -799,6 +796,9 @@ h4 {
 }
 .v-chip[fachdata-color='true'] {
     background-color: #ffcb9f;
+}
+.v-text-field__prefix {
+    padding-right: 10px;
 }
 
 </style>

@@ -4,6 +4,7 @@
             "cosi": {
                 "districtFinder": {
                     "title": "District Screening",
+                    "description": "First select the desired reference level on which the screening is to take place under “Limit areas”. You can then limit the areas of the reference level. Conditions can be added to create a new screening. Areas that match the conditions can then be accepted.",
                     "newScreening": "Create new screening",
                     "condition": "Condition",
                     "conditions": "Conditions",
@@ -61,7 +62,6 @@
                     },
                     "selector": {
                       "title": "Limit districts",
-                      "info": "First select the desired reference level on which the screening is to be performed. You can then limit the districts of the reference level.",
                       "subtitle": "Limit {{selectedScreeningLevelLabel}}",
                       "label": {
                         "level": "Reference level"

@@ -37,7 +37,7 @@ export default {
             showExportDialog: false,
             showMoreAreas: false,
             latestYear: false,
-            showHint: false
+            showHintToChangeLatestYear: false
         };
     },
     computed: {
@@ -340,6 +340,14 @@ export default {
         setFieldValidated (val) {
             this.isFieldValidated = val;
         },
+        /**
+         * Sets if the hint for the latest year is shown or not.
+         * @param {Boolean} val - The flag which decides wether the hint should be shown or not.
+         * @returns {void}
+         */
+        showLatestYear (val) {
+            this.showHintToChangeLatestYear = val;
+        },
 
         /**
          * Sets the active card id by toggle the clicked card.
@@ -441,6 +449,7 @@ export default {
                         @delete="deleteCard"
                         @scanCompleted="setCardAttributes"
                         @validateField="setFieldValidated"
+                        @showHint="showLatestYear"
                     />
                 </div>
             </div>
@@ -462,7 +471,6 @@ export default {
                 {{ resultList.length }} {{ resultList.length === 1 ? $t("additional:modules.tools.cosi.districtFinder.foundArea") : $t("additional:modules.tools.cosi.districtFinder.foundAreas") }}
             </h5>
             <template v-if="resultList.length > 0">
-                <span> Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.</span>
                 <div class="copy-box mb-4 container rounded">
                     <div class="row">
                         <div class="col col-11 pe-0">
@@ -476,12 +484,6 @@ export default {
                             </button>
                         </div>
                         <div class="col col-1 text-end ps-0">
-                            <v-snackbar
-                                v-model="copyValue"
-                                :timeout="5000"
-                            >
-                                {{ $t("additional:modules.tools.cosi.districtFinder.copyClipboard") }}
-                            </v-snackbar>
                             <button
                                 class="copy-button btn btn-link lh-1 fs-5 p-0"
                                 @click="copyToClipboard (resultList.join(', '))"
@@ -492,6 +494,18 @@ export default {
                                 />
                             </button>
                         </div>
+                        <v-snackbar
+                            v-model="copyValue"
+                            :timeout="5000"
+                        >
+                            {{ $t("additional:modules.tools.cosi.districtFinder.copyClipboard") }}
+                        </v-snackbar>
+                        <v-snackbar
+                            v-model="showHintToChangeLatestYear"
+                            :timeout="5000"
+                        >
+                            {{ $t("additional:modules.tools.cosi.districtFinder.changeToLatestYear") }}
+                        </v-snackbar>
                     </div>
                 </div>
             </template>
@@ -555,6 +569,15 @@ export default {
             opacity: 0;
             transform: translateX(80px);
         }
-    }
+}
+
+</style>
+
+<style lang="scss">
+    @import "~variables";
+
+     .v-snack__wrapper {
+        min-width: auto;
+     }
 
 </style>

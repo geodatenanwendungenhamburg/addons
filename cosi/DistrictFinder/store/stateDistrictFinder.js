@@ -22,6 +22,9 @@ const state = {
     id: "districtFinder",
     isVisibleInMenu: true,
     name: "additional:modules.tools.cosi.districtFinder.title",
+    readmeUrl: {
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/025GebieteScreening.md"
+    },
     referenceLineColor: "rgba(255, 0, 0, 0.5)",
     renderToWindow: true,
     resizableWindow: false,

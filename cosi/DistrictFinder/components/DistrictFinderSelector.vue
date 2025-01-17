@@ -205,9 +205,6 @@ export default {
 
 <template lang="html">
     <div id="district-finder-selector">
-        <div class="mb-3">
-            {{ $t("additional:modules.tools.cosi.districtFinder.selector.info") }}
-        </div>
         <label
             class="text-black-50"
             for="chip-group"
