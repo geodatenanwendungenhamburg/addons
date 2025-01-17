@@ -203,6 +203,9 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
 
                 expect(wrapper.vm.comparisonFunction()).to.be.false;
                 expect(wrapper.vm.comparisonFunction("><", 0, 0)).to.be.false;
+                expect(wrapper.vm.comparisonFunction("=", 100, "")).to.be.false;
+                expect(wrapper.vm.comparisonFunction("=", 100, undefined)).to.be.false;
+                expect(wrapper.vm.comparisonFunction("=", 100, 100, "")).to.be.false;
             });
 
             it("should return expected results", () => {

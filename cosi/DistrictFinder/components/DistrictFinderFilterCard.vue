@@ -320,6 +320,9 @@ export default {
          * @return {Boolean} Whether or not the values meet the chosen condition.
          */
         comparisonFunction (mode, value, referenceValue, tolerance = 0) {
+            if (typeof referenceValue !== "number" || typeof tolerance !== "number") {
+                return false;
+            }
             if (mode === "<") {
                 return value < referenceValue;
             }
@@ -594,7 +597,7 @@ export default {
                             <v-text-field
                                 v-model.number="referenceValue"
                                 class="reference-filter"
-                                :class="!checkInRange(selectedDataset?.valueType, referenceValue) ? 'invalid' : ''"
+                                :class="{invalid: referenceValue === '' || !checkInRange(selectedDataset?.valueType, referenceValue)}"
                                 outlined
                                 hide-details
                                 dense
@@ -629,17 +632,20 @@ export default {
                             <v-label
                                 class="filter-label"
                                 for="tolerance"
+                                :disabled="typeof referenceValue !== 'number'"
                             >
                                 {{ $t('additional:modules.tools.cosi.districtFinder.label.tolerance') }}
                             </v-label>
                             <v-text-field
                                 v-model.number="tolerance"
+                                :disabled="typeof referenceValue !== 'number'"
                                 class="tolerance"
-                                :class="!checkInRange(selectedDataset?.valueType, tolerance) ? 'invalid' : ''"
+                                :class="{invalid: tolerance === '' || !checkInRange(selectedDataset?.valueType, tolerance)}"
                                 outlined
                                 hide-details
                                 dense
                                 type="number"
+                                min="0"
                                 @input="updateResults"
                             />
                         </div>
