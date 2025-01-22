@@ -11,7 +11,7 @@ export default {
     },
     computed: {
         ...mapGetters("Tools/DistrictSelector", ["districtLevels"]),
-        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId", "subLevelSelection", "topLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["selectedLevelId", "subLevelSelection", "topLevelSelection", "selectedDistricts"]),
 
         /**
          * Gets the levels on which the screening can run.
@@ -118,7 +118,12 @@ export default {
         }
     },
     mounted () {
-        this.setTopLevelSelection(this.topLevelDistricts);
+        if (this.selectedDistricts.length) {
+            this.subLevelDistricts = this.subLevel.districts.map(district => district.getName()).sort();
+        }
+        else {
+            this.setTopLevelSelection(this.topLevelDistricts);
+        }
     },
 
     methods: {

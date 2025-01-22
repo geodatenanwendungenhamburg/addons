@@ -25,11 +25,30 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                         },
                         DistrictFinder: {
                             namespaced: true,
+                            state: {
+                                cardList: [],
+                                conditionDate: "",
+                                conditionTitle: "",
+                            },
                             getters: {
                                 selectedDistricts: () => ["Altona", "Bergedorf", "Harburg"],
                                 topLevelSelection: () => ["Altona", "Bergedorf", "Harburg"],
                                 subLevelSelection: () => ["Altona1", "Bergedorf1", "Harburg1"],
-                                selectedLevelId: () => "Super Mario"
+                                selectedLevelId: () => "Super Mario",
+                                cardList: (state) => state.cardList,
+                                conditionDate: (state) => state.conditionDate,
+                                conditionTitle: (state) => state.conditionTitle,
+                            },
+                            mutations: {
+                                setCardList(state, value) {
+                                    state.cardList = value;
+                                },
+                                setConditionDate (state, value) {
+                                    state.conditionDate = value;
+                                },
+                                setConditionTitle (state, value) {
+                                    state.conditionTitle = value;
+                                },
                             }
                         }
                     }
@@ -126,25 +145,10 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
     describe("Computed Properties", () => {
         it("should get 'allOperators'", () => {
-            const wrapper = factory.getShallowMount({
-                cardList: [{
-                    id: "0",
-                    operator: "or",
-                    number: 1
-                },
-                {
-                    id: "1",
-                    operator: "and",
-                    number: 1
-                }]
-            });
+            const wrapper = factory.getShallowMount();
 
-            expect(wrapper.vm.allOperators).to.deep.equal(["or", "and"]);
-        });
-
-        it("should get 'allDistricts'", () => {
-            const wrapper = factory.getShallowMount({
-                cardList: [{
+            wrapper.vm.setCardList(
+                [{
                     id: "0",
                     operator: "or",
                     number: 0,
@@ -155,8 +159,14 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                     operator: "and",
                     number: 1,
                     districts: ["Wunderland"]
-                }]
-            });
+                }
+            ]);
+
+            expect(wrapper.vm.allOperators).to.deep.equal(["or", "and"]);
+        });
+
+        it("should get 'allDistricts'", () => {
+            const wrapper = factory.getShallowMount();
 
             expect(wrapper.vm.allDistricts).to.deep.equal([["Mordor"], ["Wunderland"]]);
         });
@@ -164,8 +174,16 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
     describe("Methods", () => {
         describe("addCard", () => {
-            it("should have two cards", () => {
+            it("should have three cards", () => {
                 const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setCardList(
+                    [{
+                        id: "0",
+                        operator: "or",
+                        number: 0,
+                        districts: ["Mordor"]
+                    }]);
 
                 wrapper.vm.addCard();
 
@@ -175,23 +193,31 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
         describe("deleteCard", () => {
             it("should delete one card", () => {
-                const wrapper = factory.getShallowMount({
-                    cardList: [{
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setCardList(
+                    [{
                         id: "0",
                         operator: "or",
-                        number: 1
-                    }, {
+                        number: 0,
+                        districts: ["Mordor"]
+                    },
+                    {
                         id: "1",
-                        operator: "or",
-                        number: 2
-                    }]
-                });
+                        operator: "and",
+                        number: 1,
+                        districts: ["Wunderland"]
+                    }
+                ]);
 
                 wrapper.vm.deleteCard("0");
-                expect(wrapper.vm.cardList).to.deep.equal([{
-                    id: "1",
-                    operator: "or",
-                    number: 2
+
+            expect(wrapper.vm.cardList).to.deep.equal([
+            {
+                id: "1",
+                operator: "and",
+                number: 1,
+                districts: ["Wunderland"]
                 }]);
             });
         });
@@ -244,13 +270,13 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
         describe("setCardAttributes", () => {
             it("should update results correctly", () => {
-                const wrapper = factory.getShallowMount({
-                    cardList: [{
+                const wrapper = factory.getShallowMount();
+
+                wrapper.vm.setCardList([{
                         id: "0",
                         operator: "or",
                         number: 1
-                    }]
-                });
+                }]);
 
                 wrapper.vm.setCardAttributes("0", ["Altona", "Harburg"]);
 
@@ -259,22 +285,26 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             });
         });
 
-        describe("setCardList", () => {
+        describe("setConditionCards", () => {
             it("should set the card(condition) list", async () => {
                 const wrapper = factory.getShallowMount(),
-                    cardList = [{
-                        id: "123",
-                        operator: "and",
-                        number: 1
-                    }, {
-                        id: "456",
-                        operator: "or",
-                        number: 2
-                    }];
+                list = [{
+                    id: "0",
+                    operator: "or",
+                    number: 0,
+                    districts: ["Mordor"]
+                },
+                {
+                    id: "1",
+                    operator: "and",
+                    number: 1,
+                    districts: ["Wunderland"]
+                }];
 
-                wrapper.vm.setCardList(cardList);
+                wrapper.vm.setConditionCards(list);
+
                 await wrapper.vm.$nextTick();
-                expect(wrapper.vm.cardList).to.deep.equal(cardList);
+                expect(wrapper.vm.cardList).to.deep.equal(list);
             });
 
             it("should call 'resetCardList' and 'updateResultList'", async () => {
@@ -282,16 +312,19 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                     spyResetCardList = sinon.spy(wrapper.vm, "resetCardList"),
                     spyUpdateResultList = sinon.spy(wrapper.vm, "updateResultList"),
                     cardList = [{
-                        id: "123",
-                        operator: "and",
-                        number: 1
-                    }, {
-                        id: "456",
+                        id: "0",
                         operator: "or",
-                        number: 2
+                        number: 0,
+                        districts: ["Mordor"]
+                    },
+                    {
+                        id: "1",
+                        operator: "and",
+                        number: 1,
+                        districts: ["Wunderland"]
                     }];
 
-                wrapper.vm.setCardList(cardList);
+                wrapper.vm.setConditionCards(cardList);
                 await wrapper.vm.$nextTick();
                 expect(spyResetCardList.calledOnce).to.be.true;
                 expect(spyUpdateResultList.calledOnce).to.be.true;
@@ -301,8 +334,9 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
 
         describe("setCardOperator", () => {
             it("should update component data correctly on operator change event", () => {
-                const wrapper = factory.getShallowMount({
-                    cardList: [{
+                const wrapper = factory.getShallowMount();
+
+                  wrapper.vm.setCardList([{
                         id: "0",
                         operator: "or",
                         number: 1
@@ -310,8 +344,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                         id: "1",
                         operator: "or",
                         number: 2
-                    }]
-                });
+                    }]);
 
                 wrapper.vm.setCardOperator("0", "and");
                 wrapper.vm.setCardOperator("1", "and");
@@ -322,37 +355,40 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             })
         });
 
-        describe("setConditionDate", () => {
+        describe("importConditionDate", () => {
             it("should not set the date of the condition/card", async () => {
                 const wrapper = factory.getShallowMount();
 
-                wrapper.vm.setConditionDate(0);
+                wrapper.vm.importConditionDate(0);
                 expect(wrapper.vm.conditionDate).to.equal("");
-                wrapper.vm.setConditionDate(null);
+                wrapper.vm.importConditionDate(null);
                 expect(wrapper.vm.conditionDate).to.equal("");
-                wrapper.vm.setConditionDate(false);
+                wrapper.vm.importConditionDate(false);
                 expect(wrapper.vm.conditionDate).to.equal("");
-                wrapper.vm.setConditionDate(undefined);
+                wrapper.vm.importConditionDate(undefined);
                 expect(wrapper.vm.conditionDate).to.equal("");
-                wrapper.vm.setConditionDate({});
+                wrapper.vm.importConditionDate({});
                 expect(wrapper.vm.conditionDate).to.equal("");
-                wrapper.vm.setConditionDate([]);
+                wrapper.vm.importConditionDate([]);
                 expect(wrapper.vm.conditionDate).to.equal("");
             });
 
             it("should set the date of the condition/card", async () => {
                 const wrapper = factory.getShallowMount();
 
-                wrapper.vm.setConditionDate("1999-01-01");
+                wrapper.vm.importConditionDate("1999-01-01");
+
+                await wrapper.vm.$nextTick();
+
                 expect(wrapper.vm.conditionDate).to.equal("01.01.1999");
             });
         });
 
-        describe("setConditionTitle", () => {
+        describe("importConditionTitle", () => {
             it("should set the title of the condition/card", async () => {
                 const wrapper = factory.getShallowMount();
 
-                wrapper.vm.setConditionTitle("Ho ho ho");
+                wrapper.vm.importConditionTitle("Ho ho ho");
                 expect(wrapper.vm.conditionTitle).to.equal("Ho ho ho");
             });
         });
@@ -425,7 +461,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                     activeCardId: ""
                 });
                 wrapper.vm.toggleCardActive(0);
-                await wrapper.vm.$nextTick()
+                await wrapper.vm.$nextTick();
 
                 expect(wrapper.vm.activeCardId).to.be.equal(0);
             });
@@ -441,7 +477,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                 });
 
             await foundButton.trigger("click");
-            expect(wrapper.vm.cardList.length).to.be.equal(2);
+            expect(wrapper.vm.cardList.length).to.be.equal(3);
         });
     })
 });

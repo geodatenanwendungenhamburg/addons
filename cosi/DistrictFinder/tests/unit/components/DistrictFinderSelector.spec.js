@@ -86,7 +86,8 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderSelector.vue", () 
                             getters: {
                                 selectedLevelId: (state) => state.selectedLevelId,
                                 topLevelSelection: (state) => state.topLevelSelection,
-                                subLevelSelection: (state) => state.subLevelSelection
+                                subLevelSelection: (state) => state.subLevelSelection,
+                                selectedDistricts: () => []
                             }
                         }
                     }

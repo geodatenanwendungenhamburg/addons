@@ -20,17 +20,7 @@ export default {
     data () {
         return {
             activeCardId: "",
-            cardList: [{
-                districts: [],
-                id: uniqueId("card-"),
-                operator: "",
-                rule: "=",
-                ruleTolerance: 0,
-                year: false
-            }],
             copyValue: false,
-            conditionDate: "",
-            conditionTitle: this.$t("additional:modules.tools.cosi.districtFinder.conditions"),
             isFieldValidated: true,
             numberOfLimitedAreas: 20,
             resultList: false,
@@ -42,7 +32,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["cardList", "conditionDate", "conditionTitle", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
 
         /**
          * Gets the districts of all cards.
@@ -81,9 +71,19 @@ export default {
             }
         }
     },
+    mounted () {
+        if (!this.cardList.length) {
+            this.addCard();
+        }
+
+        if (this.conditionTitle === "") {
+            this.setConditionTitle(this.$t("additional:modules.tools.cosi.districtFinder.conditions"));
+        }
+    },
 
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
+        ...mapMutations("Tools/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle"]),
         ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
@@ -91,14 +91,19 @@ export default {
          * @returns {void}
          */
         addCard () {
-            this.cardList.push({
-                districts: [],
-                id: uniqueId("card-"),
-                operator: "or",
-                rule: "=",
-                ruleTolerance: 0,
-                year: false
-            });
+            const conditionCards = this.cardList.length ? this.cardList : [];
+
+            conditionCards.push(
+                {
+                    districts: [],
+                    id: uniqueId("card-"),
+                    operator: "or",
+                    rule: "=",
+                    ruleTolerance: 0,
+                    year: false
+                });
+
+            this.setCardList(conditionCards);
         },
 
         /**
@@ -229,7 +234,7 @@ export default {
          * @returns {void}
          */
         resetCardList () {
-            this.cardList = [];
+            this.setCardList([]);
         },
 
         /**
@@ -239,17 +244,10 @@ export default {
         async resetToOrigin () {
             this.resetCardList();
             await this.$nextTick();
-            this.cardList = [{
-                districts: [],
-                id: uniqueId("card-"),
-                operator: "",
-                rule: "=",
-                ruleTolerance: 0,
-                year: false
-            }];
+            this.addCard();
             this.resultList = false;
-            this.conditionTitle = this.$t("additional:modules.tools.cosi.districtFinder.conditions");
-            this.conditionDate = "";
+            this.setConditionTitle(this.$t("additional:modules.tools.cosi.districtFinder.conditions"));
+            this.setConditionDate("");
             this.setLatestYear(false);
         },
 
@@ -298,10 +296,10 @@ export default {
          * @param {Object[]} cardList - The list of cards/conditions.
          * @returns {void}
          */
-        setCardList (cardList) {
+        setConditionCards (cardList) {
             this.resetCardList();
             this.$nextTick(() => {
-                this.cardList = cardList;
+                this.setCardList(cardList);
                 this.updateResultList(this.allDistricts, this.allOperators);
             });
         },
@@ -319,12 +317,12 @@ export default {
          * @param {String} date - The date of the conditions.
          * @returns {void}
          */
-        setConditionDate (date) {
+        importConditionDate (date) {
             if (typeof date !== "string") {
                 return;
             }
 
-            this.conditionDate = dayjs(date).format("DD.MM.YYYY");
+            this.setConditionDate(dayjs(date).format("DD.MM.YYYY"));
         },
 
         /**
@@ -332,8 +330,8 @@ export default {
          * @param {String} title - The title of the conditions.
          * @returns {void}
          */
-        setConditionTitle (title) {
-            this.conditionTitle = title;
+        importConditionTitle (title) {
+            this.setConditionTitle(title);
         },
 
         /**
@@ -393,9 +391,9 @@ export default {
         </h4>
         <DistrictFinderFilterImport
             @setLatestYear="setLatestYear"
-            @setCardList="setCardList"
-            @setConditionDate="setConditionDate"
-            @setConditionTitle="setConditionTitle"
+            @setCardList="setConditionCards"
+            @setConditionDate="importConditionDate"
+            @setConditionTitle="importConditionTitle"
         />
         <div class="d-flex align-items-center mb-3">
             <h4 class="filter-title me-auto">
@@ -433,7 +431,10 @@ export default {
                 />
             </div>
         </div>
-        <transition-group name="slide-fade">
+        <transition-group
+            v-if="cardList.length"
+            name="slide-fade"
+        >
             <div
                 v-for="(card, index) in cardList"
                 :key="card.id"

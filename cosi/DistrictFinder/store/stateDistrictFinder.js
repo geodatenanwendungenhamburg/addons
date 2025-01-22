@@ -35,7 +35,11 @@ const state = {
     chartColors: {
         conditionFalse: "rgb(220, 226, 243, 1)",
         conditionTrue: "rgb(0, 67, 122, 1)"
-    }
+    },
+    cardList: [],
+    conditionDate: "",
+    conditionTitle: ""
+
 };
 
 export default state;
