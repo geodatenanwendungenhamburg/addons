@@ -40,6 +40,7 @@ export default {
             expandDataInfo: true,
             features: [],
             isLoading: false,
+            latestPendingRequest: null,
             resultNames: [],
             referenceValue: undefined,
             selectedCategory: null,
@@ -105,7 +106,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["chartColors", "referenceLineColor", "selectedLevelId", "selectedDistricts"]),
+        ...mapGetters("Tools/DistrictFinder", ["chartColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
         ...mapGetters("Tools/DistrictSelector", [
             "mapping",
             "districtLevels"
@@ -342,9 +343,10 @@ export default {
          * @param {Object} layer An oaf layer object containing at least url and collection.
          * @param {Number|String} year The year to retrieve the data for.
          * @param {String[]} propertyNames The property names that should be available in the returned features.
+         * @param {String} [filter = true] The CQL2 filter property for oaf request. (https://lgv-hamburg.atlassian.net/wiki/spaces/EDDUN/pages/109183062/OAF+OGC+API+Features#4-Filtern-mit-CQL2)
          * @returns {Object[]} The retrieved features or an empty array.
          */
-        async fetchFeatures (layer, year, propertyNames) {
+        async fetchFeatures (layer, year, propertyNames, filter = true) {
 
             if (!layer || !year || !propertyNames) {
                 return [];
@@ -358,6 +360,7 @@ export default {
                 crs: "http://www.opengis.net/def/crs/EPSG/0/25832",
                 propertyNames: propertyNames,
                 skipGeometry: true,
+                filter: filter,
                 literalFilters: {jahr: `${year}`}
             });
 
@@ -495,12 +498,52 @@ export default {
          * @returns {void}
          */
         async updateYear () {
+            if (!this.selectedCategory) {
+                return;
+            }
+
             this.isLoading = true;
+
+            const originalAnimation = this.chartConfig.options.animation;
+
+            try {
+                const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`,
+                    requestTimestamp = this.latestPendingRequest = Date.now();
+
+                this.features = await this.fetchFeatures(
+                    this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer], topFilter
+                );
+
+                if (requestTimestamp !== this.latestPendingRequest) {
+                    return;
+                }
+                this.updateResults();
+
+                setTimeout(() => {
+                    this.chartConfig.options.animation = false;
+                });
+            }
+            catch {
+                console.warn("Request prefiltering by bezirk failed");
+            }
+
+            let requestTimestamp = null;
+
+            requestTimestamp = this.latestPendingRequest = Date.now();
+
             this.features = await this.fetchFeatures(
                 this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer]
             );
 
+            if (requestTimestamp !== this.latestPendingRequest) {
+                return;
+            }
+
             this.updateResults();
+
+            setTimeout(() => {
+                this.chartConfig.options.animation = originalAnimation;
+            });
         }
     }
 };

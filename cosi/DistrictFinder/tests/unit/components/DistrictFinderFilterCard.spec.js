@@ -31,15 +31,18 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             namespaced: true,
                             mutations: {},
                             getters: {
+                                districtLevels: () => [{layerId: "1", stats: {keyOfAttrName: [], layerIds: []}}],
                                 mapping: () => {}
                             }
                         },
                         DistrictFinder: {
                             namespaced: true,
                             getters: {
+                                chartColors: () => ({conditionFalse: "rgb(255, 255, 255, 1)", conditionTrue: "rgb(255, 0, 0, 1)"}),
                                 keyOfAttrNameStats: () => "stats",
                                 selectedDistricts: () => [],
-                                chartColors: () => ({conditionFalse: "rgb(255, 255, 255, 1)", conditionTrue: "rgb(255, 0, 0, 1)"})
+                                selectedLevelId: () => "1",
+                                topLevelSelection: () => ["Altona", "Bergedorf"]
                             }
                         }
                     }
@@ -325,6 +328,84 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
 
             expect(wrapper.vm.getChartColors("stadtteil")).to.deep.equal(expectedColors);
             sinon.restore();
+            });
+        });
+        describe("updateYear", () => {
+            it("calls fetchFeatures twice", async () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().resolves([])
+                    .onSecondCall().callsFake(() => expect(fetchFeaturesStub.calledTwice).to.be.true);
+
+                wrapper.vm.updateYear();
+            });
+            it("calls fetchFeatures with expected filter parameter on first call", async () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub.onFirstCall().callsFake(() => 
+                    expect(fetchFeaturesStub.firstCall.calledWith(sinon.match.any, sinon.match.any, sinon.match.any,
+                        "bezirk IN ('Altona','Bergedorf')")).to.be.true);
+
+                wrapper.vm.updateYear();
+            });
+            it("calls fetchFeatures without filter parameter on second call (case 1: first call resolved)", async () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().resolves([])
+                    .onSecondCall().callsFake(() => expect(fetchFeaturesStub.secondCall.calledWith(
+                        sinon.match.any, sinon.match.any, sinon.match.any, undefined
+                    )).to.be.true);
+
+                wrapper.vm.updateYear();
+            });
+            it("calls fetchFeatures without filter parameter on second call (case 2: first call rejected)", async () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().rejects()
+                    .onSecondCall().callsFake(() => expect(fetchFeaturesStub.secondCall.calledWith(
+                        sinon.match.any, sinon.match.any, sinon.match.any, undefined
+                    )).to.be.true);
+
+                wrapper.vm.updateYear();
+            });
+            it("does not throw errors if first call is rejected", () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().rejects()
+                    .onSecondCall().callsFake(() => expect(fetchFeaturesStub).to.not.throw());
+            });
+            it("does throw an error if second call is rejected", () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().resolves([])
+                    .onSecondCall().callsFake(() => {
+                        expect(fetchFeaturesStub).to.throw();
+                        return Promise.reject();
+                    }
+                );
+            });
+            it("eventually sets features from second request", () => {
+                const wrapper = factory.getShallowMount(),
+                    fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
+
+                fetchFeaturesStub
+                    .onFirstCall().resolves(["Marmstorf"])
+                    .onSecondCall().callsFake(() => {
+                        expect(wrapper.vm.features).to.deep.equal(["Marmstorf", "Hausbruch"]);
+                        return Promise.resolve(["Marmstorf", "Hausbruch"]);
+                    }
+                );
             });
         });
 
