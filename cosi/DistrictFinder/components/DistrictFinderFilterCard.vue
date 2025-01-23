@@ -3,6 +3,7 @@ import BarchartItemAnnotated from "../../components/BarchartItemAnnotated.vue";
 import ContentCard from "../../components/ContentCard.vue";
 import deepAssign from "../../../../src/utils/deepAssign";
 import DistrictFinderLoadingSpinner from "./DistrictFinderLoadingSpinner.vue";
+import groupMapping from "../../utils/groupMapping";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
 
@@ -140,7 +141,7 @@ export default {
          * @returns {Object[]} The mapping datasets or an empty array.
          */
         datasetStat () {
-            return this.mapping.filter(m => m[this.keyOfAttrNameStats]) || [];
+            return groupMapping(this.mapping.filter(m => m[this.keyOfAttrNameStats])) || [];
         },
 
         /**
