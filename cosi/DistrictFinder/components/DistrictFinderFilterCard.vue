@@ -278,7 +278,7 @@ export default {
         selectedDistricts () {
             if (this.selectedDataset) {
                 this.chartConfig.options.animation = true;
-                this.addChartData();
+                this.latestPendingRequest ? this.updateYear() : this.addChartData();
                 setTimeout(() => {
                     this.chartConfig.options.animation = false;
                 });
@@ -333,7 +333,7 @@ export default {
          * @return {Boolean} Whether or not the values meet the chosen condition.
          */
         comparisonFunction (mode, value, referenceValue, tolerance = 0) {
-            if (typeof referenceValue !== "number" || typeof tolerance !== "number") {
+            if (typeof referenceValue !== "number" || mode === "=" && typeof tolerance !== "number") {
                 return false;
             }
             if (mode === "<") {
@@ -519,10 +519,12 @@ export default {
             this.isLoading = true;
 
             this.chartConfig.options.animation = true;
+            let requestTimestamp;
 
             try {
-                const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`,
-                    requestTimestamp = this.latestPendingRequest = Date.now();
+                const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`;
+
+                requestTimestamp = this.latestPendingRequest = Date.now();
 
                 this.features = await this.fetchFeatures(
                     this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer], topFilter
@@ -541,8 +543,6 @@ export default {
                 console.warn("Request prefiltering by bezirk failed");
             }
 
-            let requestTimestamp = null;
-
             requestTimestamp = this.latestPendingRequest = Date.now();
 
             this.features = await this.fetchFeatures(
@@ -552,7 +552,7 @@ export default {
             if (requestTimestamp !== this.latestPendingRequest) {
                 return;
             }
-
+            this.latestPendingRequest = null;
             this.updateResults();
 
             setTimeout(() => {
