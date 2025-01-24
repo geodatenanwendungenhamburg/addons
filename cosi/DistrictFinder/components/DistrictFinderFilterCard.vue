@@ -60,6 +60,7 @@ export default {
                 },
                 options: {
                     maintainAspectRatio: false,
+                    animation: false,
                     responsive: true,
                     scales: {
                         y: {
@@ -276,7 +277,11 @@ export default {
          */
         selectedDistricts () {
             if (this.selectedDataset) {
+                this.chartConfig.options.animation = true;
                 this.addChartData();
+                setTimeout(() => {
+                    this.chartConfig.options.animation = false;
+                });
             }
         },
 
@@ -513,7 +518,7 @@ export default {
 
             this.isLoading = true;
 
-            const originalAnimation = this.chartConfig.options.animation;
+            this.chartConfig.options.animation = true;
 
             try {
                 const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`,
@@ -551,8 +556,9 @@ export default {
             this.updateResults();
 
             setTimeout(() => {
-                this.chartConfig.options.animation = originalAnimation;
+                this.chartConfig.options.animation = false;
             });
+
         }
     }
 };
