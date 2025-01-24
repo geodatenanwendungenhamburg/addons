@@ -276,8 +276,16 @@ export default {
          */
         selectedDistricts () {
             if (this.selectedDataset) {
-                this.updateYear();
+                this.addChartData();
             }
+        },
+
+        /**
+         * Updates the condition and its chart whenever the screening level changes.
+         * @returns {void}
+         */
+        selectedLevelId () {
+            this.updateSelectedCategory();
         }
     },
 
