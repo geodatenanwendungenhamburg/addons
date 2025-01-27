@@ -18,7 +18,7 @@
 const state = {
     active: false,
     deactivateGFI: true,
-    icon: "bi-image",
+    icon: "bi-search",
     id: "districtFinder",
     isVisibleInMenu: true,
     name: "additional:modules.tools.cosi.districtFinder.title",
