@@ -384,6 +384,9 @@ export default {
                          * @todo should go somewhere else...
                          */
                         setGeomAttributes(feature, this.geomAttributes);
+                        const addressArray = layerMap.addressField.map(field => feature.get(field)),
+                            address = addressArray.length === 3 ? `${addressArray[0]} ${addressArray[1]}, ${addressArray[2]}` : addressArray.join(", ");
+
                         return {
                             key: feature.getId(),
                             name: feature.get(layerMap.keyOfAttrName),
@@ -394,7 +397,7 @@ export default {
                             layerId: layerMap.layerId,
                             gfiAttributes: vectorLayer.values_.gfiAttributes,
                             type: feature.get(layerMap.categoryField),
-                            address: layerMap.addressField.map(field => feature.get(field)).join(", "),
+                            address,
                             feature: feature,
                             enabled: true,
                             isSimulation: feature.get("isSimulation") || false,
