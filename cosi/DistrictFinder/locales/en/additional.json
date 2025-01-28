@@ -2,6 +2,7 @@
     "modules": {
         "tools": {
             "cosi": {
+                "areaSelection": "Area Selection",
                 "districtFinder": {
                     "title": "District Screening",
                     "description": "First select the desired reference level on which the screening is to take place under “Limit areas”. You can then limit the areas of the reference level. Conditions can be added to create a new screening. Areas that match the conditions can then be accepted.",
@@ -13,8 +14,8 @@
                     "showDetails": "Show details",
                     "hideDetails": "Hide details",
                     "operators": {
-                      "or": "OR",
-                      "and": "AND"
+                        "or": "OR",
+                        "and": "AND"
                     },
                     "foundArea": "Found area",
                     "foundAreas": "Found areas",
@@ -53,19 +54,19 @@
                         "export": "Export"
                     },
                     "errors": {
-                      "invalid": "File could not be read.",
-                      "wrongFileFormat": "The file is not in the correct format.",
-                      "attErr": " {{attribute}} node does not exist.",
-                      "numErr": " Reference Value or Tolerance is not in number format under Id {{id}}",
-                      "relNumErr": " For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100 under Id {{id}}",
-                      "relativErr": "For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100."
+                        "invalid": "File could not be read.",
+                        "wrongFileFormat": "The file is not in the correct format.",
+                        "attErr": " {{attribute}} node does not exist.",
+                        "numErr": " Reference Value or Tolerance is not in number format under Id {{id}}",
+                        "relNumErr": " For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100 under Id {{id}}",
+                        "relativErr": "For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100."
                     },
                     "selector": {
-                      "title": "Limit districts",
-                      "subtitle": "Limit {{selectedScreeningLevelLabel}}",
-                      "label": {
-                        "level": "Reference level"
-                      }
+                        "title": "Limit districts",
+                        "subtitle": "Limit {{selectedScreeningLevelLabel}}",
+                        "label": {
+                          "level": "Reference level"
+                        }
                     }
                   }
             }

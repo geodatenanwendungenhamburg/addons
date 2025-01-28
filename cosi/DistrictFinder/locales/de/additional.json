@@ -2,6 +2,7 @@
     "modules": {
         "tools": {
             "cosi": {
+                "areaSelection": "Gebietsauswahl",
                 "districtFinder": {
                     "title": "Gebiete Screening",
                     "description": "Wählen Sie zuerst die gewünschte Bezugsebene aus, auf der das Screening erfolgen soll. Anschließend können Sie die Gebiete der Bezugsebene eingrenzen. Um ein neues Screening zu erstellen, müssen Bedingungen hinzugefügt werden. Gebiete, die den Bedingungen entsprechen können anschließend übernommen werden.",
@@ -13,8 +14,8 @@
                     "showDetails": "Details einblenden",
                     "hideDetails": "Details ausblenden",
                     "operators": {
-                      "or": "ODER",
-                      "and": "UND"
+                        "or": "ODER",
+                        "and": "UND"
                     },
                     "foundArea": "Gefundenes Gebiet",
                     "foundAreas": "Gefundene Gebiete",
@@ -53,19 +54,19 @@
                         "export": "Exportieren"
                     },
                     "errors": {
-                      "invalid": "Datei konnte nicht gelesen werden.",
-                      "wrongFileFormat": "Die Datei hat nicht das richtige Format.",
-                      "attErr": " {{attribute}} Tag existiert nicht.",
-                      "numErr": " Referenzwert oder Toleranz ist nicht im Zahlenformat unter Id {{id}}",
-                      "relNumErr": " Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 unter Id {{id}} zulässig",
-                      "relativErr": "Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 zulässig."
+                        "invalid": "Datei konnte nicht gelesen werden.",
+                        "wrongFileFormat": "Die Datei hat nicht das richtige Format.",
+                        "attErr": " {{attribute}} Tag existiert nicht.",
+                        "numErr": " Referenzwert oder Toleranz ist nicht im Zahlenformat unter Id {{id}}",
+                        "relNumErr": " Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 unter Id {{id}} zulässig",
+                        "relativErr": "Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 zulässig."
                     },
                     "selector": {
-                      "title": "Gebiete eingrenzen",
-                      "subtitle": "{{selectedScreeningLevelLabel}} eingrenzen",
-                      "label": {
-                        "level": "Bezugsebene"
-                      }
+                        "title": "Gebiete eingrenzen",
+                        "subtitle": "{{selectedScreeningLevelLabel}} eingrenzen",
+                        "label": {
+                            "level": "Bezugsebene"
+                        }
                     }
                 }
             }
