@@ -467,13 +467,8 @@ export default {
          * @return {Object} an Object of all sorted data and labels.
          */
         sortedData () {
-            const sortedFeatures = this.featuresToUse.map(feature => feature.properties);
-
-            sortedFeatures.forEach(v => {
-                v[this.selectedCategory] = v[this.selectedCategory] || 0;
-            });
-
-            return sortedFeatures.sort((a, b) => a[this.selectedCategory] - b[this.selectedCategory]);
+            return this.featuresToUse.map(feature => feature.properties)
+                .sort((a, b) => a[this.selectedCategory] - b[this.selectedCategory]);
         },
 
         /**
@@ -539,6 +534,9 @@ export default {
                 this.features = await this.fetchFeatures(
                     this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer], topFilter
                 );
+                this.features.forEach(feature => {
+                    feature.properties[this.selectedCategory] ||= 0;
+                });
 
                 if (requestTimestamp !== this.latestPendingRequest) {
                     return;
@@ -558,6 +556,9 @@ export default {
             this.features = await this.fetchFeatures(
                 this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer]
             );
+            this.features.forEach(feature => {
+                feature.properties[this.selectedCategory] ||= 0;
+            });
 
             if (requestTimestamp !== this.latestPendingRequest) {
                 return;
