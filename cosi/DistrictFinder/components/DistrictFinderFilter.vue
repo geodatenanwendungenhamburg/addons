@@ -450,7 +450,7 @@ export default {
 
             this.resetFilteredLayer();
 
-            if (Array.isArray(this.resultList)) {
+            if (Array.isArray(this.resultList) && this.cardList.length) {
                 this.setFeatureStyle(this.features, this.keyOfAttrNameForSelectedLayer, this.resultList);
             }
         }
