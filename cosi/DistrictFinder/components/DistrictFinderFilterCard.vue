@@ -111,6 +111,7 @@ export default {
         ...mapGetters("Tools/DistrictFinder", ["chartColors", "mapColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
         ...mapGetters("Tools/DistrictSelector", [
             "districtLevels",
+            "selectedDistrictLevel",
             "mapping"
         ]),
 
@@ -119,9 +120,22 @@ export default {
          * @returns {Object[]} The statistical features.
          */
         featuresToUse () {
-            return this.selectedDistricts?.length
+            const selectedDistrictsArray = [];
+
+            if (Array.isArray(this.selectedDistricts)) {
+                this.selectedDistricts.forEach(district => {
+                    if (Object.prototype.hasOwnProperty.call(this.selectedDistrictLevel.districtNamesMap, district)) {
+                        selectedDistrictsArray.push(this.selectedDistrictLevel.districtNamesMap[district]);
+                    }
+                    else {
+                        selectedDistrictsArray.push(district);
+                    }
+                });
+            }
+
+            return selectedDistrictsArray?.length
                 ? this.features.filter(
-                    feature => this.selectedDistricts.includes(feature?.properties?.[this.keyOfAttrNameForSelectedLayer]))
+                    feature => selectedDistrictsArray.includes(feature?.properties?.[this.keyOfAttrNameForSelectedLayer]))
                 : this.features;
         },
 
