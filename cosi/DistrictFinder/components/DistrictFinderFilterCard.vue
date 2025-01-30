@@ -124,12 +124,7 @@ export default {
 
             if (Array.isArray(this.selectedDistricts)) {
                 this.selectedDistricts.forEach(district => {
-                    if (Object.prototype.hasOwnProperty.call(this.selectedDistrictLevel.districtNamesMap, district)) {
-                        selectedDistrictsArray.push(this.selectedDistrictLevel.districtNamesMap[district]);
-                    }
-                    else {
-                        selectedDistrictsArray.push(district);
-                    }
+                    selectedDistrictsArray.push(this.selectedDistrictLevel.districtNamesMap?.[district] || district);
                 });
             }
 
