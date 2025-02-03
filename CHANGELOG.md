@@ -7,6 +7,7 @@
 ### __Breaking Changes__
 
 ### Added
+- The new cosi tool [districtFinder](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/DistrictFinder/) allows to find areas based on different conditions. Further details: [districtFinder documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/DistrictFinder/doc/config.json.md)
 
 ### Changed
 
