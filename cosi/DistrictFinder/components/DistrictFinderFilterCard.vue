@@ -268,7 +268,6 @@ export default {
         features: {
             handler () {
                 this.addChartData();
-
             },
             deep: true
         },

@@ -117,6 +117,11 @@ export default {
             this.setSelectedDistricts(this.collectSelectedDistricts());
         }
     },
+
+    created () {
+        this.setSelectedDistrictLevelId(this.selectedLevelId);
+    },
+
     mounted () {
         if (this.selectedDistricts.length) {
             this.subLevelDistricts = this.subLevel.districts.map(district => district.getName()).sort();
@@ -128,6 +133,7 @@ export default {
 
     methods: {
         ...mapMutations("Tools/DistrictFinder", ["setSelectedDistricts", "setSelectedLevelId", "setSubLevelSelection", "setTopLevelSelection"]),
+        ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
          * Adds districts to the subLevel by the refernce district.

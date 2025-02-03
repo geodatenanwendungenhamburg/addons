@@ -41,6 +41,7 @@ export default {
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
         ...mapGetters("Tools/DistrictFinder", ["cardList", "conditionDate", "conditionTitle", "filteredLayer", "mapColors", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel"]),
 
         /**
          * Gets the districts of all cards.
@@ -488,8 +489,16 @@ export default {
          * @returns {void}
          */
         updateResultList (districts, operators) {
+            const selectedDistrictsArray = [];
+
+            if (Array.isArray(this.selectedDistricts)) {
+                this.selectedDistricts.forEach(district => {
+                    selectedDistrictsArray.push(this.selectedDistrictLevel?.districtNamesMap?.[district] || district);
+                });
+            }
+
             this.resultList = this.getResultList(districts, operators)
-                .filter(e => this.selectedDistricts.includes(e));
+                .filter(e => selectedDistrictsArray.includes(e));
 
             this.resetFilteredLayer();
 
