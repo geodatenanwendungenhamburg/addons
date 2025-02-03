@@ -891,6 +891,7 @@ export default {
                                 readonly
                             />
                             <v-select
+                                v-if="mode !== 'path'"
                                 v-model="_transportType"
                                 class="mb-4"
                                 title="Verkehrsmittel"
@@ -901,10 +902,12 @@ export default {
                                 outlined
                                 dense
                                 hide-details
-                                :disabled="mode === 'path'"
                             />
                             <v-row dense>
-                                <v-col class="mb-2">
+                                <v-col
+                                    v-if="mode !== 'path'"
+                                    class="mb-2"
+                                >
                                     <v-select
                                         v-model="_scaleUnit"
                                         title="Maßeinheit der Entfernung"
@@ -915,14 +918,13 @@ export default {
                                         outlined
                                         dense
                                         hide-details
-                                        :disabled="mode === 'path'"
                                     />
                                 </v-col>
                                 <v-col class="mb-2">
                                     <v-text-field
                                         id="range"
                                         v-model="_distance"
-                                        :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.distance')"
+                                        :label="$t('additional:modules.tools.cosi.accessibilityAnalysis.distance') + (mode === 'path' ? ' (in m)' : '')"
                                         type="number"
                                         min="0"
                                         outlined
