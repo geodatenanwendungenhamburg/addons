@@ -39,7 +39,9 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             namespaced: true,
                             getters: {
                                 chartColors: () => ({conditionFalse: "rgb(255, 255, 255, 1)", conditionTrue: "rgb(255, 0, 0, 1)"}),
+                                groupBlacklist: () => [],
                                 keyOfAttrNameStats: () => "stats",
+                                referenceLineColor: () => "rgba(255, 0, 0, 0.5)",
                                 selectedDistricts: () => [],
                                 selectedLevelId: () => "1",
                                 topLevelSelection: () => ["Altona", "Bergedorf"]
@@ -345,7 +347,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                 const wrapper = factory.getShallowMount(),
                     fetchFeaturesStub = sinon.stub(wrapper.vm, "fetchFeatures");
 
-                fetchFeaturesStub.onFirstCall().callsFake(() => 
+                fetchFeaturesStub.onFirstCall().callsFake(() =>
                     expect(fetchFeaturesStub.firstCall.calledWith(sinon.match.any, sinon.match.any, sinon.match.any,
                         "bezirk IN ('Altona','Bergedorf')")).to.be.true);
 

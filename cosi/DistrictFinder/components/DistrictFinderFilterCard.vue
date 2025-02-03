@@ -108,7 +108,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["chartColors", "mapColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["chartColors", "groupBlacklist", "mapColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
         ...mapGetters("Tools/DistrictSelector", [
             "districtLevels",
             "selectedDistrictLevel",
@@ -225,6 +225,14 @@ export default {
          */
         selectedDataset () {
             return this.datasetStat.find(d => d.category === this.selectedCategory);
+        },
+
+        /**
+         * Returns if the current dataset group is in blacklist
+         * @returns {Boolean} true if it is in blacklist.
+         */
+        isGroupInBlacklist () {
+            return this.groupBlacklist.includes(this.datasetStat.find(d => d.category === this.selectedCategory).group);
         },
 
         /**
@@ -535,29 +543,31 @@ export default {
             this.chartConfig.options.animation = true;
             let requestTimestamp;
 
-            try {
-                const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`;
+            if (!this.isGroupInBlacklist) {
+                try {
+                    const topFilter = `bezirk IN ('${this.topLevelSelection.join("','")}')`;
 
-                requestTimestamp = this.latestPendingRequest = Date.now();
+                    requestTimestamp = this.latestPendingRequest = Date.now();
 
-                this.features = await this.fetchFeatures(
-                    this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer], topFilter
-                );
-                this.features.forEach(feature => {
-                    feature.properties[this.selectedCategory] ||= 0;
-                });
+                    this.features = await this.fetchFeatures(
+                        this.selectedStatLayer, this.selectedYear, [this.selectedCategory, this.keyOfAttrNameForSelectedLayer], topFilter
+                    );
+                    this.features.forEach(feature => {
+                        feature.properties[this.selectedCategory] ||= 0;
+                    });
 
-                if (requestTimestamp !== this.latestPendingRequest) {
-                    return;
+                    if (requestTimestamp !== this.latestPendingRequest) {
+                        return;
+                    }
+                    this.updateResults();
+
+                    setTimeout(() => {
+                        this.chartConfig.options.animation = false;
+                    });
                 }
-                this.updateResults();
-
-                setTimeout(() => {
-                    this.chartConfig.options.animation = false;
-                });
-            }
-            catch {
-                console.warn("Request prefiltering by bezirk failed");
+                catch {
+                    console.warn("Request prefiltering by bezirk failed");
+                }
             }
 
             requestTimestamp = this.latestPendingRequest = Date.now();

@@ -5,6 +5,7 @@
  * @property {Object} [chartColors= conditionFalse: "rgb(220, 226, 243, 1)", conditionTrue: "rgb(0, 67, 122, 1)"] - Colors for the diagram depending on whether a condition is true or false
  * @property {Boolean} [deactivateGFI=false] - Deactivates the gfi if true (config-param).
  * @property {ol/Layer} filteredLayer - The layer for filtered features.
+ * @property {String[]} groupBlacklist - The blacklist of groups which will not be sent for the first district request.
  * @property {String} [icon="bi-folder2-open"] - Bootstrap icon class (config-param).
  * @property {String} id - The id of the district finder component.
  * @property {boolean} isVisibleInMenu if true, tool is selectable in menu (config-param)
@@ -28,6 +29,7 @@ const state = {
     conditionTitle: "",
     deactivateGFI: true,
     filteredLayer: undefined,
+    groupBlacklist: [],
     icon: "bi-search",
     id: "districtFinder",
     isVisibleInMenu: true,
