@@ -25,4 +25,10 @@ export default {
         visibility: hidden;
     }
 }
+
+.center-in-screen {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
 </style>

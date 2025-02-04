@@ -4,11 +4,13 @@ import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
+import DistrictFinderLoadingSpinner from "./DistrictFinderLoadingSpinner.vue";
 import {Fill, Style} from "ol/style.js";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
+import Vue from "vue";
 
 export default {
     name: "DistrictFinderFilter",
@@ -22,10 +24,12 @@ export default {
     data () {
         return {
             activeCardId: "",
+            choroplethTimeout: null,
             copyValue: false,
             features: [],
             isFieldValidated: true,
             keyOfAttrNameForSelectedLayer: "",
+            loader: null,
             numberOfLimitedAreas: 20,
             resultList: false,
             showExportDialog: false,
@@ -75,6 +79,9 @@ export default {
             }
         }
     },
+    async created () {
+        this.setFilteredLayer(await this.addNewLayerIfNotExists({layerName: "filteredLayer"}));
+    },
     mounted () {
         if (!this.cardList.length) {
             this.addCard();
@@ -83,9 +90,6 @@ export default {
         if (this.conditionTitle === "") {
             this.setConditionTitle(this.$t("additional:modules.tools.cosi.districtFinder.conditions"));
         }
-    },
-    async created () {
-        this.setFilteredLayer(await this.addNewLayerIfNotExists({layerName: "filteredLayer"}));
     },
     beforeDestroy () {
         this.resetFilteredLayer();
@@ -380,7 +384,46 @@ export default {
             if (typeof this.filteredLayer?.getSource() === "undefined" || !Array.isArray(resultList)) {
                 return;
             }
+            if (this.choroplethTimeout !== null) {
+                clearTimeout(this.choroplethTimeout);
+            }
+            if (this.topLevelSelection.length > 2) {
+                if (!this.loader) {
+                    const mapDiv = document.getElementById("map"),
+                        spinnercontainer = document.createElement("div"),
+                        SpinnerComponent = Vue.extend(DistrictFinderLoadingSpinner),
+                        SpinnerInstance = new SpinnerComponent(),
+                        SpinnerElement = SpinnerInstance.$mount().$el;
 
+                    this.loader = spinnercontainer.id = "spinner-container";
+
+                    SpinnerElement.classList.add("center-in-screen");
+                    spinnercontainer.appendChild(SpinnerElement);
+                    mapDiv.appendChild(spinnercontainer);
+                }
+
+                this.choroplethTimeout = setTimeout(() => {
+                    document.getElementById(this.loader).remove();
+                    this.loader = null;
+                    this.stylingHandler(features, key, resultList);
+                }, 2000);
+                return;
+            }
+            if (this.loader) {
+                document.getElementById(this.loader).remove();
+                this.loader = null;
+            }
+            this.stylingHandler(features, key, resultList);
+        },
+
+        /**
+         * Sets the style of filtered features and the rest features.
+         * @param {Object[]} features - The selected features from district level.
+         * @param {String} key The key to be used for the district name.
+         * @param {String[]} resultList - The result names as list.
+         * @returns {void}
+         */
+        stylingHandler (features, key, resultList) {
             this.filteredLayer.getSource().clear();
 
             this.features = features;
