@@ -4,7 +4,7 @@ import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
-import DistrictFinderLoadingSpinner from "./DistrictFinderLoadingSpinner.vue";
+import DistrictFinderFilterSpinner from "./DistrictFinderFilterSpinner.vue";
 import {Fill, Style} from "ol/style.js";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
@@ -392,7 +392,7 @@ export default {
                 if (!this.loader) {
                     const mapDiv = document.getElementById("map"),
                         spinnercontainer = document.createElement("div"),
-                        SpinnerComponent = Vue.extend(DistrictFinderLoadingSpinner),
+                        SpinnerComponent = Vue.extend(DistrictFinderFilterSpinner),
                         SpinnerInstance = new SpinnerComponent(),
                         SpinnerElement = SpinnerInstance.$mount().$el;
 

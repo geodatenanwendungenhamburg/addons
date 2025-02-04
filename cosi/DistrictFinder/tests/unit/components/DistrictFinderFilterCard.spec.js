@@ -80,19 +80,19 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
             expect(wrapper.exists()).to.be.true;
         });
 
-        it("should not find component DistrictFinderLoadingSpinner", () => {
+        it("should not find component DistrictFinderFilterSpinner", () => {
             const wrapper = factory.getShallowMount();
 
-            expect(wrapper.findComponent({name: "DistrictFinderLoadingSpinner"}).exists()).to.be.false;
+            expect(wrapper.findComponent({name: "DistrictFinderFilterSpinner"}).exists()).to.be.false;
         });
 
-        it("should find component DistrictFinderLoadingSpinner", async () => {
+        it("should find component DistrictFinderFilterSpinner", async () => {
             const wrapper = factory.getShallowMount();
 
             wrapper.setData({ isLoading: true })
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.findComponent({name: "DistrictFinderLoadingSpinner"}).exists()).to.be.true;
+            expect(wrapper.findComponent({name: "DistrictFinderFilterSpinner"}).exists()).to.be.true;
         });
     });
 

@@ -2,7 +2,7 @@
 import BarchartItemAnnotated from "../../components/BarchartItemAnnotated.vue";
 import ContentCard from "../../components/ContentCard.vue";
 import deepAssign from "../../../../src/utils/deepAssign";
-import DistrictFinderLoadingSpinner from "./DistrictFinderLoadingSpinner.vue";
+import DistrictFinderFilterSpinner from "./DistrictFinderFilterSpinner.vue";
 import groupMapping from "../../utils/groupMapping";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import {mapGetters} from "vuex";
@@ -12,7 +12,7 @@ export default {
     components: {
         BarchartItemAnnotated,
         ContentCard,
-        DistrictFinderLoadingSpinner
+        DistrictFinderFilterSpinner
     },
     props: {
         active: {
@@ -810,7 +810,7 @@ export default {
                 </div>
             </template>
         </ContentCard>
-        <DistrictFinderLoadingSpinner
+        <DistrictFinderFilterSpinner
             v-if="isLoading"
             class="loading-overlay"
         />
