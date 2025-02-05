@@ -1,16 +1,15 @@
 <script>
 import dayjs from "dayjs";
+import {debounce} from "chart.js/helpers";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
 import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
-import DistrictFinderFilterSpinner from "./DistrictFinderFilterSpinner.vue";
 import {Fill, Style} from "ol/style.js";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
-import Vue from "vue";
 
 export default {
     name: "DistrictFinderFilter",
@@ -24,13 +23,12 @@ export default {
     data () {
         return {
             activeCardId: "",
-            choroplethTimeout: null,
             copyValue: false,
-            features: [],
             isFieldValidated: true,
             keyOfAttrNameForSelectedLayer: "",
             loader: null,
             numberOfLimitedAreas: 20,
+            olFeatures: [],
             resultList: false,
             showExportDialog: false,
             showMoreAreas: false,
@@ -40,7 +38,7 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["cardList", "conditionDate", "conditionTitle", "filteredLayer", "mapColors", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
+        ...mapGetters("Tools/DistrictFinder", ["cardList", "choroplethDebounceDelay", "conditionDate", "conditionTitle", "filteredLayer", "mapColors", "topLevelSelection", "selectedLevelId", "selectedDistricts", "subLevelSelection"]),
         ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel"]),
 
         /**
@@ -57,6 +55,16 @@ export default {
          */
         allOperators () {
             return this.cardList.map(card => card.operator);
+        },
+
+        /**
+         * Gets the selected districts as they appear in the data (after processing combination defined in mapping).
+         * @returns {String[]} The selected statistic districts.
+         */
+        selectedStatisticDistricts () {
+            return this.selectedDistricts.map(
+                district => this.selectedDistrictLevel?.districtNamesMap?.[district] || district
+            );
         }
     },
     watch: {
@@ -68,6 +76,7 @@ export default {
         cardList (val) {
             if (Array.isArray(val) && !val.length) {
                 this.resultList = false;
+                this.resetFilteredLayer();
             }
         },
         /**
@@ -382,85 +391,57 @@ export default {
         },
 
         /**
-         * Sets the style of filtered features and the rest features.
-         * @param {Object[]} features - The selected features from district level.
-         * @param {String} key The key to be used for the district name.
-         * @param {String[]} resultList - The result names as list.
+         * Prepares the openlayers feature for choropleth map
+         * @param {Object[]} features OAF features with geometries.
+         * @param {String} key The property to be used as feature id (e.g. "stat_gebiet").
          * @returns {void}
          */
-        setFeatureStyle (features, key, resultList = this.resultList) {
-            if (typeof this.filteredLayer?.getSource() === "undefined" || !Array.isArray(resultList)) {
+        prepareOLFeatures (features, key) {
+            if (typeof this.filteredLayer?.getSource() === "undefined") {
                 return;
             }
-            if (this.choroplethTimeout !== null) {
-                clearTimeout(this.choroplethTimeout);
-            }
-            if (this.topLevelSelection.length > 2) {
-                if (!this.loader) {
-                    const mapDiv = document.getElementById("map"),
-                        spinnercontainer = document.createElement("div"),
-                        SpinnerComponent = Vue.extend(DistrictFinderFilterSpinner),
-                        SpinnerInstance = new SpinnerComponent(),
-                        SpinnerElement = SpinnerInstance.$mount().$el;
 
-                    this.loader = spinnercontainer.id = "spinner-container";
+            const newFeatures = getOAFFeature.readAllOAFToGeoJSON(features);
 
-                    SpinnerElement.classList.add("center-in-screen");
-                    spinnercontainer.appendChild(SpinnerElement);
-                    mapDiv.appendChild(spinnercontainer);
+            newFeatures.forEach(feature => {
+                const id = feature.get(key);
+
+                feature.setId(id);
+                if (this.selectedStatisticDistricts.includes(id)) {
+                    feature.setStyle(new Style({fill: new Fill({color:
+                        this.resultList?.includes?.(id)
+                            ? this.mapColors.conditionTrue : this.mapColors.conditionFalse
+                    })}));
                 }
+                else {
+                    feature.setStyle(new Style({fill: new Fill({color: [0, 0, 0, 0]})}));
+                }
+            });
 
-                this.choroplethTimeout = setTimeout(() => {
-                    document.getElementById(this.loader).remove();
-                    this.loader = null;
-                    this.stylingHandler(features, key, resultList);
-                }, 2000);
-                return;
-            }
-            if (this.loader) {
-                document.getElementById(this.loader).remove();
-                this.loader = null;
-            }
-            this.stylingHandler(features, key, resultList);
+            this.olFeatures.forEach(f => f.setId("invalid"));
+            this.filteredLayer.getSource().addFeatures(newFeatures);
+            this.filteredLayer.getSource().removeFeatures(this.olFeatures);
+            this.olFeatures = newFeatures;
         },
 
         /**
          * Sets the style of filtered features and the rest features.
-         * @param {Object[]} features - The selected features from district level.
-         * @param {String} key The key to be used for the district name.
-         * @param {String[]} resultList - The result names as list.
          * @returns {void}
          */
-        stylingHandler (features, key, resultList) {
-            this.filteredLayer.getSource().clear();
-
-            this.features = features;
-            this.keyOfAttrNameForSelectedLayer = key;
-            const filteredFeatures = getOAFFeature.readAllOAFToGeoJSON(features.filter(feature => resultList?.includes(feature?.properties?.[key]))),
-                restFeatures = getOAFFeature.readAllOAFToGeoJSON(features.filter(feature => !resultList?.includes(feature?.properties?.[key])));
-
-            filteredFeatures.forEach(feature => {
-                feature.setStyle(() => {
-                    return new Style({
-                        fill: new Fill({
-                            color: this.mapColors.conditionTrue
-                        })
-                    });
-                });
+        setFeatureStyle () {
+            this.olFeatures.forEach(feature => {
+                if (this.selectedStatisticDistricts.includes(feature?.getId())) {
+                    feature?.getStyle()?.getFill()?.setColor(
+                        this.resultList?.includes?.(feature?.getId()) ?
+                            this.mapColors.conditionTrue :
+                            this.mapColors.conditionFalse
+                    );
+                }
+                else {
+                    feature?.getStyle()?.getFill()?.setColor([0, 0, 0, 0]);
+                }
             });
-
-            restFeatures.forEach(feature => {
-                feature.setStyle(() => {
-                    return new Style({
-                        fill: new Fill({
-                            color: this.mapColors.conditionFalse
-                        })
-                    });
-                });
-            });
-
-            this.filteredLayer.getSource().addFeatures(filteredFeatures);
-            this.filteredLayer.getSource().addFeatures(restFeatures);
+            this.filteredLayer?.changed();
         },
 
         /**
@@ -507,11 +488,7 @@ export default {
             this.resultList = this.getResultList(districts, operators)
                 .filter(e => selectedDistrictsArray.includes(e));
 
-            this.resetFilteredLayer();
-
-            if (Array.isArray(this.resultList) && this.cardList.length) {
-                this.setFeatureStyle(this.features, this.keyOfAttrNameForSelectedLayer, this.resultList);
-            }
+            debounce(this.setFeatureStyle, this.choroplethDebounceDelay)();
         }
     }
 };
@@ -596,9 +573,9 @@ export default {
                         class="mx-4"
                         @delete="deleteCard"
                         @scanCompleted="setCardAttributes"
-                        @setFeatureStyle="setFeatureStyle"
                         @validateField="setFieldValidated"
                         @showHint="showLatestYear"
+                        @prepareFeatures="prepareOLFeatures"
                     />
                 </div>
             </div>

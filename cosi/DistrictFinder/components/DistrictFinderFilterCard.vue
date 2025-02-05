@@ -34,7 +34,7 @@ export default {
             default: false
         }
     },
-    emits: ["delete", "scanCompleted", "setFeatureStyle", "validateField", "showHint"],
+    emits: ["delete", "prepareFeatures", "scanCompleted", "validateField", "showHint"],
     data () {
         return {
             dataChips: ["statistische Daten"],
@@ -271,12 +271,6 @@ export default {
             },
             deep: true
         },
-        featuresToUse: {
-            handler (value) {
-                this.$emit("setFeatureStyle", value, this.keyOfAttrNameForSelectedLayer);
-            },
-            deep: true
-        },
         referenceValue (val) {
             this.chartConfig.options = Object.assign({}, deepAssign(this.chartConfig.options,
                 {plugins: {annotation: {annotations: {referenceLine: {
@@ -499,7 +493,6 @@ export default {
 
             if (this.selectedCategory !== null && typeof this.referenceValue !== "undefined") {
                 this.$emit("scanCompleted", this.condition.id, this.resultNames, this.selectedYear, this.selectedCategory, this.referenceValue, this.tolerance, this.selectedFilter);
-                this.$emit("setFeatureStyle", this.featuresToUse, this.keyOfAttrNameForSelectedLayer);
                 this.$emit("validateField", this.isFieldValidated);
             }
 
@@ -558,6 +551,7 @@ export default {
                     if (requestTimestamp !== this.latestPendingRequest) {
                         return;
                     }
+                    this.$emit("prepareFeatures", this.features, this.keyOfAttrNameForSelectedLayer);
                     this.updateResults();
 
                     setTimeout(() => {
@@ -582,6 +576,7 @@ export default {
                 return;
             }
             this.latestPendingRequest = null;
+            this.$emit("prepareFeatures", this.features, this.keyOfAttrNameForSelectedLayer);
             this.updateResults();
 
             setTimeout(() => {

@@ -3,6 +3,7 @@
  * @typedef {Object} DistrictFinderState
  * @property {Boolean} [active=false] - Is activated (will be rendered) or not (config-param).
  * @property {Object} [chartColors= conditionFalse: "rgb(220, 226, 243, 1)", conditionTrue: "rgb(0, 67, 122, 1)"] - Colors for the diagram depending on whether a condition is true or false
+ * @property {Number} [choroplethDebounceDelay=300] - Delay in ms for which choropleth rendering is withhold to wait for further user input. Can be adjusted according to user feedback.
  * @property {Boolean} [deactivateGFI=false] - Deactivates the gfi if true (config-param).
  * @property {ol/Layer} filteredLayer - The layer for filtered features.
  * @property {String[]} groupBlacklist - The blacklist of groups which will not be sent for the first district request.
@@ -25,6 +26,7 @@ const state = {
         conditionTrue: "rgb(0, 67, 122, 1)"
     },
     cardList: [],
+    choroplethDebounceDelay: 300,
     conditionDate: "",
     conditionTitle: "",
     deactivateGFI: true,
