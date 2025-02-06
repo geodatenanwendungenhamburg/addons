@@ -130,7 +130,8 @@ describe("addons/vpiDashboard/test/ data card component", () => {
     });
 
     it("get list of years for paginator", () => {
-        const thisYear = new Date().getFullYear();
+        // const thisYear = new Date().getFullYear();
+        const thisYear = 2024;
 
         wrapper.vm.detail = "activities";
 

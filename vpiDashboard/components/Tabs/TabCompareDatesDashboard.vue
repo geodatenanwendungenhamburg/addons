@@ -144,6 +144,12 @@ export default {
         this.all_locations.forEach((location) => {
             this.locations_a.push({location_id: location.id, street: location.street});
         });
+
+        /* DatePicker.CalendarPanel.methods.updateNow = function () {
+            this.now = this.value
+                ? new Date(this.value)
+                : new Date("2014-01-01"); // when the value is empty, default is new Date()
+        };*/
     },
     methods: {
         dayjs,
@@ -336,7 +342,12 @@ export default {
             const threeDaysInMilliseconds = 3 * 24 * 60 * 60 * 1000,
                 twoMonthsInMilliseconds = 60 * 24 * 60 * 60 * 1000;
 
-            if (new Date(val).getTime() >= (new Date().getTime() - threeDaysInMilliseconds) || new Date(val).getTime() < new Date("2019-01-01T00:00:00").getTime()) {
+            // es sind keine Daten, jünger als September 2024 vorhanden
+            if (
+                new Date(val).getTime() >= (new Date().getTime() - threeDaysInMilliseconds)
+                || new Date(val).getTime() < new Date("2019-01-01T00:00:00").getTime()
+                || new Date(val).getTime() > new Date("2024-09-30T00:00:00").getTime()
+            ) {
                 return true;
             }
 
@@ -490,6 +501,7 @@ export default {
                                 :multiple="false"
                                 :show-week-number="true"
                                 title-format="DD.MM.YYYY"
+                                default-value="2024-09-01"
                                 :lang="$t('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
                             />
                         </div>
@@ -515,6 +527,7 @@ export default {
                                 :multiple="false"
                                 :show-week-number="true"
                                 title-format="DD.MM.YYYY"
+                                default-value="2024-09-01"
                                 :lang="$t('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
                             />
                         </div>

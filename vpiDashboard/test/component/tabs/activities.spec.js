@@ -146,9 +146,10 @@ describe("addons/vpiDashboard/test/ activities tab component", () => {
 
     it("change year in data card", () => {
         // do not change anything for wrong index
-        const currentYear = new Date().getFullYear();
+        // const currentYear = new Date().getFullYear();
+        const currentYear = 2024;
 
-        wrapper.vm.yearHasChanged(7);
+        wrapper.vm.yearHasChanged(6);
         expect(wrapper.vm.currentlySelectedYear).to.equal(currentYear);
 
         // change the year for correct index

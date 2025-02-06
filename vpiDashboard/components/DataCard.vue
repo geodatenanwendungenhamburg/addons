@@ -115,7 +115,8 @@ export default {
                 return this.translate("additional:modules.tools.vpidashboard.time.days", {returnObjects: true});
             }
             if (this.detail === "activities") {
-                const thisYear = new Date().getFullYear(),
+                // const thisYear = new Date().getFullYear(),
+                const thisYear = 2024,
                     list = [];
                 let firstYear = 2019;
 

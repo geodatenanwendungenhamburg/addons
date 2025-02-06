@@ -22,8 +22,9 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = {},
-            currentYear = new Date().getFullYear();
+            result = {};
+            // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+            // currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -68,7 +69,8 @@ const mutations = {
             });
         });
 
-        // check if already data for current year available, otherwise add an empty dataset
+        // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+        /* check if already data for current year available, otherwise add an empty dataset
         if (!result[currentYear]) {
             result[currentYear] = [
                 {index: "0", avg: "n/a", sum: "n/a"},
@@ -84,7 +86,7 @@ const mutations = {
                 {index: "10", avg: "n/a", sum: "n/a"},
                 {index: "11", avg: "n/a", sum: "n/a"}
             ];
-        }
+        }*/
 
         state.sumVisitorsPerMonth = result;
     },
@@ -98,8 +100,9 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = {},
-            currentYear = new Date().getFullYear();
+            result = {};
+            // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+            // currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -129,12 +132,13 @@ const mutations = {
 
         });
 
-        // check if already data for current year available, otherwise add an empty dataset
+        // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+        /* check if already data for current year available, otherwise add an empty dataset
         if (!aggregated[currentYear]) {
             aggregated[currentYear] = [
                 [], [], [], [], [], [], [], [], [], [], [], []
             ];
-        }
+        }*/
 
         // Ceil up to 100, e.g. 18318 becomes 18400
         Object.keys(aggregated).forEach(year => {
@@ -183,8 +187,9 @@ const mutations = {
         const
             data = payload.data,
             aggregated = {},
-            result = [],
-            currentYear = new Date().getFullYear();
+            result = [];
+            // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+            // currentYear = new Date().getFullYear();
 
         Object.keys(data).forEach(key => {
             const
@@ -198,10 +203,11 @@ const mutations = {
             aggregated[label] += item.sum_num_visitors;
         });
 
-        // check if already data for current year available, otherwise add an empty dataset
+        // Daten liegen nur bis 2024 vor, deswegen kann das hier raus
+        /* check if already data for current year available, otherwise add an empty dataset
         if (!aggregated[currentYear]) {
             aggregated[currentYear] = null;
-        }
+        }*/
 
         // Ceil up to 100, e.g. 18318 becomes 18400
         Object.keys(aggregated).forEach(key => {

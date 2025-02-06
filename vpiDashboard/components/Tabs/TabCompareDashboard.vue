@@ -390,7 +390,12 @@ export default {
             const threeDaysInMilliseconds = 3 * 24 * 60 * 60 * 1000,
                 twoMonthsInMilliseconds = 60 * 24 * 60 * 60 * 1000;
 
-            if (new Date(val).getTime() >= (new Date().getTime() - threeDaysInMilliseconds) || new Date(val).getTime() < new Date("2019-01-01T00:00:00").getTime()) {
+            // es sind keine Daten, jünger als September 2024 vorhanden
+            if (
+                new Date(val).getTime() >= (new Date().getTime() - threeDaysInMilliseconds)
+                || new Date(val).getTime() < new Date("2019-01-01T00:00:00").getTime()
+                || new Date(val).getTime() > new Date("2024-09-30T00:00:00").getTime()
+            ) {
                 return true;
             }
 
@@ -600,6 +605,7 @@ export default {
                                 :multiple="false"
                                 :show-week-number="true"
                                 title-format="DD.MM.YYYY"
+                                default-value="2024-09-01"
                                 :lang="translate('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
                             />
                         </div>

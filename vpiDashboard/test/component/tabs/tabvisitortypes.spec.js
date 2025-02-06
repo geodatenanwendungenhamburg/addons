@@ -81,7 +81,8 @@ describe("addons/vpiDashboard/test/ visitor types tab component", () => {
 
     it("computes year list correctly", () => {
         expect(wrapper.vm.yearList).to.be.an("array");
-        expect(wrapper.vm.yearList).to.have.lengthOf(new Date().getFullYear() - 2019 + 1);
+        // expect(wrapper.vm.yearList).to.have.lengthOf(new Date().getFullYear() - 2019 + 1);
+        expect(wrapper.vm.yearList).to.have.lengthOf(2024 - 2019 + 1);
         expect(wrapper.vm.yearList[1]).to.equal(2020);
     });
 

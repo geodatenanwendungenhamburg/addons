@@ -76,7 +76,9 @@ export default {
             selectedChartData: "monthlyoverview",
             chartSubTitle: "",
             renderKey: 0,
-            currentlySelectedYear: new Date().getFullYear(),
+            // Daten liegen nur bis 2024 vor, deswegen hart kodiert
+            // currentlySelectedYear: new Date().getFullYear(),
+            currentlySelectedYear: 2024,
             currentlySelectedMonth: 0
         };
     },
@@ -139,7 +141,9 @@ export default {
          * @returns {Array} list of years available in the dashboard
         */
         yearList () {
-            const thisYear = new Date().getFullYear(),
+            // Daten liegen nur bis 2024 vor, deswegen hart kodiert
+            // const thisYear = new Date().getFullYear(),
+            const thisYear = 2024,
                 list = [];
             let firstYear = 2019;
 
@@ -458,6 +462,7 @@ export default {
                             :multiple="false"
                             :show-week-number="true"
                             title-format="DD.MM.YYYY"
+                            default-value="2024-09-01"
                             :lang="translate('common:libraries.vue2-datepicker.lang', {returnObjects: true})"
                         />
                     </div>

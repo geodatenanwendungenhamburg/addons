@@ -77,7 +77,9 @@ export default {
             },
             timestamp: null,
             showChart: false,
-            currentlySelectedYear: new Date().getFullYear(),
+            // Daten liegen nur bis 2024 vor, deswegen hart kodiert
+            // currentlySelectedYear: new Date().getFullYear(),
+            currentlySelectedYear: 2024,
             noDataAvailable: ""
         };
     },
@@ -89,7 +91,9 @@ export default {
          * @returns {Array} list of years available in the dashboard
         */
         yearList () {
-            const thisYear = new Date().getFullYear(),
+            // Daten liegen nur bis 2024 vor, deswegen hart kodiert
+            // const thisYear = new Date().getFullYear(),
+            const thisYear = 2024,
                 list = [];
             let firstYear = 2019;
 
