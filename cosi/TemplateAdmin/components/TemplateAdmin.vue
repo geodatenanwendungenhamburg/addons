@@ -1,12 +1,13 @@
 <script>
-import ToolTemplate from "../../../../src/modules/tools/ToolTemplate.vue";
-import {mapGetters, mapMutations, mapState} from "vuex";
-import getters from "../store/gettersTemplateAdmin";
-import mutations from "../store/mutationsTemplateAdmin";
+import getMappingJson from "../../utils/getMappingJson";
 import {getComponent} from "../../../../src/utils/getComponent";
-import TemplateAdminForm from "./TemplateAdminForm.vue";
+import getters from "../store/gettersTemplateAdmin";
 import isObject from "../../../../src/utils/isObject";
+import {mapGetters, mapMutations, mapState} from "vuex";
+import mutations from "../store/mutationsTemplateAdmin";
 import {sort} from "../../../../src/utils/sort";
+import TemplateAdminForm from "./TemplateAdminForm.vue";
+import ToolTemplate from "../../../../src/modules/tools/ToolTemplate.vue";
 
 export default {
     name: "TemplateAdmin",
@@ -23,7 +24,7 @@ export default {
     },
     computed: {
         ...mapGetters("Tools/TemplateAdmin", Object.keys(getters)),
-        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictLevelId", "selectedDistrictsCollection", "selectedDistrictNames", "mapping"]),
+        ...mapGetters("Tools/DistrictSelector", ["selectedDistrictLevel", "selectedDistrictLevelId", "selectedDistrictsCollection", "selectedDistrictNames"]),
         ...mapGetters("Tools", ["getConfiguredToolNames"]),
         ...mapState(["Tools"])
     },
@@ -38,10 +39,11 @@ export default {
             }
         }
     },
-    created () {
+    async created () {
         this.$on("close", this.close);
         const toIgnoreTools = ["TemplateAdmin", "TemplateManager"];
 
+        this.mapping = await getMappingJson();
         this.toolOptions = this.getToolList(this.Tools, Array.isArray(this.getConfiguredToolNames)
             ? this.getConfiguredToolNames.filter(toolNames => !toIgnoreTools.includes(toolNames)) : []);
     },
