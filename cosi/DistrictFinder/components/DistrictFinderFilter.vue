@@ -78,6 +78,14 @@ export default {
             if (Array.isArray(this.resultList)) {
                 this.updateResultList(this.allDistricts, this.allOperators);
             }
+        },
+        /**
+         * Sets the selected districts level id according to the selected level id
+         * @param {String} val - the selected level id.
+         * @returns {void}
+         */
+        selectedLevelId (val) {
+            this.setSelectedDistrictLevelId(val);
         }
     },
     async created () {
@@ -368,7 +376,6 @@ export default {
          * @returns {void}
          */
         async setDistricts () {
-            this.setSelectedDistrictLevelId(this.selectedLevelId);
             await this.$nextTick();
             this.setDistrictsByName({districtNames: this.resultList});
             this.resetFilteredLayer();
