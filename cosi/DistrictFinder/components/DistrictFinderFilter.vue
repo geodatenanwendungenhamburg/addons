@@ -265,6 +265,28 @@ export default {
         },
 
         /**
+         * Sets the date of the conditions.
+         * @param {String} date - The date of the conditions.
+         * @returns {void}
+         */
+        importConditionDate (date) {
+            if (typeof date !== "string") {
+                return;
+            }
+
+            this.setConditionDate(dayjs(date).format("DD.MM.YYYY"));
+        },
+
+        /**
+         * Sets the title of the conditions.
+         * @param {String} title - The title of the conditions.
+         * @returns {void}
+         */
+        importConditionTitle (title) {
+            this.setConditionTitle(title);
+        },
+
+        /**
          * Resets the cardList
          * @returns {void}
          */
@@ -295,6 +317,47 @@ export default {
             if (typeof this.filteredLayer?.getSource() !== "undefined") {
                 this.filteredLayer.getSource().clear();
             }
+        },
+
+        /**
+         * Resolve the given districts by the passed mapping object.
+         * @param {String[]} districts - The districts to mapped.
+         * @param {Object} districtsMapping - The mapping object.
+         * @returns {String[]} The mapped districts.
+         */
+        resolveByMapping (districts, districtsMapping) {
+            const mappedDistricts = [];
+
+            districts.forEach(district => {
+                if (Object.hasOwnProperty.call(districtsMapping, district)) {
+                    mappedDistricts.push(...districtsMapping[district]);
+                }
+                else {
+                    mappedDistricts.push(district);
+                }
+            });
+
+            return mappedDistricts;
+        },
+
+        /**
+         * Reverses the district names mapping object. Keys become values and values become keys.
+         * @param {Object} districtNamesMap - Mapping object to reverse.
+         * @returns {Object} The reversed mapping object.
+         */
+        reverseDistrictNamesMap (districtNamesMap) {
+            const obj = {};
+
+            Object.entries(districtNamesMap).forEach(([key, value]) => {
+                if (Object.prototype.hasOwnProperty.call(obj, value)) {
+                    obj[value].push(key);
+                }
+                else {
+                    obj[value] = [key];
+                }
+            });
+
+            return obj;
         },
 
         /**
@@ -362,34 +425,16 @@ export default {
         },
 
         /**
-         * Sets the date of the conditions.
-         * @param {String} date - The date of the conditions.
-         * @returns {void}
-         */
-        importConditionDate (date) {
-            if (typeof date !== "string") {
-                return;
-            }
-
-            this.setConditionDate(dayjs(date).format("DD.MM.YYYY"));
-        },
-
-        /**
-         * Sets the title of the conditions.
-         * @param {String} title - The title of the conditions.
-         * @returns {void}
-         */
-        importConditionTitle (title) {
-            this.setConditionTitle(title);
-        },
-
-        /**
          * Sets the currently found districts as selected districts.
          * @returns {void}
          */
         async setDistricts () {
+            const reversedDistrictNamesMap = this.reverseDistrictNamesMap(this.selectedDistrictLevel.districtNamesMap),
+                districtsToSet = this.resolveByMapping(this.resultList, reversedDistrictNamesMap);
+
+            this.setSelectedDistrictLevelId(this.selectedLevelId);
             await this.$nextTick();
-            this.setDistrictsByName({districtNames: this.resultList});
+            this.setDistrictsByName({districtNames: districtsToSet});
             this.resetFilteredLayer();
         },
 

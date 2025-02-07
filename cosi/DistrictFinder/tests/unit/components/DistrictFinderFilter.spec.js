@@ -258,6 +258,36 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
             });
         });
 
+        describe("resolveByMapping", () => {
+            it("should resolve the given districts by the passed mapping object", () => {
+                const wrapper = factory.getShallowMount(),
+                    districts = ["Niedersachsen/Hamburg", "Auenland"],
+                    mapping = {
+                        "Niedersachsen/Hamburg": ["Niedersachsen", "Hamburg"]
+                    },
+                    split = wrapper.vm.resolveByMapping(districts, mapping);
+
+                expect(split).to.deep.equal(["Niedersachsen", "Hamburg", "Auenland"]);
+            });
+        });
+
+        describe("reverseDistrictNamesMap", () => {
+            it("should resever the given mapping object", () => {
+                const wrapper = factory.getShallowMount(),
+                    mappingObject = {
+                        Niedersachsen: "Niedersachsen/Hamburg",
+                        Hamburg: "Niedersachsen/Hamburg",
+                        Mordor: "Auenland"
+                    },
+                    reversedObject = wrapper.vm.reverseDistrictNamesMap(mappingObject);
+
+                expect(reversedObject).to.deep.equal({
+                    "Niedersachsen/Hamburg": ["Niedersachsen", "Hamburg"],
+                    Auenland: ["Mordor"]
+                });
+            });
+        });
+
         describe("getExportedData", () => {
             it("should return the right exported data without areas", () => {
                 const wrapper = factory.getShallowMount(),
