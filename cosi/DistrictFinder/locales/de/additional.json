@@ -17,6 +17,7 @@
                         "or": "ODER",
                         "and": "UND"
                     },
+                    "infoCombinedDistrict": "In den Datenlieferungen des Statistikamtes Nord werden die kleinsten Stadtteile nur in Kombination mit einem größeren angrenzenden Stadtteil ausgewiesen. Daher kann die Zahl der ausgewählten Gebiete von der Zahl der gefundenen Gebiete (im Textkasten) abweichen. Dies betrifft: ",
                     "foundArea": "Gefundenes Gebiet",
                     "foundAreas": "Gefundene Gebiete",
                     "copyClipboard": "In Zwischenablage kopiert!",

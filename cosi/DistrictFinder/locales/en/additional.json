@@ -17,6 +17,7 @@
                         "or": "OR",
                         "and": "AND"
                     },
+                    "infoCombinedDistrict": "In the data provided by Statistikamt Nord, the smallest districts are only shown in combination with a larger neighbouring district. Therefore, the number of selected areas may differ from the number of areas found (in the text box). This applies to: ",
                     "foundArea": "Found area",
                     "foundAreas": "Found areas",
                     "copyClipboard": "Copy to clipboard!",

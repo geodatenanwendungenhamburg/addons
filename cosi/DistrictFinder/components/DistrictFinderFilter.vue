@@ -33,7 +33,8 @@ export default {
             showExportDialog: false,
             showMoreAreas: false,
             latestYear: false,
-            showHintToChangeLatestYear: false
+            showHintToChangeLatestYear: false,
+            combinedDistricts: []
         };
     },
     computed: {
@@ -471,6 +472,22 @@ export default {
         },
 
         /**
+         * Update the mapped district names that are contained in the result list.
+         *  @returns {void}
+         */
+        updateMappedDistrictNames () {
+            const mappedDistrictNames = Object.values(this.selectedDistrictLevel?.districtNamesMap).filter(e => this.resultList?.includes(e));
+
+            this.combinedDistricts = [];
+
+            mappedDistrictNames.forEach(district => {
+                if (district.indexOf("/") >= 0 && !this.combinedDistricts.includes(district)) {
+                    this.combinedDistricts.push(district);
+                }
+            });
+        },
+
+        /**
          * Update the result list.
          * @param {String[]} districts - The districts of all cards.
          * @param {String[]} operators - The operators of all cards.
@@ -487,6 +504,10 @@ export default {
 
             this.resultList = this.getResultList(districts, operators)
                 .filter(e => selectedDistrictsArray.includes(e));
+
+            if (Array.isArray(this.resultList) && this.selectedDistrictLevel.districtNamesMap) {
+                this.updateMappedDistrictNames();
+            }
 
             debounce(this.setFeatureStyle, this.choroplethDebounceDelay)();
         }
@@ -597,6 +618,17 @@ export default {
                 {{ resultList.length }} {{ resultList.length === 1 ? $t("additional:modules.tools.cosi.districtFinder.foundArea") : $t("additional:modules.tools.cosi.districtFinder.foundAreas") }}
             </h5>
             <template v-if="resultList.length > 0">
+                <div
+                    v-if="combinedDistricts.length"
+                    class="row info pb-2"
+                >
+                    <span class="col-1 info-icon d-flex align-items-center">
+                        <i class="bi-info-circle" />
+                    </span>
+                    <div class="col info-text ps-2">
+                        {{ $t("additional:modules.tools.cosi.districtFinder.infoCombinedDistrict") }} {{ combinedDistricts.join(', ') + "." }}
+                    </div>
+                </div>
                 <div class="copy-box mb-4 container rounded">
                     <div class="row">
                         <div class="col col-11 pe-0">
@@ -695,6 +727,16 @@ export default {
             opacity: 0;
             transform: translateX(80px);
         }
+        .info {
+            .info-icon i {
+                color: $dark_grey;
+                font-size: 16px;
+            }
+            .info-text {
+                color: $dark_grey;
+                font-size: 10px;
+        }
+    }
 }
 
 </style>
