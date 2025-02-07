@@ -176,7 +176,8 @@ export default {
                                     }
                                 }"
                                 :given-options="{
-                                    animation: false
+                                    animation: false,
+                                    maintainAspectRatio: false
                                 }"
                             />
                         </div>
@@ -187,7 +188,8 @@ export default {
                             <LinechartItem
                                 :data="chartdata.line"
                                 :given-options="{
-                                    animation: false
+                                    animation: false,
+                                    maintainAspectRatio: false
                                 }"
                             />
                         </div>
