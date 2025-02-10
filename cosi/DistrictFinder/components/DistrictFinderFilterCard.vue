@@ -103,7 +103,8 @@ export default {
                 categoryPercentage: 1.0,
                 borderWidth: 0,
                 hoverBackgroundColor: "rgb(49, 119, 177, 1)"
-            }
+            },
+            noDataset: false
         };
     },
     computed: {
@@ -505,6 +506,7 @@ export default {
          */
         async updateSelectedCategory () {
             if (!this.selectedStatLayer) {
+                this.noDataset = true;
                 console.warn("No layer found for selected category. Check categories and layer ids in config.json and mapping.json. Make also sure the required category (still) exists in the data schema.");
                 this.features = [];
                 return;
@@ -518,7 +520,7 @@ export default {
                 : new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i);
 
             this.selectedYear = this.years[0];
-            this.updateYear();
+            await this.updateYear();
         },
 
         /**
@@ -802,6 +804,12 @@ export default {
                             </div>
                         </div>
                     </div>
+                    <v-snackbar
+                        v-model="noDataset"
+                        :timeout="5000"
+                    >
+                        {{ $t("additional:modules.tools.cosi.districtFinder.warnings.noDataset") }}
+                    </v-snackbar>
                 </div>
             </template>
         </ContentCard>

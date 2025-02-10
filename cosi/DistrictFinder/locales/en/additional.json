@@ -62,6 +62,9 @@
                         "relNumErr": " For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100 under Id {{id}}",
                         "relativErr": "For a relative Attribute, the reference value or tolerance is only permitted between 0 and 100."
                     },
+                    "warnings": {
+                      "noDataset": "The selected data set is not available for this reference level."
+                    },
                     "selector": {
                         "title": "Limit districts",
                         "subtitle": "Limit {{selectedScreeningLevelLabel}}",

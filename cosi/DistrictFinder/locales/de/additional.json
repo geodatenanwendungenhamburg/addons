@@ -62,6 +62,9 @@
                         "relNumErr": " Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 unter Id {{id}} zulässig",
                         "relativErr": "Bei einem relativen Attribut ist der Referenzwert oder die Toleranz nur zwischen 0 und 100 zulässig."
                     },
+                    "warnings": {
+                        "noDataset": "Der ausgewählte Datensatz ist für diese Bezugsebene nicht vorhanden."
+                    },
                     "selector": {
                         "title": "Gebiete eingrenzen",
                         "subtitle": "{{selectedScreeningLevelLabel}} eingrenzen",
