@@ -109,12 +109,8 @@ export default {
     },
     computed: {
         ...mapGetters("Language", ["currentLocale"]),
-        ...mapGetters("Tools/DistrictFinder", ["chartColors", "groupBlacklist", "mapColors", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
-        ...mapGetters("Tools/DistrictSelector", [
-            "districtLevels",
-            "selectedDistrictLevel",
-            "mapping"
-        ]),
+        ...mapGetters("Tools/DistrictFinder", ["chartColors", "groupBlacklist", "mapColors", "mapping", "referenceLineColor", "selectedLevelId", "selectedDistricts", "topLevelSelection"]),
+        ...mapGetters("Tools/DistrictSelector", ["districtLevels", "selectedDistrictLevel"]),
 
         /**
          * Returns the selected features if a selection is made or all features.
@@ -152,7 +148,7 @@ export default {
          * @returns {Object[]} The mapping datasets or an empty array.
          */
         datasetStat () {
-            return groupMapping(this.mapping.filter(m => m[this.keyOfAttrNameStats])) || [];
+            return groupMapping(this.mapping.filter(m => m[this.keyOfAttrNameStats]));
         },
 
         /**

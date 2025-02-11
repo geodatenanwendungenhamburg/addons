@@ -17,3 +17,11 @@ export default async function getMappingJson () {
 
     return Array.isArray(response) ? response : [];
 }
+
+/**
+ * Returns an object containing the only function in this file. This is necessary for testing the components (otherwise the function could not be stubbed).
+ * @returns {Object} Export as object
+ */
+export const getMappingJsonJS = {
+    getMappingJson
+};

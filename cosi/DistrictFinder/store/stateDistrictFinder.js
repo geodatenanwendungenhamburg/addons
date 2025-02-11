@@ -11,6 +11,7 @@
  * @property {String} id - The id of the district finder component.
  * @property {boolean} isVisibleInMenu if true, tool is selectable in menu (config-param)
  * @property {Object} [mapColors= conditionFalse: "rgb(220, 226, 243, 0.5)", conditionTrue: "rgb(0, 67, 122, 0.5)"] - Colors for map if there are districts in selected districts matched the conditions.
+ * @property {Object} [mapping=[]] - Mapping array defining the available categories. Distinct from mapping from DistrictSelector, which may be changed according to template selection.
  * @property {String} [referenceLineColor="rgba(255, 0, 0, 0.5)"] Color of the line that indicates the reference value in the chart.
  * @property {String} [name="additional:modules.tools.cosi.districtFinder.title"] - The name of the tool (config-param).
  * @property {Boolean} [renderToWindow=true] - Renders tool in a window if true, otherwise in the sidebar (config-param).
@@ -39,6 +40,7 @@ const state = {
         "conditionFalse": "rgba(220, 226, 243, 0.8)",
         "conditionTrue": "rgba(0, 67, 122, 0.8)"
     },
+    mapping: [],
     name: "additional:modules.tools.cosi.districtFinder.title",
     readmeUrl: {
         "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/025_GebieteScreening.md"

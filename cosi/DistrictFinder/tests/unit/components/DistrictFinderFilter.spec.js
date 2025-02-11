@@ -1,6 +1,7 @@
 import {config, shallowMount, createLocalVue} from "@vue/test-utils";
 import DistrictFinderFilter from "../../../components/DistrictFinderFilter.vue";
 import {expect} from "chai";
+import {getMappingJsonJS} from "../../../../utils/getMappingJson";
 import sinon from "sinon";
 import Vuex from "vuex";
 
@@ -9,6 +10,14 @@ config.mocks.$t = key => key;
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
+
+before(() => {
+    sinon.stub(getMappingJsonJS, "getMappingJson").resolves([]);
+});
+
+after(() => {
+    sinon.restore();
+});
 
 describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () => {
     const store = new Vuex.Store({
@@ -32,6 +41,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                                 cardList: [],
                                 conditionDate: "",
                                 conditionTitle: "",
+                                mapping: []
                             },
                             getters: {
                                 selectedDistricts: () => ["Altona", "Bergedorf", "Harburg"],
@@ -57,6 +67,9 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
                                 setFilteredLayer (state, value) {
                                     state.filteredLayer = value;
                                 },
+                                setMapping (state, value) {
+                                    state.mapping = value;
+                                }
                             }
                         }
                     }

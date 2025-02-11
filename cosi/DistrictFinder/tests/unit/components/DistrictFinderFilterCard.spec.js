@@ -31,8 +31,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                             namespaced: true,
                             mutations: {},
                             getters: {
-                                districtLevels: () => [{layerId: "1", stats: {keyOfAttrName: [], layerIds: []}}],
-                                mapping: () => {}
+                                districtLevels: () => [{layerId: "1", stats: {keyOfAttrName: [], layerIds: []}}]
                             }
                         },
                         DistrictFinder: {
@@ -41,6 +40,7 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilterCard.vue", (
                                 chartColors: () => ({conditionFalse: "rgb(255, 255, 255, 1)", conditionTrue: "rgb(255, 0, 0, 1)"}),
                                 groupBlacklist: () => [],
                                 keyOfAttrNameStats: () => "stats",
+                                mapping: () => [],
                                 referenceLineColor: () => "rgba(255, 0, 0, 0.5)",
                                 selectedDistricts: () => [],
                                 selectedLevelId: () => "1",

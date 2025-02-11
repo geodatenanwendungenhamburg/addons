@@ -10,6 +10,7 @@ import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
+import {getMappingJsonJS} from "../../utils/getMappingJson";
 
 export default {
     name: "DistrictFinderFilter",
@@ -99,6 +100,7 @@ export default {
         }
     },
     async created () {
+        this.setMapping(await getMappingJsonJS.getMappingJson());
         this.setFilteredLayer(await this.addNewLayerIfNotExists({layerName: "filteredLayer"}));
     },
     mounted () {
@@ -116,7 +118,7 @@ export default {
     methods: {
         ...mapActions("Tools/DistrictSelector", ["setDistrictsByName"]),
         ...mapActions("Maps", ["addNewLayerIfNotExists"]),
-        ...mapMutations("Tools/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle", "setFilteredLayer"]),
+        ...mapMutations("Tools/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle", "setFilteredLayer", "setMapping"]),
         ...mapMutations("Tools/DistrictSelector", ["setSelectedDistrictLevelId"]),
 
         /**
