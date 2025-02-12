@@ -8,6 +8,7 @@ import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 import {Fill, Style} from "ol/style.js";
 import getOAFFeature from "../../../../src/api/oaf/getOAFFeature";
 import IconButton from "../../components/IconButton.vue";
+import isObject from "../../../../src/utils/isObject";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import uniqueId from "../../../../src/utils/uniqueId";
 import {getMappingJsonJS} from "../../utils/getMappingJson";
@@ -326,9 +327,13 @@ export default {
          * @returns {String[]} The mapped districts.
          */
         resolveByMapping (districts, districtsMapping) {
+            if (!isObject(districtsMapping)) {
+                return districts;
+            }
+
             const mappedDistricts = [];
 
-            districts.forEach(district => {
+            districts?.forEach(district => {
                 if (Object.hasOwnProperty.call(districtsMapping, district)) {
                     mappedDistricts.push(...districtsMapping[district]);
                 }

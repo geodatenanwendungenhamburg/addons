@@ -259,6 +259,30 @@ describe("addons/cosi/DistrictFinder/components/DistrictFinderFilter.vue", () =>
         });
 
         describe("resolveByMapping", () => {
+            it("should return the given districts if mapping parameter is invalid", () => {
+                const wrapper = factory.getShallowMount(),
+                    districts = ["Niedersachsen/Hamburg", "Auenland"];
+
+                expect(wrapper.vm.resolveByMapping(districts, null)).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, 0)).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, undefined)).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, false)).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, [])).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, 123)).to.equal(districts);
+                expect(wrapper.vm.resolveByMapping(districts, "abc")).to.equal(districts);
+            });
+
+            it("should return an empty array if districts parameter is invalid", () => {
+                const wrapper = factory.getShallowMount(),
+                    districts = null,
+                    mapping = {
+                        "Niedersachsen/Hamburg": ["Niedersachsen", "Hamburg"]
+                    },
+                    split = wrapper.vm.resolveByMapping(districts, mapping);
+
+                expect(split).to.deep.equal([]);
+            });
+
             it("should resolve the given districts by the passed mapping object", () => {
                 const wrapper = factory.getShallowMount(),
                     districts = ["Niedersachsen/Hamburg", "Auenland"],
