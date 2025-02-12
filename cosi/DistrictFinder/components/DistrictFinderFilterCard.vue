@@ -304,6 +304,9 @@ export default {
          * @returns {void}
          */
         selectedLevelId () {
+            if (this.selectedCategory && !this.selectedStatLayer) {
+                this.noDataset = true;
+            }
             this.updateSelectedCategory();
         }
     },
@@ -502,7 +505,6 @@ export default {
          */
         async updateSelectedCategory () {
             if (!this.selectedStatLayer) {
-                this.noDataset = true;
                 console.warn("No layer found for selected category. Check categories and layer ids in config.json and mapping.json. Make also sure the required category (still) exists in the data schema.");
                 this.features = [];
                 return;
