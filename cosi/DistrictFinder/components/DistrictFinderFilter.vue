@@ -434,8 +434,9 @@ export default {
          * @returns {void}
          */
         async setDistricts () {
-            const reversedDistrictNamesMap = this.reverseDistrictNamesMap(this.selectedDistrictLevel.districtNamesMap),
-                districtsToSet = this.resolveByMapping(this.resultList, reversedDistrictNamesMap);
+            const districtsToSet = this.selectedDistrictLevel?.districtNamesMap
+                ? this.resolveByMapping(this.resultList, this.reverseDistrictNamesMap(this.selectedDistrictLevel.districtNamesMap))
+                : this.resultList;
 
             this.setSelectedDistrictLevelId(this.selectedLevelId);
             await this.$nextTick();
