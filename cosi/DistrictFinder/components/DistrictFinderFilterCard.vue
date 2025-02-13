@@ -459,14 +459,16 @@ export default {
             }
             if (Object.prototype.hasOwnProperty.call(condition, "statisticCategory")) {
                 this.selectedCategory = condition.statisticCategory;
-                await this.updateSelectedCategory();
+                if (this.changeToLatestYear && this.selectedYear !== condition?.year) {
+                    this.$emit("showHint", true);
+                }
+                await this.updateSelectedCategory(!this.changeToLatestYear);
             }
             if (Object.prototype.hasOwnProperty.call(condition, "year")) {
-                if (this.changeToLatestYear) {
-                    this.$emit("showHint", this.selectedYear !== condition.year);
-                }
-                else if (this.selectedYear !== condition.year) {
+                if (this.selectedYear !== condition.year) {
                     this.selectedYear = condition.year;
+                }
+                if (!this.changeToLatestYear) {
                     this.updateYear();
                 }
             }
@@ -501,9 +503,10 @@ export default {
 
         /**
          * Performs necessary updates when the selected category has changed.
+         * @param {Boolean} skipYearUpdate  - The flag which decides wether the updateYear function should be called or not.
          * @returns {void}
          */
-        async updateSelectedCategory () {
+        async updateSelectedCategory (skipYearUpdate = false) {
             if (!this.selectedStatLayer) {
                 console.warn("No layer found for selected category. Check categories and layer ids in config.json and mapping.json. Make also sure the required category (still) exists in the data schema.");
                 this.features = [];
@@ -516,6 +519,10 @@ export default {
 
             this.years = years.length ? years.reverse()
                 : new Array(10).fill(new Date().getFullYear() - 1).map((v, i) => v - i);
+
+            if (skipYearUpdate === true) {
+                return;
+            }
 
             this.selectedYear = this.years[0];
             await this.updateYear();
