@@ -16,6 +16,7 @@
 ### Removed
 
 ### Fixed
+- oktagonKartenportal: Parameters for parsing the ALKIS attributes adjusted.
 
 ---
 

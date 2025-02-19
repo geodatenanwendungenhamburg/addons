@@ -114,14 +114,14 @@ export default {
             if (xmlElement.getElementsByTagName("app:baublockbezeichnung").length > 0) {
                 submitObject.Baublock = xmlElement.getElementsByTagName("app:baublockbezeichnung")[0].textContent;
             }
-            if (xmlElement.getAttribute("Gemarkungsname")) {
-                submitObject.Gemarkungsname = xmlElement.getAttribute("Gemarkungsname");
+            if (xmlElement.getAttribute("bezeichnung")) {
+                submitObject.Gemarkungsname = xmlElement.getAttribute("bezeichnung");
             }
-            if (xmlElement.getAttribute("Gemarkungsnummer")) {
-                submitObject.Gemarkungsnummer = xmlElement.getAttribute("Gemarkungsnummer");
+            if (xmlElement.getAttribute("gemarkunggemarkungsnummer")) {
+                submitObject.Gemarkungsnummer = xmlElement.getAttribute("gemarkunggemarkungsnummer");
             }
-            if (xmlElement.getAttribute("Flurstuecksnummer")) {
-                submitObject.Flurstuecksnummer = xmlElement.getAttribute("Flurstuecksnummer");
+            if (xmlElement.getAttribute("flurstuecksnummerzaehler")) {
+                submitObject.Flurstuecksnummer = xmlElement.getAttribute("flurstuecksnummerzaehler");
             }
         });
 
