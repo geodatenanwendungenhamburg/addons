@@ -401,14 +401,18 @@ export default {
         /**
          * Gets the selected statistical data.
          * @param {Object} dashboard - the dashboard object
-         * @returns {Object} the selected stats data
+         * @returns {Object[]} the selected stats data
          */
         getSelectedStatData (dashboard) {
             const statData = [];
 
             if (Array.isArray(dashboard?.statsFeatureFilter)) {
                 dashboard.statsFeatureFilter.forEach(stat => {
-                    statData.push(this.statData.find(data => data?.label === stat));
+                    this.statData.forEach(stData => {
+                        if (stData?.data.find(data => data?.label === stat)) {
+                            statData.push(stData.data.find(data => data?.label === stat));
+                        }
+                    });
                 });
             }
 

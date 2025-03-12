@@ -504,22 +504,28 @@ describe("addons/cosi/TemplateAdmin/components/TemplateAdminForm.vue", () => {
                 wrapper.destroy();
             });
 
-            it("should return selected geo data", () => {
-                const localGeoData = [
-                        {layerId: "123", label: "layer1"},
-                        {layerId: "124", label: "layer2"}
-                    ],
+            it("should return selected stat data", () => {
+                const localStatData = [{
+                        category: "cat",
+                        data: [
+                            {layerId: "123", label: "layer1"},
+                            {layerId: "124", label: "layer2"}
+                        ]
+                    }],
+                    dashboard = {
+                        statsFeatureFilter: ["layer1"]
+                    },
                     wrapper = shallowMount(TemplateAdminForm, {
                         propsData: {
-                            geoData: localGeoData,
-                            statData,
+                            geoData,
+                            statData: localStatData,
                             showEditTemplate: true
                         },
                         localVue,
                         store
                     });
 
-                expect(wrapper.vm.getSelectedGeoData(["123"])).to.be.deep.equal([{layerId: "123", label: "layer1"}]);
+                expect(wrapper.vm.getSelectedStatData(dashboard)).to.be.deep.equal([{layerId: "123", label: "layer1"}]);
                 wrapper.destroy();
             });
         });
