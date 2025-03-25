@@ -18,7 +18,7 @@ Run this in terminal:
 ```
 git clone https://bitbucket.org/geowerkstatt-hamburg/masterportal
 cd masterportal
-git checkout dev
+git checkout dev_version_2
 
 rm -r addons
 
@@ -26,9 +26,9 @@ git clone https://bitbucket.org/geowerkstatt-hamburg/addons addons
 git clone https://bitbucket.org/geowerkstatt-hamburg/portalconfigs
 
 cd addons
-git checkout dev
+git checkout dev_version_2
 cd ../portal
-git checkout dev
+git checkout dev_version_2
 cd ..
 
 nvm install 16.16.0
@@ -53,7 +53,7 @@ Cosi consists of three repositories. They are available on Bitbucket (private re
 	1. the `addons` folder in masterportal is replaced by
 		1. https://bitbucket.org/geowerkstatt-hamburg/addons
 	2. the `portal` folder in masterportal is replaced by https://bitbucket.org/geowerkstatt-hamburg/portalconfigs
-3. on all repositories we work on the branch called `cosi/dev` (not `dev`)
+3. on all repositories we work on the branch called `cosi/dev` (not `dev_version_2`)
 
 So we clone the masterportal repo first and get on the right branch
 Delete folders to be replaced with the other two repos
@@ -74,19 +74,19 @@ Cosi consists of multiple nested node apps. For each, the dependencies have to b
 
 ### Git Branching Model
 
-- in all three repositories, development should happen in feature branches. After a code review, and if all unit tests pass, these changes go direclty into the `dev` branch (which is the branch that is in production).
+- in all three repositories, development should happen in feature branches. After a code review, and if all unit tests pass, these changes go direclty into the `dev_version_2` branch (which is the branch that is in production).
 - adding a new feature:
 	- open a ticket on jira (jira.geowerkstatt-hamburg.de). On the ticket, you can create a branch for your feature
 	- `git checkout FEATURE_BRANCH_NAME` to switch to that new branch locally
 	- `git commit -m "commit message"` to commit your changes to that feature branch
 	- `npm run test:cosi` when your code is ready, make sure all unit tests pass with (see TDD section)
-	- `git rebase dev` your branch to be ahead of the `dev` branch. [more](https://www.atlassian.com/git/tutorials/rewriting-history/git-rebase)
+	- `git rebase dev_version_2` your branch to be ahead of the `dev_version_2` branch. [more](https://www.atlassian.com/git/tutorials/rewriting-history/git-rebase)
 	- fix any merge conflicts and run all unit tests again
 	- create a pull request on jira, and assign someone to review your code
 	- make changes as discussed with the reviewer
-	- The person who reviews the code can then accept your pull request to the dev branch.
-	- `git merge -ff` when accepting a pull request, make sure to merge with fast forward. That way (together with `rebase`), your changes will appear as a single commit at the time when your feature appears on the dev branch.
-	- `git checkout dev` go back to the dev branch
+	- The person who reviews the code can then accept your pull request to the dev_version_2 branch.
+	- `git merge -ff` when accepting a pull request, make sure to merge with fast forward. That way (together with `rebase`), your changes will appear as a single commit at the time when your feature appears on the dev_version_2 branch.
+	- `git checkout dev_version_2` go back to the dev_version_2 branch
 	- `git pull` the changes that happened
 	- `git branch -d FEATURE_BRANCH_NAME` delete the feature branch
 	- done!

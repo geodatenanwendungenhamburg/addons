@@ -92,7 +92,7 @@ describe("addons/trafficCount/components/TrafficCountCompTable.vue", () => {
     });
 
     describe("template", () => {
-        // siehe: https://bitbucket.org/geowerkstatt-hamburg/masterportal/src/dev/doc/unittestingVue.md
+        // siehe: https://bitbucket.org/geowerkstatt-hamburg/masterportal/src/dev_version_2/doc/unittestingVue.md
         it("should render a table with thead and tbody", () => {
             const table = wrapper.find("table");
 

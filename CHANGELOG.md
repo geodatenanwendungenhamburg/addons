@@ -7,7 +7,7 @@
 ### __Breaking Changes__
 
 ### Added
-- The new cosi tool [districtFinder](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/DistrictFinder/) allows to find areas based on different conditions. Further details: [districtFinder documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/DistrictFinder/doc/config.json.md)
+- The new cosi tool [districtFinder](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/DistrictFinder/) allows to find areas based on different conditions. Further details: [districtFinder documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/DistrictFinder/doc/config.json.md)
 
 ### Changed
 
@@ -95,7 +95,7 @@
 ---
 ## v2.39.0 - 2023-11-01
 ### Added
-- The new addon [statisticDashboard](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/statisticDashboard/) A tool to display statistical data. Further details: [statisticDashboard documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/statisticDashboard/doc/config.json.md)
+- The new addon [statisticDashboard](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/statisticDashboard/) A tool to display statistical data. Further details: [statisticDashboard documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/statisticDashboard/doc/config.json.md)
 
 ---
 ## v2.34.0 - 2023-06-07
@@ -134,4 +134,4 @@ Addon `obliqueViewer` was renamed to `vcOblique`.
 
 ## v2.26.0 - 2022-10-05
 ### Added
-- The new addon [obliqueViewer](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/obliqueViewer/) allows to configure oblique viewer in the Masterportal. Further details: [obliqueViewer documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/obliqueViewer/doc/config.json.md)
+- The new addon [obliqueViewer](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/obliqueViewer/) allows to configure oblique viewer in the Masterportal. Further details: [obliqueViewer documentation](https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/obliqueViewer/doc/config.json.md)
