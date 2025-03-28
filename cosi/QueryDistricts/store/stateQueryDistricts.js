@@ -43,8 +43,8 @@ const state = {
     }],
     activeSet: 0,
     readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/004querydistricts.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/004vergleichbaregebieteermitteln.md"
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/004querydistricts.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/004vergleichbaregebieteermitteln.md"
     }
 };
 

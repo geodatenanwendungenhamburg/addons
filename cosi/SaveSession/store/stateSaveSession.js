@@ -21,8 +21,8 @@ const state = {
     resizableWindow: true,
     sessionToLoad: null,
     readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/014savesession.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/014sitzungspeichern.md"
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/014savesession.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/014sitzungspeichern.md"
     },
     onlyUdpServices: true,
     defaultActiveLayerIds: []

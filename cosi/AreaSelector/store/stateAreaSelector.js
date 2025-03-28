@@ -21,8 +21,8 @@ const state = {
     deactivateGFI: false,
     geometry: null,
     readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/021manuelleflaechenauswahl.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/021manuelleflaechenauswahl.md"
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/021manuelleflaechenauswahl.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/021manuelleflaechenauswahl.md"
     }
 };
 

@@ -25,10 +25,10 @@ const state = {
     activeSelection: null,
     acceptSelection: null, // other tools can commit to this variable. Then, a new selection is added and set as active.
     readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/022selectionmanager.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/022auswahlmanager.md",
-        "en": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/022selectionmanager.md",
-        "de": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/022auswahlmanager.md"
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/022selectionmanager.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/022auswahlmanager.md",
+        "en": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/022selectionmanager.md",
+        "de": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/022auswahlmanager.md"
     }
 };
 

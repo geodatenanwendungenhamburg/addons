@@ -39,8 +39,8 @@ const state = {
     mapping: null,
     name: "Gebiet auswählen",
     readmeUrl: {
-        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018districtselector.md",
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/018gebietsauswahl.md"
+        "en-US": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/018districtselector.md",
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/018gebietsauswahl.md"
     },
     remoteMetadata: {}, // after data is loaded, we also pull metadata remotely and store it here.
     renderToWindow: true,

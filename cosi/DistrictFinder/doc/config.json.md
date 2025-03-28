@@ -13,7 +13,7 @@ Mit dem Werkzeug Gebiete Screening können verschiedene Bedingungen definiert un
 |mapColors[i].conditionTrue|nein|String|rgba(0, 67, 122, 0.8)|RGBA-Farbe für die Gebiete auf der Karte, auf die die erstellte Bedingung zutrifft.|
 |groupBlacklist|nein|String[]|[]|Kategorie-Gruppen, die beim ersten district request nicht berücksichtigt werden|
 |referenceLineColor|nein|String|rgba(255, 0, 0, 0.5)|RGBA-Farbe der Referenzwert-Linie im Diagramm|
-|readmeUrl[i].de-DE|nein|String|"https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/025_GebieteScreening.md"|URL, die zur Tool-Anleitung führt|
+|readmeUrl[i].de-DE|nein|String|"https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/025_GebieteScreening.md"|URL, die zur Tool-Anleitung führt|
 
 
 **Beispiel**
@@ -32,7 +32,7 @@ Mit dem Werkzeug Gebiete Screening können verschiedene Bedingungen definiert un
     },
     referenceLineColor: "rgba(255, 0, 0, 0.5)",
     readmeUrl: {
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/025_GebieteScreening.md"
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/025_GebieteScreening.md"
     },
 },
 ```

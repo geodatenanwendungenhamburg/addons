@@ -43,7 +43,7 @@ const state = {
     mapping: [],
     name: "additional:modules.tools.cosi.districtFinder.title",
     readmeUrl: {
-        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev/cosi/manuals/025_GebieteScreening.md"
+        "de-DE": "https://bitbucket.org/geowerkstatt-hamburg/addons/src/dev_version_2/cosi/manuals/025_GebieteScreening.md"
     },
     referenceLineColor: "rgba(255, 0, 0, 0.5)",
     renderToWindow: true,
