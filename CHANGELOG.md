@@ -3,7 +3,17 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
+## 2025-06-19 v3.3.6 (LTS)
+
+## 2025-02-21 v3.3.5 (LTS)
+
+## 2025-02-21 v3.3.4 (LTS)
+
 ## 2024-12-12 v3.3.3 (LTS)
+
+## 2024-10-09 v3.3.1 (LTS)
+
+## 2024-10-02 v3.3.0 (LTS)
 
 ## 2024-09-04 v3.2.0 (LTS)
 
