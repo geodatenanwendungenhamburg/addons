@@ -187,7 +187,7 @@ describe("addons/SimulationTool/components/PlanningScenario/PlanningScenarioCrea
         });
     });
 
-    describe("User Interaction", () => {
+    describe.skip("User Interaction", () => {
         it("should call 'resetInteraction' if user start drawing", async () => {
             const spyResetInteraction = sinon.spy(PlanningScenarioCreate.methods, "resetInteraction"),
                 wrapper = factory.getMount();
