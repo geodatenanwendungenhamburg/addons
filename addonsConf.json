@@ -138,5 +138,13 @@
   },
   "addLayerRemotely": {
     "type": "tool"
+  },
+  "districtSelector": {
+    "path": "cosi/DistrictSelector",
+    "type": "tool"
+  },
+  "accessibilityAnalysis": {
+    "path": "cosi/AccessibilityAnalysis",
+    "type": "tool"
   }
 }
