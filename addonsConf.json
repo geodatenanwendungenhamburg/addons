@@ -113,5 +113,13 @@
   "oktagonComponent": {
     "type": "tool",
     "path": "oktagon"
+  },
+  "districtSelector": {
+    "path": "cosi/DistrictSelector",
+    "type": "tool"
+  },
+  "accessibilityAnalysis": {
+    "path": "cosi/AccessibilityAnalysis",
+    "type": "tool"
   }
 }
