@@ -11,6 +11,10 @@
     "type": "searchInterface",
     "path": "searchInterfaces/waterRiskCheckSearch"
   },
+  "marineForecast": {
+    "path":"gfiThemes/marineForecast",
+    "type": "gfiTheme"
+  },
   "mietenspiegelSearch": {
     "type": "searchInterface",
     "path": "searchInterfaces/mietenspiegelSearch"
