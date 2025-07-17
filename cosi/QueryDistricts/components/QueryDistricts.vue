@@ -18,8 +18,7 @@ import {
 } from "@turf/helpers";
 import {default as turfBooleanPointInPolygon} from "@turf/boolean-point-in-polygon";
 import ToolInfo from "../../components/ToolInfo.vue";
-import {getFeaturePOST} from "../../../../src/api/wfs/getFeature.js";
-import {WFS} from "ol/format.js";
+import getOAFFeature from "../../../../src/api/oaf/getOAFFeature.js";
 import getAvailableYears from "../../utils/getAvailableYears";
 import {groupBy, getModelByAttributes} from "../../utils/radioBridge.js";
 
@@ -208,7 +207,7 @@ export default {
                         ltf: m.ltf,
                         category: m.category,
                         url: layer.url,
-                        featureType: layer.featureType
+                        collection: layer.collection
                     });
                 }
             }
@@ -315,16 +314,15 @@ export default {
                 });
             }
             else {
-                const wfsReader = new WFS();
-
-                let features = await getFeaturePOST(layer.url, {
-                        featureTypes: [layer.featureType],
-                        srsName: this.projectionCode,
+                let features = await getOAFFeature.getOAFFeatureGet({
+                        baseUrl: layer.url,
+                        collection: layer.collection,
+                        crs: `http://www.opengis.net/def/crs/${this.projectionCode.replace(":", "/0/")}`,
                         propertyNames: [layer.category, this.keyOfAttrNameStats, "jahr"]
                     }),
                     groupedFeatures = {};
 
-                features = wfsReader.readFeatures(features);
+                features = getOAFFeature.readAllOAFToGeoJSON(features);
                 // group features by district
                 groupedFeatures = groupBy(features, (feature) => {
                     return feature.get([this.keyOfAttrNameStats]);

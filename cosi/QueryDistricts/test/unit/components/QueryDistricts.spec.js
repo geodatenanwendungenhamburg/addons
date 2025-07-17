@@ -137,8 +137,8 @@ describe("addons/cosi/QueryDistricts/", () => {
                                     stats: {
                                         layers: [{
                                             id: "19034",
-                                            featureType: "de.hh.up:v_hh_statistik_bev_insgesamt",
-                                            url: "https://geodienste.hamburg.de/HH_WFS_Regionalstatistische_Daten_Stadtteile"
+                                            collection: "collection_for_19034",
+                                            url: "url_for_19034"
                                         }],
                                         baseUrl: ["https://geodienste.hamburg.de/HH_WFS_Regionalstatistische_Daten_Stadtteile"]
                                     }
@@ -330,8 +330,8 @@ describe("addons/cosi/QueryDistricts/", () => {
         expect(wrapper.vm.layerOptions).to.deep.equal([
             {"header": "BevÃ¶lkerung"},
             {"id": "bev_insgesamt", "name": "BevÃ¶lkerung insgesamt", "group": "BevÃ¶lkerung", "valueType": "relative",
-                "category": "bev_insgesamt", "featureType": "de.hh.up:v_hh_statistik_bev_insgesamt",
-                "url": "https://geodienste.hamburg.de/HH_WFS_Regionalstatistische_Daten_Stadtteile",
+                "category": "bev_insgesamt", "collection": "collection_for_19034",
+                "url": "url_for_19034",
                 "ltf": undefined
             }]
         );
@@ -637,8 +637,8 @@ describe("addons/cosi/QueryDistricts/", () => {
                 "valueType": "absolute"
             },
             {"id": "bev_insgesamt", "name": "BevÃ¶lkerung insgesamt", "group": "BevÃ¶lkerung", "valueType": "relative",
-                "category": "bev_insgesamt", "featureType": "de.hh.up:v_hh_statistik_bev_insgesamt",
-                "url": "https://geodienste.hamburg.de/HH_WFS_Regionalstatistische_Daten_Stadtteile",
+                "category": "bev_insgesamt", "collection": "collection_for_19034",
+                "url": "url_for_19034",
                 "ltf": undefined
             }
         ]);
