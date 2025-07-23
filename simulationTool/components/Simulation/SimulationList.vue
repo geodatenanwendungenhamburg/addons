@@ -1,7 +1,7 @@
 <script>
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import isObject from "../../../../src/shared/js/utils/isObject";
-import layerCollection from "../../../../src/core/layers/js/layerCollection";
+import layerCollection from "../../../../src/core/layers/js/layerCollection.js";
 import {mapGetters, mapMutations} from "vuex";
 import SectionHeader from "../SectionHeader.vue";
 
