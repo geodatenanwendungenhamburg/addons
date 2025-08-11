@@ -607,6 +607,9 @@ export default {
 
                     const statFeature = items.find((item) => item.category === category[key]);
 
+                    if (!statFeature) {
+                        return;
+                    }
                     statFeature.years.reverse().forEach(year => {
                         const value = this.getTotal(statFeature, selectedDistrictNames, year, "jahr_");
 
