@@ -675,19 +675,20 @@ export default {
             this.dataSets[index].results.forEach(result => {
                 const resultObj = {};
 
+                resultObj.Gebiet = result.scope;
                 resultObj[this.dataSets[index].inputs.selectedFieldA.id] = result.paramA_val;
                 resultObj[this.dataSets[index].inputs.selectedFieldB.id] = result.paramB_val;
-                resultObj[this.dataSets[index].inputs.selectedFieldA.id + " / " + this.dataSets[index].inputs.selectedFieldB.id] = result.relation;
+                resultObj[this.dataSets[index].inputs.selectedFieldA.id + " / " + this.dataSets[index].inputs.selectedFieldB.id] = result.relation.toLocaleString("de-DE");
                 resultObj.Kapazitaet = result.capacity;
                 resultObj.Bedarf = result.need;
-                resultObj.Bedarfsdeckung = result.coverage;
+                resultObj.Bedarfsdeckung = result.coverage.toLocaleString("de-DE") + "%";
                 json.push(resultObj);
             });
 
             return json;
         },
         exportAsXlsx (index) {
-            exportXlsx([], this.resultData(index), this.selectedYear + "_versorgungsanalyse.xls", {exclude: this.excludedPropsForExport});
+            exportXlsx([], this.resultData(index), this.selectedYear + "_versorgungsanalyse", {exclude: this.excludedPropsForExport});
         },
         /**
          * @description Push data that is to be visualized on the map to ColorCodeMap Component.
