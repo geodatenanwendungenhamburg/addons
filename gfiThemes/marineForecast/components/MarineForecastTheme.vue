@@ -1,6 +1,5 @@
 <script>
 import {mapMutations} from "vuex";
-import {isHTML} from "@shared/js/utils/isHTML.js";
 
 export default {
     name: "MarineForecastTheme",
@@ -24,7 +23,6 @@ export default {
                 return this.feature.getDocument();
             }
 
-            // Try to find an HTML string within properties for WFS/JSON GFIs
             let props = {};
 
             if (typeof this.feature.getMappedProperties === "function") {
@@ -34,26 +32,13 @@ export default {
                 props = this.feature.getProperties();
             }
 
-            if (props && typeof props === "object") {
-                // Collect all HTML-like strings; prefer specific keys first if present
-                const preferredKeys = ["html", "content", "forecast", "beschreibung", "description"],
-                    collected = [];
+            if (props && typeof props === "object" && Object.keys(props).length > 0) {
+                let rows = "";
 
-                preferredKeys.forEach(key => {
-                    if (typeof props[key] === "string" && isHTML(props[key])) {
-                        collected.push(props[key]);
-                    }
+                Object.entries(props).forEach(([key, value]) => {
+                    rows += `<tr><td>${key}</td><td>${value}</td></tr>`;
                 });
-                Object.entries(props).forEach(([, value]) => {
-                    if (typeof value === "string" && isHTML(value)) {
-                        collected.push(value);
-                    }
-                });
-
-                // De-duplicate while preserving order
-                if (collected.length > 0) {
-                    return Array.from(new Set(collected)).join("<hr>");
-                }
+                return `<table class="featureInfo"><tbody>${rows}</tbody></table>`;
             }
             return "";
         },
