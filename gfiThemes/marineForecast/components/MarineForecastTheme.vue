@@ -33,6 +33,59 @@ export default {
             }
 
             if (props && typeof props === "object" && Object.keys(props).length > 0) {
+                // Check if any property contains HTML tables (marine forecast specific)
+                const htmlProperties = Object.entries(props).filter(([, value]) => typeof value === "string" && value.includes("<table") && value.includes("class=\"featureInfo\""));
+
+                if (htmlProperties.length > 0) {
+                    // Handle marine forecast data: combine all HTML table properties into one view
+                    let combinedHtml = "";
+                    const stationName = props.stationbf || props.name || "Marine Station",
+                        position = props.position || "";
+
+                    // Add station header
+                    combinedHtml += `<h3 style="display:inline;font-family:calibri;font-size:1.35em;">${stationName}</h3>`;
+                    if (position) {
+                        combinedHtml += `<span style="font-size:1em;font-family:calibri;"> (${position}) </span>`;
+                    }
+                    combinedHtml += "<br>";
+
+                    // Add each HTML property with appropriate headers
+                    Object.entries(props).forEach(([key, value]) => {
+                        if (typeof value === "string" && value.includes("<table") && value.includes("class=\"featureInfo\"")) {
+                            // Add section headers based on property names
+                            let sectionTitle = "";
+
+                            switch (key) {
+                                case "windvorhersage":
+                                    sectionTitle = `DWD Windvorhersagen ${props.stand_wind || ""}`;
+                                    break;
+                                case "temp_vs":
+                                    sectionTitle = `Wasseroberflächentemperaturvorhersage ${props.wtemp_stand || ""}`;
+                                    break;
+                                case "ws_vorhersage":
+                                    sectionTitle = `Wasserstandsvorhersage ${props.stand || ""}`;
+                                    break;
+                                case "mondereignisse":
+                                    sectionTitle = "Mondereignisse";
+                                    break;
+                                case "sonnenereignisse":
+                                    sectionTitle = "Sonnenereignisse";
+                                    break;
+                                default:
+                                    sectionTitle = key.replace(/_/g, " ");
+                            }
+
+                            if (sectionTitle) {
+                                combinedHtml += `<h4>${sectionTitle}</h4>`;
+                            }
+                            combinedHtml += value;
+                        }
+                    });
+
+                    return combinedHtml;
+                }
+
+                // Fallback to default table format for non-marine data
                 let rows = "";
 
                 Object.entries(props).forEach(([key, value]) => {
@@ -75,12 +128,16 @@ export default {
 
                 const style = `
                     <style>
-                        body { color: #000; background: #e9e9e9; text-align: center; }
+                        body { color: #000; background: #e9e9e9; text-align: center; margin: 0; padding: 10px; }
+                        h3 { margin: 0 0 10px 0; }
+                        h4 { margin: 10px 0 5px 0; font-size: 1.1em; }
+                        table.featureInfo { margin: 5px 0 15px 0; }
                         table.featureInfo tbody { color: #000; background: #e9e9e9; text-align: center; }
                         table.featureInfo tbody tr:nth-child(even) { background: #f1f1f1; }
                         table.featureInfo tbody td:first-child, table.featureInfo tbody th:first-child {
                             color: #e1e1e1; background: #4070a0; font-weight: bold;
                         }
+                        p { margin: 5px 0; }
                     </style>`,
                     doc = `<!doctype html><html><head><meta charset="utf-8">${style}</head><body>${content}</body></html>`;
 
