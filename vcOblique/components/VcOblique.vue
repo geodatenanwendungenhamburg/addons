@@ -1,16 +1,8 @@
 <script>
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import mutationsObliqueViewer from "../store/mutationsVcOblique";
-import iframeResize from "../node_modules/iframe-resizer/js/iframeResizer";
+import iframeResizer from "iframe-resizer/js/iframeResizer";
 
-Vue?.directive("resize", {
-    beforeMount: function (el, {value = {}}) {
-        el.addEventListener("load", () => iframeResize(value, el));
-    },
-    beforeUnmount: function (el) {
-        el?.iFrameResizer?.removeListeners();
-    }
-});
 
 export default {
     name: "VcOblique",
@@ -34,6 +26,15 @@ export default {
             deep: true
         }
     },
+    directives: {
+        resize: {
+            beforeMount: function (el, {value = {}}) {
+                el.addEventListener("load", () => iframeResizer(value, el));
+            },
+            beforeUnmount: function (el) {
+                el?.iFrameResizer?.removeListeners();
+            }
+        }},
     /**
      * Put initialize functions here after mounting
      * @returns {void}

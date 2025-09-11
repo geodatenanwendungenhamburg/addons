@@ -19,7 +19,7 @@ setTimeout(() => {
             });
         });
     }
-}, 200);
+}, 500);
 
 /**
  * Setting the attributes in feature for mouseHover
