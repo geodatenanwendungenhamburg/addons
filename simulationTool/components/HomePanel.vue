@@ -16,7 +16,11 @@ export default {
     methods: {
         ...mapMutations("Modules/SimulationTool", [
             "setMode"
-        ])
+        ]),
+
+        getLogo () {
+            return "resources/img/Logo.jpg";
+        }
     }
 };
 
@@ -30,7 +34,7 @@ export default {
         />
         <img
             width="80"
-            src="resources/img/Logo.jpg"
+            :src="getLogo()"
             class="m-4"
             alt=""
         >

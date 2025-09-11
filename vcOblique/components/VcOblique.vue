@@ -1,5 +1,4 @@
 <script>
-import Vue from "vue";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import mutationsObliqueViewer from "../store/mutationsVcOblique";
 import iframeResize from "../node_modules/iframe-resizer/js/iframeResizer";

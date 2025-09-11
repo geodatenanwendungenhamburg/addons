@@ -826,7 +826,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-@import "~variables";
+;
 .selected-ouput {
     background-color: $light_blue;
 }

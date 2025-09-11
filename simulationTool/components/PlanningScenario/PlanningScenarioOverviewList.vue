@@ -153,7 +153,7 @@ export default {
 </template>
 
 <style scoped lang="scss">
-@import "~variables";
+;
 
 .list-group-item:hover {
     cursor: pointer;

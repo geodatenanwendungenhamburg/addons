@@ -513,7 +513,7 @@ export default {
 
 
 <style lang="scss" scoped>
-@import "~variables";
+;
     .info {
         max-width: fit-content;
         .info-icon {

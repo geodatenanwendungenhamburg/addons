@@ -489,7 +489,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-@import "~variables";
+;
 
 .planning-scenario {
     max-height: 100vh;

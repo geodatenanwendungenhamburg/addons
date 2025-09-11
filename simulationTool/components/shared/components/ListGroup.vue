@@ -318,7 +318,7 @@ export default {
 </template>
 
 <style scoped lang="scss">
-@import "~variables";
+;
 
 .no-stepper-arrows {
     input::-webkit-outer-spin-button,
