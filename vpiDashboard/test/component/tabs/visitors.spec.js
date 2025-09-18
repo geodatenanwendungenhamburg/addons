@@ -84,11 +84,11 @@ describe.skip("addons/vpiDashboard/test/ visitors tab component", () => {
         );
     });
 
-    it("renders the visitors component", () => {
+    it.skip("renders the visitors component", () => {
         expect(wrapper.find(".chartDataSelection").exists()).to.be.true;
     });
 
-    it("recognizes the selectedChartData that needs user interaction", () => {
+    it.skip("recognizes the selectedChartData that needs user interaction", () => {
         wrapper.vm.selectedChartData = "hourly";
         expect(wrapper.vm.isVisitorsChartType).to.be.true;
         wrapper.vm.selectedChartData = "daily";
@@ -101,13 +101,13 @@ describe.skip("addons/vpiDashboard/test/ visitors tab component", () => {
         expect(wrapper.vm.isVisitorsChartType).to.be.false;
     });
 
-    it("sets the correct charttype", () => {
+    it.skip("sets the correct charttype", () => {
         wrapper.vm.setChartType("bar");
 
         expect(wrapper.vm.chartType).to.equal("bar");
     });
 
-    it("create chart data", () => {
+    it.skip("create chart data", () => {
         wrapper.vm.selectedChartData = "hourly";
 
         const responseData = [
@@ -147,7 +147,7 @@ describe.skip("addons/vpiDashboard/test/ visitors tab component", () => {
         expect(testvalue.datasets[1].data).to.have.members([null, null]);
     });
 
-    it("change month in data card", () => {
+    it.skip("change month in data card", () => {
         wrapper.vm.monthHasChanged(2);
 
         expect(wrapper.vm.currentlySelectedMonth).to.equal(2);
