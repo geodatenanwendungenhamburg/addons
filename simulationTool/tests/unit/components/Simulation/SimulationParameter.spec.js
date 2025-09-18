@@ -116,37 +116,37 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
     });
 
     describe("Component DOM", () => {
-        it("should exist", () => {
+        it.skip("should exist", () => {
             const wrapper = factory.getMount();
 
             expect(wrapper.exists()).to.be.true;
         });
 
-        it("should render SectionHeader component", () => {
+        it.skip("should render SectionHeader component", () => {
             const wrapper = factory.getMount();
 
             expect(wrapper.findComponent({name: "SectionHeader"}).exists()).to.be.true;
         });
 
-        it("should render FlatButton component", () => {
+        it.skip("should render FlatButton component", () => {
             const wrapper = factory.getMount();
 
             expect(wrapper.findComponent({name: "FlatButton"}).exists()).to.be.true;
         });
 
-        it("should render FileUpload component", () => {
+        it.skip("should render FileUpload component", () => {
             const wrapper = factory.getMount();
 
             expect(wrapper.findComponent({name: "FileUpload"}).exists()).to.be.true;
         });
 
-        it("should render FlatButton to start a simulation", () => {
+        it.skip("should render FlatButton to start a simulation", () => {
             const wrapper = factory.getMount();
 
             expect(wrapper.find("#startSimulation").exists()).to.be.true;
         });
 
-        it("should render disabled FlatButton to start a simulation", async () => {
+        it.skip("should render disabled FlatButton to start a simulation", async () => {
             const wrapper = factory.getMount();
 
             await wrapper.setData({
@@ -159,7 +159,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
     });
 
     describe("Computed Properties", () => {
-        it("outputOptions", async () => {
+        it.skip("outputOptions", async () => {
             const wrapper = factory.getMount();
 
             await wrapper.setData({
@@ -174,7 +174,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
             );
         });
 
-        it("should return the correct value for 'objectTypeInputs'", async () => {
+        it.skip("should return the correct value for 'objectTypeInputs'", async () => {
             const wrapper = factory.getMount();
 
             await wrapper.setData({
@@ -193,7 +193,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
             });
         });
 
-        it("should return the correct value for 'stringTypeInputs'", async () => {
+        it.skip("should return the correct value for 'stringTypeInputs'", async () => {
             const wrapper = factory.getMount();
 
             await wrapper.setData({
@@ -212,7 +212,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
             });
         });
 
-        it("should return the correct value for 'isSomeOafLoading'", async () => {
+        it.skip("should return the correct value for 'isSomeOafLoading'", async () => {
             const wrapper = factory.getShallowMount();
 
             expect(wrapper.vm.isSomeOafLoading).to.be.false;
@@ -226,7 +226,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
     });
 
     describe("User Interaction", () => {
-        it("should call 'openCreatePlanningScenario' if user clicks the button to create a new planning scenario", async () => {
+        it.skip("should call 'openCreatePlanningScenario' if user clicks the button to create a new planning scenario", async () => {
             const wrapper = factory.getMount(),
                 buttonListWrapper = wrapper.findAll("button"),
                 spyOenCreatePlanningScenario = sinon.spy(wrapper.vm, "openCreatePlanningScenario");
@@ -235,7 +235,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
             expect(spyOenCreatePlanningScenario.calledOnce).to.be.true;
         });
 
-        it("should call 'backToPrevious' if user clicks the button back to previous component", async () => {
+        it.skip("should call 'backToPrevious' if user clicks the button back to previous component", async () => {
             const wrapper = factory.getMount(),
                 button = wrapper.find("#back"),
                 spyBackToPrevious = sinon.spy(wrapper.vm, "backToPrevious");
@@ -247,7 +247,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
 
     describe("Methods", () => {
         describe("getRequestBodyInputByKey", () => {
-            it("should return default value if the keys are not string", () => {
+            it.skip("should return default value if the keys are not string", () => {
                 const wrapper = factory.getMount();
 
                 expect(wrapper.vm.getRequestBodyInputByKey(null, "key2", "value")).to.equal("value");
@@ -264,13 +264,13 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getRequestBodyInputByKey("key1", {}, "value")).to.equal("value");
             });
 
-            it("should return default value if there are no set value according to the key", () => {
+            it.skip("should return default value if there are no set value according to the key", () => {
                 const wrapper = factory.getMount();
 
                 expect(wrapper.vm.getRequestBodyInputByKey("key1", "key2", "value")).to.equal("value");
             });
 
-            it("should return the value according to the key", async () => {
+            it.skip("should return the value according to the key", async () => {
                 const wrapper = factory.getMount(),
                     inputs = {
                         "key1": {
@@ -282,7 +282,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getRequestBodyInputByKey("key1", "key2", "value")).to.equal("result");
             });
 
-            it("should return the input object if propertyKey is an empty string", async () => {
+            it.skip("should return the input object if propertyKey is an empty string", async () => {
                 const wrapper = factory.getMount(),
                     inputs = {
                         "key1": "result"
@@ -294,7 +294,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("removeEmptyCollections", () => {
-            it("should remove empty collections from the requestBody", () => {
+            it.skip("should remove empty collections from the requestBody", () => {
                 const wrapper = factory.getShallowMount(),
                     oldRequestBodies = [{
                         inputs: {
@@ -317,7 +317,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("setRequestBodyInput", () => {
-            it("should not set value if the keys are not string", async () => {
+            it.skip("should not set value if the keys are not string", async () => {
                 const wrapper = factory.getMount();
 
                 await wrapper.setData({requestBodies: [{inputs: {}}]});
@@ -336,7 +336,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.requestBodies[0].inputs).to.deep.equal({});
             });
 
-            it("should set value with only one level key", async () => {
+            it.skip("should set value with only one level key", async () => {
                 const wrapper = factory.getMount();
 
                 await wrapper.setData({
@@ -353,7 +353,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 });
             });
 
-            it("should set value with only two level key", async () => {
+            it.skip("should set value with only two level key", async () => {
                 const wrapper = factory.getMount();
 
                 await wrapper.setData({
@@ -374,7 +374,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("getPrimaryTypeInputs", () => {
-            it("should return an empty object if processDescription.inputs is not an object", async () => {
+            it.skip("should return an empty object if processDescription.inputs is not an object", async () => {
                 const wrapper = factory.getShallowMount();
 
                 await wrapper.vm.$nextTick();
@@ -388,7 +388,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getPrimaryTypeInputs()).to.deep.equal({});
             });
 
-            it("should return an empty object if no inputs have 'menu' set to 'primary'", async () => {
+            it.skip("should return an empty object if no inputs have 'menu' set to 'primary'", async () => {
                 store = getStore({
                     id: "simulationId",
                     inputs: {
@@ -411,7 +411,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getPrimaryTypeInputs()).to.deep.equal({});
             });
 
-            it("should extract properties of type 'object' with primary properties", async () => {
+            it.skip("should extract properties of type 'object' with primary properties", async () => {
                 const wrapper = factory.getShallowMount(),
                     expected = {
                         prop1: {
@@ -441,7 +441,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getPrimaryTypeInputs()).to.deep.equal(expected);
             });
 
-            it("should extract inputs of type 'string'", () => {
+            it.skip("should extract inputs of type 'string'", () => {
                 const wrapper = factory.getMount(),
                     expected = {
                         input1: {
@@ -461,7 +461,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getPrimaryTypeInputs()).to.deep.equal(expected);
             });
 
-            it("should handle a mix of object and string inputs", () => {
+            it.skip("should handle a mix of object and string inputs", () => {
                 const wrapper = factory.getMount(),
                     expected = {
                         prop1: {
@@ -496,7 +496,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("getOptionalBBOXUrlInputs", () => {
-            it("should return an empty object if processDescription.inputs is not an object", () => {
+            it.skip("should return an empty object if processDescription.inputs is not an object", () => {
                 const wrapper = factory.getShallowMount();
 
                 wrapper.setData({processDescription: {inputs: null}});
@@ -509,7 +509,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getOptionalBBOXUrlInputs()).to.deep.equal({});
             });
 
-            it("should return an empty object if no inputs match the criteria", () => {
+            it.skip("should return an empty object if no inputs match the criteria", () => {
                 store = getStore({
                     id: "simulationId",
                     inputs: {
@@ -531,7 +531,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.getOptionalBBOXUrlInputs()).to.deep.equal({});
             });
 
-            it("should return the correct inputs matching the criteria", () => {
+            it.skip("should return the correct inputs matching the criteria", () => {
                 store = getStore({
                     id: "simulationId",
                     inputs: {
@@ -556,7 +556,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 });
             });
 
-            it("should handle mixed valid and invalid inputs", () => {
+            it.skip("should handle mixed valid and invalid inputs", () => {
                 store = getStore({
                     id: "simulationId",
                     inputs: {
@@ -585,7 +585,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("toggleOptionalBBOXUrlInputs", () => {
-            it("should set input and set the correct value", async () => {
+            it.skip("should set input and set the correct value", async () => {
                 const wrapper = factory.getShallowMount(),
                     mockBBOXUrl = "http://example.com/bbox/extent/500x500.tif?coord_crs=epsg:25832";
 
@@ -606,7 +606,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
 
                 expect(wrapper.vm.requestBodies[0].inputs.input1).to.equal(mockBBOXUrl);
             });
-            it("should set the input to undefined if the checkbox is unchecked", async () => {
+            it.skip("should set the input to undefined if the checkbox is unchecked", async () => {
                 const wrapper = factory.getShallowMount();
 
                 await wrapper.setData({
@@ -616,7 +616,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 wrapper.vm.toggleOptionalBBOXUrlInputs("input1");
                 expect(wrapper.vm.requestBodies[0].inputs.input1).to.be.undefined;
             });
-            it("should delete the property from requestBody if the checkbox is unchecked and it existed already", async () => {
+            it.skip("should delete the property from requestBody if the checkbox is unchecked and it existed already", async () => {
                 const wrapper = factory.getShallowMount();
 
                 await wrapper.setData({
@@ -630,7 +630,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
         });
 
         describe("onOafSwitchChange", () => {
-            it("should request the features if they do not exist in the scenario", async () => {
+            it.skip("should request the features if they do not exist in the scenario", async () => {
                 const wrapper = factory.getMount(),
                     getStub = sinon.stub(getOAFFeature, "getOAFFeatureGet");
 
@@ -641,7 +641,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(getStub.calledOnce).to.be.true;
             });
 
-            it("should not request the features if they exist in the scenario", async () => {
+            it.skip("should not request the features if they exist in the scenario", async () => {
                 const wrapper = factory.getMount(),
                     getStub = sinon.stub(getOAFFeature, "getOAFFeatureGet");
 
@@ -652,7 +652,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(getStub.called).to.be.false;
             });
 
-            it("should set the input in the requestBody", async () => {
+            it.skip("should set the input in the requestBody", async () => {
                 const wrapper = factory.getMount();
 
                 wrapper.vm.currentPlanningScenario.inputs.anOafInput = "aValue";
@@ -665,7 +665,7 @@ describe.skip("addons/SimulationTool/components/Simulation/SimulationParameter.v
                 expect(wrapper.vm.requestBodies[0].inputs.anOafInput).to.deep.equal("aValue");
             });
 
-            it("should remove the input from the requestBody if the switch is unchecked", async () => {
+            it.skip("should remove the input from the requestBody if the switch is unchecked", async () => {
                 const wrapper = factory.getMount();
 
                 wrapper.vm.currentPlanningScenario.inputs.anOafInput = "aValue";
