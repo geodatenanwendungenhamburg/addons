@@ -178,5 +178,9 @@
   "saveSession": {
     "path": "cosi/SaveSession",
     "type": "tool"
+  },
+  "calculateRatio": {
+    "path": "cosi/CalculateRatio",
+    "type": "tool"
   }
 }
