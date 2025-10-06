@@ -35,11 +35,14 @@ describe("addons/dipasCockpit/components/DipasCockpitTheme.vue", () => {
                         };
                     }
                 }
-            },
-            mocks: {
-                $t: (msg) => msg
             }
         });
+    });
+
+    afterEach(() => {
+        if (wrapper) {
+            wrapper.unmount();
+        }
     });
 
     it("should render 13 individual html elements", () => {

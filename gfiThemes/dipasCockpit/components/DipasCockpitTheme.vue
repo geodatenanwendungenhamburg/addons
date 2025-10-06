@@ -14,10 +14,16 @@ export default {
             return this.feature.getMappedProperties();
         },
         dateStart: function () {
-            return dayjs(this.attributes.dateStart, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY");
+            if (this.attributes && this.attributes.dateStart) {
+                return dayjs(this.attributes.dateStart, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY");
+            }
+            return "";
         },
         dateEnd: function () {
-            return dayjs(this.attributes.dateEnd, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY");
+            if (this.attributes && this.attributes.dateEnd) {
+                return dayjs(this.attributes.dateEnd, "YYYY-MM-DD HH:mm:ss").format("DD.MM.YYYY");
+            }
+            return "";
         }
     },
     mounted () {
