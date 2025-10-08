@@ -341,7 +341,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-
 .download-container {
     float: left;
     padding-top: 10px;

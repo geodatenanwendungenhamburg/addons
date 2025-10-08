@@ -930,7 +930,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-
 .selected-ouput {
     background-color: $light_blue;
 }
