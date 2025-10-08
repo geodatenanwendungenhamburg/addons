@@ -34,7 +34,6 @@ export default {
             deep: true
         }
     },
-
     /**
      * Put initialize functions here after mounting
      * @returns {void}
