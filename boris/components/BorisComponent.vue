@@ -558,7 +558,7 @@ export default {
 
 
 <style lang="scss" scoped>
-@import "~variables";
+;
 
 .btn-component {
   --bs-btn-color: #001B3D;
