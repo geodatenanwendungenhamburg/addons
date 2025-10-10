@@ -25,23 +25,6 @@ export default {
         VChip,
         VChipGroup
     },
-    props: {
-        templateName: {
-            type: String,
-            required: false,
-            default: ""
-        },
-        templateStatsCategories: {
-            type: Array,
-            required: false,
-            default: () => []
-        },
-        templateLayerIds: {
-            type: Array,
-            required: false,
-            default: () => []
-        }
-    },
     data: () => ({
         tagsOptionalComponents: [
             "Titelblatt inkl. Kartenausschnitt",
@@ -77,6 +60,7 @@ export default {
         ...mapGetters("Modules/Dashboard", ["items"]),
         ...mapGetters("Modules/FeaturesList", ["featuresListItems"]),
         ...mapGetters("Modules/DistrictSelector", ["districtLevels", "selectedDistrictLevel", "selectedDistrictNames", "selectedFeatures", "initMapping"]),
+        ...mapGetters("Modules/TemplateManager", ["reportName", "reportLayerIds", "reportCategories"]),
         ...mapGetters(["restServiceById"]),
         ...mapGetters("Maps", ["projection", "getCurrentExtent"]),
 
@@ -85,8 +69,10 @@ export default {
          * @returns {String} The file name.
          */
         downloadName () {
+            console.log(this.reportLayerIds);
+            console.log(this.reportCategories);
             const date = dayjs(new Date()).format("YYYY-MM-DD"),
-                fileName = this.reportTitle ? this.reportTitle : this.templateName,
+                fileName = this.reportTitle ? this.reportTitle : this.reportName,
                 prepareName = fileName.replace(/(?:\.(?![^.]+$)|[^\w.])+/g, "-");
 
             return prepareName + "-" + date + ".pdf";
@@ -215,7 +201,7 @@ export default {
                 return;
             }
             const filteredMappingByCategories = this.initMapping.filter(obj => {
-                    return this.templateStatsCategories.includes(obj.value);
+                    return this.reportCategories.includes(obj.value);
                 }),
                 groupedMapping = Object.groupBy(filteredMappingByCategories, (obj) => obj.group);
 
@@ -318,7 +304,7 @@ export default {
                 availableProgressForThisStep = this.getProgressValuePerStep();
             let imageOptions = {};
 
-            this.templateLayerIds.forEach(layerId => {
+            this.reportLayerIds.forEach(layerId => {
                 if (!template.baseLayer.map.layerIds.includes(layerId)) {
                     template.baseLayer.map.layerIds.unshift(layerId);
                 }
@@ -551,7 +537,7 @@ export default {
                 return;
             }
 
-            const data = this.getChartData(this.items, this.templateStatsCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart, this.initMapping),
+            const data = this.getChartData(this.items, this.reportCategories, this.selectedDistrictNames, this.areaColumnName, this.categoryInChart, this.initMapping),
                 imageArr = [];
 
             if (!Array.isArray(data) || !data.length) {
@@ -612,21 +598,21 @@ export default {
         /**
          * Gets the data for chart.
          * @param {Object[]} items - Items from dashboard component.
-         * @param {Object[]} templateStatsCategories - the template stats categories.
+         * @param {Object[]} reportCategories - the report stats categories.
          * @param {String[]} selectedDistrictNames - the selected district name in id.
          * @param {String} areaColumnName - the area name.
          * @param {Object[]} categoryInChart - the category to be used in chart.
          * @param {Object[]} mappingJson - the mapping json.
          * @returns {Object} the data.
          */
-        getChartData (items, templateStatsCategories, selectedDistrictNames, areaColumnName, categoryInChart, mappingJson) {
+        getChartData (items, reportCategories, selectedDistrictNames, areaColumnName, categoryInChart, mappingJson) {
             const filteredMappingByCategories = mappingJson.filter(obj => {
-                    return templateStatsCategories.includes(obj.value);
+                    return reportCategories.includes(obj.value);
                 }),
                 groupedMapping = this.groupBy(filteredMappingByCategories, "group"),
                 categoryData = [];
 
-            if (!Array.isArray(mappingJson) || mappingJson.length === 0 || !Array.isArray(items) || !items.length || !Array.isArray(templateStatsCategories) || !templateStatsCategories.length || !Array.isArray(selectedDistrictNames) || !selectedDistrictNames.length) {
+            if (!Array.isArray(mappingJson) || mappingJson.length === 0 || !Array.isArray(items) || !items.length || !Array.isArray(reportCategories) || !reportCategories.length || !Array.isArray(selectedDistrictNames) || !selectedDistrictNames.length) {
                 return categoryData;
             }
 
@@ -641,11 +627,11 @@ export default {
                     data = [];
 
                 Object.keys(category).forEach(key => {
-                    if (!Object.prototype.hasOwnProperty.call(groupedMapping, key) || !templateStatsCategories.includes(category[key])) {
+                    if (!Object.prototype.hasOwnProperty.call(groupedMapping, key) || !reportCategories.includes(category[key])) {
                         return;
                     }
 
-                    if (templateStatsCategories.includes(category[key])) {
+                    if (reportCategories.includes(category[key])) {
                         const innerObj = {};
 
                         innerObj[key] = category[key];
@@ -713,7 +699,7 @@ export default {
     <div class="container">
         <div class="row">
             <h5 class="text-primary col col-md-12 pt-1">
-                {{ templateName }}
+                {{ reportName }}
             </h5>
             <form
                 v-if="!showProgressBar"

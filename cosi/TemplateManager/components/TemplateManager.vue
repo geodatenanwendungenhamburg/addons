@@ -629,6 +629,9 @@ export default {
                     this.setMapping(await getMappingJson());
                 }
             }
+
+            this.setReportLayerIds(this.selectedLayerIdsInTemplate);
+            this.setReportCategories(this.selectedCategoriesInTemplate);
         },
 
         /**
