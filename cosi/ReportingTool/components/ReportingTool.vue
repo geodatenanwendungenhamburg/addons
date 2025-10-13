@@ -69,8 +69,6 @@ export default {
          * @returns {String} The file name.
          */
         downloadName () {
-            console.log(this.reportLayerIds);
-            console.log(this.reportCategories);
             const date = dayjs(new Date()).format("YYYY-MM-DD"),
                 fileName = this.reportTitle ? this.reportTitle : this.reportName,
                 prepareName = fileName.replace(/(?:\.(?![^.]+$)|[^\w.])+/g, "-");
@@ -200,6 +198,7 @@ export default {
             if (!this.controlsReportComponent("statistische Datenübersicht")) {
                 return;
             }
+
             const filteredMappingByCategories = this.initMapping.filter(obj => {
                     return this.reportCategories.includes(obj.value);
                 }),

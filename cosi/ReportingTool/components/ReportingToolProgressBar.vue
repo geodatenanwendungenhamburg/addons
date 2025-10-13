@@ -72,7 +72,7 @@ export default {
                 <p
                     class="p-0"
                 >
-                    {{ $t("additional:modules.tools.cosi.templateManager.reportSuccess") }}
+                    {{ $t("additional:modules.cosi.reportingTool.reportSuccess") }}
                 </p>
             </div>
             <div class="row">
@@ -82,7 +82,7 @@ export default {
                         @click.prevent="$emit('closeProgressBar')"
                     >
                         <i class="bi bi-arrow-return-left pe-2" />
-                        {{ $t("additional:modules.tools.cosi.templateManager.backToTemplate") }}
+                        {{ $t("additional:modules.cosi.reportingTool.backToTemplate") }}
                     </button>
                 </div>
             </div>

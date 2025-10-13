@@ -8,6 +8,7 @@
           "generateReport": "Generate Report",
           "optionalComponents": "Optional components of the report to be exported",
           "infrastructureData": "Infrastructure Data:",
+          "backToTemplate": "Back to reporting tool",
           "infrastructureHint": "Note: If there are more than 10 institutions, no infrastructure data table is displayed.",
           "label": {
             "selectedAreas": "Name of the selected areas",

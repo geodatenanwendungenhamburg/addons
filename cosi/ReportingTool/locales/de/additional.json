@@ -8,6 +8,7 @@
             "generateReport": "Bericht generieren",
             "optionalComponents": "Optionale Bestandteile des auszugebenen Berichts:",
             "infrastructureData": "Infrastrukturdaten:",
+            "backToTemplate": "Zurück zum ReportingTool",
             "infrastructureHint": "Hinweis: Bei mehr als 10 Einrichtungen wird keine Infrastrukturdaten-Tabelle dargestellt.",
             "label": {
               "selectedAreas": "Name der ausgewählten Gebiete",
