@@ -48,6 +48,24 @@ export default {
     computed: {
         ...mapGetters("Modules/SimulationTool", Object.keys(getters))
     },
+    watch: {
+        dataSources: {
+            handler (val) {
+                if (val.length > 1) {
+                    const ids = new Set();
+
+                    val.forEach(ds => {
+                        if (ids.has(ds.id)) {
+                            throw new Error(`Duplicate data source id found: ${ds.id}`);
+                        }
+                        ids.add(ds.id);
+                    });
+                }
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     mounted: async function () {
         await this.checkLoggedIn();
         this.maximizeDrawer();

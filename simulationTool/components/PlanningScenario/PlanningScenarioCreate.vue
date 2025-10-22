@@ -34,7 +34,7 @@ export default {
             currentScenarioData: {
                 id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 name: "Neues Planungsszenario",
-                dataSourceId: "default",
+                dataSourceId: "",
                 inputs: {}
             },
             isValid: true,
@@ -138,6 +138,9 @@ export default {
     },
     created () {
         this.source = this.getLayerSource();
+        if (this.dataSources.length > 0) {
+            this.currentScenarioData.dataSourceId = this.dataSources[0].id;
+        }
     },
     mounted () {
         this.deleteSource();

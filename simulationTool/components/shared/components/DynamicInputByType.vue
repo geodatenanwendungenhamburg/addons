@@ -1,4 +1,6 @@
 <script>
+import ArrayInput from "./ArrayInput.vue";
+import EnumInput from "./EnumInput.vue";
 import InputText from "../../../../../src/shared/modules/inputs/components/InputText.vue";
 import SliderItem from "../../../../../src/shared/modules/slider/components/SliderItem.vue";
 import SwitchInput from "../../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
@@ -6,6 +8,8 @@ import SwitchInput from "../../../../../src/shared/modules/checkboxes/components
 export default {
     name: "DynamicInputByType",
     components: {
+        ArrayInput,
+        EnumInput,
         InputText,
         SliderItem,
         SwitchInput
@@ -53,33 +57,7 @@ export default {
             required: false
         }
     },
-    emits: ["update:value", "update:checked"],
-    computed: {
-        enumValues () {
-            if (this.inputType !== "enum") {
-                return [];
-            }
-            if (this.value && typeof this.value === "object" && Array.isArray(this.value.enum)) {
-                return this.value.enum;
-            }
-            if (Array.isArray(this.value)) {
-                return this.value;
-            }
-            return [];
-        },
-        selectedEnumValue () {
-            if (this.inputType !== "enum") {
-                return this.value;
-            }
-            if (this.value && typeof this.value === "object" && Object.prototype.hasOwnProperty.call(this.value, "value")) {
-                return this.value.value;
-            }
-            if (Array.isArray(this.value)) {
-                return this.value[0];
-            }
-            return this.value;
-        }
-    }
+    emits: ["update:value", "update:checked"]
 };
 </script>
 
@@ -96,24 +74,20 @@ export default {
             />
         </template>
         <template v-else-if="inputType === 'enum'">
-            <label :for="id">
-                {{ label }}
-            </label>
-            <select
+            <EnumInput
                 :id="id"
-                class="form-select m-2"
-                :aria-label="label"
-                :value="selectedEnumValue"
-                @change="$emit('update:value', $event.target.value)"
-            >
-                <option
-                    v-for="(val, index) in enumValues"
-                    :key="index"
-                    :value="val"
-                >
-                    {{ val }}
-                </option>
-            </select>
+                :label="label"
+                :enum-object="value"
+                @update:enumValue="$emit('update:value', $event)"
+            />
+        </template>
+        <template v-else-if="inputType === 'array'">
+            <ArrayInput
+                :id="id"
+                :label="label"
+                :array-object="value"
+                @update:arrayValue="console.log('Array input updated:', $event); $emit('update:value', $event)"
+            />
         </template>
         <template v-else-if="inputType === 'boolean'">
             <div class="form-switch">

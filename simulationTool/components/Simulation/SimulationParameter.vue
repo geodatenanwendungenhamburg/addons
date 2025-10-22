@@ -51,7 +51,8 @@ export default {
             "currentPlanningScenarioId",
             "planningScenarios",
             "previousComponentOfSimulation",
-            "simulations"
+            "simulations",
+            "dataSources"
         ]),
         ...mapGetters("Modules/Login", ["accessToken"]),
 
@@ -80,7 +81,7 @@ export default {
             if (!this.processDescriptions.length) {
                 return {};
             }
-
+            console.log("combinedInputs", this.processDescriptions.reduce((inputs, description) => Object.assign(inputs, description.inputs), {}));
             return this.processDescriptions.reduce((inputs, description) => Object.assign(inputs, description.inputs), {});
         },
 
@@ -168,6 +169,44 @@ export default {
          */
         simulation () {
             return this.simulations.find(simulation => simulation.id === this.currentSimulationId);
+        },
+
+        /**
+         * Returns the CRS from the currently selected planning scenario's data source.
+         * Falls back to null if not resolvable.
+         * @returns {String|null} The CRS URI or null if none found.
+         */
+        currentDataSourceCrs () {
+            const scenario = this.currentPlanningScenario,
+                ds = scenario && Array.isArray(this.dataSources) ? this.dataSources.find(d => d.id === scenario.dataSourceId) : null;
+
+            return ds?.inputs?.crs || null;
+        },
+
+        /**
+         * Collects inputs that are mapped via dataSource (non-editable) for read-only display.
+         * Returns array of objects: { key, label, hasValue }.
+         */
+        inheritedDataSourceInputs () {
+            if (!this.simulation || !this.currentPlanningScenario) {
+                return [];
+            }
+            const scenarioInputs = this.currentPlanningScenario.inputs || {};
+
+            return Object.entries(this.simulation.inputs)
+                .filter(([, cfg]) => cfg?.dataSource)
+                .map(([inputKey, cfg]) => {
+                    const sourceKey = cfg.dataSource,
+                        value = scenarioInputs[sourceKey];
+
+                    return {
+                        key: inputKey,
+                        sourceKey,
+                        hasValue: typeof value !== "undefined" && value !== null,
+                        printableValue: typeof value === "string" ? value : typeof value,
+                        label: this.getMappedProperty(inputKey, this.simulation?.inputs?.[inputKey]?.propertiesMapping) || inputKey
+                    };
+                });
         }
     },
     watch: {
@@ -187,6 +226,14 @@ export default {
             this.flatInputs = {};
 
             Object.entries(this.combinedInputs).forEach(([inputKey, input]) => {
+                // Skip exposing CRS field in UI; it is injected automatically from data source
+                if (inputKey === "crs") {
+                    return;
+                }
+                // Skip inputs that are sourced from dataSource mapping (not editable)
+                if (this.simulation?.inputs?.[inputKey]?.dataSource) {
+                    return;
+                }
                 if (this.simulation?.inputs?.[inputKey]?.menu !== "nowhere" //
                     && !this.simulation?.inputs?.[inputKey]?.editable) {
                     switch (input.schema?.type) {
@@ -194,6 +241,9 @@ export default {
                             this.nestedInputs[inputKey] = input;
                             break;
                         case "string":
+                        case "number":
+                        case "boolean":
+                        case "array":
                             // for some reason not nested inputs always have the type "string"
                             this.flatInputs[inputKey] = input;
                             break;
@@ -439,6 +489,16 @@ export default {
                     return;
                 }
 
+                // Skip dataSource-mapped inputs (rendered read-only elsewhere)
+                if (inputConfig?.dataSource) {
+                    return;
+                }
+
+                // Skip calculated inputs (shown in dedicated block)
+                if (inputConfig?.type === "calculated") {
+                    return;
+                }
+
                 // Skip editable inputs (handled elsewhere)
                 if (inputConfig?.editable) {
                     return;
@@ -657,6 +717,7 @@ export default {
             this.processDescriptions = await Promise.all(
                 this.processHandlers.map(handler => handler.getDescription(this.accessToken))
             );
+            console.log("processDescriptions", this.processDescriptions);
         },
 
         /**
@@ -681,8 +742,7 @@ export default {
                 description => filteredProcessDescriptions.push(this.removeUnwantedProperty(description, this.ignoreProperties)));
             this.requestBodies = filteredProcessDescriptions.map(description => ({
                 inputs: {
-                    ...OgcApiProcess.getInputDefaultsFromDescription(description),
-                    ...this.currentPlanningScenario.inputs
+                    ...OgcApiProcess.getInputDefaultsFromDescription(description)
                 },
                 outputs: {}
             }));
@@ -700,6 +760,179 @@ export default {
             await this.fetchProcessDescriptions();
             this.setupIgnoreProperties();
             this.createRequestBodies();
+            console.log("Initial requestBodies:", this.requestBodies);
+            this.applyDataSourceInputMapping();
+            this.applyCalculatedInputs();
+            console.log("Prepared requestBodies:", this.requestBodies);
+        },
+
+        /**
+         * Applies calculated inputs (currently supports bbox) defined with { type: "calculated", calculationSource: "<dataSourceKey>" }.
+         * The bbox is computed from the FeatureCollection of the calculationSource as [minX, minY, maxX, maxY].
+         * @returns {void}
+         */
+        applyCalculatedInputs () {
+            if (!this.simulation || !isObject(this.simulation.inputs) || !this.currentPlanningScenario) {
+                return;
+            }
+
+            const scenarioInputs = this.currentPlanningScenario.inputs || {};
+
+            Object.entries(this.simulation.inputs).forEach(([simInputKey, cfg]) => {
+                if (cfg?.type === "calculated" && cfg?.calculationSource) {
+                    const sourceVal = scenarioInputs[cfg.calculationSource],
+                        features = Array.isArray(sourceVal?.features) ? sourceVal.features : [],
+                        halfSize = 250;
+
+                    if (!sourceVal) {
+                        console.warn(`[SimulationTool] Calculated input '${simInputKey}' skipped: source '${cfg.calculationSource}' missing.`);
+                        return;
+                    }
+
+                    if (!features.length) {
+                        console.warn(`[SimulationTool] Calculated input '${simInputKey}' skipped: source '${cfg.calculationSource}' has no features.`);
+                        return;
+                    }
+
+                    let minX = Infinity,
+                        minY = Infinity,
+                        maxX = -Infinity,
+                        maxY = -Infinity,
+                        centerX = 0,
+                        centerY = 0,
+                        bbox = null;
+
+                    features.forEach(f => {
+                        const geom = f?.geometry,
+                            coordsLists = [];
+
+                        if (!geom) {
+                            return;
+                        }
+
+                        // Collect coordinate arrays depending on geometry type
+
+                        switch (geom.type) {
+                            case "Point":
+                                coordsLists.push([geom.coordinates]);
+                                break;
+                            case "MultiPoint":
+                            case "LineString":
+                                coordsLists.push(geom.coordinates);
+                                break;
+                            case "MultiLineString":
+                            case "Polygon":
+                                coordsLists.push(...geom.coordinates);
+                                break;
+                            case "MultiPolygon":
+                                geom.coordinates.forEach(poly => coordsLists.push(...poly));
+                                break;
+                            default:
+                                break;
+                        }
+
+                        coordsLists.forEach(list => {
+                            list.forEach(coord => {
+                                if (!Array.isArray(coord) || coord.length < 2) {
+                                    return;
+                                }
+                                const x = coord[0],
+                                    y = coord[1];
+
+                                if (typeof x === "number" && typeof y === "number") {
+                                    if (x < minX) {
+                                        minX = x;
+                                    }
+                                    if (y < minY) {
+                                        minY = y;
+                                    }
+                                    if (x > maxX) {
+                                        maxX = x;
+                                    }
+                                    if (y > maxY) {
+                                        maxY = y;
+                                    }
+                                }
+                            });
+                        });
+                    });
+
+                    if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
+                        console.warn(`[SimulationTool] Calculated input '${simInputKey}' failed: invalid extent from source '${cfg.calculationSource}'.`);
+                        return;
+                    }
+
+                    centerX = (minX + maxX) / 2;
+                    centerY = (minY + maxY) / 2;
+
+                    bbox = [
+                        centerX - halfSize,
+                        centerY - halfSize,
+                        centerX + halfSize,
+                        centerY + halfSize
+                    ];
+
+                    this.requestBodies.forEach(rb => {
+                        rb.inputs = rb.inputs || {};
+                        rb.inputs[simInputKey] = bbox;
+                    });
+
+                    console.log(`[SimulationTool] Calculated bbox for '${simInputKey}' from source '${cfg.calculationSource}':`, bbox, `featureCount=${features.length}`);
+                }
+            });
+        },
+
+        /**
+         * Applies mapping from simulation.inputs[*].dataSource to scenario/dataSource provided input values.
+         * Example: simulation.inputs.geometries = { dataSource: "buildings" } -> rb.inputs.geometries receives scenario.inputs.buildings FeatureCollection.
+         * Logs a summary of mappings and missing sources.
+         * @returns {void}
+         */
+        applyDataSourceInputMapping () {
+            if (!this.simulation || !isObject(this.simulation.inputs) || !this.currentPlanningScenario) {
+                return;
+            }
+
+            const scenarioInputs = this.currentPlanningScenario.inputs || {},
+                mappings = [];
+
+            console.log("Applying dataSource input mapping with scenarioInputs:", scenarioInputs);
+            Object.entries(this.simulation.inputs).forEach(([simInputKey, cfg]) => {
+                console.log("Applying dataSource mapping for", {simInputKey, cfg});
+                if (cfg && typeof cfg.dataSource === "string") {
+                    const sourceKey = cfg.dataSource,
+                        value = scenarioInputs[sourceKey];
+
+                    if (typeof value !== "undefined") {
+                        // Apply to every request body (all processes share same logical inputs)
+                        this.requestBodies.forEach(rb => {
+                            rb.inputs = rb.inputs || {};
+                            rb.inputs[simInputKey] = value;
+                        });
+                        mappings.push({target: simInputKey, source: sourceKey, status: "ok", featureCount: Array.isArray(value?.features) ? value.features.length : undefined});
+                    }
+                    else {
+                        mappings.push({target: simInputKey, source: sourceKey, status: "missing"});
+                    }
+                }
+            });
+
+            if (mappings.length) {
+                console.log("[SimulationTool] Data source input mapping summary:", mappings);
+                const mappedSources = new Set(mappings.map(m => m.source)),
+                    unused = Object.keys(scenarioInputs).filter(k => !mappedSources.has(k));
+
+                if (unused.length) {
+                    console.warn("[SimulationTool] Unused scenario input keys (not mapped, not sent):", unused);
+                }
+            }
+            else {
+                const scenarioKeys = Object.keys(scenarioInputs || {});
+
+                if (scenarioKeys.length) {
+                    console.warn("[SimulationTool] No dataSource mappings configured; scenario inputs ignored:", scenarioKeys);
+                }
+            }
         },
 
         /**
@@ -744,26 +977,29 @@ export default {
             return requestBodies;
         },
         /**
-         * Replaces all objects with {enum: ..., value: ...} in a deeply nested object with the value of 'value'.
+         * Replaces all array or enum value objects in a deeply nested object with their values.
          * @param {Object|Array} obj - The object or array to process.
          * @returns {Object|Array} The processed object or array.
          */
-        replaceEnumValueObjects (obj) {
+        replaceArrayOrEnumValueObjects (obj) {
             if (Array.isArray(obj)) {
-                return obj.map(item => this.replaceEnumValueObjects(item));
+                return obj.map(item => this.replaceArrayOrEnumValueObjects(item));
             }
             else if (obj && typeof obj === "object") {
                 if (Object.prototype.hasOwnProperty.call(obj, "enum") && Object.prototype.hasOwnProperty.call(obj, "value")) {
 
                     return obj.value;
                 }
+                if (Array.isArray(obj.items)) {
+                    console.log("Replacing array items for", obj);
+                    return obj.items;
+                }
                 return Object.fromEntries(
-                    Object.entries(obj).map(([key, value]) => [key, this.replaceEnumValueObjects(value)])
+                    Object.entries(obj).map(([key, value]) => [key, this.replaceArrayOrEnumValueObjects(value)])
                 );
             }
             return obj;
         },
-
 
         /**
          * Prepares the request bodies for the execution and starts the simulation.
@@ -774,7 +1010,50 @@ export default {
                 return;
             }
             this.removeEmptyCollections(this.requestBodies);
-            this.requestBodies = this.replaceEnumValueObjects(this.requestBodies);
+            this.requestBodies = this.replaceArrayOrEnumValueObjects(this.requestBodies);
+
+            // Log: All parameters and specifically the buildings that will be sent to the simulation
+            try {
+                const processes = this.simulation?.processes || [],
+                    summary = this.requestBodies.map((rb, index) => ({
+                        processId: processes[index]?.id,
+                        inputKeys: Object.keys(rb?.inputs || {})
+                    }));
+
+                console.log("[SimulationTool] Simulation request bodies (summary):", summary);
+
+                this.requestBodies.forEach((rb, index) => {
+                    const processId = processes[index]?.id,
+                        inputs = rb?.inputs || {},
+                        buildings = inputs?.buildings;
+
+                    if (inputs?.crs && inputs.crs !== this.currentDataSourceCrs) {
+                        console.warn("[SimulationTool] Warning: CRS in request body differs from data source CRS", {processId, bodyCrs: inputs.crs, dataSourceCrs: this.currentDataSourceCrs});
+                    }
+                    else if (inputs?.crs) {
+                        console.log("[SimulationTool] CRS used for process:", {processId, crs: inputs.crs});
+                    }
+                    else {
+                        console.warn("[SimulationTool] No CRS present in request body (should have been injected if available)", {processId});
+                    }
+
+                    // Log all parameters (inputs)
+                    console.log("[SimulationTool] Inputs sent to simulation:", {processId, inputs});
+
+                    // Log buildings specifically
+                    if (buildings) {
+                        const featureCount = Array.isArray(buildings.features) ? buildings.features.length : undefined;
+
+                        console.log("[SimulationTool] Buildings sent to simulation:", {processId, featureCount, buildings});
+                    }
+                    else {
+                        console.warn("[SimulationTool] No buildings input present for process:", processId);
+                    }
+                });
+            }
+            catch (e) {
+                console.warn("[SimulationTool] Error while logging request bodies:", e);
+            }
 
             const scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId), // Cannot use computed property here, which may change during async call.
                 executeResponses = await Promise.all(
@@ -820,20 +1099,29 @@ export default {
          * @param {Boolean} isEnum whether the input is an enum or not.
          * @returns {void}
          */
-        setRequestBodyInput (inputKey, propertyKey, val, isEnum = false) {
+        setRequestBodyInput (inputKey, propertyKey, val, type) {
             if (typeof inputKey !== "string" || typeof propertyKey !== "string") {
                 console.warn(`Invalid parameters: inputKey=${inputKey}, propertyKey=${propertyKey}`);
                 return;
             }
 
             this.processDescriptions.forEach((description, index) => {
+                if (type === "array") {
+                    console.log("Setting array value for", {inputKey, propertyKey, val});
+                    console.log("Current value:", this.requestBodies[index]?.inputs?.[inputKey]);
+                    console.log("Description input:", description.inputs?.[inputKey]);
+                }
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
                 if (propertyKey === "") {
                     // top-level input
-                    if (isEnum && this.requestBodies[index]?.inputs?.[inputKey]?.value !== undefined) {
+                    if (type === "enum" && this.requestBodies[index]?.inputs?.[inputKey]?.value !== undefined) {
                         // Only update value part of enum object
+                        this.requestBodies[index].inputs[inputKey].value = val;
+                        return;
+                    }
+                    else if (type === "array" && Array.isArray(this.requestBodies[index]?.inputs?.[inputKey])) {
                         this.requestBodies[index].inputs[inputKey].value = val;
                         return;
                     }
@@ -844,7 +1132,11 @@ export default {
                 if (typeof this.requestBodies[index].inputs[inputKey] === "undefined") {
                     this.requestBodies[index].inputs[inputKey] = {};
                 }
-                if (isEnum && this.requestBodies[index].inputs[inputKey][propertyKey]?.value !== undefined) {
+                if (type === "enum" && this.requestBodies[index].inputs[inputKey][propertyKey]?.value !== undefined) {
+                    this.requestBodies[index].inputs[inputKey][propertyKey].value = val;
+                    return;
+                }
+                else if (type === "array" && Array.isArray(this.requestBodies[index].inputs[inputKey][propertyKey])) {
                     this.requestBodies[index].inputs[inputKey][propertyKey].value = val;
                     return;
                 }
@@ -969,6 +1261,26 @@ export default {
                     <h6 class="mt-5 mb-3">
                         {{ $t('additional:modules.tools.simulationTool.parameters') }}
                     </h6>
+
+                    <!-- Inherited (dataSource-mapped) inputs read-only -->
+                    <div
+                        v-if="inheritedDataSourceInputs.length"
+                        class="mb-4"
+                    >
+                        <div
+                            v-for="inherited in inheritedDataSourceInputs"
+                            :key="`inherited-${inherited.key}`"
+                        >
+                            <InputText
+                                :id="`inherited-${inherited.key}`"
+                                :label="inherited.label"
+                                :placeholder="inherited.label"
+                                :model-value="(inherited.hasValue ? $t('additional:modules.tools.simulationTool.inheritedFromDataSource') : $t('additional:modules.tools.simulationTool.inheritedMissing')) + ': ' + inherited.printableValue"
+                                :disabled="true"
+                                :readonly="true"
+                            />
+                        </div>
+                    </div>
                     <div
                         v-for="(input, propertyKey) in primaryTypeInputs"
                         :key="propertyKey"
@@ -982,7 +1294,7 @@ export default {
                             :min="input.minimum"
                             :max="input.maximum"
                             :aria="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
-                            @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
+                            @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, input.type)"
                             @update:checked="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
                         />
                     </div>
@@ -1074,7 +1386,7 @@ export default {
                             :value="getRequestBodyInputByKey(inputKey, '', input.default)"
                             :min="input.minimum"
                             :max="input.maximum"
-                            @update:value="setRequestBodyInput(inputKey, '', $event, Boolean(input?.enum))"
+                            @update:value="setRequestBodyInput(inputKey, '', $event, input.type)"
                             @update:checked="setRequestBodyInput(inputKey, '', $event, Boolean(input?.enum))"
                         />
                     </div>
@@ -1100,7 +1412,7 @@ export default {
                                 :value="getRequestBodyInputByKey(inputKey, propertyKey, property?.default)"
                                 :aria="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
                                 :checked="typeof property.default === 'boolean' ? property.default : false"
-                                @update:value="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
+                                @update:value="setRequestBodyInput(inputKey, propertyKey, $event, input.type)"
                                 @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
                             />
                         </div>

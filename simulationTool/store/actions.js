@@ -342,11 +342,16 @@ export default {
 
             layerSourceForObjects.addFeature(olFeature);
         });
-        currentPlanningScenario.inputs.roads.features.forEach(road => {
-            const olFeature = geoJsonParser.readFeature(road);
+        if (currentPlanningScenario.inputs?.roads?.features) {
+            currentPlanningScenario.inputs.roads.features.forEach(road => {
+                const olFeature = geoJsonParser.readFeature(road);
 
-            layerSourceForObjects.addFeature(olFeature);
-        });
+                layerSourceForObjects.addFeature(olFeature);
+            });
+        }
+        else {
+            console.warn("[SimulationTool] No roads.features present for scenario id=", currentPlanningScenario.id, " dataSourceId=", currentPlanningScenario.dataSourceId, " keys=", Object.keys(currentPlanningScenario.inputs || {}));
+        }
     },
 
     /**

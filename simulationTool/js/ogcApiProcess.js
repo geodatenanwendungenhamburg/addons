@@ -53,20 +53,36 @@ export default class OgcApiProcess {
             return defaultsObject;
         }
 
+        console.log("getting defaults from description", description);
+
         for (const inputKey in description.inputs) {
             const input = description.inputs[inputKey];
 
             defaultsObject[inputKey] = OgcApiProcess.getDefaultWithEnum(input);
 
-            if (input.schema?.type === "object") {
-                defaultsObject[inputKey] ??= {};
-                for (const propertyKey in input.schema.properties) {
-                    const property = input.schema.properties[propertyKey];
+            if (input.schema?.type === "array") {
+                defaultsObject[inputKey] = {
+                    items: [],
+                    type: input.schema?.items?.type || "string"
+                };
+            }
+            else if (input.schema?.type === "object") {
+                if (input.schema.default) {
+                    console.log("found default for object", inputKey, input.schema.default);
+                    defaultsObject[inputKey] = input.schema.default;
+                }
+                else {
+                    defaultsObject[inputKey] ??= {};
+                    for (const propertyKey in input.schema.properties) {
+                        const property = input.schema.properties[propertyKey];
 
-                    defaultsObject[inputKey][propertyKey] = OgcApiProcess.getDefaultWithEnum(property);
+                        defaultsObject[inputKey][propertyKey] = OgcApiProcess.getDefaultWithEnum(property);
+                    }
                 }
             }
         }
+
+        console.log("defaultsObject", defaultsObject);
 
         return defaultsObject;
     }
@@ -91,10 +107,15 @@ export default class OgcApiProcess {
             }
             return obj.default;
         }
-        else if (Object.hasOwn(obj, "schema") && Object.hasOwn(obj.schema, "enum") && Array.isArray(obj.schema.enum) && obj.schema.enum.length > 0) {
-            const defaultValue = obj.schema.default ? obj.schema.default : obj.schema.enum[0];
+        else if (Object.hasOwn(obj, "schema")) {
+            if (Object.hasOwn(obj.schema, "enum") && Array.isArray(obj.schema.enum) && obj.schema.enum.length > 0) {
+                const defaultValue = obj.schema.default ? obj.schema.default : obj.schema.enum[0];
 
-            return {value: defaultValue, enum: obj.schema.enum, type: "enum"};
+                return {value: defaultValue, enum: obj.schema.enum, type: "enum"};
+            }
+            else if (Object.hasOwn(obj.schema, "default")) {
+                return obj.schema.default;
+            }
         }
         return undefined;
     }

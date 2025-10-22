@@ -201,6 +201,8 @@
           "uniformlhs": "Uniform Latin Hyper Cube",
           "user": "Benutzer",
           "version": "Version",
+          "inheritedFromDataSource": "aus der Datenquelle",
+          "inheritedMissing": "(kein Wert aus Datenquelle)",
           "QdigitalSimulation": "Digitale Simulationsmodelle",
           "AdigitalSimulation": "Digitale Simulationsmodelle sind im Gegensatz zu statischen Modellen dynamisch und beinhalten eine fortschreitende Indexvariable (typischerweise Zeit). Digitale Simulationsmodelle sind computergestützte Nachbildungen realer oder hypothetischer Systeme, die es ermöglichen, deren Verhalten unter verschiedenen Bedingungen zu testen, zu analysieren und zu optimieren.",
           "QscenarioJob": "Szenario/Job",
