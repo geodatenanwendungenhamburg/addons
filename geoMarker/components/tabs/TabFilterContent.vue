@@ -1,5 +1,5 @@
 <script>
-import {mapGetters, mapMutations} from "vuex";
+import {mapGetters, mapMutations, mapActions} from "vuex";
 import Multiselect from "vue-multiselect";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import InputText from "@shared/modules/inputs/components/InputText.vue";
@@ -53,9 +53,14 @@ export default {
             "statusOptions",
             "categories",
             "departments",
-            "geoMarkerShortFeatureId"
+            "geoMarkerShortFeatureId",
+            "type"
         ]),
-        ...mapGetters("Menu", ["expanded"]),
+        ...mapGetters("Menu", [
+            "expanded",
+            "mainMenu",
+            "secondaryMenu"
+        ]),
         ...mapGetters("Modules/GraphicalSelect", [
             "selectedAreaGeoJson"
         ]),
@@ -170,8 +175,11 @@ export default {
             "setFilterSelections",
             "setGeoMarkerFeatureList",
             "setGeoMarkerActiveTab",
-            "setIsFilterApplied"
+            "setIsFilterApplied",
+            "setHasMouseMapInteractions"
         ]),
+        ...mapActions("Menu", ["changeCurrentMouseMapInteractionsComponent"]),
+        ...mapActions("Alerting", ["addSingleAlert"]),
         /**
          * Applies the filter settings, checks the layer visibility and updates the filtered features.
          * @param {boolean} [updateExtent=true] - Indicates whether the map extent should be adjusted.
@@ -539,6 +547,11 @@ export default {
                 geom: null
             });
 
+            if (this.graphicalSelectOpen) {
+                this.setHasMouseMapInteractions(false);
+                this.changeCurrentMouseMapInteractionsComponent({type: "root", side: "secondaryMenu"});
+            }
+
             this.graphicalSelectOpen = false;
             this.setIsFilterApplied(false);
 
@@ -552,6 +565,30 @@ export default {
             this.graphicalSelectOpen = false;
             this.filterUpdated = true;
             this.setIsFilterApplied(false);
+        },
+        toggleGraphicalSelect () {
+            // if (!this.graphicalSelectOpen) {
+            //     console.log("check mouse interactions");
+            //     const mainMenuComponent = this.mainMenu.currentComponent.charAt(0).toUpperCase() + this.mainMenu.currentComponent.slice(1);
+
+            //     if (mainMenuComponent !== "Root") {
+            //         const hasMouseMapInteractions = this.$store.state.Modules[mainMenuComponent].hasMouseMapInteractions;
+
+            //         if (hasMouseMapInteractions) {
+            //             this.addSingleAlert({
+            //                 category: "warning",
+            //                 title: "test",
+            //                 content: "Tool muss geschlossen werden, um den GeoMarker zu verschieben."
+            //             });
+
+            //             return;
+            //         }
+            //     }
+            // }
+            this.graphicalSelectOpen = !this.graphicalSelectOpen;
+
+            // this.setHasMouseMapInteractions(this.graphicalSelectOpen);
+            // this.changeCurrentMouseMapInteractionsComponent({type: this.graphicalSelectOpen ? this.type : "root", side: "secondaryMenu"});
         }
     }
 };
@@ -582,7 +619,7 @@ export default {
                             :icon="filterSelections.geom ? 'bi-check-circle' : 'bi-bounding-box-circles'"
                             :secondary="true"
                             :customclass="filterSelections.geom ? 'geomFilterActive' : ''"
-                            @click="graphicalSelectOpen = !graphicalSelectOpen"
+                            @click="toggleGraphicalSelect"
                         />
                     </div>
                 </div>

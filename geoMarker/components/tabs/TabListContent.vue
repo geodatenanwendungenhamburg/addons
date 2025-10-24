@@ -31,11 +31,17 @@ export default {
             "geoMarkerWfsFeatureType",
             "categories",
             "departments",
-            "geoMarkerUpdateFeature"
+            "geoMarkerUpdateFeature",
+            "type"
         ]),
         ...mapGetters("Menu", [
             "currentMenuWidth",
-            "expanded"
+            "expanded",
+            "mainMenu",
+            "secondaryMenu"
+        ]),
+        ...mapGetters("Modules", [
+            "componentMap"
         ]),
         ...mapGetters(["restServiceById"]),
         tableData () {
@@ -134,10 +140,12 @@ export default {
         ...mapMutations("Modules/GeoMarker", [
             "setGeoMarkerFeatureList",
             "setGeoMarkerFeatureSelected",
-            "setGeoMarkerUpdateLayerIds"
+            "setGeoMarkerUpdateLayerIds",
+            "setHasMouseMapInteractions"
         ]),
 
         ...mapActions("Maps", ["setCenter", "setZoom", "placingPointMarker", "removePointMarker"]),
+        ...mapActions("Menu", ["changeCurrentMouseMapInteractionsComponent"]),
         ...mapActions("Alerting", ["addSingleAlert"]),
         ...mapActions("Modules/GeoMarker", [
             "setMapInteraction",
@@ -262,16 +270,36 @@ export default {
                     this.showUpdateMessage = false;
                 }
                 else {
-                    this.rollbackGeoMarkerUpdateFeature();
+                    // this.rollbackGeoMarkerUpdateFeature();
                     this.setMapInteraction(null);
-                    this.showUpdateMessage = false;
-                    this.originalCoordinates = null;
+                    // this.showUpdateMessage = false;
+                    // this.originalCoordinates = null;
                 }
             }
         },
         toggleUpdateMode () {
             if (this.geoMarkerFeatureSelected) {
+                if (!this.geoMarkerUpdateMode) {
+                    const mainMenuComponent = this.mainMenu.currentComponent.charAt(0).toUpperCase() + this.mainMenu.currentComponent.slice(1);
+
+                    if (mainMenuComponent !== "Root") {
+                        const hasMouseMapInteractions = this.$store.state.Modules[mainMenuComponent].hasMouseMapInteractions;
+
+                        if (hasMouseMapInteractions) {
+                            this.addSingleAlert({
+                                category: "warning",
+                                title: "test",
+                                content: "Tool muss geschlossen werden, um den GeoMarker zu verschieben."
+                            });
+
+                            return;
+                        }
+                    }
+                }
                 this.geoMarkerUpdateMode = !this.geoMarkerUpdateMode;
+
+                this.setHasMouseMapInteractions(this.geoMarkerUpdateMode);
+                this.changeCurrentMouseMapInteractionsComponent({type: this.geoMarkerUpdateMode ? this.type : "root", side: "secondaryMenu"});
             }
         },
         onClickMoveButton () {

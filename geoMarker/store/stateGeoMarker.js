@@ -50,7 +50,7 @@ const state = {
     deactivateGFI: true,
     supportedDevices: ["Desktop", "Mobile", "Table"],
     supportedMapModes: ["2D"],
-    hasMouseMapInteractions: true,
+    hasMouseMapInteractions: false,
     categoriesUrl: "",
     departmentsUrl: "",
     categories: [],
@@ -101,7 +101,8 @@ const state = {
     },
     isFilterApplied: false,
     initialLoading: true,
-    newGeoMarkerCreated: false
+    newGeoMarkerCreated: false,
+    resetMouseMapInteractions: false
 };
 
 export default state;

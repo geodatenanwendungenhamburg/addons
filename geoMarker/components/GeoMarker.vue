@@ -26,7 +26,10 @@ export default {
             "geoMarkerEditLayerId",
             "rollbackGeoMarkerFeature",
             "geoMarkerFeatureList",
-            "newGeoMarkerCreated"
+            "newGeoMarkerCreated",
+            "hasMouseMapInteractions",
+            "resetMouseMapInteractions",
+            "type"
         ]),
         ...mapGetters(["allLayerConfigs"])
     },
@@ -70,6 +73,19 @@ export default {
             }
         }
     },
+    activated () {
+        if (this.resetMouseMapInteractions) {
+            this.setHasMouseMapInteractions(true);
+            this.changeCurrentMouseMapInteractionsComponent({type: this.type, side: "secondaryMenu"});
+        }
+    },
+    deactivated () {
+        if (this.hasMouseMapInteractions) {
+            this.setHasMouseMapInteractions(false);
+            this.changeCurrentMouseMapInteractionsComponent({type: "root", side: "secondaryMenu"});
+            this.setResetMouseMapInteractions(true);
+        }
+    },
     async mounted () {
         this.setCurrentTab("tabFilter");
 
@@ -94,7 +110,9 @@ export default {
             "setGeoMarkerFeatureSelected",
             "setGeoMarkerFeatureList",
             "setLockListSelection",
-            "setNewGeoMarkerCreated"
+            "setNewGeoMarkerCreated",
+            "setHasMouseMapInteractions",
+            "setResetMouseMapInteractions"
         ]),
         ...mapActions("Modules/GeoMarker", [
             "loadCategories",
@@ -104,6 +122,7 @@ export default {
             "rollbackGeoMarkerUpdateFeature"
         ]),
         ...mapActions("Maps", ["removePointMarker"]),
+        ...mapActions("Menu", ["changeCurrentMouseMapInteractionsComponent"]),
         setCurrentTab (tab) {
             this.setGeoMarkerActiveTab(tab);
         },
