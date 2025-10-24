@@ -45,7 +45,8 @@ export default {
             simulationName: "",
             ignoreProperties: [],
             flatInputs: {},
-            nestedInputs: {}
+            nestedInputs: {},
+            areInputParameterPrepared: false
         };
     },
     computed: {
@@ -274,9 +275,11 @@ export default {
         currentSimulationId: {
             async handler () {
                 if (this.currentPlanningScenario && this.simulation) {
+                    this.areInputParameterPrepared = false;
                     await this.prepareRequestBodies();
                     this.primaryTypeInputs = this.getPrimaryTypeInputs();
                     this.selectedOutputOptions = this.outputOptions;
+                    this.areInputParameterPrepared = true;
                 }
             },
             immediate: true
@@ -388,22 +391,23 @@ export default {
 
             if (typeof requestBody?.inputs?.[inputKey]?.[propertyKey] !== "undefined") {
                 if (requestBody.inputs[inputKey][propertyKey].enum) {
-                    return {
-                        enum: requestBody.inputs[inputKey][propertyKey].enum,
-                        value: requestBody.inputs[inputKey][propertyKey].value
-                    };
+                    const entry = requestBody.inputs[inputKey][propertyKey];
+
+                    if (entry?.enum) {
+                        return {enum: entry.enum, value: entry.value};
+                    }
+                    return entry;
                 }
                 return requestBody.inputs[inputKey][propertyKey];
             }
 
             if (propertyKey === "") {
-                if (requestBody?.inputs?.[inputKey]?.enum) {
-                    return {
-                        enum: requestBody.inputs[inputKey].enum,
-                        value: requestBody.inputs[inputKey].value
-                    };
+                const entry = requestBody?.inputs?.[inputKey];
+
+                if (entry?.enum) {
+                    return {enum: entry.enum, value: entry.value};
                 }
-                return requestBody?.inputs?.[inputKey];
+                return entry;
             }
 
             return val;
@@ -785,7 +789,7 @@ export default {
                 if (cfg?.type === "calculated" && cfg?.calculationSource) {
                     const sourceVal = scenarioInputs[cfg.calculationSource],
                         features = Array.isArray(sourceVal?.features) ? sourceVal.features : [],
-                        halfSize = 250;
+                        halfSize = 256;
 
                     if (!sourceVal) {
                         console.warn(`[SimulationTool] Calculated input '${simInputKey}' skipped: source '${cfg.calculationSource}' missing.`);
@@ -1012,17 +1016,11 @@ export default {
             if (!this.isLoggedIn()) {
                 return;
             }
-            this.removeEmptyCollections(this.requestBodies);
-            this.requestBodies = this.replaceArrayOrEnumValueObjects(this.requestBodies);
 
-            // Add time-frame to all request bodies
-            this.requestBodies.forEach(rb => {
-                if (rb?.inputs) {
-                    rb.inputs["time-frame"] = this.timeFrame;
-                }
-            });
+            const requestBodiesDeepCopy = JSON.parse(JSON.stringify(this.requestBodies));
 
-            console.log("timeFrame", this.timeFrame);
+            this.removeEmptyCollections(requestBodiesDeepCopy);
+            const requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
 
             // Log: All parameters and specifically the buildings that will be sent to the simulation
             try {
@@ -1034,14 +1032,14 @@ export default {
                 });
 
                 const processes = this.simulation?.processes || [],
-                    summary = this.requestBodies.map((rb, index) => ({
+                    summary = requestBodiesToSend.map((rb, index) => ({
                         processId: processes[index]?.id,
                         inputKeys: Object.keys(rb?.inputs || {})
                     }));
 
                 console.log("[SimulationTool] Simulation request bodies (summary):", summary);
 
-                this.requestBodies.forEach((rb, index) => {
+                requestBodiesToSend.forEach((rb, index) => {
                     const processId = processes[index]?.id,
                         inputs = rb?.inputs || {},
                         buildings = inputs?.buildings;
@@ -1076,7 +1074,7 @@ export default {
 
             const scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId), // Cannot use computed property here, which may change during async call.
                 executeResponses = await Promise.all(
-                    this.processHandlers.map((handler, index) => handler.execute(this.requestBodies[index], this.accessToken))
+                    this.processHandlers.map((handler, index) => handler.execute(requestBodiesToSend[index], this.accessToken))
                 ),
                 jobIDs = executeResponses.map(response => response.jobID),
                 initialStatuses = executeResponses.map(response => response.status),
@@ -1097,7 +1095,7 @@ export default {
             newSimulation.jobs = Object.fromEntries(jobIDs.map(ID => [ID, {}]));
 
             Object.values(newSimulation.jobs).forEach(async (job, index) => {
-                job.requestBody = JSON.parse(JSON.stringify(this.requestBodies[index]));
+                job.requestBody = JSON.parse(JSON.stringify(requestBodiesToSend[index]));
                 job.jobStatus = {status: initialStatuses[index]};
                 job.resultStyle = this.simulation.processes[index].resultStyle;
                 job.jobResults = await this.processHandlers[index].pollJobStatusAndGetResults(
@@ -1115,7 +1113,7 @@ export default {
          * @param {String} inputKey the input key.
          * @param {String} propertyKey the property key.
          * @param {String} val the value.
-         * @param {Boolean} isEnum whether the input is an enum or not.
+         * @param {String} type of the input (e.g., "enum", "array").
          * @returns {void}
          */
         setRequestBodyInput (inputKey, propertyKey, val, type) {
@@ -1126,40 +1124,43 @@ export default {
 
             this.processDescriptions.forEach((description, index) => {
                 if (type === "array") {
-                    console.log("Setting array value for", {inputKey, propertyKey, val});
+                    console.log("Setting array value for", {inputKey, propertyKey, val, type});
                     console.log("Current value:", this.requestBodies[index]?.inputs?.[inputKey]);
                     console.log("Description input:", description.inputs?.[inputKey]);
                 }
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
+
+                const inputs = this.requestBodies[index].inputs;
+
                 if (propertyKey === "") {
                     // top-level input
-                    if (type === "enum" && this.requestBodies[index]?.inputs?.[inputKey]?.value !== undefined) {
+                    if (type === "enum" && inputs?.[inputKey]?.value !== undefined) {
                         // Only update value part of enum object
-                        this.requestBodies[index].inputs[inputKey].value = val;
+                        inputs[inputKey].value = val;
                         return;
                     }
-                    else if (type === "array" && Array.isArray(this.requestBodies[index]?.inputs?.[inputKey])) {
-                        this.requestBodies[index].inputs[inputKey].value = val;
+                    else if (type === "array" && Array.isArray(inputs?.[inputKey])) {
+                        inputs[inputKey] = val;
                         return;
                     }
-                    this.requestBodies[index].inputs[inputKey] = val;
+                    inputs[inputKey] = val;
                     return;
                 }
 
-                if (typeof this.requestBodies[index].inputs[inputKey] === "undefined") {
-                    this.requestBodies[index].inputs[inputKey] = {};
+                if (typeof inputs[inputKey] === "undefined") {
+                    inputs[inputKey] = {};
                 }
-                if (type === "enum" && this.requestBodies[index].inputs[inputKey][propertyKey]?.value !== undefined) {
-                    this.requestBodies[index].inputs[inputKey][propertyKey].value = val;
+                if (type === "enum" && inputs[inputKey][propertyKey]?.value !== undefined) {
+                    inputs[inputKey][propertyKey].value = val;
                     return;
                 }
-                else if (type === "array" && Array.isArray(this.requestBodies[index].inputs[inputKey][propertyKey])) {
-                    this.requestBodies[index].inputs[inputKey][propertyKey].value = val;
+                else if (type === "array" && Array.isArray(inputs[inputKey][propertyKey])) {
+                    inputs[inputKey][propertyKey].value = val;
                     return;
                 }
-                this.requestBodies[index].inputs[inputKey][propertyKey] = val;
+                inputs[inputKey][propertyKey] = val;
             });
         },
 
@@ -1275,200 +1276,199 @@ export default {
                     {{ $t('additional:modules.tools.simulationTool.selectSimulation') }}
                 </label>
             </div>
-            <div v-if="primaryTypeInputsKeys.length">
-                <div>
-                    <h6 class="mt-5 mb-3">
-                        {{ $t('additional:modules.tools.simulationTool.parameters') }}
-                    </h6>
+            <div v-if="areInputParameterPrepared">
+                <div v-if="primaryTypeInputsKeys.length">
+                    <div>
+                        <h6 class="mt-5 mb-3">
+                            {{ $t('additional:modules.tools.simulationTool.parameters') }}
+                        </h6>
 
-                    <!-- Inherited (dataSource-mapped) inputs read-only -->
-                    <div
-                        v-if="inheritedDataSourceInputs.length"
-                        class="mb-4"
-                    >
+                        <!-- Inherited (dataSource-mapped) inputs read-only -->
                         <div
-                            v-for="inherited in inheritedDataSourceInputs"
-                            :key="`inherited-${inherited.key}`"
+                            v-if="inheritedDataSourceInputs.length"
+                            class="mb-4"
                         >
-                            <InputText
-                                :id="`inherited-${inherited.key}`"
-                                :label="inherited.label"
-                                :placeholder="inherited.label"
-                                :model-value="(inherited.hasValue ? $t('additional:modules.tools.simulationTool.inheritedFromDataSource') : $t('additional:modules.tools.simulationTool.inheritedMissing')) + ': ' + inherited.printableValue"
-                                :disabled="true"
-                                :readonly="true"
-                            />
-                        </div>
-                    </div>
-                    <div
-                        v-for="(input, propertyKey) in primaryTypeInputs"
-                        :key="propertyKey"
-                    >
-                        <DynamicInputByType
-                            :id="propertyKey"
-                            :input-type="input.type"
-                            :label="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
-                            :placeholder="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
-                            :value="getRequestBodyInputByKey(input.inputKey, propertyKey, input.default)"
-                            :min="input.minimum"
-                            :max="input.maximum"
-                            :aria="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
-                            @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, input.type)"
-                            @update:checked="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div
-                v-for="(input, inputKey) in optionalOafTypeInputsPrimary"
-                :key="inputKey"
-                class="mb-2"
-            >
-                <div
-                    v-if="oafLoadingStates[inputKey]"
-                    class="d-flex align-items-center"
-                >
-                    <SpinnerItem />
-                    <span class="ms-2">
-                        {{ getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping) }}
-                    </span>
-                </div>
-                <div
-                    v-else
-                    class="form-switch"
-                >
-                    <SwitchInput
-                        :id="`simulation-parameter-switch-input-${inputKey}`"
-                        :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                        :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                        :interaction="event => onOafSwitchChange(event, inputKey)"
-                        :checked="isValueSet(inputKey, input?.default)"
-                    />
-                </div>
-            </div>
-            <div v-if="Object.keys(flatInputs).length || Object.keys(nestedInputs).length">
-                <hr>
-                <AccordionItem
-                    id="advanced-simulation-parameters"
-                    :title="$t('additional:modules.tools.simulationTool.simulationAdditionalParameter')"
-                >
-                    <div
-                        v-for="(input, inputKey) in optionalOafTypeInputsAdvanced"
-                        :key="inputKey"
-                        class="mb-2"
-                    >
-                        <div
-                            v-if="oafLoadingStates[inputKey]"
-                            class="d-flex align-items-center"
-                        >
-                            <SpinnerItem />
-                            <span class="ms-2">
-                                {{ getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping) }}
-                            </span>
+                            <div
+                                v-for="inherited in inheritedDataSourceInputs"
+                                :key="`inherited-${inherited.key}`"
+                            >
+                                <InputText
+                                    :id="`inherited-${inherited.key}`"
+                                    :label="inherited.label"
+                                    :placeholder="inherited.label"
+                                    :model-value="(inherited.hasValue ? $t('additional:modules.tools.simulationTool.inheritedFromDataSource') : $t('additional:modules.tools.simulationTool.inheritedMissing')) + ': ' + inherited.printableValue"
+                                    :disabled="true"
+                                    :readonly="true"
+                                />
+                            </div>
                         </div>
                         <div
-                            v-else
-                            class="form-switch"
-                        >
-                            <SwitchInput
-                                :id="`simulation-parameter-switch-input-${inputKey}`"
-                                :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :interaction="event => onOafSwitchChange(event, inputKey)"
-                                :checked="isValueSet(inputKey, input?.default)"
-                            />
-                        </div>
-                    </div>
-                    <div
-                        v-for="(input, inputKey) in getNonPrimaryStringInputs()"
-                        :key="inputKey"
-                    >
-                        <div
-                            v-if="getOptionalBBOXUrlInputs()[inputKey]"
-                            class="form-switch"
-                        >
-                            <SwitchInput
-                                :id="`simulation-parameter-switch-input-${inputKey}`"
-                                :ref="`simulation-parameter-switch-input-${inputKey}`"
-                                :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :interaction="event => toggleOptionalBBOXUrlInputs(inputKey, event)"
-                                :checked="isValueSet(inputKey, input?.default)"
-                            />
-                        </div>
-                        <DynamicInputByType
-                            v-else
-                            :id="inputKey"
-                            :input-type="input.type"
-                            :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                            :placeholder="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                            :value="getRequestBodyInputByKey(inputKey, '', input.default)"
-                            :min="input.minimum"
-                            :max="input.maximum"
-                            @update:value="setRequestBodyInput(inputKey, '', $event, input.type)"
-                            @update:checked="setRequestBodyInput(inputKey, '', $event, Boolean(input?.enum))"
-                        />
-                    </div>
-                    <AccordionItem
-                        v-for="(input, inputKey) in nestedInputs"
-                        :id="inputKey"
-                        :key="inputKey"
-                        :title="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                        font-size="font-size-small"
-                    >
-                        <div
-                            v-for="(property, propertyKey) in getNonPrimaryProperties(input, inputKey)"
+                            v-for="(input, propertyKey) in primaryTypeInputs"
                             :key="propertyKey"
                         >
                             <DynamicInputByType
-                                :id="`${inputKey}-${propertyKey}`"
-                                :label="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :max="property.maximum"
-                                :min="property.minimum"
-                                :placeholder="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :input-type="property.type"
-                                :step="property.type === 'integer' ? 1 : 0.1"
-                                :value="getRequestBodyInputByKey(inputKey, propertyKey, property?.default)"
-                                :aria="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
-                                :checked="typeof property.default === 'boolean' ? property.default : false"
-                                @update:value="setRequestBodyInput(inputKey, propertyKey, $event, input.type)"
-                                @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
+                                :id="propertyKey"
+                                :input-type="input.type"
+                                :label="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
+                                :placeholder="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
+                                :value="getRequestBodyInputByKey(input.inputKey, propertyKey, input.default)"
+                                :min="input.minimum"
+                                :max="input.maximum"
+                                :aria="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
+                                @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, input.type)"
+                                @update:checked="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
                             />
                         </div>
-                        <TimeFrame
-                            v-if="inputKey === 'time-frame'"
-                        />
-                    </AccordionItem>
-                </accordionitem>
-            </div>
-            <h6 class="mt-2 mb-3">
-                {{ $t('additional:modules.tools.simulationTool.outputParam') }}
-            </h6>
-            <Multiselect
-                id="outputParam"
-                v-model="selectedOutputOptions"
-                :placeholder="$t('additional:modules.tools.simulationTool.chooseOutputParam')"
-                :aria-label="$t('additional:modules.tools.simulationTool.chooseOutputParam')"
-                label="name"
-                track-by="code"
-                :show-labels="false"
-                :allow-empty="false"
-                :options="outputOptions"
-                :searchable="true"
-                :multiple="true"
-                :open="true"
-            >
-                <template #tag="{ option, remove }">
-                    <button
-                        class="multiselect__tag"
-                        :class="option.code"
-                        @click="remove(option)"
-                        @keypress="remove(option)"
+                    </div>
+                </div>
+                <div
+                    v-for="(input, inputKey) in optionalOafTypeInputsPrimary"
+                    :key="inputKey"
+                    class="mb-2"
+                >
+                    <div
+                        v-if="oafLoadingStates[inputKey]"
+                        class="d-flex align-items-center"
                     >
-                        {{ option.name }}
-                    </button>
-                </template>
-            </Multiselect>
+                        <SpinnerItem />
+                        <span class="ms-2">
+                            {{ getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping) }}
+                        </span>
+                    </div>
+                    <div
+                        v-else
+                        class="form-switch"
+                    >
+                        <SwitchInput
+                            :id="`simulation-parameter-switch-input-${inputKey}`"
+                            :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                            :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                            :interaction="event => onOafSwitchChange(event, inputKey)"
+                            :checked="isValueSet(inputKey, input?.default)"
+                        />
+                    </div>
+                </div>
+                <div v-if="Object.keys(flatInputs).length || Object.keys(nestedInputs).length">
+                    <hr>
+                    <AccordionItem
+                        id="advanced-simulation-parameters"
+                        :title="$t('additional:modules.tools.simulationTool.simulationAdditionalParameter')"
+                    >
+                        <div
+                            v-for="(input, inputKey) in optionalOafTypeInputsAdvanced"
+                            :key="inputKey"
+                            class="mb-2"
+                        >
+                            <div
+                                v-if="oafLoadingStates[inputKey]"
+                                class="d-flex align-items-center"
+                            >
+                                <SpinnerItem />
+                                <span class="ms-2">
+                                    {{ getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping) }}
+                                </span>
+                            </div>
+                            <div
+                                v-else
+                                class="form-switch"
+                            >
+                                <SwitchInput
+                                    :id="`simulation-parameter-switch-input-${inputKey}`"
+                                    :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :interaction="event => onOafSwitchChange(event, inputKey)"
+                                    :checked="isValueSet(inputKey, input?.default)"
+                                />
+                            </div>
+                        </div>
+                        <div
+                            v-for="(input, inputKey) in getNonPrimaryStringInputs()"
+                            :key="inputKey"
+                        >
+                            <div
+                                v-if="getOptionalBBOXUrlInputs()[inputKey]"
+                                class="form-switch"
+                            >
+                                <SwitchInput
+                                    :id="`simulation-parameter-switch-input-${inputKey}`"
+                                    :ref="`simulation-parameter-switch-input-${inputKey}`"
+                                    :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :aria="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :interaction="event => toggleOptionalBBOXUrlInputs(inputKey, event)"
+                                    :checked="isValueSet(inputKey, input?.default)"
+                                />
+                            </div>
+                            <DynamicInputByType
+                                v-else
+                                :id="inputKey"
+                                :input-type="input.type"
+                                :label="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                :placeholder="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                :value="getRequestBodyInputByKey(inputKey, '', input.default)"
+                                :min="input.minimum"
+                                :max="input.maximum"
+                                @update:value="setRequestBodyInput(inputKey, '', $event, input.type)"
+                                @update:checked="setRequestBodyInput(inputKey, '', $event, Boolean(input?.enum))"
+                            />
+                        </div>
+                        <AccordionItem
+                            v-for="(input, inputKey) in nestedInputs"
+                            :id="inputKey"
+                            :key="inputKey"
+                            :title="getMappedProperty(inputKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                            font-size="font-size-small"
+                        >
+                            <div
+                                v-for="(property, propertyKey) in getNonPrimaryProperties(input, inputKey)"
+                                :key="propertyKey"
+                            >
+                                <DynamicInputByType
+                                    :id="`${inputKey}-${propertyKey}`"
+                                    :label="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :max="property.maximum"
+                                    :min="property.minimum"
+                                    :placeholder="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :input-type="property.type"
+                                    :step="property.type === 'integer' ? 1 : 0.1"
+                                    :value="getRequestBodyInputByKey(inputKey, propertyKey, property?.default)"
+                                    :aria="getMappedProperty(propertyKey, simulation?.inputs?.[inputKey]?.propertiesMapping)"
+                                    :checked="typeof property.default === 'boolean' ? property.default : false"
+                                    @update:value="setRequestBodyInput(inputKey, propertyKey, $event, input.type)"
+                                    @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
+                                />
+                            </div>
+                        </AccordionItem>
+                    </AccordionItem>
+                </div>
+                <h6 class="mt-2 mb-3">
+                    {{ $t('additional:modules.tools.simulationTool.outputParam') }}
+                </h6>
+                <Multiselect
+                    id="outputParam"
+                    v-model="selectedOutputOptions"
+                    :placeholder="$t('additional:modules.tools.simulationTool.chooseOutputParam')"
+                    :aria-label="$t('additional:modules.tools.simulationTool.chooseOutputParam')"
+                    label="name"
+                    track-by="code"
+                    :show-labels="false"
+                    :allow-empty="false"
+                    :options="outputOptions"
+                    :searchable="true"
+                    :multiple="true"
+                    :open="true"
+                >
+                    <template #tag="{ option, remove }">
+                        <button
+                            class="multiselect__tag"
+                            :class="option.code"
+                            @click="remove(option)"
+                            @keypress="remove(option)"
+                        >
+                            {{ option.name }}
+                        </button>
+                    </template>
+                </Multiselect>
+            </div>
         </div>
         <div
             class="mb-5"
