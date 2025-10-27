@@ -183,4 +183,16 @@ describe("addons/geoMarker/components/GeoMarkerForm.vue", () => {
 
         expect(wrapper.vm.formValidation).to.be.false;
     });
+
+    it("appends date and user name to a new geomarker.", () => {
+        const clock = sinon.useFakeTimers(new Date("2023-01-10").getTime());
+
+        wrapper.vm.geomarkerDescription = "Main geomarker description.";
+        wrapper.vm.departmentData.steuerungsstelle.bemerkung = "Comment for the department Steuerungsstelle.";
+
+        expect(wrapper.vm.newGeoMarker.beschreibung).to.equal("Main geomarker description. [10.01.2023, testuser]");
+        expect(wrapper.vm.newGeoMarker.bem_steuerungsstelle).to.equal("Comment for the department Steuerungsstelle. [10.01.2023, testuser]");
+
+        clock.restore();
+    });
 });

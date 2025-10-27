@@ -54,9 +54,11 @@ export default {
             categories: {},
             departments: {},
             departmentData: {},
+            departmentDataInitial: {},
             statusForSelectedDepartments: "offen",
             reminderDate: null,
             geomarkerDescription: "",
+            geomarkerDescriptionInitial: "",
             screenshotImage: "",
             attachment: null,
             createAnotherGeoMarker: false,
@@ -129,9 +131,9 @@ export default {
                 anhang_base_64: this.attachment ? this.attachment.base64 : null,
                 screenshot_base_64: this.screenshotImage,
                 ...this.departmentValuesForGeomarker,
-                beschreibung: this.geomarkerDescription,
+                beschreibung: this.appendUserToDescription(this.geomarkerDescription),
                 zeitstempel: dayjs().toISOString(),
-                quelle: window.activeDirectoryUser ? window.activeDirectoryUser.username : "geomarker"
+                quelle: this.currentUsername
             };
         },
         /**
@@ -150,9 +152,11 @@ export default {
                 anhang_base_64: this.attachment ? this.attachment.base64 : null,
                 screenshot_base_64: this.screenshotImage,
                 ...this.departmentValuesForGeomarker,
-                beschreibung: this.geomarkerDescription,
+                beschreibung: this.geomarkerDescription !== this.geomarkerDescriptionInitial
+                    ? this.appendUserToDescription(this.geomarkerDescription)
+                    : this.geomarkerDescription,
                 zeitstempel: dayjs().toISOString(),
-                quelle: window.activeDirectoryUser ? window.activeDirectoryUser.username : "geomarker",
+                quelle: this.currentUsername,
                 geom: this.geoMarkerUpdateFeature?.getGeometry()
             };
         },
@@ -165,6 +169,7 @@ export default {
             Object.keys(this.departmentData || {}).forEach(departmentId => {
                 const department = this.departments?.[departmentId],
                     departmentFormData = this.departmentData[departmentId] || {},
+                    departmentFormDataInitial = this.departmentDataInitial[departmentId] || {},
                     currentStatus = departmentFormData.status;
 
                 if (department?.fields) {
@@ -181,7 +186,14 @@ export default {
                         }
 
                         if (departmentFormData[fieldKey] !== null && departmentFormData[fieldKey] !== undefined) {
-                            departmentValues[fieldValue] = departmentFormData[fieldKey];
+                            if (fieldKey === "bemerkung") {
+                                departmentValues[fieldValue] = departmentFormData[fieldKey] !== departmentFormDataInitial[fieldKey]
+                                    ? this.appendUserToDescription(departmentFormData[fieldKey])
+                                    : departmentFormData[fieldKey];
+                            }
+                            else {
+                                departmentValues[fieldValue] = departmentFormData[fieldKey];
+                            }
                         }
                     });
                 }
@@ -205,6 +217,12 @@ export default {
             });
 
             return layerIdsArray;
+        },
+        /**
+         * The current user name from active directory.
+         */
+        currentUsername () {
+            return window.activeDirectoryUser ? window.activeDirectoryUser.username : "geomarker";
         }
     },
     watch: {
@@ -293,7 +311,11 @@ export default {
             );
 
             this.departmentData = this.extractDepartmentData(featureProps);
+            this.departmentDataInitial = JSON.parse(JSON.stringify(this.departmentData));
+
             this.geomarkerDescription = featureProps.beschreibung || "";
+            this.geomarkerDescriptionInitial = JSON.parse(JSON.stringify(this.geomarkerDescription));
+
             this.reminderDate = this.extractReminderDate(featureProps);
             this.screenshotImage = await this.loadPropertyOfFeatureById({
                 geomarkerId: feature.getId(),
@@ -627,15 +649,29 @@ export default {
                 });
 
                 if (transactionResponse) {
+                    // Refresh "beschreibung" in form to show appended user name and update the initial data.
+                    this.geomarkerDescription = this.updatedGeoMarker.beschreibung ?? "";
+                    this.geomarkerDescriptionInitial = JSON.parse(JSON.stringify(this.geomarkerDescription));
+
+                    // Refresh "department / bemerkung" and initial data too.
+                    Object.keys(this.departmentData).forEach((department) => {
+                        const remarkFieldId = this.departments[department].fields.bemerkung;
+
+                        this.departmentData[department].bemerkung = this.departmentValuesForGeomarker[remarkFieldId] ?? "";
+                    });
+                    this.departmentDataInitial = JSON.parse(JSON.stringify(this.departmentData));
+
+                    await this.updateGeoMarkerFeatureListAfterEdit();
+
+                    await this.moveUpdatedFeatureToTop(this.selectedFeature.getId());
+
+                    this.layerIdsForSelectedDepartments.forEach(async layerId => {
+                        await this.setFilterAgain(layerId);
+                    });
+
                     this.addSingleAlert({
                         content: this.$t("additional:modules.geoMarker.geoMarkerForm.successMessageAfterUpdate"),
                         category: "success"
-                    });
-
-                    await this.updateGeoMarkerFeatureListAfterEdit();
-                    await this.moveUpdatedFeatureToTop(this.selectedFeature.getId());
-                    this.layerIdsForSelectedDepartments.forEach(async layerId => {
-                        await this.setFilterAgain(layerId);
                     });
                 }
             }
@@ -863,6 +899,23 @@ export default {
             if (fileType) {
                 this.attachment.type = fileType;
             }
+        },
+        /**
+         * Appends the current current date and the user name at the end of the description.
+         * Example: Some text (12.11.2025, UserName)
+         * @param {String|null} description
+         * @returns {String} description with appended "(username)"
+         */
+        appendUserToDescription (description) {
+            const userPlaceholder = `${this.currentUsername}]`;
+
+            let newDescription = description?.trim() ?? "";
+
+            if (newDescription && !newDescription.endsWith(userPlaceholder)) {
+                newDescription = `${newDescription} [${dayjs().format("DD.MM.YYYY")}, ${userPlaceholder}`;
+            }
+
+            return newDescription;
         }
     }
 };
