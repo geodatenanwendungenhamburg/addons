@@ -1,6 +1,7 @@
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import DynamicInputByType from "../shared/components/DynamicInputByType.vue";
+import TimeFrame from "../shared/TimeFrame.vue";
 import FileUpload from "../../../../src/shared/modules/inputs/components/FileUpload.vue";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import getBBOXGeometry from "../shared/js/getBBoxGeometry";
@@ -29,7 +30,8 @@ export default {
         Multiselect,
         SectionHeader,
         SpinnerItem,
-        SwitchInput
+        SwitchInput,
+        TimeFrame
     },
     data () {
         return {
@@ -52,7 +54,8 @@ export default {
             "planningScenarios",
             "previousComponentOfSimulation",
             "simulations",
-            "dataSources"
+            "dataSources",
+            "timeFrame"
         ]),
         ...mapGetters("Modules/Login", ["accessToken"]),
 
@@ -1012,6 +1015,15 @@ export default {
             this.removeEmptyCollections(this.requestBodies);
             this.requestBodies = this.replaceArrayOrEnumValueObjects(this.requestBodies);
 
+            // Add time-frame to all request bodies
+            this.requestBodies.forEach(rb => {
+                if (rb?.inputs) {
+                    rb.inputs["time-frame"] = this.timeFrame;
+                }
+            });
+
+            console.log("timeFrame", this.timeFrame);
+
             // Log: All parameters and specifically the buildings that will be sent to the simulation
             try {
                 // Set skip-compression to true for all request bodies
@@ -1423,8 +1435,11 @@ export default {
                                 @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
                             />
                         </div>
+                        <TimeFrame
+                            v-if="inputKey === 'time-frame'"
+                        />
                     </AccordionItem>
-                </AccordionItem>
+                </accordionitem>
             </div>
             <h6 class="mt-2 mb-3">
                 {{ $t('additional:modules.tools.simulationTool.outputParam') }}

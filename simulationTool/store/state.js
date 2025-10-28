@@ -127,7 +127,19 @@ const state = {
     },
     simulationIdForResults: "",
     simulations: [],
-    userDetailsCache: {}
+    userDetailsCache: {},
+    timeFrame: [
+        {
+            hour: 0,
+            day: 1,
+            month: 1
+        },
+        {
+            hour: 0,
+            day: 2,
+            month: 1
+        }
+    ]
 };
 
 export default state;
