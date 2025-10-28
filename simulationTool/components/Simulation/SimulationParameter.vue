@@ -1014,6 +1014,13 @@ export default {
 
             // Log: All parameters and specifically the buildings that will be sent to the simulation
             try {
+                // Set skip-compression to true for all request bodies
+                this.requestBodies.forEach(rb => {
+                    if (rb?.inputs) {
+                        rb.inputs["skip-compression"] = true;
+                    }
+                });
+
                 const processes = this.simulation?.processes || [],
                     summary = this.requestBodies.map((rb, index) => ({
                         processId: processes[index]?.id,
