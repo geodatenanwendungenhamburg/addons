@@ -17,7 +17,8 @@ export default {
                 hour: {label: "Hour", min: 0, max: 23},
                 day: {label: "Day", min: 1, max: 31},
                 month: {label: "Month", min: 1, max: 12}
-            }
+            },
+            step: 1
         };
     },
     computed: {
@@ -63,6 +64,7 @@ export default {
             :key="timeType"
             :title="timeFrame.title"
             :is-open="true"
+            font-size="font-size-small"
         >
             <div
                 v-for="field in timeFields"
@@ -76,8 +78,8 @@ export default {
                     :value="timeFrame.values[field]"
                     :min="fieldConfig[field].min"
                     :max="fieldConfig[field].max"
-                    step="1"
-                    show-markers="true"
+                    :step="step"
+                    :show-markers="true"
                     :interaction="(event) => updateTimeValue(timeType, field, Number(event.target.value))"
                 />
             </div>
