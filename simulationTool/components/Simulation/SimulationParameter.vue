@@ -762,15 +762,12 @@ export default {
             if (!this.isLoggedIn()) {
                 return;
             }
-
             this.initializeProcessHandlers();
             await this.fetchProcessDescriptions();
             this.setupIgnoreProperties();
             this.createRequestBodies();
-            console.log("Initial requestBodies:", this.requestBodies);
             this.applyDataSourceInputMapping();
             this.applyCalculatedInputs();
-            console.log("Prepared requestBodies:", this.requestBodies);
         },
 
         /**
@@ -998,7 +995,6 @@ export default {
                     return obj.value;
                 }
                 if (Array.isArray(obj.items)) {
-                    console.log("Replacing array items for", obj);
                     return obj.items;
                 }
                 return Object.fromEntries(
@@ -1018,70 +1014,83 @@ export default {
             }
 
             const requestBodiesDeepCopy = JSON.parse(JSON.stringify(this.requestBodies));
+            let requestBodiesToSend = null,
+                scenario = null,
+                executeResponses = null,
+                jobIDs = null,
+                initialStatuses = null,
+                newSimulationId = null,
+                newSimulation = null;
+
 
             this.removeEmptyCollections(requestBodiesDeepCopy);
-            const requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
+            requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
+
+            requestBodiesToSend.forEach(rb => {
+                if (rb?.inputs) {
+                    rb.inputs["skip-compression"] = true;
+                    // time frame only needed for pedestrian wind comfort simulation
+                    if (this.currentSimulationId === "wind-comfort") {
+                        rb.inputs["time-frame"] = this.timeFrame;
+                    }
+
+                }
+            });
 
             // Log: All parameters and specifically the buildings that will be sent to the simulation
-            try {
-                // Set skip-compression to true for all request bodies
-                this.requestBodies.forEach(rb => {
-                    if (rb?.inputs) {
-                        rb.inputs["skip-compression"] = true;
-                    }
-                });
+            // try {
+            //     const processes = this.simulation?.processes || [],
+            //         summary = requestBodiesToSend.map((rb, index) => ({
+            //             processId: processes[index]?.id,
+            //             inputKeys: Object.keys(rb?.inputs || {})
+            //         }));
 
-                const processes = this.simulation?.processes || [],
-                    summary = requestBodiesToSend.map((rb, index) => ({
-                        processId: processes[index]?.id,
-                        inputKeys: Object.keys(rb?.inputs || {})
-                    }));
+            //     console.log("[SimulationTool] Simulation request bodies (summary):", summary);
 
-                console.log("[SimulationTool] Simulation request bodies (summary):", summary);
+            //     requestBodiesToSend.forEach((rb, index) => {
+            //         const processId = processes[index]?.id,
+            //             inputs = rb?.inputs || {},
+            //             buildings = inputs?.buildings;
 
-                requestBodiesToSend.forEach((rb, index) => {
-                    const processId = processes[index]?.id,
-                        inputs = rb?.inputs || {},
-                        buildings = inputs?.buildings;
+            //         if (inputs?.crs && inputs.crs !== this.currentDataSourceCrs) {
+            //             console.warn("[SimulationTool] Warning: CRS in request body differs from data source CRS", {processId, bodyCrs: inputs.crs, dataSourceCrs: this.currentDataSourceCrs});
+            //         }
+            //         else if (inputs?.crs) {
+            //             console.log("[SimulationTool] CRS used for process:", {processId, crs: inputs.crs});
+            //         }
+            //         else {
+            //             console.warn("[SimulationTool] No CRS present in request body (should have been injected if available)", {processId});
+            //         }
 
-                    if (inputs?.crs && inputs.crs !== this.currentDataSourceCrs) {
-                        console.warn("[SimulationTool] Warning: CRS in request body differs from data source CRS", {processId, bodyCrs: inputs.crs, dataSourceCrs: this.currentDataSourceCrs});
-                    }
-                    else if (inputs?.crs) {
-                        console.log("[SimulationTool] CRS used for process:", {processId, crs: inputs.crs});
-                    }
-                    else {
-                        console.warn("[SimulationTool] No CRS present in request body (should have been injected if available)", {processId});
-                    }
+            //         // Log all parameters (inputs)
+            //         console.log("[SimulationTool] Inputs sent to simulation:", {processId, inputs});
 
-                    // Log all parameters (inputs)
-                    console.log("[SimulationTool] Inputs sent to simulation:", {processId, inputs});
+            //         // Log buildings specifically
+            //         if (buildings) {
+            //             const featureCount = Array.isArray(buildings.features) ? buildings.features.length : undefined;
 
-                    // Log buildings specifically
-                    if (buildings) {
-                        const featureCount = Array.isArray(buildings.features) ? buildings.features.length : undefined;
+            //             console.log("[SimulationTool] Buildings sent to simulation:", {processId, featureCount, buildings});
+            //         }
+            //         else {
+            //             console.warn("[SimulationTool] No buildings input present for process:", processId);
+            //         }
+            //     });
+            // }
+            // catch (e) {
+            //     console.warn("[SimulationTool] Error while logging request bodies:", e);
+            // }
 
-                        console.log("[SimulationTool] Buildings sent to simulation:", {processId, featureCount, buildings});
-                    }
-                    else {
-                        console.warn("[SimulationTool] No buildings input present for process:", processId);
-                    }
-                });
-            }
-            catch (e) {
-                console.warn("[SimulationTool] Error while logging request bodies:", e);
-            }
-
-            const scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId), // Cannot use computed property here, which may change during async call.
-                executeResponses = await Promise.all(
-                    this.processHandlers.map((handler, index) => handler.execute(requestBodiesToSend[index], this.accessToken))
-                ),
-                jobIDs = executeResponses.map(response => response.jobID),
-                initialStatuses = executeResponses.map(response => response.status),
-                newSimulationId = jobIDs.join("_"),
-                newSimulation = {
-                    name: this.simulationName || this.simulation.title,
-                    configId: this.currentSimulationId};
+            scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId); // Cannot use computed property here, which may change during async call.
+            executeResponses = await Promise.all(
+                this.processHandlers.map((handler, index) => handler.execute(requestBodiesToSend[index], this.accessToken))
+            );
+            jobIDs = executeResponses.map(response => response.jobID);
+            initialStatuses = executeResponses.map(response => response.status);
+            newSimulationId = jobIDs.join("_");
+            newSimulation = {
+                name: this.simulationName || this.simulation.title,
+                configId: this.currentSimulationId
+            };
 
             if (jobIDs.some(ID => !ID)) {
                 console.warn("Not all job IDs returned from process execution.");
@@ -1437,6 +1446,9 @@ export default {
                                     @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
                                 />
                             </div>
+                            <TimeFrame
+                                v-if="inputKey === 'time-frame'"
+                            />
                         </AccordionItem>
                     </AccordionItem>
                 </div>
