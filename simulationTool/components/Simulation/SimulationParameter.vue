@@ -1022,7 +1022,9 @@ export default {
 
             requestBodiesToSend.forEach(rb => {
                 if (rb?.inputs) {
-                    rb.inputs["skip-compression"] = true;
+                    if (this.currentSimulationId.includes("wind")) {
+                        rb.inputs["skip-compression"] = true;
+                    }
                     // time frame only needed for pedestrian wind comfort simulation
                     if (this.currentSimulationId === "wind-comfort") {
                         rb.inputs["time-frame"] = this.timeFrame;
