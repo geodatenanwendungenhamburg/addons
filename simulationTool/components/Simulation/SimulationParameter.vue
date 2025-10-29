@@ -85,7 +85,6 @@ export default {
             if (!this.processDescriptions.length) {
                 return {};
             }
-            console.log("combinedInputs", this.processDescriptions.reduce((inputs, description) => Object.assign(inputs, description.inputs), {}));
             return this.processDescriptions.reduce((inputs, description) => Object.assign(inputs, description.inputs), {});
         },
 
@@ -880,8 +879,6 @@ export default {
                         rb.inputs = rb.inputs || {};
                         rb.inputs[simInputKey] = bbox;
                     });
-
-                    console.log(`[SimulationTool] Calculated bbox for '${simInputKey}' from source '${cfg.calculationSource}':`, bbox, `featureCount=${features.length}`);
                 }
             });
         },
@@ -900,9 +897,7 @@ export default {
             const scenarioInputs = this.currentPlanningScenario.inputs || {},
                 mappings = [];
 
-            console.log("Applying dataSource input mapping with scenarioInputs:", scenarioInputs);
             Object.entries(this.simulation.inputs).forEach(([simInputKey, cfg]) => {
-                console.log("Applying dataSource mapping for", {simInputKey, cfg});
                 if (cfg && typeof cfg.dataSource === "string") {
                     const sourceKey = cfg.dataSource,
                         value = scenarioInputs[sourceKey];
@@ -922,7 +917,6 @@ export default {
             });
 
             if (mappings.length) {
-                console.log("[SimulationTool] Data source input mapping summary:", mappings);
                 const mappedSources = new Set(mappings.map(m => m.source)),
                     unused = Object.keys(scenarioInputs).filter(k => !mappedSources.has(k));
 
@@ -1132,11 +1126,11 @@ export default {
             }
 
             this.processDescriptions.forEach((description, index) => {
-                if (type === "array") {
-                    console.log("Setting array value for", {inputKey, propertyKey, val, type});
-                    console.log("Current value:", this.requestBodies[index]?.inputs?.[inputKey]);
-                    console.log("Description input:", description.inputs?.[inputKey]);
-                }
+                // if (type === "array") {
+                //     console.log("Setting array value for", {inputKey, propertyKey, val, type});
+                //     console.log("Current value:", this.requestBodies[index]?.inputs?.[inputKey]);
+                //     console.log("Description input:", description.inputs?.[inputKey]);
+                // }
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
