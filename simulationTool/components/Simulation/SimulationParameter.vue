@@ -734,7 +734,6 @@ export default {
             this.ignoreProperties = Object.keys(this.simulation.inputs)
                 .filter(inputKey => this.simulation.inputs[inputKey].ignoreProperties)
                 .flatMap(inputKey => this.simulation.inputs[inputKey].ignoreProperties);
-
         },
 
         /**
@@ -754,6 +753,16 @@ export default {
             }));
         },
 
+        setValuesFromConfig () {
+            this.requestBodies.forEach((body, index) => {
+                Object.keys(body.inputs).forEach(inputKey => {
+                    if (this.simulation?.inputs?.[inputKey]?.setValue) {
+                        this.requestBodies[index].inputs[inputKey] = this.simulation?.inputs?.[inputKey].setValue;
+                    }
+                });
+            });
+        },
+
         /** Prepares the request body for the simulation.
          * @returns {void}
          */
@@ -765,6 +774,7 @@ export default {
             await this.fetchProcessDescriptions();
             this.setupIgnoreProperties();
             this.createRequestBodies();
+            this.setValuesFromConfig();
             this.applyDataSourceInputMapping();
             this.applyCalculatedInputs();
         },
@@ -1020,13 +1030,14 @@ export default {
             this.removeEmptyCollections(requestBodiesDeepCopy);
             requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
 
-            requestBodiesToSend.forEach(rb => {
+            requestBodiesToSend.forEach((rb, index) => {
                 if (rb?.inputs) {
-                    if (this.currentSimulationId.includes("wind")) {
+                    // skip compression for wind simulations
+                    if (this.simulation?.processes[index]?.id.includes("wind")) {
                         rb.inputs["skip-compression"] = true;
                     }
                     // time frame only needed for pedestrian wind comfort simulation
-                    if (this.currentSimulationId === "wind-comfort") {
+                    if (this.simulation?.processes[index]?.id === "wind:pedestrian-wind-comfort") {
                         rb.inputs["time-frame"] = this.timeFrame;
                     }
 
@@ -1136,7 +1147,6 @@ export default {
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
-
                 const inputs = this.requestBodies[index].inputs;
 
                 if (propertyKey === "") {
