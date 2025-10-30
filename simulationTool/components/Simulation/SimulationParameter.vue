@@ -1032,15 +1032,9 @@ export default {
 
             requestBodiesToSend.forEach((rb, index) => {
                 if (rb?.inputs) {
-                    // skip compression for wind simulations
-                    if (this.simulation?.processes[index]?.id.includes("wind")) {
-                        rb.inputs["skip-compression"] = true;
-                    }
-                    // time frame only needed for pedestrian wind comfort simulation
                     if (this.simulation?.processes[index]?.id === "wind:pedestrian-wind-comfort") {
                         rb.inputs["time-frame"] = this.timeFrame;
                     }
-
                 }
             });
 
