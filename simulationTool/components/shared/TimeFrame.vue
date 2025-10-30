@@ -1,56 +1,56 @@
 <script>
-import SliderItem from "@shared/modules/slider/components/SliderItem.vue";
-import AccordionItem from "@shared/modules/accordion/components/AccordionItem.vue";
 import {mapMutations, mapGetters} from "vuex";
-
 
 export default {
     name: "TimeFrame",
-    components: {
-        SliderItem,
-        AccordionItem
-    },
+    emits: ["timeFrameChanged"],
     data () {
         return {
-            timeFields: ["hour", "day", "month"],
-            fieldConfig: {
-                hour: {label: "Hour", min: 0, max: 23},
-                day: {label: "Day", min: 1, max: 31},
-                month: {label: "Month", min: 1, max: 12}
-            },
-            step: 1
+            seasonOptions: [
+                {value: "winter", label: "Winter"},
+                {value: "spring", label: "Spring"},
+                {value: "summer", label: "Summer"},
+                {value: "autumn", label: "Autumn"},
+                {value: "full-year", label: "Full Year"}
+            ],
+            hoursOptions: [
+                {value: "morning", label: "Morning"},
+                {value: "noon", label: "Noon"},
+                {value: "evening", label: "Evening"},
+                {value: "night", label: "Night"},
+                {value: "all-hours", label: "All Hours"}
+            ]
         };
     },
     computed: {
         ...mapGetters("Modules/SimulationTool", ["timeFrame"]),
-        timeFrames () {
+        currentTimeFrame () {
+            // Default values if timeFrame is not set or in old format
             return {
-                startTime: {
-                    title: "Start Time",
-                    id: "start-time",
-                    values: {
-                        hour: this.timeFrame[0].hour,
-                        day: this.timeFrame[0].day,
-                        month: this.timeFrame[0].month
-                    }
-                },
-                endTime: {
-                    title: "End Time",
-                    id: "end-time",
-                    values: {
-                        hour: this.timeFrame[1].hour,
-                        day: this.timeFrame[1].day,
-                        month: this.timeFrame[1].month
-                    }
-                }
+                season: this.timeFrame?.season || "winter",
+                hours: this.timeFrame?.hours || "evening"
             };
         }
     },
     methods: {
         ...mapMutations("Modules/SimulationTool", ["setTimeFrame"]),
-        updateTimeValue (timeType, field, value) {
-            this.timeFrames[timeType].values[field] = value;
-            this.setTimeFrame([this.timeFrames.startTime.values, this.timeFrames.endTime.values]);
+        updateSeason (newSeason) {
+            const updatedTimeFrame = {
+                ...this.currentTimeFrame,
+                season: newSeason
+            };
+
+            this.setTimeFrame(updatedTimeFrame);
+            this.$emit("timeFrameChanged", updatedTimeFrame);
+        },
+        updateHours (newHours) {
+            const updatedTimeFrame = {
+                ...this.currentTimeFrame,
+                hours: newHours
+            };
+
+            this.setTimeFrame(updatedTimeFrame);
+            this.$emit("timeFrameChanged", updatedTimeFrame);
         }
     }
 };
@@ -58,31 +58,51 @@ export default {
 
 <template>
     <div>
-        <AccordionItem
-            v-for="(timeFrame, timeType) in timeFrames"
-            :id="`${timeFrame.id}-simulation-parameters`"
-            :key="timeType"
-            :title="timeFrame.title"
-            :is-open="true"
-            font-size="font-size-small"
-        >
-            <div
-                v-for="field in timeFields"
-                :key="field"
-                class="mb-3"
+        <div class="mb-3">
+            <label
+                for="season-select"
+                class="form-label"
             >
-                <SliderItem
-                    :id="`${timeType}-${field}-slider`"
-                    :label="fieldConfig[field].label"
-                    :aria="`${timeFrame.title} ${fieldConfig[field].label}`"
-                    :value="timeFrame.values[field]"
-                    :min="fieldConfig[field].min"
-                    :max="fieldConfig[field].max"
-                    :step="step"
-                    :show-markers="true"
-                    :interaction="(event) => updateTimeValue(timeType, field, Number(event.target.value))"
-                />
-            </div>
-        </AccordionItem>
+                Season
+            </label>
+            <select
+                id="season-select"
+                v-model="currentTimeFrame.season"
+                class="form-select"
+                @change="updateSeason($event.target.value)"
+            >
+                <option
+                    v-for="option in seasonOptions"
+                    :key="option.value"
+                    :value="option.value"
+                >
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
+
+        <!-- Hours Selection -->
+        <div class="mb-3">
+            <label
+                for="hours-select"
+                class="form-label"
+            >
+                Hours
+            </label>
+            <select
+                id="hours-select"
+                v-model="currentTimeFrame.hours"
+                class="form-select"
+                @change="updateHours($event.target.value)"
+            >
+                <option
+                    v-for="option in hoursOptions"
+                    :key="option.value"
+                    :value="option.value"
+                >
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
     </div>
 </template>
