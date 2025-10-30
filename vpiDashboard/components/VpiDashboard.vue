@@ -181,13 +181,13 @@ export default {
             await nextTick();
             const vpiLayerSource = this.map.getLayers().getArray().find(l => {
                 return l.get("id") === this.gridLayerId;
-            }).getSource();
+            })?.getSource();
 
-            if (vpiLayerSource.getFeatures().length) {
+            if (vpiLayerSource?.getFeatures().length) {
                 this.setAllLocationsArray(vpiLayerSource.getFeatures().map(feature => feature.get("geoid")));
             }
             else {
-                vpiLayerSource.once("featuresloadend", event => {
+                vpiLayerSource?.once("featuresloadend", event => {
                     this.setAllLocationsArray(event?.features.map(feature => feature.get("geoid")));
                 });
             }

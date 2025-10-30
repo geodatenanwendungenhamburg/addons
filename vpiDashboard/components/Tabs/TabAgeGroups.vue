@@ -199,7 +199,21 @@ export default {
          */
         createChartData (responseData, chartType) {
             const tempData = [],
-                xLabels = new Set();
+                xLabels = new Set(),
+                allDateValuesInResponse = responseData.map(item => item.properties.datum),
+                uniqueDateValuesInResponse = [...new Set(allDateValuesInResponse)],
+                missingAgeGroupsForDateInResponse = {};
+
+            // check responseData of missing combinations of date and agegroup
+            uniqueDateValuesInResponse.forEach(datum => {
+                const responseValuesForDate = responseData.filter(item => item.properties.datum === datum),
+                    ageGroupsForDate = responseValuesForDate.map(item => item.properties.altersklasse),
+                    missingAgeGroupsForDate = this.ageGroupChartLabels.filter(ageGroup => !ageGroupsForDate.includes(`[${ageGroup}]`));
+
+                if (missingAgeGroupsForDate.length > 0) {
+                    missingAgeGroupsForDateInResponse[datum] = missingAgeGroupsForDate;
+                }
+            });
 
             responseData.forEach((element) => {
                 this.ageGroupChartLabels.forEach((label, index) => {
@@ -215,6 +229,15 @@ export default {
                     }
                     if (element.properties.altersklasse === `[${label}]`) {
                         tempData[index].data.push(element.properties.besucher);
+                    }
+                    else if (
+                        missingAgeGroupsForDateInResponse[element.properties.datum] &&
+                        missingAgeGroupsForDateInResponse[element.properties.datum].includes(label)
+                    ) {
+                        const i = missingAgeGroupsForDateInResponse[element.properties.datum].findIndex((el) => el === label);
+
+                        missingAgeGroupsForDateInResponse[element.properties.datum].splice(i, 1);
+                        tempData[index].data.push(0);
                     }
                     xLabels.add(dayjs(element.properties.datum).locale(this.currentLocale).format("dd, DD.MM.YYYY"));
                 });
