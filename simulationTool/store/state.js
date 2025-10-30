@@ -45,6 +45,7 @@
  * @property {String|null} simulationApiUrl The URL for the Urban Model Platform API
  * @property {Object} simulationAreaStyle - The default style for the simulation area (BBOX/Extent of planning scenario)
  * @property {Object} userDetailsCache cache for user details
+ * @property {Object} timeFrame the time frame for the simulation
  */
 const state = {
     ensembles: [],
@@ -128,18 +129,10 @@ const state = {
     simulationIdForResults: "",
     simulations: [],
     userDetailsCache: {},
-    timeFrame: [
-        {
-            hour: 0,
-            day: 1,
-            month: 1
-        },
-        {
-            hour: 0,
-            day: 2,
-            month: 1
-        }
-    ]
+    timeFrame: {
+        season: "winter",
+        hours: "evening"
+    }
 };
 
 export default state;
