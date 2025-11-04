@@ -591,7 +591,7 @@ export default {
                 this.tableFeaturesCollection[layerId][coordinate2d].set(customZKey + propertyKey, zValue);
             }
             else {
-                // Use z-coordinate as before (for height values)
+                // Use z-coordinate for height values (with default to "0" if missing)
                 const validZ = z !== undefined && z !== null && z !== "" ? z : "0";
 
                 propertyKey = validZ;

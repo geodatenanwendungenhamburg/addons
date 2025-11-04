@@ -59,7 +59,6 @@ export default {
         parseValues (raw) {
             const parts = raw.split(",").map(s => s.trim()).filter(s => s.length > 0);
 
-            console.log("Parsing values for", {raw, parts, valueType: this.valueType});
             switch (this.valueType) {
                 case "number":
                     return parts.map(p => {
