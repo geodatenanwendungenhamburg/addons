@@ -264,7 +264,14 @@ export default {
          */
         selectedOutputOptions (val) {
             this.requestBodies.forEach(requestBody => {
+                // Preserve existing inputs and response, recreate outputs
+                const inputs = requestBody.inputs,
+                    response = requestBody.response || "document";
+
+                requestBody.inputs = inputs;
+                requestBody.response = response;
                 requestBody.outputs = {};
+
                 val.forEach(elem => {
                     requestBody.outputs[elem.code] = {};
                 });
@@ -749,6 +756,7 @@ export default {
                 inputs: {
                     ...OgcApiProcess.getInputDefaultsFromDescription(description)
                 },
+                response: "document",
                 outputs: {}
             }));
         },
@@ -1030,13 +1038,13 @@ export default {
             this.removeEmptyCollections(requestBodiesDeepCopy);
             requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
 
-            requestBodiesToSend.forEach((rb, index) => {
-                if (rb?.inputs) {
-                    if (this.simulation?.processes[index]?.id === "wind:pedestrian-wind-comfort") {
-                        rb.inputs["time-frame"] = this.timeFrame;
-                    }
-                }
-            });
+            console.log("Prepared request bodies to send:", requestBodiesToSend);
+
+            // requestBodiesToSend.forEach(rb => {
+            //     rb.response = "document";
+            // });
+
+            // console.log("Final request bodies to send:", requestBodiesToSend);
 
             // Log: All parameters and specifically the buildings that will be sent to the simulation
             // try {
