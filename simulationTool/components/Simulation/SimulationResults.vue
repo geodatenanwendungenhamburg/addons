@@ -321,7 +321,7 @@ export default {
                     return zB - zA;
                 });
 
-            return allZValues;
+            return allZValues || [];
         },
 
         /**
@@ -424,10 +424,20 @@ export default {
          * @returns {String} A string representation of the key-value pairs, each pair on a new line.
          */
         formatKeyValuePairs (list, prefixToRemove, suffix = "m") {
+            // If there's only one entry and it's a "value" property (no real 3D coordinates),
+            // show it simply without height formatting
+            if (list.length === 1 && list[0][0] === "custom-z-value") {
+                return `Wert: ${list[0][1]}`;
+            }
+
+            // Calculate max length for height values (that will have suffix)
             const maxKeyLength = Math.max(...list.map(([k]) => String(k).length), 0);
 
             return list.map(([key, value]) => {
-                const paddedKey = `${key + suffix}`.padEnd(maxKeyLength + 1, " ");
+                // Check if key is valid (not null, undefined, or empty string)
+                const keyString = key !== null && key !== undefined && key !== "" ? String(key) : "",
+                    keyWithSuffix = keyString ? `${keyString}${suffix}` : "",
+                    paddedKey = keyWithSuffix.padEnd(maxKeyLength + suffix.length, " ");
 
                 return `${paddedKey.slice(prefixToRemove.length)}: ${value}`;
             }).join("\n");
@@ -518,7 +528,7 @@ export default {
                     layerSource = layer.getLayerSource();
 
                 Object.values(jobs).forEach(job => {
-                    const featuresToAdd = ConvertFeature.geoJsonToOpenlayers(job.jobResults?.[output]?.features || []),
+                    const featuresToAdd = ConvertFeature.geoJsonToOpenlayers(job.jobResults?.[output]?.features || job.jobResults?.[output]?.value?.features || []),
                         foundProcess = this.simulationConfig?.processes.find(process => process?.id === job.jobStatus.processID) || {},
                         isTableMode = foundProcess?.renderingOptions?.featureRenderMode === "table";
 
@@ -555,9 +565,11 @@ export default {
          */
         storeTranslatedPointAndCreateLine (feature, layerId, toShowAttrKey, originalXYKey, customZKey) {
             const featureGeometry = feature.getGeometry(),
-                [x, y, z] = featureGeometry.getCoordinates().toString().split(","),
+                coordinates = featureGeometry.getCoordinates(),
+                [x, y, z] = Array.isArray(coordinates) ? coordinates : coordinates.toString().split(","),
                 coordinate2d = `${x},${y}`;
-            let zValue;
+            let zValue,
+                propertyKey;
 
             if (!isObject(this.tableFeaturesCollection[layerId][coordinate2d])) {
                 const clonedFeature = feature.clone();
@@ -570,9 +582,23 @@ export default {
                     zValue = typeof value === "undefined" ? "---" : value;
                 }
             });
-            this.tableFeaturesCollection[layerId][coordinate2d].set(customZKey + z, zValue);
+
+            // If we're showing 'value' property and no z-coordinate exists, use a different approach
+
+            if (toShowAttrKey === "value" && (z === undefined || z === null || z === "")) {
+                // Use "value" as the key instead of z-coordinate
+                propertyKey = "value";
+                this.tableFeaturesCollection[layerId][coordinate2d].set(customZKey + propertyKey, zValue);
+            }
+            else {
+                // Use z-coordinate as before (for height values)
+                const validZ = z !== undefined && z !== null && z !== "" ? z : "0";
+
+                propertyKey = validZ;
+                this.tableFeaturesCollection[layerId][coordinate2d].set(customZKey + validZ, zValue);
+            }
             this.tableFeaturesCollection[layerId][coordinate2d].set(originalXYKey, coordinate2d);
-            this.lineFeaturesCollection[layerId][`${coordinate2d},${z}`] = new Feature(new LineString([
+            this.lineFeaturesCollection[layerId][`${coordinate2d},${propertyKey}`] = new Feature(new LineString([
                 featureGeometry.getCoordinates(),
                 this.tableFeaturesCollection[layerId][coordinate2d].getGeometry().getCoordinates()
             ]));
