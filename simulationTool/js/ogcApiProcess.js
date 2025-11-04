@@ -53,8 +53,6 @@ export default class OgcApiProcess {
             return defaultsObject;
         }
 
-        console.log("getting defaults from description", description);
-
         for (const inputKey in description.inputs) {
             const input = description.inputs[inputKey];
 
@@ -68,7 +66,6 @@ export default class OgcApiProcess {
             }
             else if (input.schema?.type === "object") {
                 if (input.schema.default) {
-                    console.log("found default for object", inputKey, input.schema.default);
                     defaultsObject[inputKey] = input.schema.default;
                 }
                 else {
@@ -81,9 +78,6 @@ export default class OgcApiProcess {
                 }
             }
         }
-
-        console.log("defaultsObject", defaultsObject);
-
         return defaultsObject;
     }
     /**

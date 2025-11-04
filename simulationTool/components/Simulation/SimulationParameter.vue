@@ -1,7 +1,6 @@
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import DynamicInputByType from "../shared/components/DynamicInputByType.vue";
-import TimeFrame from "../shared/TimeFrame.vue";
 import FileUpload from "../../../../src/shared/modules/inputs/components/FileUpload.vue";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import getBBOXGeometry from "../shared/js/getBBoxGeometry";
@@ -30,8 +29,7 @@ export default {
         Multiselect,
         SectionHeader,
         SpinnerItem,
-        SwitchInput,
-        TimeFrame
+        SwitchInput
     },
     data () {
         return {
@@ -55,8 +53,7 @@ export default {
             "planningScenarios",
             "previousComponentOfSimulation",
             "simulations",
-            "dataSources",
-            "timeFrame"
+            "dataSources"
         ]),
         ...mapGetters("Modules/Login", ["accessToken"]),
 
@@ -730,7 +727,6 @@ export default {
             this.processDescriptions = await Promise.all(
                 this.processHandlers.map(handler => handler.getDescription(this.accessToken))
             );
-            console.log("processDescriptions", this.processDescriptions);
         },
 
         /**
@@ -1038,57 +1034,6 @@ export default {
             this.removeEmptyCollections(requestBodiesDeepCopy);
             requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
 
-            console.log("Prepared request bodies to send:", requestBodiesToSend);
-
-            // requestBodiesToSend.forEach(rb => {
-            //     rb.response = "document";
-            // });
-
-            // console.log("Final request bodies to send:", requestBodiesToSend);
-
-            // Log: All parameters and specifically the buildings that will be sent to the simulation
-            // try {
-            //     const processes = this.simulation?.processes || [],
-            //         summary = requestBodiesToSend.map((rb, index) => ({
-            //             processId: processes[index]?.id,
-            //             inputKeys: Object.keys(rb?.inputs || {})
-            //         }));
-
-            //     console.log("[SimulationTool] Simulation request bodies (summary):", summary);
-
-            //     requestBodiesToSend.forEach((rb, index) => {
-            //         const processId = processes[index]?.id,
-            //             inputs = rb?.inputs || {},
-            //             buildings = inputs?.buildings;
-
-            //         if (inputs?.crs && inputs.crs !== this.currentDataSourceCrs) {
-            //             console.warn("[SimulationTool] Warning: CRS in request body differs from data source CRS", {processId, bodyCrs: inputs.crs, dataSourceCrs: this.currentDataSourceCrs});
-            //         }
-            //         else if (inputs?.crs) {
-            //             console.log("[SimulationTool] CRS used for process:", {processId, crs: inputs.crs});
-            //         }
-            //         else {
-            //             console.warn("[SimulationTool] No CRS present in request body (should have been injected if available)", {processId});
-            //         }
-
-            //         // Log all parameters (inputs)
-            //         console.log("[SimulationTool] Inputs sent to simulation:", {processId, inputs});
-
-            //         // Log buildings specifically
-            //         if (buildings) {
-            //             const featureCount = Array.isArray(buildings.features) ? buildings.features.length : undefined;
-
-            //             console.log("[SimulationTool] Buildings sent to simulation:", {processId, featureCount, buildings});
-            //         }
-            //         else {
-            //             console.warn("[SimulationTool] No buildings input present for process:", processId);
-            //         }
-            //     });
-            // }
-            // catch (e) {
-            //     console.warn("[SimulationTool] Error while logging request bodies:", e);
-            // }
-
             scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId); // Cannot use computed property here, which may change during async call.
             executeResponses = await Promise.all(
                 this.processHandlers.map((handler, index) => handler.execute(requestBodiesToSend[index], this.accessToken))
@@ -1141,11 +1086,6 @@ export default {
             }
 
             this.processDescriptions.forEach((description, index) => {
-                // if (type === "array") {
-                //     console.log("Setting array value for", {inputKey, propertyKey, val, type});
-                //     console.log("Current value:", this.requestBodies[index]?.inputs?.[inputKey]);
-                //     console.log("Description input:", description.inputs?.[inputKey]);
-                // }
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
@@ -1454,9 +1394,6 @@ export default {
                                     @update:checked="setRequestBodyInput(inputKey, propertyKey, $event, Boolean(property.enum))"
                                 />
                             </div>
-                            <TimeFrame
-                                v-if="inputKey === 'time-frame'"
-                            />
                         </AccordionItem>
                     </AccordionItem>
                 </div>
