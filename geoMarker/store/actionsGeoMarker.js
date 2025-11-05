@@ -43,7 +43,7 @@ const actions = {
      * @param {Object} dispatch - The dispatch object.
      * @returns {void}
      */
-    clearInteractions ({commit, dispatch, getters}) {
+    clearInteractions ({commit, dispatch, getters, rootState}) {
         const {drawInteraction, modifyInteraction, translateInteraction, drawLayer, selectInteraction} = getters,
             map = mapCollection.getMap("2D");
 
@@ -122,7 +122,7 @@ const actions = {
      * @param {Object} payload - The payload object.
      * @returns {void}
      */
-    async handleDrawInteraction ({commit, dispatch}, payload) {
+    async handleDrawInteraction ({commit, dispatch, getters}, payload) {
         const {interaction, layerInformation} = payload,
             pointStyle = new Style({
                 image: new CircleStyle({
@@ -152,7 +152,9 @@ const actions = {
             }),
             translateInteraction = new Translate({
                 layers: [drawLayer]
-            });
+            }),
+            {id} = getters;
+            console.log(id)
 
         commit("setDrawInteraction", drawInteraction);
         commit("setModifyInteraction", modifyInteraction);
@@ -518,6 +520,72 @@ const actions = {
         }
 
         commit("setGeomarkerEditLayerUrl", url);
+    },
+    /**
+     * Restores a frozen GeoMarker feature to the draw layer on the map.
+     * Used to restore features that were temporarily removed when draw tool was activated.
+     * After restoration, sets up modify and translate interactions (not draw).
+     * @param {Function} context.dispatch - The dispatch function
+     * @param {Function} context.getters - The getters function
+     * @param {Function} context.commit - The commit function
+     * @param {Object} payload - The payload object
+     * @param {Object} payload.feature - The feature to restore to the map
+     * @returns {void}
+     */
+    restoreFrozenNewGeoMarkerFeature ({dispatch, getters, commit}, {feature}) {
+        console.log("restore action")
+        if (!feature) {
+            console.log("returned.. !feature")
+            return;
+        }
+
+        const map = mapCollection.getMap("2D");
+
+        if (!map) {
+            console.log("returned map")
+            return;
+        }
+
+        // Find or create the draw layer
+        const drawLayer = map.getLayers().getArray().find(layer => layer.get("id") === "module/geoMarker/vectorLayer");
+
+        if (drawLayer && drawLayer.getSource) {
+            console.log("draw layer")
+            // Clone the feature to avoid reference issues
+            const clonedFeature = feature.clone();
+
+            // Add the feature to the draw layer source
+            drawLayer.getSource().addFeature(clonedFeature);
+
+            // Set up modify and translate interactions (like drawend does)
+            const modifyInteraction = new Modify({
+                source: drawLayer.getSource()
+            }),
+                translateInteraction = new Translate({
+                    layers: [drawLayer]
+                });
+
+            commit("setModifyInteraction", modifyInteraction);
+            commit("setTranslateInteraction", translateInteraction);
+
+            modifyInteraction.on("modifyend", (event) => {
+                commit("setGeoMarkerUpdateFeature", event.features.getArray()[0]);
+            });
+
+            translateInteraction.on("translatestart", () => {
+                dispatch("Maps/removePointMarker", null, {root: true});
+            });
+
+            translateInteraction.on("translateend", (event) => {
+                commit("setGeoMarkerUpdateFeature", event.features.getArray()[0]);
+            });
+
+            dispatch("Maps/addInteraction", modifyInteraction, {root: true});
+            dispatch("Maps/addInteraction", translateInteraction, {root: true});
+
+            // Set selected interaction to indicate we're in edit mode
+            commit("setSelectedInteraction", "insert");
+        }
     },
     /**
      * Rolls back the geometry of the selected GeoMarker feature to its previous state.

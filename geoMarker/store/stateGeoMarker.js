@@ -27,6 +27,7 @@
  * @property {String|null} geoMarkerUpdateLayerIds - The id(s) of the layer(s) which contain the selected GeoMarker feature
  * @property {Object|null} updateGeoMarkerFeature - The GeoMarker feature being updated
  * @property {Object|null} rollbackGeoMarkerFeature - The feature to roll back to
+ * @property {Object|null} frozenNewGeoMarkerFeature - The newly created feature saved before freeze
  * @property {String|null} selectedInteraction - Which map interaction is currently active, if any.
  * @property {Object|null} drawInteraction - The current draw interaction object
  * @property {Object|null} drawLayer - Temporary layer used for drawing features
@@ -69,6 +70,7 @@ const state = {
     geoMarkerUpdateFeature: null,
     triggerFilter: false,
     rollbackGeoMarkerFeature: null,
+    frozenNewGeoMarkerFeature: null,
     selectedInteraction: null,
     drawInteraction: null,
     drawLayer: null,

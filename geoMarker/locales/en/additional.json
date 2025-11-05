@@ -44,6 +44,9 @@
                     "label": "List"
                 }
             },
+            "overlay": {
+                "closeDrawTool": "Please close the Draw Tool to use GeoMarker"
+            },
             "GeoMakerList": {
                 "tableNoData": "No GeoMarkers selected for display.",
                 "selectedGeoMarkerWithId": "GeoMarker with Id {{id}} is selected",
