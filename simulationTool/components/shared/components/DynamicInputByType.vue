@@ -86,7 +86,7 @@ export default {
                 :id="id"
                 :label="label"
                 :array-object="value"
-                @update:arrayValue="console.log('Array input updated:', $event); $emit('update:value', $event)"
+                @update:arrayValue="$emit('update:value', $event)"
             />
         </template>
         <template v-else-if="inputType === 'boolean'">
