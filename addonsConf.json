@@ -274,5 +274,8 @@
   "landRegistryFile": {
     "path": "landRegistryFile",
     "type": "tool"
+  },
+  "pvObligation": {
+    "type": "tool"
   }
 }
