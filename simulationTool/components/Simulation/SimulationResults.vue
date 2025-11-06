@@ -814,13 +814,13 @@ export default {
                 class="ms-1 my-1"
                 :title="$t('additional:modules.tools.simulationTool.inputParameters')"
             >
-                <div class="overflow-x-auto">
+                <div class="input-parameters-container">
                     <div
                         v-for="(input, inputKey) in inputsToShow"
                         :key="inputKey"
                     >
                         <div
-                            v-if="typeof input === 'object' && input?.type !== 'FeatureCollection'"
+                            v-if="typeof input === 'object' && input?.type !== 'FeatureCollection' && !Array.isArray(input)"
                             class="container"
                         >
                             <div
@@ -834,6 +834,17 @@ export default {
                                 <div class="col col-md-7 font-bold align-self-center">
                                     {{ property }}
                                 </div>
+                            </div>
+                        </div>
+                        <div
+                            v-else-if="typeof input !== 'object' && getMappedProperty(inputKey, simulationConfig?.inputs?.[inputKey]?.propertiesMapping) !== ''"
+                            class="py-1 row"
+                        >
+                            <div class="col col-md-5">
+                                {{ getMappedProperty(inputKey, simulationConfig?.inputs?.[inputKey]?.propertiesMapping) + ":" }}
+                            </div>
+                            <div class="col col-md-7 font-bold align-self-center">
+                                {{ input }}
                             </div>
                         </div>
                     </div>
@@ -1020,5 +1031,20 @@ export default {
         font-size: $font_size_sm;
         align-content: center;
     }
+}
+
+/* prevent scroll bar in accordion item with a lot of parameters */
+#simulation-results-accordion-inputs {
+    .accordion-body {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+}
+
+.input-parameters-container {
+    width: 100%;
+    overflow: visible;
+    height: auto;
+    max-height: none;
 }
 </style>
