@@ -2,7 +2,52 @@
     "modules": {
         "pvObligation": {
             "name": "PV Pflicht",
-            "description": "TODO"
+            "description": "TODO",
+            "wizard": {
+                "buttons": {
+                    "back": "voriger Schritt",
+                    "next": "nächster Schritt"
+                },
+                "introduction": "TODO: Insert introduction text",
+                "step": {
+                    "grossArea": {
+                        "wizardTitle": "Bruttodachfläche",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "netArea": {
+                        "wizardTitle": "Nettodachfläche",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "netExcludedAreas": {
+                        "wizardTitle": "Sperrfläche ergänzen",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "personalInformation": {
+                        "wizardTitle": "Persönliche Daten",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "personalNotes": {
+                        "wizardTitle": "eigene Erläuterungen",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "generateReport": {
+                        "wizardTitle": "Report erzeugen",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    }
+                }
+            }
         }
     }
 }
