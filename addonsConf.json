@@ -1,4 +1,7 @@
 {
+  "pvObligation": {
+    "type": "tool"
+  },
   "exampleSearch": {
     "type": "searchInterface",
     "path": "searchInterfaces/exampleSearch"

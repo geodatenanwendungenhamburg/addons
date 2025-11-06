@@ -1,0 +1,8 @@
+{
+    "modules": {
+        "pvObligation": {
+            "name": "PV Obligation",
+            "description": "TODO"
+        }
+    }
+}
