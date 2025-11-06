@@ -1,8 +1,12 @@
 <script>
 import {mapGetters} from "vuex";
+import PvObligationWizard from "./PvObligationWizard.vue";
 
 export default {
     name: "PvObligation",
+    components: {
+        PvObligationWizard
+    },
     computed: {
         ...mapGetters("Modules/PvObligation", [])
     }
@@ -11,11 +15,14 @@ export default {
 
 <template lang="html">
     <div id="pvObligation">
+        <PvObligationWizard />
     </div>
 </template>
 
-<style lang="scss">
-#pvObligation{
-}
+<style lang="scss" scoped>
+    @import "~variables";
+
+    #pvObligation{
+    }
 </style>
 
