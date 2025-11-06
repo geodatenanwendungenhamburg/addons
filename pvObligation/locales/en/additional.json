@@ -2,7 +2,52 @@
     "modules": {
         "pvObligation": {
             "name": "PV Obligation",
-            "description": "TODO"
+            "description": "TODO",
+            "wizard": {
+                "buttons": {
+                    "back": "previous step",
+                    "next": "next step"
+                },
+                "introduction": "TODO: Insert introduction text",
+                "step": {
+                    "grossArea": {
+                        "wizardTitle": "Gross roof area",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "netArea": {
+                        "wizardTitle": "Net roof area",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "netExcludedAreas": {
+                        "wizardTitle": "Add excluded areas",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "personalInformation": {
+                        "wizardTitle": "Personal information",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "personalNotes": {
+                        "wizardTitle": "Personal notes",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    },
+                    "generateReport": {
+                        "wizardTitle": "Generate report",
+                        "component": {
+                            "introduction": "TODO: Insert introduction text"
+                        }
+                    }
+                }
+            }
         }
     }
 }
