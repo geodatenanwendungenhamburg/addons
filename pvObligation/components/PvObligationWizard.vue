@@ -1,11 +1,11 @@
 <script>
 import {markRaw} from "vue";
 import {mapGetters} from "vuex";
-import AccordionItem from "../../../src/shared/modules/accordion/components/AccordionItem.vue";
-import FlatButton from "../../../src/shared/modules/buttons/components/FlatButton.vue";
+import AccordionItem from "@shared/modules/accordion/components/AccordionItem.vue";
+import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import PvObligationWizardStepGrossArea from "./PvObligationWizardStepGrossArea.vue";
 import PvObligationWizardStepNetArea from "./PvObligationWizardStepNetArea.vue";
-import PvObligationWizardStepNetExcludedAreas from "./PvObligationWizardStepNetExcludedAreas.vue";
+import PvObligationWizardStepNetRestrictedAreas from "./PvObligationWizardStepNetRestrictedAreas.vue";
 import PvObligationWizardStepPersonalInformation from "./PvObligationWizardStepPersonalInformation.vue";
 import PvObligationWizardStepPersonalNotes from "./PvObligationWizardStepPersonalNotes.vue";
 import PvObligationWizardStepGenerateReport from "./PvObligationWizardStepGenerateReport.vue";
@@ -17,7 +17,7 @@ export default {
         FlatButton,
         PvObligationWizardStepGrossArea,
         PvObligationWizardStepNetArea,
-        PvObligationWizardStepNetExcludedAreas,
+        PvObligationWizardStepNetRestrictedAreas,
         PvObligationWizardStepPersonalInformation,
         PvObligationWizardStepPersonalNotes,
         PvObligationWizardStepGenerateReport
@@ -41,10 +41,10 @@ export default {
                     componentFormData: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.netExcludedAreas.wizardTitle"),
+                    title: this.$t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.wizardTitle"),
                     isOpen: false,
                     isError: false,
-                    component: markRaw(PvObligationWizardStepNetExcludedAreas),
+                    component: markRaw(PvObligationWizardStepNetRestrictedAreas),
                     componentFormData: null
                 },
                 {

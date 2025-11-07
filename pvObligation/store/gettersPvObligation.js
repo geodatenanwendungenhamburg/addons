@@ -1,4 +1,4 @@
-import {generateSimpleGetters} from "../../../src/shared/js/utils/generators";
+import {generateSimpleGetters} from "@shared/js/utils/generators";
 import state from "./statePvObligation";
 
 const getters = {

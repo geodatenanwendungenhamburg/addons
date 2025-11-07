@@ -3,6 +3,7 @@
         "pvObligation": {
             "name": "PV Obligation",
             "description": "TODO",
+            "generateReportSpinner": "The report is currently been generated ...",
             "wizard": {
                 "buttons": {
                     "back": "previous step",
@@ -22,7 +23,7 @@
                             "introduction": "TODO: Insert introduction text"
                         }
                     },
-                    "netExcludedAreas": {
+                    "netRestrictedAreas": {
                         "wizardTitle": "Add excluded areas",
                         "component": {
                             "introduction": "TODO: Insert introduction text"
@@ -43,7 +44,8 @@
                     "generateReport": {
                         "wizardTitle": "Generate report",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "createReport": "Generate PDF"
                         }
                     }
                 }

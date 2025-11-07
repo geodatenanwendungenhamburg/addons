@@ -3,6 +3,7 @@
         "pvObligation": {
             "name": "PV Pflicht",
             "description": "TODO",
+            "generateReportSpinner": "Der Report wird gerade erzeugt ...",
             "wizard": {
                 "buttons": {
                     "back": "voriger Schritt",
@@ -22,7 +23,7 @@
                             "introduction": "TODO: Insert introduction text"
                         }
                     },
-                    "netExcludedAreas": {
+                    "netRestrictedAreas": {
                         "wizardTitle": "Sperrfläche ergänzen",
                         "component": {
                             "introduction": "TODO: Insert introduction text"
@@ -43,7 +44,8 @@
                     "generateReport": {
                         "wizardTitle": "Report erzeugen",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "createReport": "PDF erzeugen"
                         }
                     }
                 }
