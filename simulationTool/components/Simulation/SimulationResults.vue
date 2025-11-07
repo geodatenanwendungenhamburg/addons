@@ -584,7 +584,6 @@ export default {
             });
 
             // If we're showing 'value' property and no z-coordinate exists, use a different approach
-
             if (toShowAttrKey === "value" && (z === undefined || z === null || z === "")) {
                 // Use "value" as the key instead of z-coordinate
                 propertyKey = "value";
@@ -624,7 +623,8 @@ export default {
                 style: null,
                 layers: [layer.layer],
                 filter: feature => typeof feature.get("simulationId") !== "undefined",
-                toggleCondition: singleClick
+                toggleCondition: singleClick,
+                hitTolerance: 10
             }), "select", event => this.onFeatureSelect(event, `${this.simulationIdForResults}-${this.currentOutput}`, layerSource, customZKey));
 
             geojsonFeature.forEach(feature => {
