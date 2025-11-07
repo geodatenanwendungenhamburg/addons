@@ -1,0 +1,15 @@
+{
+  "name": "pvObligation",
+  "version": "0.1.0",
+  "description": "Tool to check the photovoltaik obligation on roofs in Hamburg",
+  "title": "PV-Pflicht-Check",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/geowerkstatt-hamburg/addons.git"
+  },
+  "scripts": {},
+  "dependencies": {
+    "pdfmake": "^0.2.6"
+  }
+}

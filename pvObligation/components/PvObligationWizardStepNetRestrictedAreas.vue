@@ -2,7 +2,7 @@
 import {mapGetters} from "vuex";
 
 export default {
-    name: "PvObligationWizardStepNetExcludedAreas",
+    name: "PvObligationWizardStepNetRestrictedAreas",
     components: {},
     props: {
         // Read-only form data from all wizard step siblings
@@ -37,9 +37,9 @@ export default {
 </script>
 
 <template lang="html">
-    <div id="pvObligationWizardStepNetExcludedAreas">
+    <div id="pvObligationWizardStepNetRestrictedAreas">
         <div class="introduction">
-            {{ $t("additional:modules.pvObligation.wizard.step.netExcludedAreas.component.introduction") }}
+            {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
         </div>
     </div>
 </template>
@@ -47,7 +47,7 @@ export default {
 <style lang="scss" scoped>
     @import "~variables";
 
-    #pvObligationWizardStepNetExcludedAreas{
+    #pvObligationWizardStepNetRestrictedAreas{
     }
 </style>
 
