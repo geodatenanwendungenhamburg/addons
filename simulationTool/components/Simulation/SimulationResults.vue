@@ -695,8 +695,10 @@ export default {
          */
         onFeatureSelect (event, layerId, layerSource, customZKey) {
             const currentFeature = event.selected[0] || event.deselected[0],
-                featureCoordinateAsString = currentFeature.getGeometry().getCoordinates().toString(),
-                keyOfTableFeature = featureCoordinateAsString.split(",").slice(0, -1).join(","),
+                coordinates = currentFeature.getGeometry().getCoordinates(),
+                // 3d coordinates: take only x,y for key
+                coordinatesFor2D = coordinates.length > 2 ? coordinates.slice(0, -1) : coordinates,
+                keyOfTableFeature = coordinatesFor2D.join(","),
                 tableFeature = this.tableFeaturesCollection[layerId][keyOfTableFeature],
                 hideFeatures = Array.isArray(event.selected) && event.selected.length > 0;
 
