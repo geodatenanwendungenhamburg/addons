@@ -578,7 +578,7 @@ export default {
                 this.tableFeaturesCollection[layerId][coordinate2d] = clonedFeature;
             }
             Object.entries(feature.getProperties()).forEach(([key, value]) => {
-                if (toShowAttrKey === key) {
+                if (toShowAttrKey === key || key.startsWith(toShowAttrKey)) {
                     zValue = typeof value === "undefined" ? "---" : value;
                 }
             });
