@@ -21,7 +21,7 @@ Tool to simulate wind and noise.
 |id|ja|String||The id of datasource.|true|
 |title|ja|String||The titel of datasource.|true|
 |maxSideLength|ja|Number|450|The maximum allowed side lenght for the selected area in meters.|true|
-|inputs|yes|Object|Object|An object to set input parameter for datasources.|true|
+|inputs|yes|Object|Object|An object to set input parameter for datasources. If the input is string or boolean, an no default value has been set by the backend, a default value can be configured with the parameter `setValue`|true|
 
 #### Portalconfig.menu.tool.simulationTool.simulations
 
