@@ -11,6 +11,7 @@
  * @property {Boolean} isVisibleInMenu - if true, tool is selectable in menu (config-param)
  * @property {Boolean} deactivateGFI - flag if tool should deactivate gfi (config-param)
  * @property {Boolean} standAlonePortal - flag if tool is used in a standalone portal, then titles are removed via CSS (config-param)
+ * @property {Boolean} isCreatingReport - flag if the report is currently been generated
  */
 
 const state = {
@@ -24,9 +25,10 @@ const state = {
     icon: "bi-sun",
     isVisibleInMenu: true,
     deactivateGFI: true,
-    standAlonePortal: false
+    standAlonePortal: false,
 
     // PvObligation addon state
+    isCreatingReport: false
 };
 
 export default state;

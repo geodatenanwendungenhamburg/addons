@@ -1,4 +1,4 @@
-import {generateSimpleMutations} from "../../../src/shared/js/utils/generators";
+import {generateSimpleMutations} from "@shared/js/utils/generators";
 import state from "./statePvObligation.js";
 
 const mutations = {
