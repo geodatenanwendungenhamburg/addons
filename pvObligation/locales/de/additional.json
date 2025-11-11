@@ -15,13 +15,18 @@
                     "grossArea": {
                         "wizardTitle": "Bruttodachfläche",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "Klicken Sie in der Karte auf das gewünschte Gebäude, um die Bruttodachfläche zu ermitteln.",
+                            "grossAreaText": "Die Bruttodachfläche zum ausgewählten Gebäude beträgt: ",
+                            "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²)."
                         }
                     },
                     "netArea": {
                         "wizardTitle": "Nettodachfläche",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "netRoofAreaText": "Wir haben für Ihr Gebäude automatisch die Nettodachfläche ermittelt: ",
+                            "additionalNetAreaText": "Sie können weitere relevante Flächen hinzufügen und kommentieren, die für die Berechnung der Nettodachfläche herangezogen werden sollen.",
+                            "obligatedAreaText": "Auf Grundlage der aktuell ermittelten Nettodachfläche müssen Sie {{ obligatedArea }}m² PV installieren (30% der Nettodachfläche)."
                         }
                     },
                     "netRestrictedAreas": {
