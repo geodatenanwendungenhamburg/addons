@@ -11,8 +11,10 @@
  * @property {Boolean} isVisibleInMenu - if true, tool is selectable in menu (config-param)
  * @property {Boolean} deactivateGFI - flag if tool should deactivate gfi (config-param)
  * @property {Boolean} standAlonePortal - flag if tool is used in a standalone portal, then titles are removed via CSS (config-param)
+ * @property {Boolean} hasMouseMapInteractions - flag if tool has mouse interactions on the map (config-param)
  * @property {Boolean} isCreatingReport - flag if the report is currently been generated
- */
+ * @property {String} selectedRoofId - ID of the selected roof
+ **/
 
 const state = {
     // Masterportal state
@@ -26,9 +28,11 @@ const state = {
     isVisibleInMenu: true,
     deactivateGFI: true,
     standAlonePortal: false,
+    hasMouseMapInteractions: true,
 
     // PvObligation addon state
-    isCreatingReport: false
+    isCreatingReport: false,
+    selectedRoofId: null
 };
 
 export default state;
