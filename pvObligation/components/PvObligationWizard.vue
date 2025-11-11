@@ -90,10 +90,14 @@ export default {
     },
     methods: {
         wizardStepIsActive (componentName) {
-            return this.wizardSteps.find((step) => step.isOpen).component.name === componentName;
+            return this.wizardSteps.find((step) => step.isOpen)?.component?.name === componentName;
         },
         openWizardStep (event, index) {
             if (event.target.classList.contains("accordion-button") && !event.target.classList.contains("collapsed")) {
+                this.wizardStepIsValid(
+                    this.wizardSteps.find(item => item.isOpen)
+                );
+
                 this.wizardSteps.forEach((item) => {
                     item.isOpen = false;
                 });
@@ -102,6 +106,43 @@ export default {
 
                 this.updateWizardStepNavigationButtons();
                 this.collectFormDataFromWizardSteps();
+
+                if (this.wizardSteps.length === index + 1) {
+                    this.validateAllStepsOnFinalStep();
+                }
+            }
+        },
+        nextWizardStep () {
+            if (this.wizardStepIsValid()) {
+                for (let i = 0; i < this.wizardSteps.length; i++) {
+                    if (this.wizardSteps[i].isOpen === true) {
+                        this.wizardSteps[i].isOpen = false;
+                        this.wizardSteps[i + 1].isOpen = true;
+                        this.updateWizardStepNavigationButtons();
+                        this.collectFormDataFromWizardSteps();
+
+                        if (this.wizardSteps.length === i + 2) {
+                            this.validateAllStepsOnFinalStep();
+                        }
+
+                        break;
+                    }
+                }
+            }
+        },
+        previousWizardStep () {
+            if (this.wizardStepIsValid()) {
+                for (let i = 0; i < this.wizardSteps.length; i++) {
+                    if (this.wizardSteps[i].isOpen === true) {
+                        this.wizardSteps[i].isOpen = false;
+                        this.wizardSteps[i - 1].isOpen = true;
+
+                        this.updateWizardStepNavigationButtons();
+                        this.collectFormDataFromWizardSteps();
+
+                        break;
+                    }
+                }
             }
         },
         updateWizardStepNavigationButtons () {
@@ -113,32 +154,6 @@ export default {
                 }
             }
         },
-        nextWizardStep () {
-            for (let i = 0; i < this.wizardSteps.length; i++) {
-                if (this.wizardSteps[i].isOpen === true) {
-                    this.wizardSteps[i].isOpen = false;
-                    this.wizardSteps[i + 1].isOpen = true;
-
-                    this.updateWizardStepNavigationButtons();
-                    this.collectFormDataFromWizardSteps();
-
-                    break;
-                }
-            }
-        },
-        previousWizardStep () {
-            for (let i = 0; i < this.wizardSteps.length; i++) {
-                if (this.wizardSteps[i].isOpen === true) {
-                    this.wizardSteps[i].isOpen = false;
-                    this.wizardSteps[i - 1].isOpen = true;
-
-                    this.updateWizardStepNavigationButtons();
-                    this.collectFormDataFromWizardSteps();
-
-                    break;
-                }
-            }
-        },
         collectFormDataFromWizardSteps () {
             this.wizardSteps.forEach(step => {
                 const refArr = this.$refs[`ref${step.component.name}`],
@@ -146,6 +161,26 @@ export default {
 
                 step.componentFormData = instance?.componentFormData;
             });
+        },
+        wizardStepIsValid (selectedStep = null) {
+            const currentStep = selectedStep ?? this.wizardSteps.find(step => step.isOpen),
+                refArr = this.$refs[`ref${currentStep.component.name}`],
+                instance = Array.isArray(refArr) ? refArr[0] : refArr,
+                stepIsValid = typeof instance?.componentFormDataValidate === "function"
+                    ? instance.componentFormDataValidate()
+                    : true;
+
+            currentStep.isError = !stepIsValid;
+
+            return stepIsValid;
+        },
+        handleWizardStepError (data) {
+            const index = this.wizardSteps.findIndex(step => step.component.name === data.componentName);
+
+            this.wizardSteps[index].isError = !data.isValid;
+        },
+        validateAllStepsOnFinalStep () {
+            this.wizardSteps.forEach(step => this.wizardStepIsValid(step));
         }
     }
 };
@@ -176,6 +211,7 @@ export default {
                         :ref="`ref${step.component.name}`"
                         :wizard-steps-form-data="wizardStepsFormData"
                         :wizard-step-is-active="wizardStepIsActive(step.component.name)"
+                        @stepError="handleWizardStepError"
                     />
                 </AccordionItem>
             </div>
@@ -205,6 +241,10 @@ export default {
 
 <style lang="scss" scoped>
     @import "~variables";
+
+    :deep(.invalid-feedback) {
+        display: block;
+    }
 
     #pvObligationWizard {
         div.wizard {
