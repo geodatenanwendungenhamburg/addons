@@ -97,7 +97,7 @@ export default class OgcApiProcess {
                     }
                     enumArr.unshift(obj.default);
                 }
-                return {value: obj.default, enum: enumArr};
+                return {value: obj.default, enum: enumArr, type: "enum"};
             }
             return obj.default;
         }
