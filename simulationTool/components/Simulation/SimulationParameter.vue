@@ -1109,7 +1109,7 @@ export default {
                 if (typeof inputs[inputKey] === "undefined") {
                     inputs[inputKey] = {};
                 }
-                if (type === "enum" && inputs[inputKey][propertyKey]?.value !== undefined) {
+                if ((type === "enum" || inputs[inputKey][propertyKey]?.type === "enum") && inputs[inputKey][propertyKey]?.value !== undefined) {
                     inputs[inputKey][propertyKey].value = val;
                     return;
                 }
