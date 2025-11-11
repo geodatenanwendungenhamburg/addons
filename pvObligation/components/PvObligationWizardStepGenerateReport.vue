@@ -22,7 +22,8 @@ export default {
     data () {
         return {
             // This data is made available to all other wizard step siblings
-            componentFormData: {}
+            componentFormData: {},
+            componentFormErrors: {}
         };
     },
     computed: {
@@ -33,9 +34,7 @@ export default {
     watch: {
         wizardStepIsActive: {
             /* eslint-disable-next-line */
-            handler (isNowActive, wasActiveBefore) {
-                // console.log(`Step "${this.$options.name}" isNowActive: ${isNowActive} (wasActiveBefore: ${wasActiveBefore})`);
-            },
+            handler (isNowActive, wasActiveBefore) {},
             immediate: true
         }
     },
@@ -43,6 +42,14 @@ export default {
         ...mapActions("Modules/PvObligation", [
             "exportPDF"
         ]),
+        /**
+         * Called from PvObligationWizard.vue, see wizardStepIsValid()
+         * Validates the component form data and add validation errors.
+         * @returns {Boolean} true, if data is valid, false if invalid
+         */
+        componentFormDataValidate () {
+            return true;
+        },
         createPDF () {
             this.exportPDF({
                 author: "Beispielnutzer",
@@ -102,7 +109,10 @@ export default {
 <style lang="scss" scoped>
     @import "~variables";
 
-    #pvObligationWizardStepGenerateReport {
+    #pvObligationWizardStepGenerateReport{
+        div.introduction {
+            margin-bottom: 1rem;
+        }
     }
 </style>
 
