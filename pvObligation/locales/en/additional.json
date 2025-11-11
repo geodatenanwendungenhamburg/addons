@@ -15,13 +15,18 @@
                     "grossArea": {
                         "wizardTitle": "Gross roof area",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "Click on the desired building in the map to determine the gross roof area.",
+                            "grossAreaText": "The gross roof area of the selected building is: ",
+                            "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²)."
                         }
                     },
                     "netArea": {
                         "wizardTitle": "Net roof area",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "netRoofAreaText": "The selected net roof area is: ",
+                            "additionalNetAreaText": "You can add and comment on other relevant areas to be considered for the calculation of the net roof area.",
+                            "obligatedAreaText": "Based on the currently determined net roof area, you have to install {{ obligatedArea }}m² of PV (30% of the net roof area)."
                         }
                     },
                     "netRestrictedAreas": {

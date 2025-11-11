@@ -1,3 +1,8 @@
+
+import GeoJSON from "ol/format/GeoJSON";
+import dissolve from "@turf/dissolve";
+import {featureCollection} from "@turf/helpers";
+
 /* eslint-disable one-var */
 import pdfMake from "pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
@@ -229,5 +234,71 @@ export default {
             height: cropHeight,
             scale: rootGetters["Maps/scale"]
         };
+    },
+    /**
+     * Dissolves roof features with the same roofId from a given layer, calculates the total roof area,
+     * and adds the dissolved feature(s) to the outlineLayer.
+     *
+     * - Finds all features in the source layer with the specified roofId.
+     * - Calculates the sum of the "dachfl_3d" property for these features.
+     * - Dissolves overlapping polygons using Turf.js.
+     * - Adds the dissolved feature(s) to the outlineLayer's source.
+     *
+     * @param {Object} _ - Vuex context (unused).
+     * @param {Object} payload - The payload containing required parameters.
+     * @param {string|number} payload.roofId - The ID of the roof to dissolve features for.
+     * @param {ol.layer.Vector} payload.outlineLayer - The OpenLayers vector layer to add dissolved features to.
+     * @param {string} payload.layerName - The name of the source layer containing roof features.
+     * @returns {number} The total calculated roof area (sum of "dachfl_3d" property).
+     */
+    dissolveRoofFeaturesAndCalculateArea (_, payload) {
+        const {roofId, outlineLayer, layerName} = payload,
+            geojsonFeatures = [], // turf requires array of geojson features
+            sourceLayer = mapCollection.getMap("2D") ? mapCollection.getMap("2D").getLayers().getArray().find(layer => layer.get("name") === layerName) : undefined,
+            source = sourceLayer ? sourceLayer.getSource() : null,
+            allFeatures = source ? source.getFeatures() : [],
+            sameRoofFeatures = allFeatures.filter(feature => roofId && feature.get("gebaeude_id") === roofId),
+            format = new GeoJSON(),
+            olSource = outlineLayer.getSource();
+
+        let roofArea = 0;
+
+        sameRoofFeatures.forEach(feature => {
+            const geometry = feature.getGeometry();
+
+            roofArea += parseFloat(feature.get("dachfl_3d")) || 0;
+
+            if (geometry.getType() === "MultiPolygon") {
+                // Split MultiPolygon into Polygons as this is required by turf.dissolve
+                geometry.getPolygons().forEach(polygon => {
+                    const polyFeature = feature.clone();
+
+                    polyFeature.setGeometry(polygon.clone());
+                    geojsonFeatures.push(format.writeFeatureObject(polyFeature));
+                });
+            }
+            else if (geometry.getType() === "Polygon") {
+                const polyFeature = feature.clone();
+
+                polyFeature.setGeometry(feature.getGeometry().clone());
+                geojsonFeatures.push(format.writeFeatureObject(polyFeature));
+            }
+        });
+
+        olSource.clear();
+
+        if (geojsonFeatures.length > 0) {
+            const features = featureCollection(geojsonFeatures),
+                dissolvedFeatureGeoJson = dissolve(features);
+
+            dissolvedFeatureGeoJson.features.forEach(feature => {
+                const dissolvedFeature = format.readFeature(feature);
+
+                olSource.addFeature(dissolvedFeature);
+            });
+        }
+
+        return roofArea;
     }
+
 };
