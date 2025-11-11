@@ -32,7 +32,17 @@
                     "personalInformation": {
                         "wizardTitle": "Persönliche Daten",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "form": {
+                                "propertyOwnerFullName": "Vor- und Nachname (Eigentümer:in)",
+                                "street": "Straße",
+                                "postalCode": "Postleitzahl",
+                                "city": "Stadt",
+                                "email": "E-Mail",
+                                "phoneNumber": "Telefonnummer",
+                                "reportCreatedBy": "Bericht erstellt durch (falls abweichend von Eigentümer:in)"
+                            }
                         }
                     },
                     "personalNotes": {
@@ -49,6 +59,10 @@
                         }
                     }
                 }
+            },
+            "formErrors": {
+                "genericMissingValue": "Fehlende Eingabe",
+                "genericInvalidValue": "Fehlerhafte Eingabe"
             }
         }
     }
