@@ -48,4 +48,52 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
         expect(wrapper.exists()).to.be.true;
         expect(wrapper.attributes().id).equals("pvObligationWizardStepGenerateReport");
     });
+
+    it("returns false if any wizard step is invalid", async () => {
+        const wrapper = shallowMount(Component, {
+            propsData: {
+                wizardStepsFormData: {
+                    "component_1": {
+                        isValid: true
+                    },
+                    "component_2": {
+                        isValid: false
+                    },
+                    "component_3": {
+                        isValid: true
+                    }
+                },
+                wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
+            }
+        });
+
+        expect(wrapper.vm.allWizardStepsValid).to.be.false;
+    });
+
+    it("returns true if every wizard step is valid", async () => {
+        const wrapper = shallowMount(Component, {
+            propsData: {
+                wizardStepsFormData: {
+                    "component_1": {
+                        isValid: true
+                    },
+                    "component_2": {
+                        isValid: true
+                    },
+                    "component_3": {
+                        isValid: true
+                    }
+                },
+                wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
+            }
+        });
+
+        expect(wrapper.vm.allWizardStepsValid).to.be.true;
+    });
 });

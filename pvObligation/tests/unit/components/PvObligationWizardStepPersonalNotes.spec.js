@@ -5,14 +5,18 @@ import Component from "../../../components/PvObligationWizardStepPersonalNotes.v
 config.global.mocks.$t = key => key;
 
 describe("addons/pvObligation/components/PvObligationWizardStepPersonalNotes.vue", () => {
-    it("could load the component and root HTML element contains correct ID", async () => {
-        const wrapper = shallowMount(Component, {
+    let wrapper;
+
+    beforeEach(() => {
+        wrapper = shallowMount(Component, {
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
             }
         });
+    });
 
+    it("could load the component and root HTML element contains correct ID", async () => {
         expect(wrapper.exists()).to.be.true;
         expect(wrapper.attributes().id).equals("pvObligationWizardStepPersonalNotes");
     });
