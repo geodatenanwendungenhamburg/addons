@@ -29,7 +29,11 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport"
-        ])
+        ]),
+        allWizardStepsValid () {
+            return Object.keys(this.wizardStepsFormData)
+                .every(stepComponentName => this.wizardStepsFormData[stepComponentName].isValid);
+        }
     },
     watch: {
         wizardStepIsActive: {
@@ -48,7 +52,7 @@ export default {
          * @returns {Boolean} true, if data is valid, false if invalid
          */
         componentFormDataValidate () {
-            return true;
+            return !Object.values(this.componentFormErrors).some(Boolean);
         },
         createPDF () {
             this.exportPDF({
@@ -94,14 +98,23 @@ export default {
 <template lang="html">
     <div id="pvObligationWizardStepGenerateReport">
         <div class="introduction">
-            <p> {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.introduction") }} </p>
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.introduction") }}
+            </p>
+        </div>
+
+        <div
+            v-if="!allWizardStepsValid"
+            class="error"
+        >
+            {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.generalError") }}
         </div>
 
         <FlatButton
             :text="$t('additional:modules.pvObligation.wizard.step.generateReport.component.createReport')"
             :interaction="() => createPDF()"
             icon="bi bi-box"
-            :disabled="isCreatingReport"
+            :disabled="!allWizardStepsValid || isCreatingReport"
         />
     </div>
 </template>
@@ -112,6 +125,13 @@ export default {
     #pvObligationWizardStepGenerateReport{
         div.introduction {
             margin-bottom: 1rem;
+        }
+
+        div.error {
+            color: $light_red;
+            font-size: 0.9rem;
+            display: block;
+            margin: -0.5rem 0 1rem 0.25rem;
         }
     }
 </style>

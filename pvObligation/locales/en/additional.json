@@ -49,14 +49,19 @@
                     "personalNotes": {
                         "wizardTitle": "Personal notes",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "form": {
+                                "personalNote": "Add explanations or comments here..."
+                            }
                         }
                     },
                     "generateReport": {
                         "wizardTitle": "Generate report",
                         "component": {
                             "introduction": "TODO: Insert introduction text",
-                            "createReport": "Generate PDF"
+                            "createReport": "Generate PDF",
+                            "generalError": "Error: Not all required fields are filled in. Please complete the missing information to generate the report."
                         }
                     }
                 }
