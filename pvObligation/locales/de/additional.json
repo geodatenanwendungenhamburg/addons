@@ -9,7 +9,8 @@
                     "back": "voriger Schritt",
                     "next": "nächster Schritt"
                 },
-                "introduction": "TODO: Insert introduction text",
+                "introduction": "TODO: Insert introduction text.",
+                "introductionLinkPrivacyPolicy": "Datenschutzerklärung",
                 "step": {
                     "grossArea": {
                         "wizardTitle": "Bruttodachfläche",

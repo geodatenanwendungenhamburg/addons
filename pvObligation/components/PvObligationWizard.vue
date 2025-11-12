@@ -191,6 +191,13 @@ export default {
         <div class="wizard">
             <div class="introduction">
                 {{ $t("additional:modules.pvObligation.wizard.introduction") }}
+
+                <a
+                    href="https://geodienste.hamburg.de/lgv-config/about-files/datenschutzerklaerung.pdf"
+                    target="_blank"
+                >
+                    {{ $t("additional:modules.pvObligation.wizard.introductionLinkPrivacyPolicy") }}
+                </a>
             </div>
 
             <div class="steps">
