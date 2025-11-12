@@ -49,14 +49,19 @@
                     "personalNotes": {
                         "wizardTitle": "eigene Erläuterungen",
                         "component": {
-                            "introduction": "TODO: Insert introduction text"
+                            "introduction": "TODO: Insert introduction text",
+                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "form": {
+                                "personalNote": "Erläuterungen oder Anmerkungen hier eintragen..."
+                            }
                         }
                     },
                     "generateReport": {
                         "wizardTitle": "Report erzeugen",
                         "component": {
                             "introduction": "TODO: Insert introduction text",
-                            "createReport": "PDF erzeugen"
+                            "createReport": "PDF erzeugen",
+                            "generalError": "Fehler: Nicht alle Pflichtfelder sind ausgefüllt. Bitte ergänzen Sie die fehlenden Informationen, um den Report zu erzeugen."
                         }
                     }
                 }

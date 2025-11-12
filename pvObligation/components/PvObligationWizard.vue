@@ -29,44 +29,44 @@ export default {
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle"),
                     isOpen: true,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepGrossArea),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 },
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.netArea.wizardTitle"),
                     isOpen: false,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepNetArea),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 },
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.wizardTitle"),
                     isOpen: false,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepNetRestrictedAreas),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 },
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.personalInformation.wizardTitle"),
                     isOpen: false,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepPersonalInformation),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 },
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.personalNotes.wizardTitle"),
                     isOpen: false,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepPersonalNotes),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 },
                 {
                     title: this.$t("additional:modules.pvObligation.wizard.step.generateReport.wizardTitle"),
                     isOpen: false,
-                    isError: false,
                     component: markRaw(PvObligationWizardStepGenerateReport),
-                    componentFormData: null
+                    componentFormData: null,
+                    componentFormDataIsValid: null
                 }
             ],
             showNextWizardStepButton: true,
@@ -79,7 +79,10 @@ export default {
             const wizardStepsFormData = {};
 
             this.wizardSteps.forEach((step) => {
-                wizardStepsFormData[step.component.name] = step.componentFormData;
+                wizardStepsFormData[step.component.name] = {
+                    isValid: step.componentFormDataIsValid,
+                    formData: step.componentFormData
+                };
             });
 
             return wizardStepsFormData;
@@ -170,14 +173,14 @@ export default {
                     ? instance.componentFormDataValidate()
                     : true;
 
-            currentStep.isError = !stepIsValid;
+            currentStep.componentFormDataIsValid = stepIsValid;
 
             return stepIsValid;
         },
         handleWizardStepError (data) {
             const index = this.wizardSteps.findIndex(step => step.component.name === data.componentName);
 
-            this.wizardSteps[index].isError = !data.isValid;
+            this.wizardSteps[index].componentFormDataIsValid = data.isValid;
         },
         validateAllStepsOnFinalStep () {
             this.wizardSteps.forEach(step => this.wizardStepIsValid(step));
@@ -207,9 +210,9 @@ export default {
                     :key="index"
                     :title="step.title"
                     :is-open="step.isOpen"
-                    :icon="step.isError ? 'bi-exclamation-triangle-fill' : ''"
+                    :icon="step.componentFormDataIsValid === false ? 'bi-exclamation-triangle-fill' : ''"
                     :coloured-header="true"
-                    :class="step.isError ? 'error' : ''"
+                    :class="step.componentFormDataIsValid === false ? 'error' : ''"
                     @click="openWizardStep($event, index)"
                 >
                     <component

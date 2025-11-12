@@ -39,7 +39,7 @@ export default {
          * @returns {Boolean} true, if data is valid, false if invalid
          */
         componentFormDataValidate () {
-            return true;
+            return !Object.values(this.componentFormErrors).some(Boolean);
         }
     }
 };
