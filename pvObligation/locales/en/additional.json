@@ -9,7 +9,8 @@
                     "back": "previous step",
                     "next": "next step"
                 },
-                "introduction": "TODO: Insert introduction text",
+                "introduction": "TODO: Insert introduction text.",
+                "introductionLinkPrivacyPolicy": "Privacy Policy",
                 "step": {
                     "grossArea": {
                         "wizardTitle": "Gross roof area",
