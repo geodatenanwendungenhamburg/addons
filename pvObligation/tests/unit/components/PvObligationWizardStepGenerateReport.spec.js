@@ -13,7 +13,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
             Modules: {
                 namespaced: true,
                 modules: {
-                    PVObligation: {
+                    PvObligation: {
                         namespaced: true,
                         getters: {
                             isCreatingReport () {

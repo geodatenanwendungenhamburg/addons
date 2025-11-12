@@ -12,7 +12,7 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
             Modules: {
                 namespaced: true,
                 modules: {
-                    PVObligation: {
+                    PvObligation: {
                         namespaced: true,
                         getters: {
                             isCreatingReport () {
