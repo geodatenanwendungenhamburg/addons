@@ -40,6 +40,10 @@ export default {
 
     #pvObligation{
         position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
 
         div.filterSpinner {
             position: absolute;
