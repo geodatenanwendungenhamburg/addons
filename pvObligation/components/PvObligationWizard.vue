@@ -232,6 +232,7 @@ export default {
                     :aria-label="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     :text="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     icon="bi-backspace"
+                    :secondary="true"
                     @click="previousWizardStep()"
                 />
 
@@ -242,6 +243,7 @@ export default {
                     :aria-label="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     :text="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     icon="bi-backspace-reverse"
+                    :secondary="true"
                     @click="nextWizardStep()"
                 />
             </div>
@@ -257,12 +259,14 @@ export default {
     }
 
     #pvObligationWizard {
+        height: 100%;
+
         div.wizard {
+            height: 100%;
+            overflow: hidden;
+            padding-top: 1rem;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            flex: 1;
-            overflow: hidden;
 
             div.introduction {
                 margin-bottom: 0.5rem;
@@ -271,9 +275,10 @@ export default {
             div.steps {
                 display: flex;
                 flex-direction: column;
-                justify-content: left;
                 flex: 1;
+                justify-content: left;
                 overflow: auto;
+                height: 100%;
 
                 :deep(.error button.accordion-button) {
                     color: $light_red;
@@ -286,6 +291,20 @@ export default {
                 justify-content: space-between;
                 width: 100%;
                 padding-top: 1rem;
+                position: sticky;
+                bottom: 0;
+                background: $white;
+                z-index: 10;
+                box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+
+                button.flat-button{
+                    // !important is required because the shared FlatButton component uses .mb-3 with !important
+                    margin-bottom: 0 !important;
+
+                    &:hover {
+                        background-color: $light_grey;
+                    }
+                }
             }
         }
     }
