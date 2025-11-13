@@ -1,39 +1,30 @@
 <script>
+import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import mapCollection from "@core/maps/js/mapCollection";
 import {mapActions, mapGetters} from "vuex";
 import {Style, Stroke, Fill} from "ol/style";
 
 export default {
     name: "PvObligationWizardStepNetArea",
-    components: {},
-    props: {
-        // Read-only form data from all wizard step siblings
-        wizardStepsFormData: {
-            type: Object,
-            required: true
-        },
-        wizardStepIsActive: {
-            type: Boolean,
-            required: true
-        }
-    },
+    extends: PvObligationWizardStepScriptExtends,
     data () {
         return {
-            // This data is made available to all other wizard step siblings
+            /** @override */
             componentFormData: {
                 netRoofArea: null
-            },
-            componentFormErrors: {}
+            }
         };
     },
     computed: {
-        ...mapGetters("Modules/PvObligation", ["selectedRoofId"])
+        ...mapGetters("Modules/PvObligation", [
+            "selectedRoofId"
+        ])
     },
     watch: {
+        /** @override */
         wizardStepIsActive: {
             // eslint-disable-next-line no-unused-vars
             handler (isNowActive, wasActiveBefore) {
-                // console.log(`Step "${this.$options.name}" isNowActive: ${isNowActive} (wasActiveBefore: ${wasActiveBefore})`);
                 if (isNowActive) {
                     this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
 
@@ -50,8 +41,12 @@ export default {
         }
     },
     methods: {
-        ...mapActions("Modules/PvObligation", ["dissolveRoofFeaturesAndCalculateArea"]),
-        ...mapActions("Maps", ["addNewLayerIfNotExists"]),
+        ...mapActions("Modules/PvObligation", [
+            "dissolveRoofFeaturesAndCalculateArea"
+        ]),
+        ...mapActions("Maps", [
+            "addNewLayerIfNotExists"
+        ]),
         async defineNetArea (payload) {
             const roofId = this.selectedRoofId,
                 outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
@@ -63,14 +58,6 @@ export default {
 
             this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
             this.obligatedArea = Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10;
-        },
-        /**
-         * Called from PvObligationWizard.vue, see wizardStepIsValid()
-         * Validates the component form data and add validation errors.
-         * @returns {Boolean} true, if data is valid, false if invalid
-         */
-        componentFormDataValidate () {
-            return !Object.values(this.componentFormErrors).some(Boolean);
         }
     }
 };

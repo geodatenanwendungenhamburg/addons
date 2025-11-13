@@ -1,59 +1,23 @@
 <script>
+import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import {mapGetters, mapActions} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
-
 
 export default {
     name: "PvObligationWizardStepGenerateReport",
     components: {
         FlatButton
     },
-    props: {
-        // Read-only form data from all wizard step siblings
-        wizardStepsFormData: {
-            type: Object,
-            required: true
-        },
-        wizardStepIsActive: {
-            type: Boolean,
-            required: true
-        }
-    },
-    data () {
-        return {
-            // This data is made available to all other wizard step siblings
-            componentFormData: {},
-            componentFormErrors: {}
-        };
-    },
+    extends: PvObligationWizardStepScriptExtends,
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport"
-        ]),
-        allWizardStepsValid () {
-            return Object.keys(this.wizardStepsFormData)
-                .every(stepComponentName => this.wizardStepsFormData[stepComponentName].isValid);
-        }
-    },
-    watch: {
-        wizardStepIsActive: {
-            /* eslint-disable-next-line */
-            handler (isNowActive, wasActiveBefore) {},
-            immediate: true
-        }
+        ])
     },
     methods: {
         ...mapActions("Modules/PvObligation", [
             "exportPDF"
         ]),
-        /**
-         * Called from PvObligationWizard.vue, see wizardStepIsValid()
-         * Validates the component form data and add validation errors.
-         * @returns {Boolean} true, if data is valid, false if invalid
-         */
-        componentFormDataValidate () {
-            return !Object.values(this.componentFormErrors).some(Boolean);
-        },
         createPDF () {
             this.exportPDF({
                 author: "Beispielnutzer",
