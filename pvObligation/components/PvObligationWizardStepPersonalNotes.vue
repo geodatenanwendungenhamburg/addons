@@ -1,48 +1,16 @@
 <script>
-import {mapGetters} from "vuex";
+import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 
 export default {
     name: "PvObligationWizardStepPersonalNotes",
-    components: {},
-    props: {
-        // Read-only form data from all wizard step siblings
-        wizardStepsFormData: {
-            type: Object,
-            required: true
-        },
-        wizardStepIsActive: {
-            type: Boolean,
-            required: true
-        }
-    },
+    extends: PvObligationWizardStepScriptExtends,
     data () {
         return {
-            // This data is made available to all other wizard step siblings
+            /** @override */
             componentFormData: {
                 personalNote: ""
-            },
-            componentFormErrors: {}
+            }
         };
-    },
-    computed: {
-        ...mapGetters("Modules/PvObligation", [])
-    },
-    watch: {
-        wizardStepIsActive: {
-            /* eslint-disable-next-line */
-            handler (isNowActive, wasActiveBefore) {},
-            immediate: true
-        }
-    },
-    methods: {
-        /**
-         * Called from PvObligationWizard.vue, see wizardStepIsValid()
-         * Validates the component form data and add validation errors.
-         * @returns {Boolean} true, if data is valid, false if invalid
-         */
-        componentFormDataValidate () {
-            return !Object.values(this.componentFormErrors).some(Boolean);
-        }
     }
 };
 </script>
