@@ -1,28 +1,19 @@
 <script>
+import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import {mapActions, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
 
 export default {
     name: "PvObligationWizardStepGrossArea",
-    components: {},
-    props: {
-        // Read-only form data from all wizard step siblings
-        wizardStepsFormData: {
-            type: Object,
-            required: true
-        },
-        wizardStepIsActive: {
-            type: Boolean,
-            required: true
-        }
-    },
+    extends: PvObligationWizardStepScriptExtends,
     data () {
         return {
-            // This data is made available to all other wizard step siblings
+            /** @override */
             componentFormData: {
                 grossRoofArea: null
             },
+            /** @override */
             componentFormErrors: {
                 grossRoofArea: null
             },
@@ -30,6 +21,7 @@ export default {
         };
     },
     watch: {
+        /** @override */
         wizardStepIsActive: {
             handler (isNowActive, wasActiveBefore) {
                 if (wasActiveBefore) {
@@ -100,11 +92,7 @@ export default {
                 this.componentFormData.grossRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "Dachflächen"}) * 10) / 10;
             });
         },
-        /**
-         * Called from PvObligationWizard.vue, see wizardStepIsValid()
-         * Validates the component form data and add validation errors.
-         * @returns {Boolean} true, if data is valid, false if invalid
-         */
+        /** @override */
         componentFormDataValidate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue");
 
