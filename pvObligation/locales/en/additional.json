@@ -74,6 +74,35 @@
             "formErrors": {
                 "genericMissingValue": "Missing input",
                 "genericInvalidValue": "Invalid input"
+            },
+            "components": {
+                "restrictionList": {
+                    "formHeaderCreate": "Add relevant area",
+                    "formHeaderCreateDescription": "Use one of the drawing tools below to mark a relevant area on your roof and add a note. After saving, you can record more areas or edit them in the list.",
+                    "listHeader": "List of your recorded areas",
+                    "buttonAdd": "Add relevant areas",
+                    "buttonDelete": "remove",
+                    "buttonEdit": "Edit",
+                    "buttonSave": "Save",
+                    "buttonCancel": "Cancel",
+                    "textareaPlaceholderNotes": "Add explanations or comments here...",
+                    "listEmpty": "No relevant areas have been recorded on the map yet.",
+                    "numberExplaination": "The identifier ({{ id }}) corresponds to the area marked on the map with the same ID.",
+                    "selectDrawTool": "Select draw tool:",
+                    "drawTypes": {
+                        "polygon": "Polygon",
+                        "rectangle": "Rechteck",
+                        "circle": "Circle"
+                    },
+                    "helpFormDraw": {
+                        "hint": "Drawing on the map:",
+                        "text": "To add a new relevant area, draw it directly on your roof area in the map. You can choose from rectangle, circle, and polygon shapes. When drawing a polygon, place the desired corner points one after another and finish the input with a double click."
+                    },
+                    "helpFormDrawModify": {
+                        "hint": "Edit drawings on the map:",
+                        "text": "You can modify the drawings you created directly on the map using the mouse."
+                    }
+                }
             }
         }
     }
