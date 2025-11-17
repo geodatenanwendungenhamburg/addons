@@ -3,15 +3,20 @@ import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptE
 import mapCollection from "@core/maps/js/mapCollection";
 import {mapActions, mapGetters} from "vuex";
 import {Style, Stroke, Fill} from "ol/style";
+import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 
 export default {
     name: "PvObligationWizardStepNetArea",
+    components: {
+        PvObligationRestrictionList
+    },
     extends: PvObligationWizardStepScriptExtends,
     data () {
         return {
             /** @override */
             componentFormData: {
-                netRoofArea: null
+                netRoofArea: null,
+                restrictedListItems: []
             }
         };
     },
@@ -58,6 +63,9 @@ export default {
 
             this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
             this.obligatedArea = Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10;
+        },
+        onListItems (listItems) {
+            this.componentFormData.restrictedListItems = listItems;
         }
     }
 };
@@ -66,29 +74,28 @@ export default {
 <template lang="html">
     <div id="pvObligationWizardStepNetArea">
         <div v-if="componentFormData.netRoofArea !== null">
-            <p
-                class="netRoofAreaText"
-            >
+            <p class="netRoofAreaText">
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {netRoofArea: componentFormData.netRoofArea, obligatedArea: obligatedArea}) }}
             </p>
 
-            <strong
-                class="netRoofAreaValue"
-            >
+            <strong class="netRoofAreaValue">
                 {{ componentFormData.netRoofArea }} m²
             </strong>
 
-            <p
-                class="netRoofAreaText"
-            >
+            <p class="netRoofAreaText">
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
+            </p>
+
+            <p class="netRoofAreaText">
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
             </p>
 
-            <p
-                class="netRoofAreaText"
-            >
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
-            </p>
+            <PvObligationRestrictionList
+                class="restrictionList"
+                :is-disabled="false"
+                :index-prefix="'N'"
+                @list-items="onListItems"
+            />
         </div>
     </div>
 </template>
@@ -105,6 +112,10 @@ export default {
             display: flex;
             justify-content: center;
             font-size: 1.25rem;
+        }
+
+        div.restrictionList {
+            margin-top: 1rem;
         }
     }
 </style>

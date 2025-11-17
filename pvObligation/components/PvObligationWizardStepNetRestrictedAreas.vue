@@ -1,9 +1,26 @@
 <script>
+import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 
 export default {
     name: "PvObligationWizardStepNetRestrictedAreas",
-    extends: PvObligationWizardStepScriptExtends
+    components: {
+        PvObligationRestrictionList
+    },
+    extends: PvObligationWizardStepScriptExtends,
+    data () {
+        return {
+            /** @override */
+            componentFormData: {
+                restrictedListItems: []
+            }
+        };
+    },
+    methods: {
+        onListItems (listItems) {
+            this.componentFormData.restrictedListItems = listItems;
+        }
+    }
 };
 </script>
 
@@ -12,6 +29,13 @@ export default {
         <div class="introduction">
             {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
         </div>
+
+        <PvObligationRestrictionList
+            class="restrictionList"
+            :is-disabled="false"
+            :index-prefix="'S'"
+            @list-items="onListItems"
+        />
     </div>
 </template>
 
