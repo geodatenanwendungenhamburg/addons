@@ -74,6 +74,35 @@
             "formErrors": {
                 "genericMissingValue": "Fehlende Eingabe",
                 "genericInvalidValue": "Fehlerhafte Eingabe"
+            },
+            "components": {
+                "restrictionList": {
+                    "formHeaderCreate": "Relevante Fläche hinzufügen",
+                    "formHeaderCreateDescription": "Zeichnen Sie mit einem der unten auswählbaren Zeichenwerkzeugen einen relevanten Bereich auf Ihrem Dach und fügen Sie eine Anmerkung hinzu. Nach dem Speichern können Sie weitere Bereiche erfassen oder diese in der Liste bearbeiten.",
+                    "listHeader": "Liste Ihrer erfassten Flächen",
+                    "buttonAdd": "relevante Flächen hinzufügen",
+                    "buttonDelete": "Entfernen",
+                    "buttonEdit": "Bearbeiten",
+                    "buttonSave": "Speichern",
+                    "buttonCancel": "Abbrechen",
+                    "textareaPlaceholderNotes": "Erläuterungen oder Anmerkungen hier eintragen...",
+                    "listEmpty": "Es wurde noch keine relevante Flächen in der Karte erfasst.",
+                    "numberExplaination": "Der Bezeichner ({{ id }}) entspricht der in der Karte eingezeichneten Fläche mit derselben Kennung.",
+                    "selectDrawTool": "Zeichenwerkzeug wählen:",
+                    "drawTypes": {
+                        "polygon": "Polygon",
+                        "rectangle": "Rechteck",
+                        "circle": "Kreis"
+                    },
+                    "helpFormDrawCreate": {
+                        "hint": "Zeichnen in der Karte:",
+                        "text": "Um eine neue relevante Fläche hinzuzufügen, zeichnen Sie diese direkt auf Ihrer Dachfläche in der Karte. Ihnen stehen die Formen Rechteck, Kreis und Polygon zur Verfügung. Beim Zeichnen eines Polygons setzen Sie nacheinander die gewünschten Eckpunkte und schließen die Eingabe mit einem Doppelklick ab."
+                    },
+                    "helpFormDrawModify": {
+                        "hint": "Zeichnungen auf der Karte bearbeiten:",
+                        "text": "Sie können Ihre erstellten Zeichnungen direkt auf der Karte mit der Maus verändern."
+                    }
+                }
             }
         }
     }
