@@ -16,6 +16,7 @@
                         "wizardTitle": "Gross roof area",
                         "component": {
                             "introduction": "Click on the desired building in the map to determine the gross roof area.",
+                            "hintSearch": "Tip: Use the search to find and display the building more quickly.",
                             "grossAreaText": "The gross roof area of the selected building is: ",
                             "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²)."
                         }
@@ -23,6 +24,8 @@
                     "netArea": {
                         "wizardTitle": "Net roof area",
                         "component": {
+                            "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
+                            "missingStepGrossAreaMessage": "Afterwards, the initial net roof area will be displayed here, and you can, if necessary, draw areas that should additionally be excluded.",
                             "introduction": "TODO: Insert introduction text",
                             "netRoofAreaText": "The selected net roof area is: ",
                             "additionalNetAreaText": "You can add and comment on other relevant areas to be considered for the calculation of the net roof area.",
@@ -32,6 +35,8 @@
                     "netRestrictedAreas": {
                         "wizardTitle": "Add excluded areas",
                         "component": {
+                            "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
+                            "missingStepGrossAreaMessage": "Afterwards, you can, if necessary, draw areas here that you want to designate as restricted areas.",
                             "introduction": "TODO: Insert introduction text"
                         }
                     },
@@ -86,7 +91,6 @@
                     "buttonSave": "Save",
                     "buttonCancel": "Cancel",
                     "textareaPlaceholderNotes": "Add explanations or comments here...",
-                    "listEmpty": "No relevant areas have been recorded on the map yet.",
                     "numberExplaination": "The identifier ({{ id }}) corresponds to the area marked on the map with the same ID.",
                     "selectDrawTool": "Select draw tool:",
                     "drawTypes": {

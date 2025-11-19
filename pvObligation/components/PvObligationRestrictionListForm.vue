@@ -237,7 +237,7 @@ export default {
 
         div.actions {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             margin-top: 1rem;
 
             button:hover {

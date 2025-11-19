@@ -156,10 +156,6 @@ export default {
                 </template>
             </div>
         </div>
-
-        <div v-if="!listItems.length && !itemSelectedCreate">
-            {{ $t("additional:modules.pvObligation.components.restrictionList.listEmpty") }}
-        </div>
     </div>
 </template>
 
