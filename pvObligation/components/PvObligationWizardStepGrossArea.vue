@@ -43,7 +43,10 @@ export default {
                             return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
                         });
 
-                    netAreaLayer.setVisible(false);
+                    if (netAreaLayer) {
+                        netAreaLayer.setVisible(false);
+                    }
+
                     grossAreaLayer.setVisible(true);
                 }
             },
@@ -108,9 +111,13 @@ export default {
 
 <template lang="html">
     <div id="pvObligationWizardStepGrossArea">
-        <div class="introduction">
+        <p>
             {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.introduction") }}
-        </div>
+        </p>
+
+        <p v-if="!componentFormData.grossRoofArea">
+            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.hintSearch") }}
+        </p>
 
         <p
             v-if="componentFormData.grossRoofArea !== null"
@@ -139,9 +146,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepGrossArea {
-        p.grossRoofAreaText {
-            margin: 0.5rem 0;
-        }
+        margin: 1rem 0;
 
         strong.grossRoofAreaValue {
             display: flex;
@@ -151,11 +156,8 @@ export default {
 
         p.noOblicagionText {
             border: 0.125rem dotted grey;
-            padding: 0.5rem;
-        }
-
-        div.introduction {
-            margin-bottom: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
         }
     }
 </style>

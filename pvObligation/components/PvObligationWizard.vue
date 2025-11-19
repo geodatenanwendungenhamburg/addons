@@ -192,7 +192,7 @@ export default {
 <template lang="html">
     <div id="pvObligationWizard">
         <div class="wizard">
-            <div class="introduction">
+            <p>
                 {{ $t("additional:modules.pvObligation.wizard.introduction") }}
 
                 <a
@@ -201,7 +201,7 @@ export default {
                 >
                     {{ $t("additional:modules.pvObligation.wizard.introductionLinkPrivacyPolicy") }}
                 </a>
-            </div>
+            </p>
 
             <div class="steps">
                 <AccordionItem
@@ -267,10 +267,6 @@ export default {
             padding-top: 1rem;
             display: flex;
             flex-direction: column;
-
-            div.introduction {
-                margin-bottom: 0.5rem;
-            }
 
             div.steps {
                 display: flex;

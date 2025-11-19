@@ -8,7 +8,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
     it("could load the component and root HTML element contains correct ID", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
-                wizardStepsFormData: {},
+                wizardStepsFormData: {
+                    PvObligationWizardStepGrossArea: {
+                        isValid: true
+                    }
+                },
                 wizardStepIsActive: true
             }
         });
@@ -20,7 +24,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
     it("does not render net roof area texts when netRoofArea is null", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
-                wizardStepsFormData: {},
+                wizardStepsFormData: {
+                    PvObligationWizardStepGrossArea: {
+                        isValid: false
+                    }
+                },
                 wizardStepIsActive: true
             }
         });
@@ -31,7 +39,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
     it("renders all net roof area paragraphs when netRoofArea is set", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
-                wizardStepsFormData: {},
+                wizardStepsFormData: {
+                    PvObligationWizardStepGrossArea: {
+                        isValid: true
+                    }
+                },
                 wizardStepIsActive: true
             }
         });
@@ -52,7 +64,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
     it("renders correct obligatedArea rounding", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
-                wizardStepsFormData: {},
+                wizardStepsFormData: {
+                    PvObligationWizardStepGrossArea: {
+                        isValid: true
+                    }
+                },
                 wizardStepIsActive: true
             }
         });
