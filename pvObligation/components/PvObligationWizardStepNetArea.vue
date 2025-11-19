@@ -35,8 +35,8 @@ export default {
                     if (this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
                         this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
 
-                        const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(layer => {
-                            return layer.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
+                        const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(l => {
+                            return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
                         });
 
                         if (layer) {
