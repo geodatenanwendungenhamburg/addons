@@ -26,16 +26,28 @@ export default {
 
 <template lang="html">
     <div id="pvObligationWizardStepNetRestrictedAreas">
-        <div class="introduction">
-            {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
+        <div v-if="!wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid">
+            <p class="error">
+                {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.missingStepGrossAreaError") }}
+            </p>
+
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.missingStepGrossAreaMessage") }}
+            </p>
         </div>
 
-        <PvObligationRestrictionList
-            class="restrictionList"
-            :is-disabled="false"
-            :index-prefix="'S'"
-            @list-items="onListItems"
-        />
+        <div v-else>
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
+            </p>
+
+            <PvObligationRestrictionList
+                class="restrictionList"
+                :is-disabled="false"
+                index-prefix="S"
+                @list-items="onListItems"
+            />
+        </div>
     </div>
 </template>
 
@@ -43,8 +55,10 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepNetRestrictedAreas{
-        div.introduction {
-            margin-bottom: 1rem;
+        margin: 1rem 0;
+
+        p.error {
+            color: $light_red;
         }
     }
 </style>

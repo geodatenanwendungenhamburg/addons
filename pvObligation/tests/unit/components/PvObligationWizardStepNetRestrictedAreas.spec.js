@@ -8,7 +8,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetRestrictedArea
     it("could load the component and root HTML element contains correct ID", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
-                wizardStepsFormData: {},
+                wizardStepsFormData: {
+                    PvObligationWizardStepGrossArea: {
+                        isValid: true
+                    }
+                },
                 wizardStepIsActive: true
             }
         });
