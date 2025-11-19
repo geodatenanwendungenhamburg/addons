@@ -1,8 +1,9 @@
 <script>
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
-import {mapActions, mapMutations} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
+import axios from "axios";
 
 export default {
     name: "PvObligationWizardStepGrossArea",
@@ -17,8 +18,12 @@ export default {
             componentFormErrors: {
                 grossRoofArea: null
             },
-            grossAreaSelection: null
+            grossAreaSelection: null,
+            grossAreaStyle: {}
         };
+    },
+    computed: {
+        ...mapGetters(["configJs"])
     },
     watch: {
         /** @override */
@@ -27,11 +32,11 @@ export default {
                 if (wasActiveBefore) {
                     this.grossAreaSelection.setActive(false);
 
-                    const layer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
+                    const roofLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
                         return l.get("id") === "Module/pvObligation/layer/roofArea";
                     });
 
-                    layer.setVisible(false);
+                    roofLayer.setVisible(false);
                 }
                 else if (isNowActive && this.grossAreaSelection) {
                     this.grossAreaSelection.setActive(true);
@@ -53,7 +58,13 @@ export default {
             immediate: true
         }
     },
-    mounted () {
+    async mounted () {
+        const styleJson = await axios.get(this.configJs.styleConf);
+
+        this.grossAreaStyle = styleJson.data.find(style => {
+            return style.styleId === "dachflaechen";
+        }).rules[0].style;
+
         this.defineGrossArea({layerName: "Module/pvObligation/layer/roofArea"});
     },
     methods: {
@@ -68,10 +79,14 @@ export default {
             "addInteraction"
         ]),
         async defineGrossArea (payload) {
-            const selectInteraction = new Select({
+            const rgbStroke = this.grossAreaStyle?.polygonStrokeColor?.join(","),
+                strokeColor = `rgb(${rgbStroke})`,
+                rgbFill = this.grossAreaStyle?.polygonFillColor?.join(","),
+                fillColor = `rgba(${rgbFill})`,
+                selectInteraction = new Select({
                     style: new Style({
-                        stroke: new Stroke({color: "rgba(0, 0, 0, 0)", width: 1}),
-                        fill: new Fill({color: "rgba(0, 0, 0, 0)"})
+                        stroke: new Stroke({color: strokeColor, width: this.grossAreaStyle?.polygonStrokeWidth || 1}),
+                        fill: new Fill({color: fillColor})
                     }),
                     filter: (feature, layer) => {
                         return layer && layer.get("name") === "Dachflächen";
