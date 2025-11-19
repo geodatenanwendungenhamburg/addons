@@ -68,9 +68,9 @@ export default {
 
 <template lang="html">
     <div id="pvObligationWizardStepPersonalInformation">
-        <div class="introduction">
+        <p>
             {{ $t("additional:modules.pvObligation.wizard.step.personalInformation.component.introduction") }}
-        </div>
+        </p>
 
         <form>
             <InputText
@@ -146,9 +146,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepPersonalInformation {
-        div.introduction {
-            margin-bottom: 1rem;
-        }
+        margin: 1rem 0;
 
         form {
             .error {

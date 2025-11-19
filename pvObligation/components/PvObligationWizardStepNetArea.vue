@@ -17,7 +17,8 @@ export default {
             componentFormData: {
                 netRoofArea: null,
                 restrictedListItems: []
-            }
+            },
+            obligatedArea: null
         };
     },
     computed: {
@@ -31,14 +32,16 @@ export default {
             // eslint-disable-next-line no-unused-vars
             handler (isNowActive, wasActiveBefore) {
                 if (isNowActive) {
-                    this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
+                    if (this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
+                        this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
 
-                    const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(l => {
-                        return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
-                    });
+                        const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(layer => {
+                            return layer.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
+                        });
 
-                    if (layer) {
-                        layer.setVisible(true);
+                        if (layer) {
+                            layer.setVisible(true);
+                        }
                     }
                 }
             },
@@ -73,8 +76,18 @@ export default {
 
 <template lang="html">
     <div id="pvObligationWizardStepNetArea">
-        <div v-if="componentFormData.netRoofArea !== null">
-            <p class="netRoofAreaText">
+        <div v-if="!wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid">
+            <p class="error">
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.missingStepGrossAreaError") }}
+            </p>
+
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.missingStepGrossAreaMessage") }}
+            </p>
+        </div>
+
+        <div v-else>
+            <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {netRoofArea: componentFormData.netRoofArea, obligatedArea: obligatedArea}) }}
             </p>
 
@@ -82,18 +95,18 @@ export default {
                 {{ componentFormData.netRoofArea }} m²
             </strong>
 
-            <p class="netRoofAreaText">
+            <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
             </p>
 
-            <p class="netRoofAreaText">
+            <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
             </p>
 
             <PvObligationRestrictionList
                 class="restrictionList"
                 :is-disabled="false"
-                :index-prefix="'N'"
+                index-prefix="N"
                 @list-items="onListItems"
             />
         </div>
@@ -104,18 +117,21 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepNetArea{
-        p.netRoofAreaText {
-            margin: 0.5rem 0;
-        }
+        margin: 1rem 0;
 
         strong.netRoofAreaValue {
-            display: flex;
-            justify-content: center;
+            display: block;
+            margin-bottom: 1rem;
+            text-align: center;
             font-size: 1.25rem;
         }
 
         div.restrictionList {
             margin-top: 1rem;
+        }
+
+        p.error {
+            color: $light_red;
         }
     }
 </style>

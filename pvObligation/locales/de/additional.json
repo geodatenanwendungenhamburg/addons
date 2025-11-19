@@ -16,6 +16,7 @@
                         "wizardTitle": "Bruttodachfläche",
                         "component": {
                             "introduction": "Klicken Sie in der Karte auf das gewünschte Gebäude, um die Bruttodachfläche zu ermitteln.",
+                            "hintSearch": "Tipp: Nutzen Sie die Suche, um das Gebäude schneller zu finden und anzuzeigen.",
                             "grossAreaText": "Die Bruttodachfläche zum ausgewählten Gebäude beträgt: ",
                             "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²)."
                         }
@@ -23,6 +24,8 @@
                     "netArea": {
                         "wizardTitle": "Nettodachfläche",
                         "component": {
+                            "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
+                            "missingStepGrossAreaMessage": "Im Anschluss wird Ihnen hier die initiale Nettodachfläche angezeigt, und Sie können gegebenenfalls Flächen einzeichnen, die zusätzlich ausgeschlossen werden sollen.",
                             "introduction": "TODO: Insert introduction text",
                             "netRoofAreaText": "Wir haben für Ihr Gebäude automatisch die Nettodachfläche ermittelt: ",
                             "additionalNetAreaText": "Sie können weitere relevante Flächen hinzufügen und kommentieren, die für die Berechnung der Nettodachfläche herangezogen werden sollen.",
@@ -32,6 +35,8 @@
                     "netRestrictedAreas": {
                         "wizardTitle": "Sperrfläche ergänzen",
                         "component": {
+                            "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
+                            "missingStepGrossAreaMessage": "Im Anschluss können Sie hier gegebenenfalls Flächen einzeichnen, die Sie als Sperrflächen ausweisen wollen.",
                             "introduction": "TODO: Insert introduction text"
                         }
                     },
@@ -86,7 +91,6 @@
                     "buttonSave": "Speichern",
                     "buttonCancel": "Abbrechen",
                     "textareaPlaceholderNotes": "Erläuterungen oder Anmerkungen hier eintragen...",
-                    "listEmpty": "Es wurde noch keine relevante Flächen in der Karte erfasst.",
                     "numberExplaination": "Der Bezeichner ({{ id }}) entspricht der in der Karte eingezeichneten Fläche mit derselben Kennung.",
                     "selectDrawTool": "Zeichenwerkzeug wählen:",
                     "drawTypes": {
