@@ -1,5 +1,5 @@
 <script>
-import {mapGetters} from "vuex";
+import {mapGetters, mapActions} from "vuex";
 import PvObligationWizard from "./PvObligationWizard.vue";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
 
@@ -9,10 +9,84 @@ export default {
         PvObligationWizard,
         SpinnerItem
     },
+    data () {
+        return {
+            allRoofsLoaded: false
+        };
+    },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "isCreatingReport"
-        ])
+            "isCreatingReport",
+            "relevantLayerIds"
+        ]),
+        spinnerInfoText () {
+            if (!this.allRoofsLoaded) {
+                return this.$t("additional:modules.pvObligation.roofsAreLoadingSpinner");
+            }
+            else if (this.isCreatingReport) {
+                return this.$t("additional:modules.pvObligation.generateReportSpinner");
+            }
+
+            return "";
+        }
+    },
+    async mounted () {
+        await this.waitForFeaturesToBeLoaded();
+    },
+    methods: {
+        ...mapActions(["replaceByIdInLayerConfig"]),
+        async waitForFeaturesToBeLoaded () {
+            const promises = [],
+                map = mapCollection.getMap("2D"),
+                layers = map?.getLayers()?.getArray();
+
+            this.relevantLayerIds?.forEach(layerId => {
+                promises.push(
+                    new Promise(resolve => {
+                        const layer = layers?.find(l => l.get("id") === layerId) ?? undefined;
+
+                        if (layer && layer.isVisible()) {
+                            const source = layer.getSource();
+
+                            // Info: This workaround does not work, if a layer has no features at all.
+                            if (!source.getFeatures().length) {
+                                source.once("featuresloadend", resolve);
+                            }
+                            else {
+                                resolve();
+                            }
+                        }
+                        else {
+                            this.replaceByIdInLayerConfig({
+                                layerConfigs: [{
+                                    id: layerId,
+                                    layer: {
+                                        visibility: true,
+                                        showInLayerTree: true
+                                    }
+                                }]
+                            }, {root: true}).then(() => {
+                                const source = layers.find(l => l.get("id") === layerId).getSource();
+
+                                // Info: This workaround does not work, if a layer has no features at all.
+                                if (!source.getFeatures().length) {
+                                    source.once("featuresloadend", resolve);
+                                }
+                                else {
+                                    resolve();
+                                }
+                            }).catch(() => {
+                                resolve();
+                            });
+                        }
+                    })
+                );
+            });
+
+            await Promise.all(promises);
+
+            this.allRoofsLoaded = true;
+        }
     }
 };
 </script>
@@ -22,15 +96,15 @@ export default {
         <PvObligationWizard />
 
         <div
-            v-if="isCreatingReport"
-            class="filterSpinner"
+            v-if="isCreatingReport || !allRoofsLoaded"
+            class="waitingSpinner"
         >
             <SpinnerItem
                 custom-class="spinner"
                 class="ms-3"
             />
 
-            <p> {{ $t("additional:modules.pvObligation.generateReportSpinner") }}</p>
+            <p> {{ spinnerInfoText }} </p>
         </div>
     </div>
 </template>
@@ -45,7 +119,7 @@ export default {
         height: 100%;
         overflow: hidden;
 
-        div.filterSpinner {
+        div.waitingSpinner {
             position: absolute;
             top: 0;
             left: 0;
