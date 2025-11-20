@@ -1,15 +1,65 @@
+import {createStore} from "vuex";
 import {config, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepGrossArea.vue";
+import axios from "axios";
+import sinon from "sinon";
 
 config.global.mocks.$t = key => key;
 
+sinon.stub(axios, "get").resolves({
+    data: [
+        {
+            styleId: "dachflaechen",
+            rules: [{style: {}}]
+        }
+    ]
+});
+
 describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", () => {
+    const store = createStore({
+        getters: {
+            configJs: () => ({
+                styleConf: "/dummy/url"
+            })
+        },
+        modules: {
+            PvObligation: {
+                namespaced: true,
+                getters: {
+                    isCreatingReport: () => sinon.stub()
+                },
+                mutations: {
+                    setSelectedRoofId: () => sinon.stub()
+                },
+                actions: {
+                    dissolveRoofFeaturesAndCalculateArea: sinon.stub()
+                }
+            },
+            Maps: {
+                namespaced: true,
+                getters: {
+                    isCreatingReport: () => sinon.stub()
+                },
+                mutations: {
+                    setSelectedRoofId: () => sinon.stub()
+                },
+                actions: {
+                    addNewLayerIfNotExists: sinon.stub(),
+                    addInteraction: sinon.stub()
+                }
+            }
+        }
+    });
+
     it("could load the component and root HTML element contains correct ID", async () => {
         const wrapper = shallowMount(Component, {
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
             }
         });
 
@@ -22,6 +72,9 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
             }
         });
 
@@ -34,11 +87,15 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
             }
         });
 
         // Simulate selection result
         wrapper.vm.componentFormData.grossRoofArea = 49.8;
+        wrapper.vm.displayGrossRoofArea = "49,8";
 
         await wrapper.vm.$nextTick();
 
@@ -47,7 +104,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
             tooSmallEl = wrapper.find("p.noOblicagionText");
 
         expect(grossAreaEl.exists()).to.be.true;
-        expect(grossAreaEl.text()).to.contain("49.8");
+        expect(grossAreaEl.text()).to.contain("49,8");
         expect(tooSmallEl.exists()).to.be.true;
     });
 
@@ -56,10 +113,14 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
             }
         });
 
         wrapper.vm.componentFormData.grossRoofArea = 120;
+        wrapper.vm.displayGrossRoofArea = "120";
 
         await wrapper.vm.$nextTick();
 
