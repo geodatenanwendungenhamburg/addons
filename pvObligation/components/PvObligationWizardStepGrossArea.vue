@@ -3,6 +3,7 @@ import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptE
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
+import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import axios from "axios";
 
 export default {
@@ -19,6 +20,7 @@ export default {
                 grossRoofArea: null
             },
             grossAreaSelection: null,
+            displayGrossRoofArea: 0,
             grossAreaStyle: {}
         };
     },
@@ -108,6 +110,7 @@ export default {
 
                 this.setSelectedRoofId(roofId);
                 this.componentFormData.grossRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "Dachflächen"}) * 10) / 10;
+                this.displayGrossRoofArea = thousandsSeparator(this.componentFormData.grossRoofArea);
             });
         },
         /** @override */
@@ -138,14 +141,14 @@ export default {
             v-if="componentFormData.grossRoofArea !== null"
             class="grossRoofAreaText"
         >
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaText", {grossRoofArea: componentFormData.grossRoofArea}) }}
+            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaText") }}
         </p>
 
         <strong
             v-if="componentFormData.grossRoofArea !== null"
             class="grossRoofAreaValue"
         >
-            {{ componentFormData.grossRoofArea }} m²
+            {{ displayGrossRoofArea }} m²
         </strong>
 
         <p
