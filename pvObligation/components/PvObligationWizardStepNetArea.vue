@@ -4,6 +4,7 @@ import mapCollection from "@core/maps/js/mapCollection";
 import {mapActions, mapGetters} from "vuex";
 import {Style, Stroke, Fill} from "ol/style";
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
+import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 
 export default {
     name: "PvObligationWizardStepNetArea",
@@ -18,7 +19,8 @@ export default {
                 netRoofArea: null,
                 restrictedListItems: []
             },
-            obligatedArea: null
+            obligatedArea: null,
+            displayNetRoofArea: 0
         };
     },
     computed: {
@@ -65,7 +67,8 @@ export default {
             }));
 
             this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
-            this.obligatedArea = Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10;
+            this.obligatedArea = thousandsSeparator(Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10);
+            this.displayNetRoofArea = thousandsSeparator(this.componentFormData.netRoofArea);
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
@@ -92,7 +95,7 @@ export default {
             </p>
 
             <strong class="netRoofAreaValue">
-                {{ componentFormData.netRoofArea }} m²
+                {{ displayNetRoofArea }} m²
             </strong>
 
             <p>

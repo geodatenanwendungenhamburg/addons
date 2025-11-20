@@ -51,6 +51,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         // Simulate calculation results (avoid calling map-dependent method)
         wrapper.vm.componentFormData.netRoofArea = 100;
         wrapper.vm.obligatedArea = 30; // 30% of 100
+        wrapper.vm.displayNetRoofArea = "100";
 
         await wrapper.vm.$nextTick();
 
@@ -74,7 +75,8 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         });
 
         wrapper.vm.componentFormData.netRoofArea = 123.456;
-        wrapper.vm.obligatedArea = Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10; // mimic component logic
+        wrapper.vm.obligatedArea = Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10;
+        wrapper.vm.displayNetRoofArea = "123.456";
 
         await wrapper.vm.$nextTick();
 
