@@ -17,6 +17,9 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
                         getters: {
                             isCreatingReport () {
                                 return false;
+                            },
+                            relevantLayerIds () {
+                                return [];
                             }
                         },
                         mutations: {
@@ -35,5 +38,20 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
 
         expect(wrapper.exists()).to.be.true;
         expect(wrapper.attributes().id).equals("pvObligation");
+    });
+
+    it("loading spinner is shown at beginning", async () => {
+        const wrapper = shallowMount(Component, {global: {plugins: [store]}});
+
+        wrapper.vm.allRoofsLoaded = true;
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find("div.waitingSpinner").exists()).to.be.false;
+
+        wrapper.vm.allRoofsLoaded = false;
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find("div.waitingSpinner").exists()).to.be.true;
+        expect(wrapper.vm.spinnerInfoText).to.equal("additional:modules.pvObligation.roofsAreLoadingSpinner");
     });
 });

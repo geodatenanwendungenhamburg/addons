@@ -3,6 +3,7 @@
         "pvObligation": {
             "name": "Photovoltaikpflicht im Bestand",
             "description": "Unterstützt bei der Herleitung der Dachfläche, die mit PV belegt werden muss, wenn wesentliche Umbauten des Daches durchgeführt werden.",
+            "roofsAreLoadingSpinner": "Bitte etwas Geduld, die Dachflächen werden gerade geladen ...",
             "generateReportSpinner": "Der Report wird gerade erzeugt ...",
             "wizard": {
                 "buttons": {
