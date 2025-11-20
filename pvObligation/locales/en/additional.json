@@ -3,6 +3,7 @@
         "pvObligation": {
             "name": "PV obligation in existing buildings",
             "description": "Assists in determining the roof area that must be covered with PV when significant roof renovations are carried out.",
+            "roofsAreLoadingSpinner": "Please be patient, the roofs are currently been loaded ...",
             "generateReportSpinner": "The report is currently been generated ...",
             "wizard": {
                 "buttons": {
