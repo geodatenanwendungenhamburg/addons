@@ -15,7 +15,7 @@ describe("PvObligationRestrictionListForm.vue", () => {
                 formDataItem: {
                     id: "X1",
                     description: "Text for x1",
-                    geometries: []
+                    features: ["test"]
                 }
             },
             global: {
@@ -52,7 +52,7 @@ describe("PvObligationRestrictionListForm.vue", () => {
             data: {
                 id: "X1",
                 description: "Text for x1",
-                geometries: []
+                features: ["test"]
             }
         });
 
@@ -67,7 +67,7 @@ describe("PvObligationRestrictionListForm.vue", () => {
                 formDataItem: {
                     id: "X1",
                     description: "",
-                    geometries: []
+                    features: []
                 }
             },
             global: {
