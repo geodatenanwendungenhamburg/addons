@@ -40,7 +40,7 @@ export default {
             return {
                 id: `${this.indexPrefix}${this.blueprintIdIndex}`,
                 description: "",
-                geometries: []
+                features: []
             };
         },
         onButtonAdd () {
@@ -55,6 +55,17 @@ export default {
             this.listItems.splice(this.listItems.findIndex(item => item === itemSelectedEdit), 1);
 
             this.$emit("listItems", this.listItems);
+
+            const drawLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
+                    return layer.get("id") === "module/pvObligation/drawLayer";
+                }),
+                removeFeatures = drawLayer.getSource().getFeatures().filter(feature => {
+                    return feature.get("id") === itemSelectedEdit.id;
+                });
+
+            removeFeatures.forEach(feature => {
+                drawLayer.getSource().removeFeature(feature);
+            });
         },
         onListFormInteractionCreate (interaction) {
             if (interaction.action === "save") {

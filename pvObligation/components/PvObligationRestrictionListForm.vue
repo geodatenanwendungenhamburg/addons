@@ -2,6 +2,12 @@
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
+import {mapActions} from "vuex";
+import {Style, Stroke, Fill} from "ol/style";
+import {createBox} from "ol/interaction/Draw";
+import {Draw} from "ol/interaction";
+import {fromCircle} from "ol/geom/Polygon";
+
 export default {
     name: "PvObligationRestrictionListForm",
     components: {
@@ -17,7 +23,7 @@ export default {
                 return ["create", "edit"].includes(value);
             }
         },
-        // Given form data, e.g. {id: "S1", description: "Description text", geometries: []}
+        // Given form data, e.g. {id: "S1", description: "Description text", features: []}
         formDataItem: {
             type: Object,
             required: true
@@ -31,16 +37,47 @@ export default {
             formData: {
                 id: this.formDataItem.id,
                 description: this.formDataItem.description,
-                geometries: this.formDataItem.geometries
+                features: this.formDataItem.features
             },
             formErrors: {
                 id: null,
                 description: null,
-                geometries: null
+                features: null
+            },
+            shapes: {
+                polygon: {
+                    icon: "bi bi-pentagon",
+                    geometryType: "Polygon"
+                },
+                circle: {
+                    icon: "bi bi-circle",
+                    geometryType: "Circle"
+                },
+                rectangle: {
+                    icon: "bi bi-square",
+                    geometryType: "Circle",
+                    geometryFunction: createBox()
+                }
+            },
+            drawState: {
+                layer: null,
+                interaction: null,
+                activeShapeId: "polygon"
             }
         };
     },
+    async mounted () {
+        await this.initializeDrawing();
+    },
+    beforeUnmount () {
+        this.removeDrawInteraction();
+    },
     methods: {
+        ...mapActions("Maps", [
+            "addNewLayerIfNotExists",
+            "addInteraction",
+            "removeInteraction"
+        ]),
         onSave () {
             if (!this.validate()) {
                 return;
@@ -60,6 +97,8 @@ export default {
                 mode: this.formMode,
                 data: this.formData
             });
+
+            this.removeDrawnFeatures();
         },
         validate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue");
@@ -68,7 +107,110 @@ export default {
                 ? errorMessageMissingValue
                 : null;
 
+            this.formErrors.features = !this.formData?.features.length
+                ? this.$t("additional:modules.pvObligation.components.restrictionList.missingAreaText")
+                : null;
+
             return !Object.values(this.formErrors).some(Boolean);
+        },
+        /**
+         * Sets the active shape used for drawing and recreates the draw interaction if changed.
+         * @param {string} shapeId Identifier of the shape inside `shapes`.
+         * @returns {void}
+         */
+        setSelectedShape (shapeId) {
+            if (this.drawState.activeShapeId === shapeId) {
+                return;
+            }
+
+            this.drawState.activeShapeId = shapeId;
+            this.createDrawInteraction();
+        },
+        /**
+         * Ensures a vector layer for drawing exists and initializes the draw interaction.
+         * @returns {Promise<void>} Resolves when the layer is ready and interaction created.
+         */
+        async initializeDrawing () {
+            this.drawState.layer = await this.addNewLayerIfNotExists({
+                layerName: "module/pvObligation/drawLayer",
+                id: "module/pvObligation/drawLayer"
+            });
+
+            this.createDrawInteraction();
+        },
+        /**
+         * Destroys any existing draw interaction and creates a new one based on current active shape.
+         * Registers the drawend handler and adds the interaction to the map.
+         * @returns {void}
+         */
+        createDrawInteraction () {
+            this.removeDrawInteraction();
+
+            this.drawState.interaction = new Draw({
+                source: this.drawState.layer.getSource(),
+                type: this.shapes[this.drawState.activeShapeId].geometryType,
+                geometryFunction: this.shapes[this.drawState.activeShapeId].geometryFunction,
+                stopClick: true,
+                style: new Style({
+                    fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
+                    stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2})
+                })
+            });
+
+            this.drawState.interaction.on("drawend", this.handleDrawEnd);
+            this.addInteraction(this.drawState.interaction);
+        },
+        /**
+         * Handles the end of a drawing operation: sets properties on the drawn feature
+         * @param {Object} event Draw end event object containing the created feature.
+         * @param {import('ol/Feature').default} event.feature The drawn feature instance.
+         * @returns {void}
+         */
+        handleDrawEnd (event) {
+            event.feature.setProperties({
+                type: this.drawState.activeShapeId,
+                id: this.formData.id,
+                area2D: this.calculateArea(event.feature.getGeometry())
+            });
+
+            this.formData.features.push(event.feature);
+        },
+        /**
+         * Calculates area of given geometry. Supports polygons and circles.
+         * @param {import('ol/geom/Geometry').default} geometry Geometry to calculate area from.
+         * @returns {number|null} Area in map units or null if unsupported.
+         */
+        calculateArea (geometry) {
+            if (typeof geometry.getArea === "function") {
+                return geometry.getArea();
+            }
+            if (geometry.getType?.() === "Circle") {
+                return fromCircle(geometry).getArea();
+            }
+            return null;
+        },
+        /**
+         * Removes current draw interaction from map and unregisters the drawend listener.
+         * @returns {void}
+         */
+        removeDrawInteraction () {
+            if (this.drawState.interaction) {
+                this.removeInteraction(this.drawState.interaction);
+                this.drawState.interaction.un("drawend", this.handleDrawEnd);
+            }
+        },
+        /**
+         * Removes all features associated with the current formData from the drawing layer.
+         * @returns {void}
+         */
+        removeDrawnFeatures () {
+            const removeFeature = this.drawState.layer.getSource().getFeatures().filter(feature => {
+                return feature.get("id") === this.formData.id;
+            });
+
+            removeFeature.forEach(feature => {
+                this.drawState.layer.getSource().removeFeature(feature);
+            });
         }
     }
 };
@@ -96,21 +238,12 @@ export default {
 
                         <div class="buttonGroup">
                             <IconButton
-                                :aria="$t('additional:modules.pvObligation.components.restrictionList.drawTypes.polygon')"
-                                icon="bi bi-pentagon"
-                                :class-array="['btn-primary']"
-                            />
-
-                            <IconButton
-                                :aria="$t('additional:modules.pvObligation.components.restrictionList.drawTypes.rectangle')"
-                                icon="bi bi-circle"
-                                :class-array="['btn-light']"
-                            />
-
-                            <IconButton
-                                :aria="$t('additional:modules.pvObligation.components.restrictionList.drawTypes.circle')"
-                                icon="bi bi-square"
-                                :class-array="['btn-light']"
+                                v-for="(shape, shapeId) in shapes"
+                                :key="shapeId"
+                                :aria="$t(`additional:modules.pvObligation.components.restrictionList.drawTypes.${shapeId}`)"
+                                :icon="shape.icon"
+                                :interaction="() => setSelectedShape(shapeId)"
+                                :class-array="drawState.activeShapeId === shapeId ? ['btn-primary'] : ['btn-light']"
                             />
                         </div>
                     </div>
@@ -135,6 +268,13 @@ export default {
                     class="invalid-feedback"
                 >
                     {{ formErrors.description }}
+                </span>
+
+                <span
+                    v-if="formErrors.features"
+                    class="invalid-feedback"
+                >
+                    {{ formErrors.features }}
                 </span>
 
                 <div class="actions">
@@ -261,4 +401,3 @@ export default {
         }
     }
 </style>
-

@@ -105,7 +105,8 @@
                     "helpFormDrawModify": {
                         "hint": "Edit drawings on the map:",
                         "text": "You can modify the drawings you created directly on the map using the mouse."
-                    }
+                    },
+                    "missingAreaText": "Please draw the area to be excluded from the net roof area."
                 }
             }
         }
