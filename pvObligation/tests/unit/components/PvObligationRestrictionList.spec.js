@@ -45,17 +45,17 @@ describe("PvObligationRestrictionList.vue", () => {
                 {
                     id: "X1",
                     description: "Text for x1",
-                    geometries: []
+                    features: []
                 },
                 {
                     id: "X2",
                     description: "Text for x2",
-                    geometries: []
+                    features: []
                 },
                 {
                     id: "X3",
                     description: "Text for x3",
-                    geometries: []
+                    features: []
                 }
             ]
         });
