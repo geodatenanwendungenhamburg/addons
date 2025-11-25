@@ -1,15 +1,17 @@
 {
     "modules": {
         "pvObligation": {
-            "name": "PV Obligation",
-            "description": "TODO",
+            "name": "PV obligation in existing buildings",
+            "description": "Assists in determining the roof area that must be covered with PV when significant roof renovations are carried out.",
             "generateReportSpinner": "The report is currently been generated ...",
             "wizard": {
                 "buttons": {
                     "back": "previous step",
                     "next": "next step"
                 },
-                "introduction": "TODO: Insert introduction text.",
+                "introduction": "This application is intended to assist in calculating the area that must be covered with photovoltaics when “significant roof modifications” are carried out. The PDF report is for your personal records and serves as proof in the event of a random check. You can find more information on the PV obligation here:",
+                "introductionLinkFurtherInfo": "PV obligation in Hamburg - hamburg.de",
+                "introductionPart2": "None of the information provided below is stored on servers. The PDF is created locally on your computer. Data is handled in accordance with the DSGVO.",
                 "introductionLinkPrivacyPolicy": "Privacy Policy",
                 "step": {
                     "grossArea": {

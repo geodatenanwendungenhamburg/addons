@@ -46,7 +46,7 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
             }
         });
 
-        let accordionItems = wrapper.findAll("div.wizard div.steps accordion-item-stub");
+        let accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
 
         expect(accordionItems[0].attributes().title).equal("Step 1");
         expect(accordionItems[0].attributes().isopen).equal("true");
@@ -64,7 +64,7 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
 
         await nextTick();
 
-        accordionItems = wrapper.findAll("div.wizard div.steps accordion-item-stub");
+        accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
 
         expect(accordionItems[0].attributes().title).equal("Step 1");
         expect(accordionItems[0].attributes().isopen).equal("false");

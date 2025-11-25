@@ -1,15 +1,17 @@
 {
     "modules": {
         "pvObligation": {
-            "name": "PV Pflicht",
-            "description": "TODO",
+            "name": "Photovoltaikpflicht im Bestand",
+            "description": "Unterstützt bei der Herleitung der Dachfläche, die mit PV belegt werden muss, wenn wesentliche Umbauten des Daches durchgeführt werden.",
             "generateReportSpinner": "Der Report wird gerade erzeugt ...",
             "wizard": {
                 "buttons": {
                     "back": "voriger Schritt",
                     "next": "nächster Schritt"
                 },
-                "introduction": "TODO: Insert introduction text.",
+                "introduction": "Diese Anwendung soll zur Unterstützung bei der Berechnung der Fläche dienen, die mit Photovoltaik belegt werden muss, wenn “wesentliche Umbauten des Daches” durchgeführt werden. Der PDF-Bericht ist für Ihre persönlichen Unterlagen und dient als Nachweismöglichkeit für den Fall einer Stichprobe. Nähere Informationen zur PV-Pflicht finden Sie hier:",
+                "introductionLinkFurtherInfo": "PV-Pflicht in Hamburg - hamburg.de",
+                "introductionPart2": "Alle im folgenden gemachten Angaben werden nicht auf Servern gespeichert. Die Erstellung des PDF erfolgt lokal auf Ihrem Rechner. Der Umgang mit Daten erfolgt im Einklang mit der DSGVO.",
                 "introductionLinkPrivacyPolicy": "Datenschutzerklärung",
                 "step": {
                     "grossArea": {
