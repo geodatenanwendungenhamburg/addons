@@ -57,9 +57,7 @@
                                 "street": "Straße",
                                 "postalCode": "Postleitzahl",
                                 "city": "Stadt",
-                                "email": "E-Mail",
-                                "phoneNumber": "Telefonnummer",
-                                "reportCreatedBy": "Bericht erstellt durch (falls abweichend von Eigentümer:in)"
+                                "houseNumber": "Hausnummer"
                             }
                         }
                     },
