@@ -1,17 +1,43 @@
 import {config, shallowMount} from "@vue/test-utils";
+import {createStore} from "vuex";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepPersonalInformation.vue";
 
 config.global.mocks.$t = key => key;
 
 describe("PvObligationWizardStepPersonalInformation.vue", () => {
-    let wrapper;
+    let wrapper,
+        store;
 
     beforeEach(() => {
+        store = createStore({
+            modules: {
+                Modules: {
+                    namespaced: true,
+                    modules: {
+                        PvObligation: {
+                            namespaced: true,
+                            state: {
+                                selectedRoofId: null
+                            },
+                            getters: {
+                                selectedRoofId: (state) => {
+                                    return state.selectedRoofId;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         wrapper = shallowMount(Component, {
-            propsData: {
+            props: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
             }
         });
     });
@@ -28,9 +54,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
                 street: "",
                 postalCode: "",
                 city: "",
-                email: "",
-                phoneNumber: "",
-                reportCreatedBy: ""
+                houseNumber: ""
             }
         });
 
@@ -42,9 +66,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
         expect(wrapper.vm.componentFormErrors.street).equals("additional:modules.pvObligation.formErrors.genericMissingValue");
         expect(wrapper.vm.componentFormErrors.postalCode).equals("additional:modules.pvObligation.formErrors.genericMissingValue");
         expect(wrapper.vm.componentFormErrors.city).equals("additional:modules.pvObligation.formErrors.genericMissingValue");
-        expect(wrapper.vm.componentFormErrors.email).to.be.null;
-        expect(wrapper.vm.componentFormErrors.phoneNumber).to.be.null;
-        expect(wrapper.vm.componentFormErrors.reportCreatedBy).to.be.null;
+        expect(wrapper.vm.componentFormErrors.houseNumber).equals("additional:modules.pvObligation.formErrors.genericMissingValue");
     });
 
     it("validates and returns false and sets error for invalid fields", () => {
@@ -54,9 +76,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
                 street: "Musterstraße",
                 postalCode: "1234", // <- invalid value, too short
                 city: "Musterstadt",
-                email: "test@example.com",
-                phoneNumber: "123456789",
-                reportCreatedBy: "Max Mustermann"
+                houseNumber: "21"
             }
         });
 
@@ -68,9 +88,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
         expect(wrapper.vm.componentFormErrors.street).to.be.null;
         expect(wrapper.vm.componentFormErrors.postalCode).equals("additional:modules.pvObligation.formErrors.genericInvalidValue");
         expect(wrapper.vm.componentFormErrors.city).to.be.null;
-        expect(wrapper.vm.componentFormErrors.email).to.be.null;
-        expect(wrapper.vm.componentFormErrors.phoneNumber).to.be.null;
-        expect(wrapper.vm.componentFormErrors.reportCreatedBy).to.be.null;
+        expect(wrapper.vm.componentFormErrors.houseNumber).to.be.null;
     });
 
     it("validates and returns true for valid data", () => {
@@ -80,9 +98,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
                 street: "Musterstraße",
                 postalCode: "12345",
                 city: "Musterstadt",
-                email: "test@example.com",
-                phoneNumber: "123456789",
-                reportCreatedBy: "Max Mustermann"
+                houseNumber: "21"
             }
         });
         const result = wrapper.vm.componentFormDataValidate();

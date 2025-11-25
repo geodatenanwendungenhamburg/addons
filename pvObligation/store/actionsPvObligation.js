@@ -2,6 +2,7 @@
 import GeoJSON from "ol/format/GeoJSON";
 import dissolve from "@turf/dissolve";
 import {featureCollection} from "@turf/helpers";
+import {transform} from "ol/proj";
 
 /* eslint-disable one-var */
 import pdfMake from "pdfmake";
@@ -299,6 +300,60 @@ export default {
         }
 
         return roofArea;
-    }
+    },
+    /**
+     * Reverse geocodes the last map click coordinate and returns address components.
+     *
+     * Uses the configured reverse geocoding service (state.geosearchReverseServiceId) and the
+     * Maps/clickCoordinate and Maps/projection root getters to build the request.
+     *
+     * @async
+     * @param {Object} Object Vuex context
+     * @returns {Promise<Object>} Resolves with an address object containing:
+     *  {string|null} street
+     *  {string|null} city
+     *  {string|null} postalCode
+     *  {string|null} houseNumber
+     */
+    async getAddress ({state, rootGetters}) {
+        const address = {
+                street: null,
+                city: null,
+                postalCode: null,
+                houseNumber: null
+            },
+            clickCoordinate = rootGetters["Maps/clickCoordinate"],
+            projectionCode = rootGetters["Maps/projectionCode"],
+            coordinates = transform(
+                [clickCoordinate[0], clickCoordinate[1]],
+                projectionCode,
+                "EPSG:4326"
+            ),
+            serviceUrl = rootGetters.restServiceById(state.geosearchReverseServiceId).url,
+            requestUrl = new URL(serviceUrl, state.baseUrl);
 
+        requestUrl.searchParams.set("lon", String(coordinates[0]));
+        requestUrl.searchParams.set("lat", String(coordinates[1]));
+        requestUrl.searchParams.set("count", "1");
+        requestUrl.searchParams.set("properties", ["haus", "ort", "plz", "strasse"]);
+
+        try {
+            const response = await fetch(requestUrl),
+                data = await response.json();
+
+            if (data) {
+                const properties = data.features[0].properties;
+
+                address.city = properties.ort;
+                address.postalCode = properties.plz;
+                address.street = properties.strasse;
+                address.houseNumber = properties.haus;
+            }
+        }
+        catch (error) {
+            console.error("Reverse geocoding error:", error);
+        }
+
+        return address;
+    }
 };
