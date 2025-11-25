@@ -114,6 +114,34 @@
                      "missingAreaText": "Bitte zeichnen Sie die Fläche ein, die von der Nettodachfläche ausgeschlossen werden soll.",
                      "area3D": "Fläche: "
                 }
+            },
+            "report": {
+              "headerText": "PV-Pflicht-Report",
+              "title":  "PV-Pflicht-Report",
+              "buildingData": {
+                "title": "Angaben zum Gebäude",
+                "owner": "Eigentümer:In",
+                "address": "Adresse"
+              },
+              "areas": {
+                "gros": "Bruttodachfläche des Gebäudes",
+                "net": "Nettodachfläche des Gebäudes",
+                "pvObligation": "Verpflichtend zu belegende Fläche",
+                "netReduce": "Diese Flächen reduzieren die Nettodachfläche",
+                "noNetReduce": "Es wurden keine Flächen eingetragen, die die Nettodachfläche reduzieren.",
+                "restrictedAreas": "Diese Flächen werden als Sperrflächen ausgewiesen",
+                "noRestrictedAreas": "Es wurden keine Flächen eingetragen, die nicht mit PV belegt werden können.",
+                "areaListNr": "Flächennr.",
+                "areaListDescr": "Erläuterung"
+              },
+              "furtherInformation": "Weitere Informationen",
+              "noFurtherInformation": "- keine Angaben -",
+              "scale": "Maßstab",
+              "createdWith": "Erstellt mit dem PV-Pflicht-Tool der BUKEA Hamburg",
+              "fileNamePrefix": "PV-Pflicht-Report-",
+              "author": "Ersteller:In",
+              "page": "Seite",
+              "creationDate": "Erstellt am:"
             }
         }
     }

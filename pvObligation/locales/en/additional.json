@@ -114,6 +114,34 @@
                     "missingAreaText": "Please draw the area to be excluded from the net roof area.",
                     "area3D": "Aerea: "
                 }
+            },
+            "report": {
+              "headerText": "PV Obligation Report",
+              "title":  "PV Obligation Report",
+              "buildingData": {
+                "title": "Building information",
+                "owner": "Owner",
+                "address": "Address"
+              },
+              "areas": {
+                "gros": "Gross roof area of the building",
+                "net": "Net roof area of the building",
+                "pvObligation": "Mandatory area to be covered",
+                "netReduce": "These areas reduce the net roof area",
+                "noNetReduce": "No areas have been entered that reduce the net roof area.",
+                "restrictedAreas": "These areas are designated as restricted areas",
+                "noRestrictedAreas": "No areas have been entered that cannot be covered with PV.",
+                "areaListNr": "Area no.",
+                "areaListDescr": "Explanation"
+              },
+              "furtherInformation": "Further information",
+              "noFurtherInformation": "- no information -",
+              "scale": "Scale",
+              "createdWith": "Created with the PV Obligation Tool of BUKEA Hamburg",
+              "fileNamePrefix": "PV-Obligation-Report-",
+              "author": "Author",
+              "page": "Page",
+              "creationDate": "Created on:"
             }
         }
     }

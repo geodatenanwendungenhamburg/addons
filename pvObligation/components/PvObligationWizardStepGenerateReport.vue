@@ -20,39 +20,14 @@ export default {
         ]),
         createPDF () {
             this.exportPDF({
-                author: "Beispielnutzer",
-                brutto: 120000,
-                netto: 50000,
-                pvObligation: 20000,
-                restrictedAreaSum: 10000,
-                finalPVArea: 10000,
-                netto_reduce_areas: [
-                    {
-                        id: 1,
-                        description: "Hier ist ein Dachflächenfenster"
-                    },
-                    {
-                        id: 2,
-                        description: "Hier ist ein Dachflächenfenster"
-                    }
-                ],
-                restricted_areas: [
-                    {
-                        id: 3,
-                        description: "Verschattung"
-                    },
-                    {
-                        id: 4,
-                        description: "Noch mehr Verschattung"
-                    }
-                ],
-                personalData: {
-                    owner: "Dagober Duck",
-                    address: "Grünwaldweg 2, 20045 Hamburg",
-                    mail: "dagobert@duck.de",
-                    phone: ""
-                },
-                additionalInformation: "Hier kann noch ein langer Text stehen!"
+                author: this.wizardStepsFormData.PvObligationWizardStepPersonalInformation.formData.propertyOwnerFullName,
+                brutto: this.wizardStepsFormData.PvObligationWizardStepGrossArea.formData.grossRoofArea,
+                netto: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea,
+                pvObligation: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea * 0.3,
+                nettoReduceAreas: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.restrictedListItems,
+                restrictedAreas: this.wizardStepsFormData.PvObligationWizardStepNetRestrictedAreas.formData.restrictedListItems,
+                personalData: this.wizardStepsFormData.PvObligationWizardStepPersonalInformation.formData,
+                additionalInformation: this.wizardStepsFormData.PvObligationWizardStepPersonalNotes.formData.personalNote
             });
         }
     }
