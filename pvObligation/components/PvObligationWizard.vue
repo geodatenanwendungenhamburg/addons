@@ -192,38 +192,46 @@ export default {
 <template lang="html">
     <div id="pvObligationWizard">
         <div class="wizard">
-            <p>
-                {{ $t("additional:modules.pvObligation.wizard.introduction") }}
+            <div class="wizardContent">
+                <div class="intro">
+                    <p>
+                        {{ $t("additional:modules.pvObligation.wizard.introduction") }}
 
-                <a
-                    href="https://geodienste.hamburg.de/lgv-config/about-files/datenschutzerklaerung.pdf"
-                    target="_blank"
-                >
-                    {{ $t("additional:modules.pvObligation.wizard.introductionLinkPrivacyPolicy") }}
-                </a>
-            </p>
+                        <a
+                            href="https://www.hamburg.de/politik-und-verwaltung/behoerden/bukea/themen/energie/erneuerbare-energien/photovoltaik/pv-pflicht-in-hamburg"
+                            target="_blank"
+                        >
+                            {{ $t("additional:modules.pvObligation.wizard.introductionLinkFurtherInfo") }}
+                        </a>
+                    </p>
 
-            <div class="steps">
-                <AccordionItem
-                    v-for="(step, index) in wizardSteps"
-                    :id="`wizard-item-${index}`"
-                    :key="index"
-                    :title="step.title"
-                    :is-open="step.isOpen"
-                    :icon="step.componentFormDataIsValid === false ? 'bi-exclamation-triangle-fill' : ''"
-                    :coloured-header="true"
-                    :class="step.componentFormDataIsValid === false ? 'error' : ''"
-                    @click="openWizardStep($event, index)"
-                >
-                    <component
-                        :is="step.component"
-                        v-if="step.component"
-                        :ref="`ref${step.component.name}`"
-                        :wizard-steps-form-data="wizardStepsFormData"
-                        :wizard-step-is-active="wizardStepIsActive(step.component.name)"
-                        @stepError="handleWizardStepError"
-                    />
-                </AccordionItem>
+                    <p>
+                        {{ $t("additional:modules.pvObligation.wizard.introductionPart2") }}
+                    </p>
+                </div>
+
+                <div class="steps">
+                    <AccordionItem
+                        v-for="(step, index) in wizardSteps"
+                        :id="`wizard-item-${index}`"
+                        :key="index"
+                        :title="step.title"
+                        :is-open="step.isOpen"
+                        :icon="step.componentFormDataIsValid === false ? 'bi-exclamation-triangle-fill' : ''"
+                        :coloured-header="true"
+                        :class="step.componentFormDataIsValid === false ? 'error' : ''"
+                        @click="openWizardStep($event, index)"
+                    >
+                        <component
+                            :is="step.component"
+                            v-if="step.component"
+                            :ref="`ref${step.component.name}`"
+                            :wizard-steps-form-data="wizardStepsFormData"
+                            :wizard-step-is-active="wizardStepIsActive(step.component.name)"
+                            @stepError="handleWizardStepError"
+                        />
+                    </AccordionItem>
+                </div>
             </div>
 
             <div class="navigation">
@@ -264,15 +272,13 @@ export default {
         div.wizard {
             height: 100%;
             overflow: hidden;
-            padding-top: 1rem;
             display: flex;
             flex-direction: column;
 
-            div.steps {
+            div.wizardContent {
                 display: flex;
                 flex-direction: column;
                 flex: 1;
-                justify-content: left;
                 overflow: auto;
                 height: 100%;
 
