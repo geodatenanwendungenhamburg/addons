@@ -19,8 +19,10 @@
                         "wizardTitle": "Bruttodachfläche",
                         "component": {
                             "introduction": "Klicken Sie in der Karte auf das gewünschte Gebäude, um die Bruttodachfläche zu ermitteln.",
-                            "hintSearch": "Tipp: Nutzen Sie die Suche, um das Gebäude schneller zu finden und anzuzeigen.",
+                            "hintSearch": "(Tipp: Nutzen Sie die Suche, um das Gebäude schneller zu finden und anzuzeigen.)",
+                            "grossAreaDescription": "Die Bruttodachfläche umfasst die gesamte Dachfläche des Gebäudes, inkl. aller Teilflächen unabhängig von Ausrichtung, Nutzung oder Verschattung. Beträgt diese mehr als 50 m², unterliegt sie der PV-Pflicht sofern “wesentliche Umbauten des Daches” durchgeführt werden. ",
                             "grossAreaText": "Die Bruttodachfläche zum ausgewählten Gebäude beträgt: ",
+                            "grossAreaHint": "(Hinweis: Die Dachflächen wurden automatisiert erfasst. Es können Abweichungen zur realen Fläche auftreten. Bitte berücksichtigen Sie diese im folgenden Schritt oder unter “Eigene Erläuterungen”)", 
                             "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²)."
                         }
                     },
