@@ -137,6 +137,10 @@ export default {
             {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.hintSearch") }}
         </p>
 
+        <p>
+            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaDescription") }}
+        </p>
+
         <p
             v-if="componentFormData.grossRoofArea !== null"
             class="grossRoofAreaText"
@@ -150,6 +154,10 @@ export default {
         >
             {{ displayGrossRoofArea }} m²
         </strong>
+
+        <p v-if="componentFormData.grossRoofArea !== null">
+            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaHint") }}
+        </p>
 
         <p
             v-if="componentFormData.grossRoofArea < 50 && componentFormData.grossRoofArea !== null"
