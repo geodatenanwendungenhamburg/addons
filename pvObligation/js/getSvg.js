@@ -110,7 +110,7 @@ function getFooterSvg (currentPage, pageCount, author, createdWith) {
                             id="tspan3"
                             style="font-size:2.11667px;stroke-width:0.264583"
                             x="82.322624"
-                            y="10.982323">Erstellt am: ${getDate()}</tspan>
+                            y="10.982323">${getCreationDate()}</tspan>
                         <tspan
                             sodipodi:role="line"
                             style="font-size:1.85208px;stroke-width:0.264583"
@@ -134,15 +134,15 @@ function getAuthor (author) {
         return "";
     }
 
-    return "Ersteller:in: " + author;
+    return i18next.t("additional:modules.pvObligation.report.author") + " " + author;
 }
 
 /**
  * Returns date as string in DD.MM.YYYY format.
  * @returns {string} date as string.
  */
-function getDate () {
-    return dayjs(new Date()).format("DD.MM.YYYY");
+function getCreationDate () {
+    return i18next.t("additional:modules.pvObligation.report.creationDate") + " " + dayjs(new Date()).format("DD.MM.YYYY");
 }
 
 /**
@@ -156,7 +156,7 @@ function getPaginationLabel (currentPage, pageCount) {
         return "";
     }
 
-    return "Seite " + currentPage.toString() + "/" + pageCount;
+    return i18next.t("additional:modules.pvObligation.report.page") + " " + currentPage.toString() + "/" + pageCount;
 }
 
 export {

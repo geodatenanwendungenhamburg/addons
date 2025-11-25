@@ -23,17 +23,18 @@ export default {
      * @param {Number} formData.pvObligation - Mandatory PV area in m².
      * @param {Number} formData.restrictedAreaSum - Sum of restricted areas in m².
      * @param {Number} formData.finalPVArea - Final area to be used with PV in m².
-     * @param {Array<Object>} formData.netto_reduce_areas - Areas subtracted from the net roof area.
-     * @param {Number} formData.netto_reduce_areas[].id - ID of the reduced area.
-     * @param {String} formData.netto_reduce_areas[].description - Description of the reduced area.
-     * @param {Array<Object>} formData.restricted_areas - Areas with restrictions.
-     * @param {Number} formData.restricted_areas[].id - ID of the restricted area.
-     * @param {String} formData.restricted_areas[].description - Description of the restriction.
+     * @param {Array<Object>} formData.nettoReduceAreas - Areas subtracted from the net roof area.
+     * @param {Number} formData.nettoReduceAreas[].id - ID of the reduced area.
+     * @param {String} formData.nettoReduceAreas[].description - Description of the reduced area.
+     * @param {Array<Object>} formData.restrictedAreas - Areas with restrictions.
+     * @param {Number} formData.restrictedAreas[].id - ID of the restricted area.
+     * @param {String} formData.restrictedAreas[].description - Description of the restriction.
      * @param {Object} formData.personalData - Personal data of the owner.
-     * @param {String} formData.personalData.owner - Name of the owner.
-     * @param {String} formData.personalData.address - Address of the owner.
-     * @param {String} formData.personalData.mail - Email address of the owner.
-     * @param {String} formData.personalData.phone - Phone number of the owner.
+     * @param {String} formData.personalData.propertyOwnerFullName - Name of the owner.
+     * @param {String} formData.personalData.street - street of the building.
+     * @param {String} formData.personalData.houseNumber - house number of the building.
+     * @param {String} formData.personalData.postalCode - postalcode of the building.
+     * @param {String} formData.personalData.city - city of the building.
      * @param {String} formData.additionalInformation - Additional optional information.
      * @returns {void}
      *
@@ -53,144 +54,175 @@ export default {
             exportDate = dayjs(new Date()).format("DD-MM-YYYY");
 
         // Header
-        docDefinition.header = {text: "PV-Pflicht-Report", alignment: "right", fontSize: 11, margin: [0, 20, 40, 40], color: "#646464"};
+        // /////////////////////
+        docDefinition.header = {
+            text: i18next.t("additional:modules.pvObligation.report.headerText"),
+            alignment: "right",
+            fontSize: 11,
+            margin: [0, 20, 40, 40],
+            color: "#646464"
+        };
 
         // Titel
-        docDefinition.content.push(
-            {text: "PV-Pflicht-Report", style: "header", bold: true, fontSize: 14, margin: [0, 14]}
-        );
-
-        // Map
+        // /////////////////////
         docDefinition.content.push({
-            image: mapContent.base64Image,
-            width: idealMapWidthInPDF,
-            alignment: "center"
+            text: i18next.t("additional:modules.pvObligation.report.title"),
+            style: "header",
+            bold: true,
+            fontSize: 14,
+            margin: [0, 14]
         });
 
+        // data for the building
+        // /////////////////////
         docDefinition.content.push({
-            text: "Maßstab 1:" + thousandsSeparator(mapContent.scale),
-            fontSize: 8,
-            alignment: "center",
-            margin: [0, 5],
-            pageBreak: "after"
+            text: i18next.t("additional:modules.pvObligation.report.buildingData.title"),
+            bold: true,
+            fontSize: 12,
+            margin: [0, 20, 0, 10]
         });
 
-        // Areas (brutto, netto, obligation)
-        docDefinition.content.push(
-            {text: "Ihre ermittelten Flächen", bold: true, fontSize: 12, margin: [0, 10]}
-        );
-        docDefinition.content.push(
-            {
-                layout: "lightHorizontalLines", // optional
-                table: {
-                    // headers are automatically repeated if the table spans over multiple pages
-                    // you can declare how many rows should be treated as headers
-                    headerRows: 1,
-                    widths: ["*", 100, "auto"],
-                    body: [
-                        ["", "Fläche in m²", "Erläuterung"],
-                        ["Bruttodachfläche", thousandsSeparator(parseFloat(formData.brutto, 10).toFixed(1)), "Die gesamte Fläche des Daches"],
-                        ["Nettodachfläche", thousandsSeparator(parseFloat(formData.netto, 10).toFixed(1)), "Die ermittelte Nettofläche des Daches"],
-                        ["PV-Pflicht-Fläche", thousandsSeparator(parseFloat(formData.pvObligation, 10).toFixed(1)), "30% der Nettodachfläche. Diese Fläche muss mit PV belegt werden."],
-                        ["Sperrflächen", thousandsSeparator(parseFloat(formData.restrictedAreaSum, 10).toFixed(1)), "Summe der Sperrflächen"],
-                        ["Mit PV zu belegende Fläche", thousandsSeparator(parseFloat(formData.finalPVArea, 10).toFixed(1)), "Final mit PV zu belegende Fläche"]
-                    ]
-                }}
-        );
+        const personalData = [];
 
-        // netto reducing areas
-        docDefinition.content.push(
-            {text: "Diese Flächen reduzieren die Nettodachfläche", bold: true, fontSize: 12, margin: [0, 20, 0, 10]}
-        );
-
-        const nettoReducingAreas = [
-            ["Flächennr.", "Erläuterung"]
-        ];
-
-        formData.netto_reduce_areas.forEach((area) => {
-            nettoReducingAreas.push([area.id, area.description]);
-        });
+        personalData.push([i18next.t("additional:modules.pvObligation.report.buildingData.owner"), formData.personalData.propertyOwnerFullName]);
+        personalData.push([i18next.t("additional:modules.pvObligation.report.buildingData.address"), formData.personalData.street + " " + formData.personalData.houseNumber]);
+        personalData.push(["", formData.personalData.postalCode + " " + formData.personalData.city]);
 
         docDefinition.content.push({
-            layout: "lightHorizontalLines", // optional
+            layout: "noBorders",
             table: {
-                // headers are automatically repeated if the table spans over multiple pages
-                // you can declare how many rows should be treated as headers
-                headerRows: 1,
-                widths: [100, "auto"],
-                body: nettoReducingAreas
-            }
-        });
-
-        // restricted areas
-        docDefinition.content.push(
-            {text: "Diese Flächen werden als Sperrflächen ausgewiesen", bold: true, fontSize: 12, margin: [0, 20, 0, 10]}
-        );
-
-        const restrictedAreas = [
-            ["Flächennr.", "Erläuterung"]
-        ];
-
-        formData.restricted_areas.forEach((area) => {
-            restrictedAreas.push([area.id, area.description]);
-        });
-
-        docDefinition.content.push({
-            layout: "lightHorizontalLines", // optional
-            table: {
-                // headers are automatically repeated if the table spans over multiple pages
-                // you can declare how many rows should be treated as headers
-                headerRows: 1,
-                widths: [100, "auto"],
-                body: restrictedAreas
-            }
-        });
-
-        // personal data
-        docDefinition.content.push(
-            {text: "Diese persönlichen Daten haben Sie eingegeben", bold: true, fontSize: 12, margin: [0, 20, 0, 10]}
-        );
-
-        const personalData = [
-            ["", ""]
-        ];
-
-        personalData.push(["Eigentümer", formData.personalData.owner]);
-        personalData.push(["Adresse", formData.personalData.address]);
-        personalData.push(["e-Mail", formData.personalData.mail]);
-        personalData.push(["Telefon", formData.personalData.phone]);
-
-        docDefinition.content.push({
-            layout: "lightHorizontalLines", // optional
-            table: {
-                // headers are automatically repeated if the table spans over multiple pages
-                // you can declare how many rows should be treated as headers
-                headerRows: 1,
-                widths: ["auto", "auto"],
                 body: personalData
             }
         });
 
-        // Additional information
+        // Areas (brutto, netto, obligation)
+        // /////////////////////
         docDefinition.content.push(
-            {text: "Weitere Informationen", bold: true, fontSize: 12, margin: [0, 20, 0, 10]}
+            {
+                layout: "lightHorizontalLines",
+                table: {
+                    widths: ["*", "auto"],
+                    body: [
+                        ["", ""],
+                        [
+                            i18next.t("additional:modules.pvObligation.report.areas.gros"),
+                            {
+                                text: thousandsSeparator(parseFloat(formData.brutto, 10).toFixed(1)) + " m²",
+                                alignment: "right",
+                                noWrap: true
+                            }
+                        ],
+                        [
+                            i18next.t("additional:modules.pvObligation.report.areas.net"),
+                            {
+                                text: thousandsSeparator(parseFloat(formData.netto, 10).toFixed(1)) + " m²",
+                                alignment: "right",
+                                noWrap: true
+                            }
+                        ],
+                        [
+                            i18next.t("additional:modules.pvObligation.report.areas.pvObligation"),
+                            {
+                                text: thousandsSeparator(parseFloat(formData.pvObligation, 10).toFixed(1)) + " m²",
+                                alignment: "right",
+                                noWrap: true
+                            }
+                        ]
+                    ]
+                },
+                margin: [0, 20, 0, 10]
+            }
         );
 
-        docDefinition.content.push(
-            {text: formData.additionalInformation, margin: [0, 0, 0, 10]}
-        );
+        // netto reducing areas
+        // /////////////////////
+        const netReduceAreasData = await dispatch("addDrawnAreaTable", {
+            drawnAreaData: formData.nettoReduceAreas,
+            title: i18next.t("additional:modules.pvObligation.report.areas.netReduce"),
+            noAreasTitle: i18next.t("additional:modules.pvObligation.report.areas.noNetReduce")
+        });
+
+        docDefinition.content.push(netReduceAreasData);
+
+        // restricted areas
+        // /////////////////////
+        const restrictedAreasData = await dispatch("addDrawnAreaTable", {
+            drawnAreaData: formData.restrictedAreas,
+            title: i18next.t("additional:modules.pvObligation.report.areas.restrictedAreas"),
+            noAreasTitle: i18next.t("additional:modules.pvObligation.report.areas.noRestrictedAreas")
+        });
+
+        docDefinition.content.push(restrictedAreasData);
+
+        // Additional information
+        // /////////////////////
+        docDefinition.content.push({
+            text: i18next.t("additional:modules.pvObligation.report.furtherInformation"),
+            bold: true,
+            fontSize: 12,
+            margin: [0, 20, 0, 10]
+        });
+
+        if (formData.additionalInformation.length > 0) {
+            docDefinition.content.push({
+                text: formData.additionalInformation,
+                margin: [0, 0, 0, 10]
+            });
+        }
+        else {
+            docDefinition.content.push({
+                text: i18next.t("additional:modules.pvObligation.report.noFurtherInformation"),
+                italics: true,
+                margin: [0, 0, 0, 10]
+            });
+        }
+
+        // Map
+        // /////////////////////
+        docDefinition.content.push({
+            image: mapContent.base64Image,
+            width: idealMapWidthInPDF,
+            alignment: "center",
+            pageBreak: "before"
+        });
+
+        /* currently the map is not in scale, therefore comment this out, as long as it is fixed
+        docDefinition.content.push({
+            text: i18next.t("additional:modules.pvObligation.report.scale") + " 1:" + thousandsSeparator(mapContent.scale),
+            fontSize: 8,
+            alignment: "center",
+            margin: [0, 5]
+        });*/
 
         // Footer
+        // /////////////////////
         docDefinition.footer = (currentPage, pageCount) => {
-            return getFooterSvg(currentPage, pageCount, formData.author, "Erstellt mit dem PV-Pflicht-Tool der BUKEA Hamburg");
+            return getFooterSvg(currentPage, pageCount, formData.author, i18next.t("additional:modules.pvObligation.report.createdWith"));
         };
 
         // Here we call the pdfMake function to render pdf from the docDefinition
-        pdfMake.createPdf(docDefinition, "", "", pdfFonts).download(`PV-Pflicht-Report-${exportDate}.pdf`, () => {
-            setTimeout(() => {
-                commit("setIsCreatingReport", false);
-            }, 2000);
-        });
+        try {
+            const fileName = `${i18next.t("additional:modules.pvObligation.report.fileNamePrefix")}${exportDate}.pdf`;
+
+            await new Promise((resolve, reject) => {
+                try {
+                    pdfMake.createPdf(docDefinition, "", "", pdfFonts).download(fileName, () => {
+                        setTimeout(() => {
+                            resolve();
+                        }, 2000);
+                    });
+                }
+                catch (error) {
+                    reject(error);
+                }
+            });
+        }
+        catch (error) {
+            console.error("PDF Erstellung fehlgeschlagen:", error);
+        }
+        finally {
+            commit("setIsCreatingReport", false);
+        }
     },
     /**
      * Crops the main map canvas by removing the left and right menu widths,
@@ -235,6 +267,50 @@ export default {
             height: cropHeight,
             scale: rootGetters["Maps/scale"]
         };
+    },
+    // eslint-disable-next-line no-unused-vars
+    async addDrawnAreaTable ({_}, payload) {
+        const content = [];
+
+        if (payload.drawnAreaData.length > 0) {
+            content.push({
+                text: payload.title,
+                bold: true,
+                fontSize: 12,
+                margin: [0, 20, 0, 10]
+            });
+
+            const restrictedAreas = [
+                [
+                    i18next.t("additional:modules.pvObligation.report.areas.areaListNr"),
+                    i18next.t("additional:modules.pvObligation.report.areas.areaListDescr")
+                ]
+            ];
+
+            payload.drawnAreaData.forEach((area) => {
+                restrictedAreas.push([area.id, area.description]);
+            });
+
+            content.push({
+                layout: "lightHorizontalLines",
+                table: {
+                    // headers are automatically repeated if the table spans over multiple pages
+                    // you can declare how many rows should be treated as headers
+                    headerRows: 1,
+                    widths: [100, "auto"],
+                    body: restrictedAreas
+                }
+            });
+        }
+        else {
+            content.push({
+                text: payload.noAreasTitle,
+                italics: true,
+                margin: [0, 0, 0, 10]
+            });
+        }
+
+        return content;
     },
     /**
      * Dissolves roof features with the same roofId from a given layer, calculates the total roof area,
