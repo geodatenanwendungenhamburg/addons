@@ -41,6 +41,10 @@ export default {
                 {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
             </p>
 
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.additionalInfo") }}
+            </p>
+
             <PvObligationRestrictionList
                 class="restrictionList"
                 :is-disabled="false"

@@ -33,10 +33,18 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
             }
         });
 
-        expect(wrapper.findAll("p.netRoofAreaText").length).to.equal(0);
+        expect(wrapper.findAll("p").length).to.equal(2);
+
+        wrapper.findAll("p").forEach((pTag) => {
+            expect(pTag.text()).to.contain("missingStepGrossArea");
+        });
     });
 
     it("renders all net roof area paragraphs when netRoofArea is set", async () => {
+        config.global.mocks.$t = (key, addon) => {
+            return key + (addon ? Object.values(addon).join(",") : "");
+        };
+
         const wrapper = shallowMount(Component, {
             propsData: {
                 wizardStepsFormData: {
@@ -55,14 +63,16 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await wrapper.vm.$nextTick();
 
-        // eslint-disable-next-line
-        const paragraphs = wrapper.findAll("strong.netRoofAreaValue");
-
-        expect(paragraphs.length).to.equal(1);
-        expect(paragraphs.at(0).text()).to.contain("100");
+        expect(wrapper.findAll("strong").length).to.equal(2);
+        expect(wrapper.findAll("strong")[0].text()).to.contain("100");
+        expect(wrapper.findAll("strong")[1].text()).to.contain("30");
     });
 
     it("renders correct obligatedArea rounding", async () => {
+        config.global.mocks.$t = (key, addon) => {
+            return key + (addon ? Object.values(addon).join(",") : "");
+        };
+
         const wrapper = shallowMount(Component, {
             propsData: {
                 wizardStepsFormData: {
@@ -80,10 +90,8 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await wrapper.vm.$nextTick();
 
-        // eslint-disable-next-line
-        const paragraphs = wrapper.findAll("strong.netRoofAreaValue");
-
-        expect(paragraphs.length).to.equal(1);
-        expect(paragraphs.at(0).text()).to.contain("123.456");
+        expect(wrapper.findAll("strong").length).to.equal(2);
+        expect(wrapper.findAll("strong")[0].text()).to.contain("123.456");
+        expect(wrapper.findAll("strong")[1].text()).to.contain(Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10);
     });
 });
