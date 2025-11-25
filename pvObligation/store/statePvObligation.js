@@ -37,7 +37,9 @@ const state = {
     relevantLayerIds: [
         "34755", // dachflaechen
         "34753" // dachflaechen_pv
-    ]
+    ],
+    baseUrl: "https://geoportal-hamburg.de",
+    geosearchReverseServiceId: "5"
 };
 
 export default state;

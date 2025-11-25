@@ -1,6 +1,7 @@
 <script>
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import InputText from "@shared/modules/inputs/components/InputText.vue";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
     name: "PvObligationWizardStepPersonalInformation",
@@ -16,9 +17,7 @@ export default {
                 street: "",
                 postalCode: "",
                 city: "",
-                email: "",
-                phoneNumber: "",
-                reportCreatedBy: ""
+                houseNumber: ""
             },
             /** @override */
             componentFormErrors: {
@@ -26,39 +25,74 @@ export default {
                 street: null,
                 postalCode: null,
                 city: null,
-                email: null,
-                phoneNumber: null,
-                reportCreatedBy: null
+                houseNumber: null
             }
         };
     },
+    computed: {
+        ...mapGetters("Modules/PvObligation", [
+            "selectedRoofId"
+        ])
+    },
+    watch: {
+        selectedRoofId: {
+            handler: async function (newValue) {
+                if (!newValue) {
+                    return;
+                }
+
+                try {
+                    Object.assign(this.componentFormData, await this.getAddress() || this.componentFormData);
+                }
+                catch (error) {
+                    console.error("Error in selectedRoofId watcher:", error);
+                }
+            },
+            deep: false
+        }
+    },
     methods: {
+        ...mapActions("Modules/PvObligation", [
+            "getAddress"
+        ]),
         /** @override */
         componentFormDataValidate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue"),
-                errorMessageInvalidValue = this.$t("additional:modules.pvObligation.formErrors.genericInvalidValue");
+                errorMessageInvalidValue = this.$t("additional:modules.pvObligation.formErrors.genericInvalidValue"),
+                validations = [
+                    {
+                        field: "propertyOwnerFullName",
+                        error: !this.componentFormData.propertyOwnerFullName.length ? errorMessageMissingValue : null
+                    },
+                    {
+                        field: "street",
+                        error: !this.componentFormData.street.length ? errorMessageMissingValue : null
+                    },
+                    {
+                        field: "postalCode",
+                        error: (() => {
+                            if (!this.componentFormData.postalCode.length) {
+                                return errorMessageMissingValue;
+                            }
+                            if (!(/^\d{5}$/).test(this.componentFormData.postalCode)) {
+                                return errorMessageInvalidValue;
+                            }
+                            return null;
+                        })()
+                    },
+                    {
+                        field: "houseNumber",
+                        error: !this.componentFormData.houseNumber.length ? errorMessageMissingValue : null
+                    },
+                    {
+                        field: "city",
+                        error: !this.componentFormData.city.length ? errorMessageMissingValue : null
+                    }
+                ];
 
-            this.componentFormErrors.propertyOwnerFullName = !this.componentFormData.propertyOwnerFullName.length
-                ? errorMessageMissingValue
-                : null;
-
-            this.componentFormErrors.street = !this.componentFormData.street.length
-                ? errorMessageMissingValue
-                : null;
-
-            if (!this.componentFormData.postalCode.length) {
-                this.componentFormErrors.postalCode = errorMessageMissingValue;
-            }
-            else if (!(/^\d{5}$/).test(this.componentFormData.postalCode)) {
-                this.componentFormErrors.postalCode = errorMessageInvalidValue;
-            }
-            else {
-                this.componentFormErrors.postalCode = null;
-            }
-
-            this.componentFormErrors.city = !this.componentFormData.city.length
-                ? errorMessageMissingValue
-                : null;
+            validations.forEach(({field, error}) => {
+                this.componentFormErrors[field] = error;
+            });
 
             return !Object.values(this.componentFormErrors).some(Boolean);
         }
@@ -74,66 +108,50 @@ export default {
 
         <form>
             <InputText
-                :id="'componentFormDataPropertyOwnerFullName'"
+                id="componentFormDataPropertyOwnerFullName"
                 v-model="componentFormData.propertyOwnerFullName"
                 :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.propertyOwnerFullName') + ' *'"
                 :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.propertyOwnerFullName')"
                 :error-message="componentFormErrors.propertyOwnerFullName"
             />
 
-            <InputText
-                :id="'componentFormDataStreet'"
-                v-model="componentFormData.street"
-                :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street') + ' *'"
-                :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street')"
-                :error-message="componentFormErrors.street"
-            />
-
             <div class="groupHorizontal">
-                <div class="formField formFieldPostalCode">
-                    <InputText
-                        :id="'componentFormDataPostalCode'"
-                        v-model="componentFormData.postalCode"
-                        :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode') + ' *'"
-                        :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode')"
-                        :error-message="componentFormErrors.postalCode"
-                    />
-                </div>
+                <InputText
+                    id="componentFormDataStreet"
+                    v-model="componentFormData.street"
+                    class="componentFormDataStreet"
+                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street')"
+                    :error-message="componentFormErrors.street"
+                />
 
-                <div class="formField">
-                    <InputText
-                        :id="'componentFormDataCity'"
-                        v-model="componentFormData.city"
-                        :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city') + ' *'"
-                        :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city')"
-                        :error-message="componentFormErrors.city"
-                    />
-                </div>
+                <InputText
+                    id="componentFormDataHouseNumber"
+                    v-model="componentFormData.houseNumber"
+                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.houseNumber') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.houseNumber')"
+                    :error-message="componentFormErrors.houseNumber"
+                />
             </div>
 
-            <InputText
-                :id="'componentFormEmail'"
-                v-model="componentFormData.email"
-                :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.email')"
-                :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.email')"
-                :error-message="componentFormErrors.email"
-            />
+            <div class="groupHorizontal">
+                <InputText
+                    id="componentFormDataPostalCode"
+                    v-model="componentFormData.postalCode"
+                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode')"
+                    :error-message="componentFormErrors.postalCode"
+                />
 
-            <InputText
-                :id="'componentFormPhoneNumber'"
-                v-model="componentFormData.phoneNumber"
-                :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.phoneNumber')"
-                :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.phoneNumber')"
-                :error-message="componentFormErrors.phoneNumber"
-            />
-
-            <InputText
-                :id="'componentFormReportCreatedBy'"
-                v-model="componentFormData.reportCreatedBy"
-                :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.reportCreatedBy')"
-                :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.reportCreatedBy')"
-                :error-message="componentFormErrors.reportCreatedBy"
-            />
+                <InputText
+                    id="componentFormDataCity"
+                    v-model="componentFormData.city"
+                    class="componentFormDataCity"
+                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city')"
+                    :error-message="componentFormErrors.city"
+                />
+            </div>
         </form>
 
         <div class="dataPrivacyInfo">
@@ -156,19 +174,12 @@ export default {
                 margin: -0.5rem 0 1rem 0.25rem;
             }
 
-            .groupHorizontal {
+            div.groupHorizontal {
                 display: flex;
-                flex-direction: row;
                 gap: 1rem;
-
-                .formField {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-
-                    &.formFieldPostalCode {
-                        width: 200px;
-                    }
+                div.componentFormDataStreet,
+                div.componentFormDataCity{
+                    width: 80%;
                 }
             }
         }
