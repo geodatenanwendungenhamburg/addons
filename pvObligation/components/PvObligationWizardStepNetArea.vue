@@ -91,19 +91,23 @@ export default {
 
         <div v-else>
             <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {netRoofArea: componentFormData.netRoofArea, obligatedArea: obligatedArea}) }}
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.introduction") }}
             </p>
 
-            <strong class="netRoofAreaValue">
-                {{ displayNetRoofArea }} m²
+            <strong>
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {displayNetRoofArea: displayNetRoofArea}) }}
+            </strong>
+
+            <strong>
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
             </strong>
 
             <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
             </p>
 
             <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netAreaNoteText") }}
             </p>
 
             <PvObligationRestrictionList
@@ -122,7 +126,7 @@ export default {
     #pvObligationWizardStepNetArea{
         margin: 1rem 0;
 
-        strong.netRoofAreaValue {
+        strong {
             display: block;
             margin-bottom: 1rem;
             text-align: center;
