@@ -19,8 +19,10 @@
                         "wizardTitle": "Gross roof area",
                         "component": {
                             "introduction": "Click on the desired building in the map to determine the gross roof area.",
-                            "hintSearch": "Tip: Use the search to find and display the building more quickly.",
+                            "hintSearch": "(Tip: Use the search to find and display the building more quickly.)",
+                            "grossAreaDescription": "The gross roof area includes the entire roof area of the building, including all sub-areas regardless of orientation, use, or shading. If this area exceeds 50 m², it is subject to the PV obligation if ‘significant roof modifications’ are carried out.",
                             "grossAreaText": "The gross roof area of the selected building is: ",
+                            "grossAreaHint": "(Note: The roof areas have been recorded automatically. There may be deviations from the actual area. Please take this into account in the next step or under ‘Personal notes’.)",
                             "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²)."
                         }
                     },
