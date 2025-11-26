@@ -93,5 +93,8 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         expect(wrapper.findAll("strong").length).to.equal(2);
         expect(wrapper.findAll("strong")[0].text()).to.contain("123.456");
         expect(wrapper.findAll("strong")[1].text()).to.contain(Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10);
+
+        // reset the settings to avoid problems in former tests
+        config.global.mocks.$t = key => key;
     });
 });
