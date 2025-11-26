@@ -184,6 +184,16 @@ export default {
         },
         validateAllStepsOnFinalStep () {
             this.wizardSteps.forEach(step => this.wizardStepIsValid(step));
+        },
+        onResetWizardData () {
+            this.wizardSteps.forEach(step => {
+                const refArr = this.$refs[`ref${step.component.name}`],
+                    instance = Array.isArray(refArr) ? refArr[0] : refArr;
+
+                if (typeof instance?.resetWizardStepData === "function") {
+                    instance.resetWizardStepData();
+                }
+            });
         }
     }
 };
@@ -229,6 +239,7 @@ export default {
                             :wizard-steps-form-data="wizardStepsFormData"
                             :wizard-step-is-active="wizardStepIsActive(step.component.name)"
                             @stepError="handleWizardStepError"
+                            @resetWizardData="onResetWizardData"
                         />
                     </AccordionItem>
                 </div>

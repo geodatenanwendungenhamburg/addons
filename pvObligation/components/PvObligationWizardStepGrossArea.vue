@@ -25,7 +25,10 @@ export default {
         };
     },
     computed: {
-        ...mapGetters(["configJs"])
+        ...mapGetters(["configJs"]),
+        ...mapGetters("Modules/PvObligation", [
+            "selectedRoofId"
+        ])
     },
     watch: {
         /** @override */
@@ -107,6 +110,15 @@ export default {
             selectInteraction.on("select", async (e) => {
                 const selectedFeature = e.selected[0],
                     roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
+
+                if (this.selectedRoofId && this.selectedRoofId !== roofId) {
+                    // eslint-disable-next-line no-alert
+                    if (!confirm(this.$t("additional:modules.pvObligation.wizard.step.grossArea.component.confirmChangeRoof"))) {
+                        return;
+                    }
+
+                    this.resetWizardData();
+                }
 
                 this.setSelectedRoofId(roofId);
                 this.componentFormData.grossRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "Dachflächen"}) * 10) / 10;

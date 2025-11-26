@@ -11,6 +11,12 @@ export default {
                 personalNote: ""
             }
         };
+    },
+    methods: {
+        /** @override */
+        resetWizardStepData () {
+            this.componentFormData.personalNote = "";
+        }
     }
 };
 </script>
