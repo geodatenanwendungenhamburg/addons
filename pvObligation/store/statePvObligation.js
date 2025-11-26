@@ -15,6 +15,9 @@
  * @property {Boolean} isCreatingReport - flag if the report is currently been generated
  * @property {String} selectedRoofId - ID of the selected roof
  * @property {String[]} relevantLayerIds - IDs of roof layers used in this addon (configured in config.json). The addon will wait until the features of these layers are loaded before it starts working.
+ * @property {Boolean} isDrawing - flag indicating whether the user is currently drawing on the map
+ * @property {String} baseUrl - base URL of the Geoportal used for remote requests (e.g. reverse geocoding)
+ * @property {String} geosearchReverseServiceId - id of the reverse geosearch service to get the service url from restConfig
  **/
 
 const state = {
@@ -39,7 +42,9 @@ const state = {
         "34753" // dachflaechen_pv
     ],
     baseUrl: "https://geoportal-hamburg.de",
-    geosearchReverseServiceId: "5"
+    geosearchReverseServiceId: "5",
+    stepNetRestrictedAreasIsDrawing: false,
+    stepNetAreaIsDrawing: false
 };
 
 export default state;
