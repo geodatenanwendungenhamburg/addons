@@ -19,13 +19,19 @@ export default {
                 netRoofArea: null,
                 restrictedListItems: []
             },
+            /** @override */
+            componentFormErrors: {
+                drawingIsNotCompletedError: false
+            },
             obligatedArea: null,
             displayNetRoofArea: 0
         };
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "selectedRoofId"
+            "selectedRoofId",
+            "stepNetAreaIsDrawing",
+            "stepNetRestrictedAreasIsDrawing"
         ])
     },
     watch: {
@@ -93,6 +99,12 @@ export default {
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+        },
+        /** @override */
+        componentFormDataValidate () {
+            this.componentFormErrors.drawingIsNotCompletedError = this.stepNetAreaIsDrawing;
+
+            return !Object.values(this.componentFormErrors).some(Boolean);
         }
     }
 };
@@ -111,6 +123,12 @@ export default {
         </div>
 
         <div v-else>
+            <div v-if="componentFormErrors.drawingIsNotCompletedError">
+                <p class="error">
+                    {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.drawingIsNotCompletedError") }}
+                </p>
+            </div>
+
             <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.introduction") }}
             </p>
@@ -133,8 +151,9 @@ export default {
 
             <PvObligationRestrictionList
                 class="restrictionList"
-                :is-disabled="false"
+                :is-disabled="stepNetRestrictedAreasIsDrawing"
                 index-prefix="N"
+                :disabled-message="$t('additional:modules.pvObligation.wizard.step.netArea.component.disabledMessage')"
                 @list-items="onListItems"
             />
         </div>

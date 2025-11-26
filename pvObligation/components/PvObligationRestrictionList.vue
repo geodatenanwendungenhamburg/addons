@@ -2,6 +2,7 @@
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import PvObligationRestrictionListForm from "./PvObligationRestrictionListForm.vue";
+import {mapMutations} from "vuex";
 
 export default {
     name: "PvObligationRestrictionList",
@@ -20,6 +21,10 @@ export default {
         isDisabled: {
             type: Boolean,
             required: true
+        },
+        disabledMessage: {
+            type: String,
+            required: true
         }
     },
     emits: [
@@ -33,7 +38,29 @@ export default {
             blueprintIdIndex: 0
         };
     },
+    watch: {
+        itemSelectedCreate (value) {
+            if (this.indexPrefix.startsWith("S")) {
+                this.setStepNetRestrictedAreasIsDrawing(value !== null);
+            }
+            else {
+                this.setStepNetAreaIsDrawing(value !== null);
+            }
+        },
+        itemSelectedEdit (value) {
+            if (this.indexPrefix.startsWith("S")) {
+                this.setStepNetRestrictedAreasIsDrawing(value !== null);
+            }
+            else {
+                this.setStepNetAreaIsDrawing(value !== null);
+            }
+        }
+    },
     methods: {
+        ...mapMutations("Modules/PvObligation", [
+            "setStepNetAreaIsDrawing",
+            "setStepNetRestrictedAreasIsDrawing"
+        ]),
         formDataItemBlueprint () {
             this.blueprintIdIndex++;
 
@@ -96,6 +123,13 @@ export default {
 
 <template lang="html">
     <div id="pvObligationRestrictionList">
+        <span
+            v-if="isDisabled"
+            class="error"
+        >
+            {{ disabledMessage }}
+        </span>
+
         <FlatButton
             v-if="!itemSelectedCreate"
             class="buttonAdd"
@@ -184,6 +218,10 @@ export default {
     @import "~variables";
 
     #pvObligationRestrictionList{
+        span.error {
+            color: $light_red;
+        }
+
         button.buttonAdd {
             margin-top: 1rem;
         }
