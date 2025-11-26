@@ -11,6 +11,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import booleanIntersects from "@turf/boolean-intersects";
 import intersect from "@turf/intersect";
 import difference from "@turf/difference";
+import booleanEqual from "@turf/boolean-equal";
 import {featureCollection} from "@turf/helpers";
 
 export default {
@@ -73,6 +74,8 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
+            "stepNetRestrictedAreasIsDrawing",
+            "stepNetAreaIsDrawing",
             "selectedRoofId"
         ])
     },
@@ -250,7 +253,7 @@ export default {
                     intersectionFeature = await this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
 
                     // eslint-disable-next-line one-var
-                    const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature);
+                    const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature, drawFeature);
 
                     if (differenceFeature) {
                         differenceFeature.forEach(feature => {
@@ -318,7 +321,7 @@ export default {
          * @param {Feature} feature - The feature to process.
          * @returns {Promise<Array<Object>} The array of features with overlaps removed or cut.
          */
-        async cutOverlappingFeatures (intersectionFeature) {
+        async cutOverlappingFeatures (intersectionFeature, drawFeature) {
             if (!intersectionFeature) {
                 return [];
             }
@@ -330,10 +333,15 @@ export default {
             let intersectionFeatureGeojson = olGeoJson.writeFeatureObject(intersectionFeature),
                 differenceFeature = null;
 
-            drawFeatures.forEach((feature, index) => {
-                if (index === drawFeatures.length - 1) {
+            drawFeatures.forEach((feature) => {
+                const drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature),
+                    euqalAsDrawGeometry = booleanEqual(drawFeatureGeoJson, olGeoJson.writeFeatureObject(feature));
+
+                if (euqalAsDrawGeometry) {
                     return;
                 }
+
+                // eslint-disable-next-line one-var
                 const featureGeoJson = olGeoJson.writeFeatureObject(feature),
                     featuresIntersecting = booleanIntersects(intersectionFeatureGeojson, featureGeoJson);
 

@@ -2,24 +2,63 @@ import {config, mount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationRestrictionList.vue";
 import {nextTick} from "vue";
+import sinon from "sinon";
+import {createStore} from "vuex";
 
 config.global.mocks.$t = key => key;
 
 describe("PvObligationRestrictionList.vue", () => {
-    let wrapper;
+    let wrapper,
+        store;
 
     beforeEach(() => {
+        store = createStore({
+            modules: {
+                namespaced: true,
+                Maps: {
+                    namespaced: true,
+                    actions: {
+                        addNewLayerIfNotExists: sinon.stub(),
+                        addInteraction: sinon.stub(),
+                        removeInteraction: sinon.stub()
+                    }
+                },
+                Modules: {
+                    namespaced: true,
+                    modules: {
+                        PvObligation: {
+                            namespaced: true,
+                            state: {
+                                stepNetAreaIsDrawing: false,
+                                stepNetRestrictedAreasIsDrawing: false
+                            },
+                            mutations: {
+                                setStepNetRestrictedAreasIsDrawing (state, payload) {
+                                    state.stepNetRestrictedAreasIsDrawing = payload;
+                                },
+                                setStepNetAreaIsDrawing (state, payload) {
+                                    state.stepNetAreaIsDrawing = payload;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
         wrapper = mount(Component, {
             props: {
                 indexPrefix: "X",
-                isDisabled: false
+                isDisabled: false,
+                disabledMessage: "test"
             },
             global: {
                 mocks: {
                     $t: key => key
-                }
+                },
+                plugins: [store]
             }
         });
+
     });
 
     it("could load the component and root HTML element contains correct ID", () => {
@@ -67,5 +106,51 @@ describe("PvObligationRestrictionList.vue", () => {
         expect(listItems[0].find("div.number").text()).equals("X1");
         expect(listItems[1].find("div.number").text()).equals("X2");
         expect(listItems[2].find("div.number").text()).equals("X3");
+    });
+
+    it("sets stepNetAreaIsDrawing via watcher when indexPrefix start with N", async () => {
+        await wrapper.setProps({
+            indexPrefix: "N"
+        });
+
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
+
+        await wrapper.vm.onButtonAdd();
+        await nextTick();
+
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.true;
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
+
+        await wrapper.setData({
+            itemSelectedCreate: null
+        });
+        await nextTick();
+
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
+    });
+
+    it("sets stepNetRestrictedAreasIsDrawing via watcher when indexPrefix starts with S", async () => {
+        await wrapper.setProps({
+            indexPrefix: "S"
+        });
+
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
+
+        await wrapper.vm.onButtonAdd();
+        await nextTick();
+
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.true;
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
+
+        await wrapper.setData({
+            itemSelectedCreate: null
+        });
+        await nextTick();
+
+        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
+        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
     });
 });

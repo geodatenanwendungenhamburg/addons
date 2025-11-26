@@ -1,6 +1,7 @@
 <script>
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
+import {mapGetters} from "vuex";
 
 export default {
     name: "PvObligationWizardStepNetRestrictedAreas",
@@ -13,8 +14,18 @@ export default {
             /** @override */
             componentFormData: {
                 restrictedListItems: []
+            },
+            /** @override */
+            componentFormErrors: {
+                drawingIsNotCompletedError: false
             }
         };
+    },
+    computed: {
+        ...mapGetters("Modules/PvObligation", [
+            "stepNetRestrictedAreasIsDrawing",
+            "stepNetAreaIsDrawing"
+        ])
     },
     methods: {
         /** @override */
@@ -37,6 +48,12 @@ export default {
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+        },
+        /** @override */
+        componentFormDataValidate () {
+            this.componentFormErrors.drawingIsNotCompletedError = this.stepNetRestrictedAreasIsDrawing;
+
+            return !Object.values(this.componentFormErrors).some(Boolean);
         }
     }
 };
@@ -55,6 +72,12 @@ export default {
         </div>
 
         <div v-else>
+            <div v-if="componentFormErrors.drawingIsNotCompletedError">
+                <p class="error">
+                    {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.drawingIsNotCompletedError") }}
+                </p>
+            </div>
+
             <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
             </p>
@@ -65,8 +88,9 @@ export default {
 
             <PvObligationRestrictionList
                 class="restrictionList"
-                :is-disabled="false"
+                :is-disabled="stepNetAreaIsDrawing"
                 index-prefix="S"
+                :disabled-message="$t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.disabledMessage')"
                 @list-items="onListItems"
             />
         </div>
