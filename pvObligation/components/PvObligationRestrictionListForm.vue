@@ -73,6 +73,8 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
+            "stepNetRestrictedAreasIsDrawing",
+            "stepNetAreaIsDrawing",
             "selectedRoofId"
         ])
     },
