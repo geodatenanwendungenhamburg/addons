@@ -20,4 +20,17 @@ describe("addons/pvObligation/components/PvObligationWizardStepPersonalNotes.vue
         expect(wrapper.exists()).to.be.true;
         expect(wrapper.attributes().id).equals("pvObligationWizardStepPersonalNotes");
     });
+
+    it("should reset correct wizard step data", async () => {
+        wrapper.setData({
+            componentFormData: {
+                personalNote: "Hello World"
+            }
+        });
+
+        wrapper.vm.resetWizardStepData();
+
+        expect(wrapper.vm.componentFormData.personalNote === "").to.be.true;
+    });
 });
+

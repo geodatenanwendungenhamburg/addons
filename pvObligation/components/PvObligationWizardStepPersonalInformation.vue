@@ -34,6 +34,16 @@ export default {
     },
     methods: {
         /** @override */
+        resetWizardStepData () {
+            Object.keys(this.componentFormData).forEach(key => {
+                this.componentFormData[key] = "";
+            });
+
+            Object.keys(this.componentFormErrors).forEach(key => {
+                this.componentFormErrors[key] = null;
+            });
+        },
+        /** @override */
         componentFormDataValidate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue"),
                 errorMessageInvalidValue = this.$t("additional:modules.pvObligation.formErrors.genericInvalidValue");
