@@ -25,6 +25,9 @@ export default {
             required: true
         }
     },
+    emits: [
+        "resetWizardData"
+    ],
     data () {
         return {
             // Shared form data for this component, accessible by other wizard steps
@@ -50,10 +53,25 @@ export default {
         /**
          * Called from PvObligationWizard.vue, see wizardStepIsValid()
          * Validates the component form data and add validation errors.
+         * Must be implemented in the extending component, if needed.
          * @returns {Boolean} true, if data is valid, false if invalid
          */
         componentFormDataValidate () {
             return true;
+        },
+        /**
+         * Resets the data for a wizard step.
+         * Called from PvObligationWizard.vue when a reset is requested.
+         * Can be implemented in the extending component, if needed.
+         */
+        resetWizardStepData () {
+            // Implement in extending component if needed
+        },
+        /**
+         * Emitts an event to reset all wizard steps form data.
+         */
+        resetWizardData () {
+            this.$emit("resetWizardData");
         }
     }
 };

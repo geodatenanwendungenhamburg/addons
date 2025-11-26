@@ -17,6 +17,24 @@ export default {
         };
     },
     methods: {
+        /** @override */
+        resetWizardStepData () {
+            if (!this.componentFormData.restrictedListItems.length) {
+                return;
+            }
+
+            const drawLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
+                return layer.get("id") === "module/pvObligation/drawLayer";
+            });
+
+            drawLayer.getSource().getFeatures().forEach(feature => {
+                if (this.componentFormData.restrictedListItems.map(item => item.id).includes(feature.get("id"))) {
+                    drawLayer.getSource().removeFeature(feature);
+                }
+            });
+
+            this.componentFormData.restrictedListItems.splice(0);
+        },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
         }
