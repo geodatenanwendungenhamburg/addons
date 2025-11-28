@@ -111,7 +111,8 @@
                         "hint": "Zeichnungen auf der Karte bearbeiten:",
                         "text": "Sie können Ihre erstellten Zeichnungen direkt auf der Karte mit der Maus verändern."
                     },
-                     "missingAreaText": "Bitte zeichnen Sie die Fläche ein, die von der Nettodachfläche ausgeschlossen werden soll."
+                     "missingAreaText": "Bitte zeichnen Sie die Fläche ein, die von der Nettodachfläche ausgeschlossen werden soll.",
+                     "area3D": "Fläche: "
                 }
             }
         }
