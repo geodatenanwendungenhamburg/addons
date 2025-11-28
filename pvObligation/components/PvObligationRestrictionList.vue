@@ -84,6 +84,11 @@ export default {
             }
 
             this.itemSelectedEdit = null;
+        },
+        getArea3D (id) {
+            return this.listItems.find(item => item.id === id).features.reduce((sum, feature) => {
+                return Math.round(sum + feature.values_.area3D) * 10 / 10;
+            }, 0);
         }
     }
 };
@@ -150,19 +155,24 @@ export default {
                         </div>
                     </div>
 
-                    <div class="actions">
-                        <FlatButton
-                            :secondary="true"
-                            :text="$t('additional:modules.pvObligation.components.restrictionList.buttonEdit')"
-                            :interaction="() => onButtonEdit(listItem)"
-                        />
+                    <div class="bottomRow">
+                        <div class="area3D">
+                            {{ $t('additional:modules.pvObligation.components.restrictionList.area3D') + getArea3D(listItem.id) }}m²
+                        </div>
+                        <div class="actions">
+                            <FlatButton
+                                :secondary="true"
+                                :text="$t('additional:modules.pvObligation.components.restrictionList.buttonEdit')"
+                                :interaction="() => onButtonEdit(listItem)"
+                            />
 
-                        <IconButton
-                            class="buttonDelete"
-                            :aria="$t('additional:modules.pvObligation.components.restrictionList.buttonDelete')"
-                            :interaction="() => onButtonDelete(listItem)"
-                            icon="bi bi-x-circle"
-                        />
+                            <IconButton
+                                class="buttonDelete"
+                                :aria="$t('additional:modules.pvObligation.components.restrictionList.buttonDelete')"
+                                :interaction="() => onButtonDelete(listItem)"
+                                icon="bi bi-x-circle"
+                            />
+                        </div>
                     </div>
                 </template>
             </div>
@@ -218,17 +228,30 @@ export default {
                     }
                 }
 
-                div.actions {
+                div.bottomRow {
                     display: flex;
-                    gap: 1rem;
-                    justify-content: end;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.25rem;
+                    margin-top: 1rem;
 
-                    div.buttonDelete:hover {
-                        color: $light_red;
+                    div.area3D {
+                        align-self: flex-start;
+                        margin: 0;
                     }
 
-                    button:hover {
-                        background-color: $light_grey;
+                    div.actions {
+                        display: flex;
+                        gap: 1rem;
+                        justify-content: end;
+
+                        div.buttonDelete:hover {
+                            color: $light_red;
+                        }
+
+                        button:hover {
+                            background-color: $light_grey;
+                        }
                     }
                 }
             }
