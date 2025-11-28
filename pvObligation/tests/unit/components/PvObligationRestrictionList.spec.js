@@ -1,11 +1,9 @@
-import {config, mount} from "@vue/test-utils";
+import {mount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationRestrictionList.vue";
 import {nextTick} from "vue";
 import sinon from "sinon";
 import {createStore} from "vuex";
-
-config.global.mocks.$t = key => key;
 
 describe("PvObligationRestrictionList.vue", () => {
     let wrapper,
@@ -58,7 +56,12 @@ describe("PvObligationRestrictionList.vue", () => {
                 plugins: [store]
             }
         });
+    });
 
+    afterEach(() => {
+        if (wrapper) {
+            wrapper.unmount();
+        }
     });
 
     it("could load the component and root HTML element contains correct ID", () => {

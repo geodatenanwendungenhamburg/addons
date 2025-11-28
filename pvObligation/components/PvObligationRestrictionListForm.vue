@@ -78,8 +78,8 @@ export default {
             "selectedRoofId"
         ])
     },
-    async mounted () {
-        await this.initializeDrawing();
+    mounted () {
+        this.initializeDrawing();
     },
     beforeUnmount () {
         this.removeDrawInteraction();

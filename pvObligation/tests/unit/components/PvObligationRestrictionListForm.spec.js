@@ -1,14 +1,28 @@
-import {config, mount} from "@vue/test-utils";
+import {mount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationRestrictionListForm.vue";
 import {nextTick} from "vue";
-
-config.global.mocks.$t = key => key;
+import sinon from "sinon";
+import {createStore} from "vuex";
 
 describe("PvObligationRestrictionListForm.vue", () => {
-    let wrapper;
+    let wrapper,
+        store;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        store = createStore({
+            modules: {
+                Maps: {
+                    namespaced: true,
+                    actions: {
+                        addNewLayerIfNotExists: sinon.stub(),
+                        addInteraction: sinon.stub(),
+                        removeInteraction: sinon.stub()
+                    }
+                }
+            }
+        });
+
         wrapper = mount(Component, {
             props: {
                 formMode: "edit",
@@ -21,9 +35,16 @@ describe("PvObligationRestrictionListForm.vue", () => {
             global: {
                 mocks: {
                     $t: key => key
-                }
+                },
+                plugins: [store]
             }
         });
+    });
+
+    afterEach(() => {
+        if (wrapper) {
+            wrapper.unmount();
+        }
     });
 
     it("could load the component and root HTML element contains correct ID", () => {
