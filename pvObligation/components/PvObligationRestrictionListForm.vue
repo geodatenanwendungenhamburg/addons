@@ -2,11 +2,16 @@
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
-import {mapActions} from "vuex";
-import {Style, Stroke, Fill} from "ol/style";
+import {mapActions, mapGetters} from "vuex";
+import {Style, Stroke, Fill, Text as OlText} from "ol/style";
 import {createBox} from "ol/interaction/Draw";
 import {Draw} from "ol/interaction";
 import {fromCircle} from "ol/geom/Polygon";
+import GeoJSON from "ol/format/GeoJSON";
+import booleanIntersects from "@turf/boolean-intersects";
+import intersect from "@turf/intersect";
+import difference from "@turf/difference";
+import {featureCollection} from "@turf/helpers";
 
 export default {
     name: "PvObligationRestrictionListForm",
@@ -65,6 +70,11 @@ export default {
                 activeShapeId: "polygon"
             }
         };
+    },
+    computed: {
+        ...mapGetters("Modules/PvObligation", [
+            "selectedRoofId"
+        ])
     },
     async mounted () {
         await this.initializeDrawing();
@@ -167,13 +177,7 @@ export default {
          * @returns {void}
          */
         handleDrawEnd (event) {
-            event.feature.setProperties({
-                type: this.drawState.activeShapeId,
-                id: this.formData.id,
-                area2D: this.calculateArea(event.feature.getGeometry())
-            });
-
-            this.formData.features.push(event.feature);
+            this.cutDrawnFeatures(event.feature);
         },
         /**
          * Calculates area of given geometry. Supports polygons and circles.
@@ -211,8 +215,182 @@ export default {
             removeFeature.forEach(feature => {
                 this.drawState.layer.getSource().removeFeature(feature);
             });
+        },
+        /**
+         * Cuts the currently drawn features on the map using the specified geometry.
+         * This method processes the drawn features and applies the cut operation,
+         * updating the map with the resulting geometries.
+         *
+         * @param {Geometry} cutGeometry - The geometry used to cut the drawn features.
+         * @returns {void}
+         */
+        cutDrawnFeatures (drawFeature) {
+            const netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
+                    return layer.get("name") === "PV-geeignete Dachflächen";
+                }),
+                netAreaFeatures = netAreaLayer.getSource().getFeatures().filter(feature => {
+                    return feature.get("gebaeude_id") === this.selectedRoofId;
+                }),
+                // Convert OpenLayers feature to GeoJSON for turf processing
+                olGeoJson = new GeoJSON(),
+                drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature);
+
+            netAreaFeatures.forEach(async netAreaFeature => {
+                let intersectionFeature = null;
+
+                if (netAreaFeature.getGeometry().getType() === "MultiPolygon") {
+                    const featureGeoJson = olGeoJson.writeFeatureObject(netAreaFeature);
+
+                    // Ensure featureGeoJson is valid
+                    if (!featureGeoJson || !featureGeoJson.geometry) {
+                        console.warn("Net area feature polygon is invalid or missing geometry.");
+                        return;
+                    }
+
+                    intersectionFeature = await this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
+
+                    // eslint-disable-next-line one-var
+                    const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature);
+
+                    if (differenceFeature) {
+                        differenceFeature.forEach(feature => {
+                            this.addFeatureWithProperties(feature, featureGeoJson);
+                        });
+                    }
+                }
+                else if (netAreaFeature.getGeometry().getType() === "Polygon") {
+                    const polyFeature = netAreaFeature.clone();
+
+                    polyFeature.setGeometry(netAreaFeature.getGeometry().clone());
+
+                    // eslint-disable-next-line one-var
+                    const featureGeoJson = olGeoJson.writeFeatureObject(polyFeature);
+
+                    intersectionFeature = this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
+
+                    // eslint-disable-next-line one-var
+                    const differenceFeature = this.cutOverlappingFeatures(intersectionFeature);
+
+                    if (differenceFeature) {
+                        differenceFeature.forEach(feature => {
+                            this.addFeatureWithProperties(feature, featureGeoJson);
+                        });
+                    }
+                }
+            });
+        },
+        /**
+         * Checks if the given feature intersects with any features in the net roof layer.
+         * @param {GeoJson} featureGeoJson - The feature to check for intersection.
+         * @param {GeoJson} drawFeatureGeoJson - The drawn feature to intersect with.
+         * @returns {Feature} The intersection feature if an intersection exists, otherwise null.
+         */
+        async intersectFeature (featureGeoJson, drawFeatureGeoJson) {
+            const intersection = intersect(featureCollection([featureGeoJson, drawFeatureGeoJson])),
+                olGeoJson = new GeoJSON();
+
+            let intersectionFeature = null;
+
+            if (intersection && intersection.geometry) {
+                // Convert Turf intersection (GeoJSON) to OpenLayers feature
+                intersectionFeature = olGeoJson.readFeature(intersection);
+            }
+
+            // Remove the original drawn feature from the layer
+            setTimeout(() => {
+                const source = this.drawState.layer.getSource();
+
+                source.getFeatures().forEach(f => {
+                    if (f && !f.get("id")) {
+                        source.removeFeature(f);
+                    }
+                });
+            }, 0);
+
+            if (intersectionFeature) {
+                return intersectionFeature;
+            }
+
+            return null;
+        },
+        /**
+         * Removes or cuts overlapping features from a given set of features.
+         * @param {Feature} feature - The feature to process.
+         * @returns {Promise<Array<Object>} The array of features with overlaps removed or cut.
+         */
+        async cutOverlappingFeatures (intersectionFeature) {
+            if (!intersectionFeature) {
+                return [];
+            }
+
+            const olGeoJson = new GeoJSON(),
+                drawFeatures = this.drawState.layer.getSource().getFeatures(),
+                differenceFeatures = [];
+
+            let intersectionFeatureGeojson = olGeoJson.writeFeatureObject(intersectionFeature),
+                differenceFeature = null;
+
+            drawFeatures.forEach((feature, index) => {
+                if (index === drawFeatures.length - 1) {
+                    return;
+                }
+                const featureGeoJson = olGeoJson.writeFeatureObject(feature),
+                    featuresIntersecting = booleanIntersects(intersectionFeatureGeojson, featureGeoJson);
+
+                if (featuresIntersecting) {
+                    const differenceResult = difference(featureCollection([intersectionFeatureGeojson, featureGeoJson]));
+
+                    if (differenceResult && differenceResult.geometry) {
+                        differenceFeature = olGeoJson.readFeature(differenceResult);
+                        intersectionFeatureGeojson = differenceResult;
+                    }
+                }
+            });
+
+            if (differenceFeature) {
+                differenceFeatures.push(differenceFeature);
+            }
+            else {
+                differenceFeatures.push(intersectionFeature);
+            }
+
+            return differenceFeatures;
+        },
+        /**
+         * Adds a new feature to the map with the specified properties.
+         *
+         * @param {Object} feature - The feature object to add.
+         * @param {Object} featureGeoJson - The GeoJson of the original roof feature containing the required properties.
+         * @returns {void}
+         */
+        addFeatureWithProperties (feature, featureGeoJson) {
+            const area2D = this.calculateArea(feature.getGeometry());
+
+            // Add a text label style
+            feature.setStyle(new Style({
+                fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
+                stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2}),
+                text: new OlText({
+                    text: this.formData.id,
+                    font: "bold 14px Arial",
+                    fill: new Fill({color: "#222"}),
+                    stroke: new Stroke({color: "#fff", width: 3}),
+                    overflow: true
+                })
+            }));
+
+            feature.setProperties({
+                type: this.drawState.activeShapeId,
+                id: this.formData.id,
+                area2D: area2D,
+                area3D: area2D / Math.cos((featureGeoJson.properties.dachneig * Math.PI) / 180)
+            });
+
+            this.drawState.layer.getSource().addFeature(feature);
+            this.formData.features.push(feature);
         }
     }
+
 };
 </script>
 
