@@ -3,6 +3,7 @@ import {config, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
 import Component from "../../../components/PvObligationWizardStepGenerateReport.vue";
+import {createEmpty as createEmptyExtent} from "ol/extent";
 
 config.global.mocks.$t = key => key;
 
@@ -10,6 +11,20 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
     const store = createStore({
         modules: {
             namespaced: true,
+            Maps: {
+                namespaced: true,
+                actions: {
+                    zoomToExtent: sinon.stub()
+                }
+            },
+            Menu: {
+                namespaced: true,
+                getters: {
+                    expanded: () => (side) => {
+                        return side === "secondaryMenu";
+                    }
+                }
+            },
             Modules: {
                 namespaced: true,
                 modules: {
@@ -18,6 +33,9 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
                         getters: {
                             isCreatingReport () {
                                 return false;
+                            },
+                            selectedRoofExtent () {
+                                return createEmptyExtent();
                             }
                         },
                         mutations: {
@@ -95,5 +113,30 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
         });
 
         expect(wrapper.vm.allWizardStepsValid).to.be.true;
+    });
+
+    it("mapZoomToExtentPadding has the correct structure", () => {
+        const wrapper = shallowMount(Component, {
+            propsData: {
+                wizardStepsFormData: {
+                    "component_1": {
+                        isValid: true
+                    },
+                    "component_2": {
+                        isValid: true
+                    },
+                    "component_3": {
+                        isValid: true
+                    }
+                },
+                wizardStepIsActive: true
+            },
+            global: {
+                plugins: [store]
+            }
+        });
+
+        expect(wrapper.vm.mapZoomToExtentPadding).to.be.an("array");
+        expect(wrapper.vm.mapZoomToExtentPadding.length).to.equal(4);
     });
 });
