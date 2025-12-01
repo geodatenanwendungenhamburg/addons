@@ -50,7 +50,15 @@ export default {
                 borderColor: ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"]
             },
             mapContent = await dispatch("addMap"),
-            idealMapWidthInPDF = mapContent.width > mapContent.height ? 450 : 300,
+            A4PageWidth = 595.28,
+            maxHeight = 700,
+            maxContentWidth = Math.max(0, A4PageWidth - docDefinition.pageMargins[0] - docDefinition.pageMargins[2]),
+            aspectRatio = mapContent.width / mapContent.height,
+            idealMapWidthInPDF = Math.round(
+                maxContentWidth / aspectRatio <= maxHeight
+                    ? maxContentWidth
+                    : maxHeight * aspectRatio
+            ),
             exportDate = dayjs(new Date()).format("DD-MM-YYYY");
 
         // Header
@@ -63,7 +71,7 @@ export default {
             color: "#646464"
         };
 
-        // Titel
+        // Titel and data for the building
         // /////////////////////
         docDefinition.content.push({
             text: i18next.t("additional:modules.pvObligation.report.title"),
@@ -71,27 +79,21 @@ export default {
             bold: true,
             fontSize: 14,
             margin: [0, 14]
-        });
-
-        // data for the building
-        // /////////////////////
-        docDefinition.content.push({
+        },
+        {
             text: i18next.t("additional:modules.pvObligation.report.buildingData.title"),
             bold: true,
             fontSize: 12,
             margin: [0, 20, 0, 10]
-        });
-
-        const personalData = [];
-
-        personalData.push([i18next.t("additional:modules.pvObligation.report.buildingData.owner"), formData.personalData.propertyOwnerFullName]);
-        personalData.push([i18next.t("additional:modules.pvObligation.report.buildingData.address"), formData.personalData.street + " " + formData.personalData.houseNumber]);
-        personalData.push(["", formData.personalData.postalCode + " " + formData.personalData.city]);
-
-        docDefinition.content.push({
+        },
+        {
             layout: "noBorders",
             table: {
-                body: personalData
+                body: [
+                    [i18next.t("additional:modules.pvObligation.report.buildingData.owner"), formData.personalData.propertyOwnerFullName],
+                    [i18next.t("additional:modules.pvObligation.report.buildingData.address"), formData.personalData.street + " " + formData.personalData.houseNumber],
+                    ["", formData.personalData.postalCode + " " + formData.personalData.city]
+                ]
             }
         });
 
@@ -136,23 +138,19 @@ export default {
 
         // netto reducing areas
         // /////////////////////
-        const netReduceAreasData = await dispatch("addDrawnAreaTable", {
+        docDefinition.content.push(...await dispatch("addDrawnAreaTable", {
             drawnAreaData: formData.nettoReduceAreas,
             title: i18next.t("additional:modules.pvObligation.report.areas.netReduce"),
             noAreasTitle: i18next.t("additional:modules.pvObligation.report.areas.noNetReduce")
-        });
-
-        docDefinition.content.push(netReduceAreasData);
+        }));
 
         // restricted areas
         // /////////////////////
-        const restrictedAreasData = await dispatch("addDrawnAreaTable", {
+        docDefinition.content.push(...await dispatch("addDrawnAreaTable", {
             drawnAreaData: formData.restrictedAreas,
             title: i18next.t("additional:modules.pvObligation.report.areas.restrictedAreas"),
             noAreasTitle: i18next.t("additional:modules.pvObligation.report.areas.noRestrictedAreas")
-        });
-
-        docDefinition.content.push(restrictedAreasData);
+        }));
 
         // Additional information
         // /////////////////////
@@ -185,14 +183,6 @@ export default {
             alignment: "center",
             pageBreak: "before"
         });
-
-        /* currently the map is not in scale, therefore comment this out, as long as it is fixed
-        docDefinition.content.push({
-            text: i18next.t("additional:modules.pvObligation.report.scale") + " 1:" + thousandsSeparator(mapContent.scale),
-            fontSize: 8,
-            alignment: "center",
-            margin: [0, 5]
-        });*/
 
         // Footer
         // /////////////////////
@@ -233,7 +223,7 @@ export default {
      *   {number} width - The width of the cropped image in pixels.
      *   {number} height - The height of the cropped image in pixels.
      */
-    addMap ({rootGetters}) {
+    addMap () {
         const map = mapCollection.getMap("2D"),
             canvas = map.getViewport().querySelector("canvas"),
             rigthMenuWidth = document.getElementById("mp-menu-secondaryMenu").offsetWidth,
@@ -264,12 +254,10 @@ export default {
         return {
             base64Image: offscreenCanvas.toDataURL("image/png"),
             width: cropWidth,
-            height: cropHeight,
-            scale: rootGetters["Maps/scale"]
+            height: cropHeight
         };
     },
-    // eslint-disable-next-line no-unused-vars
-    async addDrawnAreaTable ({_}, payload) {
+    async addDrawnAreaTable (_, payload) {
         const content = [];
 
         if (payload.drawnAreaData.length > 0) {
