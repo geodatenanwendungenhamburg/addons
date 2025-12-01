@@ -54,10 +54,10 @@ export default {
                     icon: "bi bi-pentagon",
                     geometryType: "Polygon"
                 },
-                circle: {
-                    icon: "bi bi-circle",
-                    geometryType: "Circle"
-                },
+                // circle: {
+                //     icon: "bi bi-circle",
+                //     geometryType: "Circle"
+                // },
                 rectangle: {
                     icon: "bi bi-square",
                     geometryType: "Circle",
