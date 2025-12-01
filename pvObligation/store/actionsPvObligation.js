@@ -3,6 +3,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import dissolve from "@turf/dissolve";
 import {featureCollection} from "@turf/helpers";
 import {transform} from "ol/proj";
+import {createEmpty as createEmptyExtent, extend} from "ol/extent";
 
 /* eslint-disable one-var */
 import pdfMake from "pdfmake";
@@ -15,7 +16,7 @@ export default {
     /**
      *
      *  This function converts data from reportTemplates to pdf
-     * @param {Object} _ vuex context
+     * @param {Object} Object Vuex context
      * @param {Object} formData data from the pv obligation analysis that shall be added to the pdf export
      * @param {String} formData.author - Name of the report creator, e.g. "Christa Becker".
      * @param {Number} formData.brutto - Gross roof area in m².
@@ -218,6 +219,7 @@ export default {
      * Crops the main map canvas by removing the left and right menu widths,
      * draws a 2px black border around the cropped area, and returns the result as a base64 image.
      *
+     * @param {Object} Object Vuex context
      * @returns {Object} An object containing:
      *   {string} base64Image - The base64-encoded PNG image of the cropped map.
      *   {number} width - The width of the cropped image in pixels.
@@ -309,14 +311,14 @@ export default {
      * - Dissolves overlapping polygons using Turf.js.
      * - Adds the dissolved feature(s) to the outlineLayer's source.
      *
-     * @param {Object} _ - Vuex context (unused).
+     * @param {Object} Object Vuex context
      * @param {Object} payload - The payload containing required parameters.
      * @param {string|number} payload.roofId - The ID of the roof to dissolve features for.
      * @param {ol.layer.Vector} payload.outlineLayer - The OpenLayers vector layer to add dissolved features to.
      * @param {string} payload.layerName - The name of the source layer containing roof features.
      * @returns {number} The total calculated roof area (sum of "dachfl_3d" property).
      */
-    dissolveRoofFeaturesAndCalculateArea (_, payload) {
+    dissolveRoofFeaturesAndCalculateArea ({commit}, payload) {
         const {roofId, outlineLayer, layerName} = payload,
             geojsonFeatures = [], // turf requires array of geojson features
             sourceLayer = mapCollection.getMap("2D") ? mapCollection.getMap("2D").getLayers().getArray().find(layer => layer.get("name") === layerName) : undefined,
@@ -354,13 +356,18 @@ export default {
 
         if (geojsonFeatures.length > 0) {
             const features = featureCollection(geojsonFeatures),
-                dissolvedFeatureGeoJson = dissolve(features);
+                dissolvedFeatureGeoJson = dissolve(features),
+                bbox = createEmptyExtent();
 
             dissolvedFeatureGeoJson.features.forEach(feature => {
                 const dissolvedFeature = format.readFeature(feature);
 
                 olSource.addFeature(dissolvedFeature);
+
+                extend(bbox, dissolvedFeature.getGeometry().getExtent());
             });
+
+            commit("setSelectedRoofExtent", bbox);
         }
 
         return roofArea;

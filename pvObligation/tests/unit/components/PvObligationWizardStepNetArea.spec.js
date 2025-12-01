@@ -3,6 +3,7 @@ import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepNetArea.vue";
 import sinon from "sinon";
 import {createStore} from "vuex";
+import {createEmpty as createEmptyExtent} from "ol/extent";
 
 describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () => {
     let wrapper,
@@ -16,7 +17,16 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                     actions: {
                         addNewLayerIfNotExists: sinon.stub(),
                         addInteraction: sinon.stub(),
-                        removeInteraction: sinon.stub()
+                        removeInteraction: sinon.stub(),
+                        zoomToExtent: sinon.stub()
+                    }
+                },
+                Menu: {
+                    namespaced: true,
+                    getters: {
+                        expanded: () => (side) => {
+                            return side === "secondaryMenu";
+                        }
                     }
                 },
                 Modules: {
@@ -26,10 +36,12 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                             namespaced: true,
                             state: {
                                 selectedRoofId: 1,
+                                selectedRoofExtent: createEmptyExtent(),
                                 isDrawing: false
                             },
                             getters: {
                                 selectedRoofId: (state) => state.selectedRoofId,
+                                selectedRoofExtent: (state) => state.selectedRoofExtent,
                                 isDrawing: (state) => state.isDrawing
                             },
                             actions: {
@@ -131,5 +143,10 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         expect(wrapper.findAll("strong").length).to.equal(2);
         expect(wrapper.findAll("strong")[0].text()).to.contain("123.456");
         expect(wrapper.findAll("strong")[1].text()).to.contain(Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10);
+    });
+
+    it("mapZoomToExtentPadding has the correct structure", () => {
+        expect(wrapper.vm.mapZoomToExtentPadding).to.be.an("array");
+        expect(wrapper.vm.mapZoomToExtentPadding.length).to.equal(4);
     });
 });

@@ -26,26 +26,55 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "selectedRoofId",
+            "selectedRoofExtent",
             "isDrawing"
-        ])
+        ]),
+        ...mapGetters("Menu", ["expanded"]),
+        /**
+         * Checks if the menu sides are open or closed and
+         * calculates the padding for the zoomToExtent function, depending on the opening state
+         * @returns {Number[]} Padding values for an extent, fitting inbetween the menu sides.
+         */
+        mapZoomToExtentPadding () {
+            let rightPadding = 20,
+                leftPadding = 20;
+
+            if (this.expanded("secondaryMenu")) {
+                const el = document.getElementById("mp-menu-secondaryMenu");
+
+                rightPadding = el ? el.offsetWidth + 20 : 20;
+            }
+
+            if (this.expanded("mainMenu")) {
+                const el = document.getElementById("mp-menu-mainMenu");
+
+                leftPadding = el ? el.offsetWidth + 20 : 20;
+            }
+
+            return [20, rightPadding, 20, leftPadding];
+        }
     },
     watch: {
         /** @override */
         wizardStepIsActive: {
-            // eslint-disable-next-line no-unused-vars
-            handler (isNowActive, wasActiveBefore) {
-                if (isNowActive) {
-                    if (this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
-                        this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
+            handler (isNowActive) {
+                if (isNowActive && this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
+                    this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
 
-                        const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(l => {
-                            return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
-                        });
+                    const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(l => {
+                        return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
+                    });
 
-                        if (layer) {
-                            layer.setVisible(true);
-                        }
+                    if (layer) {
+                        layer.setVisible(true);
                     }
+
+                    this.zoomToExtent({
+                        extent: this.selectedRoofExtent,
+                        options: {
+                            padding: this.mapZoomToExtentPadding
+                        }
+                    });
                 }
             },
             immediate: true
@@ -56,7 +85,8 @@ export default {
             "dissolveRoofFeaturesAndCalculateArea"
         ]),
         ...mapActions("Maps", [
-            "addNewLayerIfNotExists"
+            "addNewLayerIfNotExists",
+            "zoomToExtent"
         ]),
         /** @override */
         resetWizardStepData () {
