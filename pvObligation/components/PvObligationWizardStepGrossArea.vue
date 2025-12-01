@@ -5,9 +5,13 @@ import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import axios from "axios";
+import ConfirmModalItem from "./shared/ConfirmModalItem.vue";
 
 export default {
     name: "PvObligationWizardStepGrossArea",
+    components: {
+        ConfirmModalItem
+    },
     extends: PvObligationWizardStepScriptExtends,
     data () {
         return {
@@ -21,7 +25,9 @@ export default {
             },
             grossAreaSelection: null,
             displayGrossRoofArea: 0,
-            grossAreaStyle: {}
+            grossAreaStyle: {},
+            showConfirmModal: false,
+            pendingRoofId: null
         };
     },
     computed: {
@@ -111,18 +117,15 @@ export default {
                 const selectedFeature = e.selected[0],
                     roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
 
+                // Show confirm modal if another roof is selected
                 if (this.selectedRoofId && this.selectedRoofId !== roofId) {
-                    // eslint-disable-next-line no-alert
-                    if (!confirm(this.$t("additional:modules.pvObligation.wizard.step.grossArea.component.confirmChangeRoof"))) {
-                        return;
-                    }
+                    this.pendingRoofId = roofId;
+                    this.showConfirmModal = true;
 
-                    this.resetWizardData();
+                    return;
                 }
 
-                this.setSelectedRoofId(roofId);
-                this.componentFormData.grossRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "Dachflächen"}) * 10) / 10;
-                this.displayGrossRoofArea = thousandsSeparator(this.componentFormData.grossRoofArea);
+                this.setAndDisolveRoofId(roofId, outlineLayer);
             });
         },
         /** @override */
@@ -134,6 +137,30 @@ export default {
                 : null;
 
             return !Object.values(this.componentFormErrors).some(Boolean);
+        },
+        handleClickedActionButtonCancel () {
+            this.showConfirmModal = false;
+            this.pendingRoofId = null;
+        },
+        async handleClickedActionButtonConfirm () {
+            this.resetWizardData();
+
+            this.setAndDisolveRoofId(this.pendingRoofId, mapCollection.getMap("2D").getLayers().getArray().find(l => l.get("id") === "Module/pvObligation/layer/roofArea"));
+
+            this.showConfirmModal = false;
+            this.pendingRoofId = null;
+        },
+        async setAndDisolveRoofId (roofId, outlineLayer) {
+            this.setSelectedRoofId(roofId);
+
+            const area = await this.dissolveRoofFeaturesAndCalculateArea({
+                roofId: roofId,
+                outlineLayer: outlineLayer,
+                layerName: "Dachflächen"
+            });
+
+            this.componentFormData.grossRoofArea = Math.round(area * 10) / 10;
+            this.displayGrossRoofArea = thousandsSeparator(this.componentFormData.grossRoofArea);
         }
     }
 };
@@ -177,6 +204,24 @@ export default {
         >
             {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText") }}
         </p>
+
+        <ConfirmModalItem
+            modal-inner-wrapper-style="max-width: 400px"
+            :show-modal="showConfirmModal"
+            :modal-title="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.header')"
+            :button-confirm-label="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.actionButtonConfirmLabel')"
+            :button-cancel-label="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.actionButtonCancelLabel')"
+            @clicked-confirm="handleClickedActionButtonConfirm()"
+            @clicked-cancel="handleClickedActionButtonCancel()"
+        >
+            <p>
+                {{ $t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.contentIntro') }}
+            </p>
+
+            <p>
+                {{ $t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.contentQuestion') }}
+            </p>
+        </ConfirmModalItem>
     </div>
 </template>
 
