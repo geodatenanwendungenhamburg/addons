@@ -38,7 +38,7 @@
                         "component": {
                             "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
                             "missingStepGrossAreaMessage": "Afterwards, the initial net roof area will be displayed here, and you can, if necessary, draw areas that should additionally be excluded.",
-                            "drawingIsNotCompletedError": "The drawing is not yet complete. Please select ‘Save’ or ‘Cancel’ before changing the step.",
+                            "drawingIsNotCompletedError": "The drawing is not yet complete. Please select Save or Cancel before proceeding to the next step.",
                             "introduction": "The net roof area is the gross roof area minus roof structures, skylights, other necessary roof uses and the north-facing portion of the roof with a slope of over 10 degrees. At least 30% of this must be covered with PV. We have automatically determined a net roof area for your building, taking into account roof areas facing “north” with an inclination of more than 10 degrees.",
                             "netRoofAreaText": "The selected net roof area is: {{ displayNetRoofArea }} m²",
                             "obligatedAreaText": "Minimum area for PV is:{{ obligatedArea }} m² (30% of the net roof area).",

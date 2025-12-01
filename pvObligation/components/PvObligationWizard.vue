@@ -274,6 +274,7 @@ export default {
             <div class="navigation">
                 <FlatButton
                     v-if="showPreviousWizardStepButton"
+                    class="backButton"
                     :aria-label="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     :text="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     icon="bi-backspace"
@@ -284,6 +285,7 @@ export default {
 
                 <FlatButton
                     v-if="showNextWizardStepButton"
+                    class="nextButton"
                     :aria-label="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     :text="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     icon="bi-backspace-reverse"
@@ -344,6 +346,14 @@ export default {
                 z-index: 10;
                 box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
 
+                button.nextButton:only-child {
+                    margin-left: auto;
+                }
+
+                button.backButton:only-child {
+                    margin-right: auto;
+                }
+
                 button.flat-button{
                     // !important is required because the shared FlatButton component uses .mb-3 with !important
                     margin-bottom: 0 !important;
@@ -356,4 +366,3 @@ export default {
         }
     }
 </style>
-
