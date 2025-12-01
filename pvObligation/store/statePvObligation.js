@@ -14,6 +14,7 @@
  * @property {Boolean} hasMouseMapInteractions - flag if tool has mouse interactions on the map (config-param)
  * @property {Boolean} isCreatingReport - flag if the report is currently been generated
  * @property {String} selectedRoofId - ID of the selected roof
+ * @property {Number[]} selectedRoofExtent - Geometric extent of the selected roof [minx, miny, maxx, maxy]
  * @property {String[]} relevantLayerIds - IDs of roof layers used in this addon (configured in config.json). The addon will wait until the features of these layers are loaded before it starts working.
  * @property {Boolean} isDrawing - flag indicating whether the user is currently drawing on the map
  * @property {String} baseUrl - base URL of the Geoportal used for remote requests (e.g. reverse geocoding)
@@ -37,6 +38,7 @@ const state = {
     // PvObligation addon state
     isCreatingReport: false,
     selectedRoofId: null,
+    selectedRoofExtent: [],
     relevantLayerIds: [
         "34755", // dachflaechen
         "34753" // dachflaechen_pv
