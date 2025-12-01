@@ -39,7 +39,7 @@
                         "component": {
                             "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
                             "missingStepGrossAreaMessage": "Im Anschluss wird Ihnen hier die initiale Nettodachfläche angezeigt, und Sie können gegebenenfalls Flächen einzeichnen, die zusätzlich ausgeschlossen werden sollen.",
-                            "drawingIsNotCompletedError": "Die Zeichnung ist noch nicht abgeschlossen. Bitte wählen Sie ‘Speichern’ oder ‘Abbrechen’, bevor Sie step Wechseln.",
+                            "drawingIsNotCompletedError": "Die Zeichnung ist noch nicht abgeschlossen. Bitte wählen Sie Speichern oder Abbrechen, bevor Sie den Schritt wechseln",
                             "introduction": "Die Nettodachfläche ist die Bruttodachfläche abzüglich Dachaufbauten, Dachfenstern, anderer notwendiger Dachnutzungen und der nach Norden ausgerichteten Flächenanteile des Daches mit Neigung über 10 Grad. Mindestens 30% davon müssen mit PV belegt werden. Wir haben für Ihr Gebäude automatisch eine Nettodachfläche ermittelt und dabei nach “Norden” ausgerichtete Dachflächen mit mehr als 10 Grad Neigung berücksichtigt.",
                             "netRoofAreaText": "Die Nettodachfläche beträgt: {{ displayNetRoofArea }} m²",
                             "obligatedAreaText": "Mindestfläche für PV: {{ obligatedArea }} m² (30% der Nettodachfläche).",
