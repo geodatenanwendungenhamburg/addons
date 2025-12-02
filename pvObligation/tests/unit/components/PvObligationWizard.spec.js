@@ -1,11 +1,50 @@
 import {nextTick} from "vue";
 import {config, shallowMount} from "@vue/test-utils";
+import {createStore} from "vuex";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizard.vue";
 
 config.global.mocks.$t = key => key;
 
 describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
+    let store,
+        wrapper;
+
+    beforeEach(() => {
+        store = createStore({
+            modules: {
+                Modules: {
+                    namespaced: true,
+                    modules: {
+                        PvObligation: {
+                            namespaced: true,
+                            state: () => ({
+                                isDrawing: false
+                            }),
+                            getters: {
+                                isDrawing: state => state.isDrawing
+                            },
+                            mutations: {
+                                setIsDrawing (state, payload) {
+                                    state.isDrawing = payload;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        wrapper = shallowMount(Component, {
+            global: {
+                plugins: [store]
+            }
+        });
+    });
+
+    afterEach(() => {
+        wrapper?.unmount();
+    });
 
     /**
      * Create a list of wizard steps
@@ -31,20 +70,13 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
     }
 
     it("could load the component and root HTML element contains correct ID", async () => {
-        const wrapper = shallowMount(Component);
-
         expect(wrapper.exists()).to.be.true;
         expect(wrapper.attributes().id).equals("pvObligationWizard");
     });
 
     it("renders two wizard steps and changes the active step successful", async () => {
-        const wrapper = shallowMount(Component, {
-            data () {
-                return {
-                    wizardSteps: createWizardSteps()
-                };
-            }
-        });
+        wrapper.vm.wizardSteps = createWizardSteps();
+        await nextTick();
 
         let accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
 

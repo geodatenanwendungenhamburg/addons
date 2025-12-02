@@ -2,7 +2,7 @@
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import {Style, Stroke, Fill, Text as OlText} from "ol/style";
 import {createBox} from "ol/interaction/Draw";
 import {Draw} from "ol/interaction";
@@ -73,13 +73,11 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "stepNetRestrictedAreasIsDrawing",
-            "stepNetAreaIsDrawing",
             "selectedRoofId"
         ])
     },
-    async mounted () {
-        await this.initializeDrawing();
+    mounted () {
+        this.initializeDrawing();
     },
     beforeUnmount () {
         this.removeDrawInteraction();
@@ -89,6 +87,9 @@ export default {
             "addNewLayerIfNotExists",
             "addInteraction",
             "removeInteraction"
+        ]),
+        ...mapMutations("Modules/PvObligation", [
+            "setIsDrawing"
         ]),
         onSave () {
             if (!this.validate()) {
@@ -100,6 +101,8 @@ export default {
                 mode: this.formMode,
                 data: this.formData
             });
+
+            this.setIsDrawing(false);
         },
         onCancel () {
             this.formData = {...this.formDataItem};
@@ -111,6 +114,7 @@ export default {
             });
 
             this.removeDrawnFeatures();
+            this.setIsDrawing(false);
         },
         validate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue");
@@ -392,7 +396,6 @@ export default {
             this.formData.features.push(feature);
         }
     }
-
 };
 </script>
 

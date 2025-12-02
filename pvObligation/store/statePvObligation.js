@@ -43,8 +43,7 @@ const state = {
     ],
     baseUrl: "https://geoportal-hamburg.de",
     geosearchReverseServiceId: "5",
-    stepNetRestrictedAreasIsDrawing: false,
-    stepNetAreaIsDrawing: false
+    isDrawing: false
 };
 
 export default state;

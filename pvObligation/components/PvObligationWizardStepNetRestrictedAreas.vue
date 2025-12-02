@@ -14,17 +14,12 @@ export default {
             /** @override */
             componentFormData: {
                 restrictedListItems: []
-            },
-            /** @override */
-            componentFormErrors: {
-                drawingIsNotCompletedError: false
             }
         };
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "stepNetRestrictedAreasIsDrawing",
-            "stepNetAreaIsDrawing"
+            "isDrawing"
         ])
     },
     methods: {
@@ -48,12 +43,6 @@ export default {
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
-        },
-        /** @override */
-        componentFormDataValidate () {
-            this.componentFormErrors.drawingIsNotCompletedError = this.stepNetRestrictedAreasIsDrawing;
-
-            return !Object.values(this.componentFormErrors).some(Boolean);
         }
     }
 };
@@ -72,7 +61,7 @@ export default {
         </div>
 
         <div v-else>
-            <div v-if="componentFormErrors.drawingIsNotCompletedError">
+            <div v-if="isDrawing">
                 <p class="error">
                     {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.drawingIsNotCompletedError") }}
                 </p>
@@ -88,9 +77,8 @@ export default {
 
             <PvObligationRestrictionList
                 class="restrictionList"
-                :is-disabled="stepNetAreaIsDrawing"
                 index-prefix="S"
-                :disabled-message="$t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.disabledMessage')"
+                :is-disabled="false"
                 @list-items="onListItems"
             />
         </div>
