@@ -163,10 +163,6 @@ export default {
                 />
             </div>
         </form>
-
-        <div class="dataPrivacyInfo">
-            {{ $t("additional:modules.pvObligation.wizard.step.personalInformation.component.dataPrivacyInfo") }}
-        </div>
     </div>
 </template>
 
