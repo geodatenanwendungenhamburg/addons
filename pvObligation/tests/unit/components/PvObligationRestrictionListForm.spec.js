@@ -1,14 +1,57 @@
-import {config, mount} from "@vue/test-utils";
+import {mount} from "@vue/test-utils";
+import {createStore} from "vuex";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationRestrictionListForm.vue";
 import {nextTick} from "vue";
-
-config.global.mocks.$t = key => key;
+import sinon from "sinon";
 
 describe("PvObligationRestrictionListForm.vue", () => {
-    let wrapper;
+    let wrapper,
+        store;
 
     beforeEach(() => {
+        const mockLayer = {getSource: () => {
+            return {
+                getFeatures: sinon.stub().returns([]),
+                addFeature: sinon.stub(),
+                removeFeature: sinon.stub()
+            };
+        }};
+
+        store = createStore({
+            modules: {
+                Modules: {
+                    namespaced: true,
+                    modules: {
+                        PvObligation: {
+                            namespaced: true,
+                            state: () => ({
+                                isDrawing: false,
+                                selectedRoofId: null
+                            }),
+                            getters: {
+                                isDrawing: state => state.isDrawing,
+                                selectedRoofId: state => state.selectedRoofId
+                            },
+                            mutations: {
+                                setIsDrawing (state, payload) {
+                                    state.isDrawing = payload;
+                                }
+                            }
+                        }
+                    }
+                },
+                Maps: {
+                    namespaced: true,
+                    actions: {
+                        addNewLayerIfNotExists: sinon.stub().resolves(mockLayer),
+                        addInteraction: sinon.stub(),
+                        removeInteraction: sinon.stub()
+                    }
+                }
+            }
+        });
+
         wrapper = mount(Component, {
             props: {
                 formMode: "edit",
@@ -19,11 +62,16 @@ describe("PvObligationRestrictionListForm.vue", () => {
                 }
             },
             global: {
+                plugins: [store],
                 mocks: {
                     $t: key => key
                 }
             }
         });
+    });
+
+    afterEach(() => {
+        wrapper?.unmount();
     });
 
     it("could load the component and root HTML element contains correct ID", () => {
@@ -60,6 +108,7 @@ describe("PvObligationRestrictionListForm.vue", () => {
     });
 
     it("shows an error and does not fire the interaction event, if the form data is invalid", async () => {
+        wrapper.unmount();
         wrapper = mount(Component, {
             props: {
                 action: "save",
@@ -71,6 +120,7 @@ describe("PvObligationRestrictionListForm.vue", () => {
                 }
             },
             global: {
+                plugins: [store],
                 mocks: {
                     $t: key => key
                 }

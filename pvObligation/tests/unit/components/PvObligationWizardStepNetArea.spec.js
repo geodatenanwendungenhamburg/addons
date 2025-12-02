@@ -26,23 +26,18 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                             namespaced: true,
                             state: {
                                 selectedRoofId: 1,
-                                stepNetAreaIsDrawing: false,
-                                stepNetRestrictedAreasIsDrawing: false
+                                isDrawing: false
                             },
                             getters: {
                                 selectedRoofId: (state) => state.selectedRoofId,
-                                stepNetAreaIsDrawing: (state) => state.stepNetAreaIsDrawing,
-                                stepNetRestrictedAreasIsDrawing: (state) => state.stepNetRestrictedAreasIsDrawing
+                                isDrawing: (state) => state.isDrawing
                             },
                             actions: {
                                 dissolveRoofFeaturesAndCalculateArea: sinon.stub().resolves(100)
                             },
                             mutations: {
-                                setStepNetAreaIsDrawing: (state, payload) => {
-                                    state.stepNetAreaIsDrawing = payload;
-                                },
-                                stepNetRestrictedAreasIsDrawing: (state, payload) => {
-                                    state.stepNetRestrictedAreasIsDrawing = payload;
+                                setIsDrawing: (state, payload) => {
+                                    state.isDrawing = payload;
                                 }
                             }
                         }

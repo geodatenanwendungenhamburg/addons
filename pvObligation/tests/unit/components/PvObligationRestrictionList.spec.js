@@ -29,15 +29,11 @@ describe("PvObligationRestrictionList.vue", () => {
                         PvObligation: {
                             namespaced: true,
                             state: {
-                                stepNetAreaIsDrawing: false,
-                                stepNetRestrictedAreasIsDrawing: false
+                                isDrawing: false
                             },
                             mutations: {
-                                setStepNetRestrictedAreasIsDrawing (state, payload) {
-                                    state.stepNetRestrictedAreasIsDrawing = payload;
-                                },
-                                setStepNetAreaIsDrawing (state, payload) {
-                                    state.stepNetAreaIsDrawing = payload;
+                                setIsDrawing (state, payload) {
+                                    state.setIsDrawing = payload;
                                 }
                             }
                         }
@@ -106,51 +102,5 @@ describe("PvObligationRestrictionList.vue", () => {
         expect(listItems[0].find("div.number").text()).equals("X1");
         expect(listItems[1].find("div.number").text()).equals("X2");
         expect(listItems[2].find("div.number").text()).equals("X3");
-    });
-
-    it("sets stepNetAreaIsDrawing via watcher when indexPrefix start with N", async () => {
-        await wrapper.setProps({
-            indexPrefix: "N"
-        });
-
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
-
-        await wrapper.vm.onButtonAdd();
-        await nextTick();
-
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.true;
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
-
-        await wrapper.setData({
-            itemSelectedCreate: null
-        });
-        await nextTick();
-
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
-    });
-
-    it("sets stepNetRestrictedAreasIsDrawing via watcher when indexPrefix starts with S", async () => {
-        await wrapper.setProps({
-            indexPrefix: "S"
-        });
-
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
-
-        await wrapper.vm.onButtonAdd();
-        await nextTick();
-
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.true;
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
-
-        await wrapper.setData({
-            itemSelectedCreate: null
-        });
-        await nextTick();
-
-        expect(store.state.Modules.PvObligation.stepNetRestrictedAreasIsDrawing).to.be.false;
-        expect(store.state.Modules.PvObligation.stepNetAreaIsDrawing).to.be.false;
     });
 });
