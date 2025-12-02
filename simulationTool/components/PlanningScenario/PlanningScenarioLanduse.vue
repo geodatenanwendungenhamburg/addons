@@ -178,6 +178,24 @@ export default {
          */
         sortBy () {
             return this.editableInputs[this.currentEditableInput]?.sortBy;
+        },
+        newInputButtonKey () {
+            let newInputButtonKey = "newButton";
+
+            switch (this.currentEditableInput) {
+                case "buildings":
+                    newInputButtonKey = "newBuilding";
+                    break;
+                case "roads":
+                    newInputButtonKey = "newRoad";
+                    break;
+                case "stations":
+                    newInputButtonKey = "newStation";
+                    break;
+                default:
+                    newInputButtonKey = "newButton";
+            }
+            return this.$t(`additional:modules.tools.simulationTool.${newInputButtonKey}`);
         }
     },
     watch: {
@@ -724,7 +742,7 @@ export default {
             >
                 <FlatButton
                     class="m-3"
-                    :text="currentEditableInput === 'buildings' ? $t('additional:modules.tools.simulationTool.newBuilding') : $t('additional:modules.tools.simulationTool.newRoad')"
+                    :text="newInputButtonKey"
                     icon="bi-pencil-square"
                     :interaction="() => [setCurrentPlanningComponent('newLanduse'), setCurrentInputName(currentEditableInput)]"
                 />
