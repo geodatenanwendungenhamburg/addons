@@ -70,82 +70,67 @@
         "cycleTravelerSource": {
           "schema": {
             "type": "object",
+            "format": "geojson-feature",
             "properties": {
-              "geometry": {
-                "type": "object",
-                "description": "Source area geometry (Polygon)"
-              },
-              "startTime": {
-                "type": "string",
-                "format": "datetime",
-                "description": "Start time for spawning (must be >= startPoint)"
-              },
-              "endTime": {
-                "type": "string",
-                "format": "datetime",
-                "description": "End time for spawning (must be <= endPoint)"
-              },
               "spawningAmount": {
                 "type": "integer",
                 "minimum": 1,
-                "default": 10,
-                "description": "Number of cyclists to spawn per interval"
+                "maximum": 100,
+                "default": 10
               },
               "spawningIntervalInMinutes": {
                 "type": "integer",
                 "minimum": 1,
-                "default": 10,
-                "description": "Interval in minutes for spawning cyclists"
+                "maximum": 60,
+                "default": 10
+              },
+              "startTime": {
+                "type": "string",
+                "format": "datetime"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "datetime"
               },
               "hasOwnBikeProbability": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1,
-                "default": 0.5,
-                "description": "Probability that a cyclist has their own bike (0.0-1.0)"
+                "default": 0.5
               },
               "gender": {
                 "type": "string",
-                "enum": [
-                  "male",
-                  "female"
-                ],
-                "default": "male",
-                "description": "Gender of cyclists"
+                "enum": ["male", "female"],
+                "default": "male"
               },
               "mass": {
                 "type": "number",
                 "minimum": 40,
                 "maximum": 150,
-                "default": 70,
-                "description": "Mass of cyclist in kg"
+                "default": 70
               },
               "perceptionInMeter": {
                 "type": "number",
                 "minimum": 0,
-                "default": 1.0,
-                "description": "Perception distance in meters"
+                "default": 1.0
               }
             },
-            "required": [
-              "geometry",
-              "spawningAmount"
-            ]
+            "required": ["spawningAmount"]
           },
           "menu": "primary",
+          "geometryType": "Point",
           "propertiesMapping": {
-            "geometry": "Startbereich",
-            "startTime": "Startzeit (innerhalb Simulationsperiode)",
-            "endTime": "Endzeit (innerhalb Simulationsperiode)",
+            "cycleTravelerSource": "Radfahrer-Startbereich",
             "spawningAmount": "Anzahl Radfahrer pro Intervall",
             "spawningIntervalInMinutes": "Erzeugungsintervall (Minuten)",
+            "startTime": "Startzeit (innerhalb Simulationsperiode)",
+            "endTime": "Endzeit (innerhalb Simulationsperiode)",
             "hasOwnBikeProbability": "Wahrscheinlichkeit eigenes Rad",
             "gender": "Geschlecht",
             "mass": "Masse (kg)",
             "perceptionInMeter": "Wahrnehmungsdistanz (m)"
           },
           "primaryProperties": [
-            "geometry",
             "spawningAmount",
             "spawningIntervalInMinutes"
           ]
@@ -153,19 +138,12 @@
         "cycleTravelerTarget": {
           "schema": {
             "type": "object",
-            "properties": {
-              "geometry": {
-                "type": "object",
-                "description": "Target area geometry (Polygon)"
-              }
-            },
-            "required": [
-              "geometry"
-            ]
+            "format": "geojson-geometry"
           },
           "menu": "primary",
+          "geometryType": "Point",
           "propertiesMapping": {
-            "geometry": "Zielbereich"
+            "cycleTravelerTarget": "Radfahrer-Zielbereich"
           }
         },
         "rentalStations": {

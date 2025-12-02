@@ -337,15 +337,18 @@ export default {
             olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(feat.style));
             layerSource.addFeature(olFeature);
         });
-        currentPlanningScenario.inputs.buildings.features.forEach(building => {
-            const olFeature = geoJsonParser.readFeature(building);
+        
+        // Add all input features (buildings, roads, rentalStations, etc.)
+        Object.keys(currentPlanningScenario.inputs).forEach(inputKey => {
+            const input = currentPlanningScenario.inputs[inputKey];
 
-            layerSourceForObjects.addFeature(olFeature);
-        });
-        currentPlanningScenario.inputs.roads.features.forEach(road => {
-            const olFeature = geoJsonParser.readFeature(road);
+            if (input?.features && Array.isArray(input.features)) {
+                input.features.forEach(feature => {
+                    const olFeature = geoJsonParser.readFeature(feature);
 
-            layerSourceForObjects.addFeature(olFeature);
+                    layerSourceForObjects.addFeature(olFeature);
+                });
+            }
         });
     },
 

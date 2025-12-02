@@ -59,6 +59,10 @@ export default {
         geometryType: {
             type: String,
             default: "Polygon"
+        },
+        nestedProperties: {
+            type: Object,
+            default: null
         }
     },
     emits: ["update:value", "update:checked"],
@@ -86,6 +90,22 @@ export default {
                 return this.value[0];
             }
             return this.value;
+        }
+    },
+    methods: {
+        /**
+         * Updates the geometry part of a GeoJSON Feature.
+         * @param {Object} geometry - The new geometry object.
+         * @returns {void}
+         */
+        updateFeatureGeometry (geometry) {
+            const feature = {
+                type: "Feature",
+                geometry: geometry,
+                properties: this.value?.properties || {}
+            };
+
+            this.$emit("update:value", feature);
         }
     }
 };
@@ -172,6 +192,27 @@ export default {
                 :geometry-type="geometryType"
                 @update:value="$emit('update:value', $event)"
             />
+        </template>
+        <template v-else-if="inputType === 'geojson-geometry'">
+            <GeometryInput
+                :id="id"
+                :label="label"
+                :value="value"
+                :geometry-type="geometryType"
+                @update:value="$emit('update:value', $event)"
+            />
+        </template>
+        <template v-else-if="inputType === 'geojson-feature'">
+            <div class="geojson-feature-input">
+                <GeometryInput
+                    :id="id + '_geometry'"
+                    :label="label"
+                    :value="value?.geometry"
+                    :geometry-type="geometryType"
+                    @update:value="updateFeatureGeometry($event)"
+                />
+                <slot name="properties" />
+            </div>
         </template>
     </div>
 </template>

@@ -406,6 +406,20 @@ export default {
                 processed.default = property.schema.default ?? property.default;
                 processed.minimum = property.schema.minimum ?? property.minimum;
                 processed.maximum = property.schema.maximum ?? property.maximum;
+                
+                // Handle datetime format with dynamic min/max
+                if (property.schema.format === "datetime") {
+                    processed.type = "datetime";
+                    
+                    // For startTime in cycleTravelerSource: min = startPoint
+                    if (inputKey === "cycleTravelerSource" && propertyKey === "startTime") {
+                        processed.minimum = this.getRequestBodyInputByKey("startPoint", null, null);
+                    }
+                    // For endTime in cycleTravelerSource: max = endPoint
+                    if (inputKey === "cycleTravelerSource" && propertyKey === "endTime") {
+                        processed.maximum = this.getRequestBodyInputByKey("endPoint", null, null);
+                    }
+                }
             }
             else {
                 processed.type = property.type || "string";
@@ -450,6 +464,31 @@ export default {
                 }
 
                 if (input.schema?.type === "object" && includeObjectProperties) {
+                    // Handle GeoJSON Feature format
+                    if (input.schema?.format === "geojson-feature") {
+                        result[inputKey] = {
+                            type: "geojson-feature",
+                            inputKey: inputKey,
+                            propertyKey: null,
+                            geometryType: inputConfig?.geometryType || "Point",
+                            properties: input.schema.properties || {},
+                            default: null
+                        };
+                        return;
+                    }
+
+                    // Handle GeoJSON Geometry format
+                    if (input.schema?.format === "geojson-geometry") {
+                        result[inputKey] = {
+                            type: "geojson-geometry",
+                            inputKey: inputKey,
+                            propertyKey: null,
+                            geometryType: inputConfig?.geometryType || "Point",
+                            default: null
+                        };
+                        return;
+                    }
+
                     // Handle object properties
                     const properties = input.schema.properties || {},
                         primaryProperties = inputConfig?.primaryProperties || [];
@@ -557,6 +596,34 @@ export default {
             this.oafLoadingStates[inputKey] = false;
 
             this.currentPlanningScenario.inputs[inputKey] = featureCollection;
+        },
+
+        /**
+         * Sets a property of a GeoJSON Feature in the request body.
+         * @param {String} inputKey The input key for the feature.
+         * @param {String} propertyKey The property key to set.
+         * @param {*} value The value to set.
+         * @returns {void}
+         */
+        setFeatureProperty (inputKey, propertyKey, value) {
+            this.requestBodies.forEach(requestBody => {
+                // Initialize feature if it doesn't exist
+                if (!requestBody.inputs[inputKey]) {
+                    requestBody.inputs[inputKey] = {
+                        type: "Feature",
+                        geometry: null,
+                        properties: {}
+                    };
+                }
+
+                // Ensure it's a valid feature structure
+                if (!requestBody.inputs[inputKey].properties) {
+                    requestBody.inputs[inputKey].properties = {};
+                }
+
+                // Set the property
+                requestBody.inputs[inputKey].properties[propertyKey] = value;
+            });
         },
 
         /**
@@ -815,14 +882,14 @@ export default {
         /**
          * Sets the inputs value of the request body input according to inputKey and property as key.
          * @param {String} inputKey the input key.
-         * @param {String} propertyKey the property key.
+         * @param {String} propertyKey the property key (can be null for top-level inputs).
          * @param {String} val the value.
          * @param {Boolean} isEnum whether the input is an enum or not.
          * @returns {void}
          */
         setRequestBodyInput (inputKey, propertyKey, val, isEnum = false) {
-            if (typeof inputKey !== "string" || typeof propertyKey !== "string") {
-                console.warn(`Invalid parameters: inputKey=${inputKey}, propertyKey=${propertyKey}`);
+            if (typeof inputKey !== "string") {
+                console.warn(`Invalid inputKey: ${inputKey}`);
                 return;
             }
 
@@ -830,8 +897,9 @@ export default {
                 if (!description.inputs?.[inputKey]) {
                     return;
                 }
-                if (propertyKey === "") {
-                    // top-level input
+                
+                // Handle top-level inputs (propertyKey is "" or null)
+                if (propertyKey === "" || propertyKey === null) {
                     if (isEnum && this.requestBodies[index]?.inputs?.[inputKey]?.value !== undefined) {
                         // Only update value part of enum object
                         this.requestBodies[index].inputs[inputKey].value = val;
@@ -841,6 +909,7 @@ export default {
                     return;
                 }
 
+                // Handle nested properties
                 if (typeof this.requestBodies[index].inputs[inputKey] === "undefined") {
                     this.requestBodies[index].inputs[inputKey] = {};
                 }
@@ -974,6 +1043,7 @@ export default {
                         :key="propertyKey"
                     >
                         <DynamicInputByType
+                            v-if="input.type !== 'geojson-feature'"
                             :id="propertyKey"
                             :input-type="input.type"
                             :label="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
@@ -981,10 +1051,39 @@ export default {
                             :value="getRequestBodyInputByKey(input.inputKey, propertyKey, input.default)"
                             :min="input.minimum"
                             :max="input.maximum"
+                            :geometry-type="input.geometryType"
                             :aria="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
                             @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
                             @update:checked="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
                         />
+                        <DynamicInputByType
+                            v-else
+                            :id="propertyKey"
+                            :input-type="input.type"
+                            :label="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
+                            :value="getRequestBodyInputByKey(input.inputKey, null, input.default)"
+                            :geometry-type="input.geometryType"
+                            @update:value="setRequestBodyInput(input.inputKey, null, $event, false)"
+                        >
+                            <template #properties>
+                                <div
+                                    v-for="(property, propKey) in input.properties"
+                                    :key="propKey"
+                                    class="ms-3 mt-2"
+                                >
+                                    <DynamicInputByType
+                                        :id="`${propertyKey}_${propKey}`"
+                                        :input-type="property.type"
+                                        :label="getMappedProperty(propKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
+                                        :value="getRequestBodyInputByKey(input.inputKey, propKey, property.default)"
+                                        :min="property.minimum"
+                                        :max="property.maximum"
+                                        @update:value="setFeatureProperty(input.inputKey, propKey, $event)"
+                                        @update:checked="setFeatureProperty(input.inputKey, propKey, $event)"
+                                    />
+                                </div>
+                            </template>
+                        </DynamicInputByType>
                     </div>
                 </div>
             </div>
