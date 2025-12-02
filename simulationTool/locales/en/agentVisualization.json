@@ -1,0 +1,21 @@
+{
+    "agentVisualization": "Agent Visualization",
+    "agentDistribution": "Agent Distribution",
+    "agentDetails": "Agent Details",
+    "agents": "Agents",
+    "currentTime": "Current Time",
+    "goalCoords": "Goal Coordinates",
+    "hasBike": "Has Bike",
+    "loadAgentData": "Load Agent Data",
+    "mode": "Mode",
+    "play": "Play",
+    "pause": "Pause",
+    "reset": "Reset",
+    "routeLength": "Route Length",
+    "showTrails": "Show Comet Trail",
+    "startCoords": "Start Coordinates",
+    "step": "Step",
+    "time": "Time",
+    "trailLength": "Trail Length",
+    "velocity": "Velocity"
+}

@@ -45,8 +45,16 @@
  * @property {String|null} simulationApiUrl The URL for the Urban Model Platform API
  * @property {Object} simulationAreaStyle - The default style for the simulation area (BBOX/Extent of planning scenario)
  * @property {Object} userDetailsCache cache for user details
+ * @property {Object|null} agentData - GeoJSON FeatureCollection with agent data
+ * @property {String[]} agentTimeSteps - Sorted array of time steps
+ * @property {Number} agentCurrentTimeStep - Current time step index
+ * @property {Boolean} agentIsPlaying - Whether agent animation is playing
  */
 const state = {
+    agentData: null,
+    agentTimeSteps: [],
+    agentCurrentTimeStep: 0,
+    agentIsPlaying: false,
     ensembles: [],
     ensemblesLoading: false,
     id: "simulationTool",

@@ -1,6 +1,7 @@
 <script>
 import actions from "../store/actions";
 import getters from "../store/getters";
+import AgentVisualization from "./AgentVisualization/AgentVisualizationModern.vue";
 import HelpPanel from "./HelpSection/HelpPanel.vue";
 import HomePanel from "./HomePanel.vue";
 import {mapGetters, mapActions, mapMutations} from "vuex";
@@ -31,6 +32,7 @@ export default {
         // EnsembleDetails,
         // EnsembleCreation,
         // EnsembleList,
+        AgentVisualization,
         HomePanel,
         HelpPanel,
         JobDetails,
@@ -114,6 +116,9 @@ export default {
             <HomePanel
                 v-if="mode === 'home-panel'"
                 @selected="selectProcess"
+            />
+            <AgentVisualization
+                v-if="mode === 'agentVisualization'"
             />
             <PlanningScenario
                 v-if="mode === 'planningScenario'"

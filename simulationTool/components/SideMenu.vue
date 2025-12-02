@@ -100,6 +100,15 @@ export default {
             <i class="bi bi-list-check" />
         </button>
         <button
+            v-if="!hiddenSideMenus.includes('agentVisualization')"
+            class="btn btn-link"
+            :class="{ active: mode === 'agentVisualization' }"
+            :title="$t('additional:modules.tools.simulationTool.agentVisualization')"
+            @click="() => setMode('agentVisualization')"
+        >
+            <i class="bi bi-people-fill" />
+        </button>
+        <button
             v-if="!hiddenSideMenus.includes('process')"
             class="btn btn-link"
             :class="{ active: mode.includes('process') }"

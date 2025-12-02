@@ -1,0 +1,21 @@
+{
+    "agentVisualization": "Agenten-Visualisierung",
+    "agentDistribution": "Agentenverteilung",
+    "agentDetails": "Agentendetails",
+    "agents": "Agenten",
+    "currentTime": "Aktuelle Zeit",
+    "goalCoords": "Ziel-Koordinaten",
+    "hasBike": "Hat Fahrrad",
+    "loadAgentData": "Agentendaten laden",
+    "mode": "Modus",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "reset": "Zurücksetzen",
+    "routeLength": "Routenlänge",
+    "showTrails": "Kometenschweif anzeigen",
+    "startCoords": "Start-Koordinaten",
+    "step": "Schritt",
+    "time": "Zeit",
+    "trailLength": "Schweif-Länge",
+    "velocity": "Geschwindigkeit"
+}
