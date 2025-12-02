@@ -3,6 +3,7 @@ import ConvertFeature from "../../js/convertFeatures";
 import ConvertStyle from "../../js/convertStyle";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import getBBOXGeometry from "../shared/js/getBBoxGeometry";
+import {GeoJSON} from "ol/format";
 import getOAFFeature from "../../../../src/shared/js/api/oaf/getOAFFeature";
 import isObject from "../../../../src/shared/js/utils/isObject";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
@@ -10,6 +11,7 @@ import layerFactory from "../../../../src/core/layers/js/layerFactory";
 import ListGroup from "../shared/components/ListGroup.vue";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import NavTab from "../../../../src/shared/modules/tabs/components/NavTab.vue";
+import oafUtils from "../shared/js/oafUtils";
 import {Select} from "ol/interaction";
 import {singleClick} from "ol/events/condition";
 import SpinnerItem from "../../../../src/shared/modules/spinner/components/SpinnerItem.vue";
@@ -312,19 +314,80 @@ export default {
                 const [inputKey, input] = entries[i];
 
                 if (input?.source?.type === "oaf") {
-                    const filter = getOAFFeature.getOAFGeometryFilter(bboxGeometry, "geometry", "intersects");
+                    // Check if filtering is supported
+                    const filterSupport = await oafUtils.supportsFiltering(input.source.url);
+                    let features;
+
+                    if (filterSupport.supportsFilter) {
+                        // Try with CQL filter
+                        try {
+                            // Get the correct geometry property name
+                            const geometryProperty = await oafUtils.getGeometryPropertyName(input.source.url, input.source.collection),
+                                filter = getOAFFeature.getOAFGeometryFilter(bboxGeometry, geometryProperty, "intersects");
+
+                            console.warn(`Using ${filterSupport.filterType} filter with geometry property: ${geometryProperty}`);
+
+                            features = await getOAFFeature.getOAFFeatureGet(input.source.url, input.source.collection, {
+                                limit: 100,
+                                filter,
+                                filterCrs: crs,
+                                crs
+                            });
+                        }
+                        catch (error) {
+                            console.warn(`CQL filter failed for ${inputKey}, falling back to bbox:`, error);
+                            features = await this.fetchWithBbox(input.source, bboxGeometry, crs);
+                        }
+                    }
+                    else {
+                        console.warn(`Service does not support CQL filters, using bbox for ${inputKey}`);
+                        features = await this.fetchWithBbox(input.source, bboxGeometry, crs);
+                    }
 
                     scenario.inputs[inputKey] = {
                         type: "FeatureCollection",
-                        features: await getOAFFeature.getOAFFeatureGet(input.source.url, input.source.collection, {
-                            limit: 100,
-                            filter,
-                            filterCrs: crs,
-                            crs
-                        })
+                        features: features
+                    };
+                }
+                else if (input?.source?.type === "geojson") {
+                    const response = await fetch(input.source.url),
+                        geojson = await response.json();
+
+                    scenario.inputs[inputKey] = {
+                        type: "FeatureCollection",
+                        features: geojson.features || []
                     };
                 }
             }
+        },
+
+        /**
+         * Fetches features using bbox instead of CQL filter.
+         * @param {Object} source - The source configuration.
+         * @param {ol/Geometry/Polygon} bboxGeometry - The polygon geometry.
+         * @param {String} crs - The coordinate reference system.
+         * @returns {Promise<Object[]>} Array of features.
+         */
+        async fetchWithBbox (source, bboxGeometry, crs) {
+            const extent = bboxGeometry.getExtent(),
+                bbox = extent.join(","),
+                features = await getOAFFeature.getOAFFeatureGet(source.url, source.collection, {
+                    limit: 100,
+                    bbox: bbox,
+                    bboxCrs: crs,
+                    crs
+                }),
+                format = new GeoJSON();
+
+            // Client-side filtering: only keep features that actually intersect
+            return features.filter(feature => {
+                if (!feature.geometry) {
+                    return false;
+                }
+                const olFeature = format.readFeature(feature);
+
+                return bboxGeometry.intersectsExtent(olFeature.getGeometry().getExtent());
+            });
         },
 
         /**
