@@ -196,6 +196,26 @@ export default {
                     newInputButtonKey = "newButton";
             }
             return this.$t(`additional:modules.tools.simulationTool.${newInputButtonKey}`);
+        },
+
+        /**
+         * Gets the effective current editable input, adjusting for cases where only one input exists.
+         * @returns {String} The current editable input key.
+         */
+        effectiveCurrentEditableInput () {
+            const inputKeys = Object.keys(this.editableInputs);
+
+            // If only one input exists, always use that one
+            if (inputKeys.length === 1) {
+                return inputKeys[0];
+            }
+
+            // If currentEditableInput is not set or invalid, default to "buildings" or first available
+            if (!this.currentEditableInput || !this.editableInputs[this.currentEditableInput]) {
+                return inputKeys.includes("buildings") ? "buildings" : inputKeys[0];
+            }
+
+            return this.currentEditableInput;
         }
     },
     watch: {
@@ -204,6 +224,19 @@ export default {
             if (typeof this.getInputSource !== "undefined") {
                 this.schema = await getOAFFeature.getCollectionSchema(this.getInputSource.url, this.getInputSource?.collection);
             }
+        },
+
+        /**
+         * Syncs the store with the effective current editable input.
+         * @param {String} newValue - The new effective current editable input.
+         */
+        effectiveCurrentEditableInput: {
+            handler (newValue) {
+                if (newValue !== this.currentEditableInput) {
+                    this.setCurrentEditableInput(newValue);
+                }
+            },
+            immediate: true
         },
 
         /**
@@ -631,7 +664,7 @@ export default {
                             :value="key"
                             class="form-check-input"
                             type="radio"
-                            :checked="key === currentEditableInput"
+                            :checked="key === effectiveCurrentEditableInput"
                             @input="setCurrentEditableInput(key)"
                         >
                         <label
