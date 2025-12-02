@@ -8,6 +8,7 @@ import isObject from "../../../../src/shared/js/utils/isObject";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
 import ListGroup from "../shared/components/ListGroup.vue";
+import mapCollection from "../../../../src/core/maps/js/mapCollection";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import NavTab from "../../../../src/shared/modules/tabs/components/NavTab.vue";
 import {Select} from "ol/interaction";
@@ -15,6 +16,7 @@ import {singleClick} from "ol/events/condition";
 import SpinnerItem from "../../../../src/shared/modules/spinner/components/SpinnerItem.vue";
 import SwitchInput from "../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
 import {infrastructureLayerId} from "../../layerIds.js";
+import {transform} from "ol/proj";
 
 export default {
     name: "PlanningScenarioLanduse",
@@ -304,25 +306,61 @@ export default {
          * @return {void}
          */
         async fetchFeatures (scenario, inputs, bboxGeometry, crs) {
-            const entries = Object.entries(inputs);
+            const entries = Object.entries(inputs),
+                mapProjection = mapCollection.getMapView("2D").getProjection().getCode();
 
             for (let i = 0; i < entries.length; i++) {
                 const [inputKey, input] = entries[i];
 
                 if (input?.source?.type === "oaf") {
-                    const filter = getOAFFeature.getOAFGeometryFilter(bboxGeometry, "geometry", "intersects");
+                    // Transform geometry if datasource CRS differs from map projection
+                    let geometryForFilter = bboxGeometry.clone();
+                    const targetCrsCode = this.extractEpsgCode(crs);
+
+                    if (targetCrsCode && targetCrsCode !== mapProjection) {
+                        geometryForFilter.transform(mapProjection, targetCrsCode);
+                    }
+
+                    // Use bbox parameter instead of filter for APIs that don't support CQL filters
+                    const extent = geometryForFilter.getExtent();
+                    const bboxString = `${extent[0]},${extent[1]},${extent[2]},${extent[3]}`;
 
                     scenario.inputs[inputKey] = {
                         type: "FeatureCollection",
                         features: await getOAFFeature.getOAFFeatureGet(input.source.url, input.source.collection, {
                             limit: 100,
-                            filter,
-                            filterCrs: crs,
+                            bbox: bboxString,
+                            bboxCrs: crs,
                             crs
                         })
                     };
                 }
             }
+        },
+
+        /**
+         * Extracts EPSG code from CRS URL format.
+         * @param {String} crsUrl - The CRS URL (e.g., "http://www.opengis.net/def/crs/OGC/1.3/CRS84" or "http://www.opengis.net/def/crs/EPSG/0/4326").
+         * @returns {String|null} The EPSG code (e.g., "EPSG:4326") or null if not parseable.
+         */
+        extractEpsgCode (crsUrl) {
+            if (!crsUrl) {
+                return null;
+            }
+
+            // Handle CRS84 (which is essentially WGS84 with lon/lat order)
+            if (crsUrl.includes("/CRS84")) {
+                return "EPSG:4326";
+            }
+
+            // Handle EPSG format: http://www.opengis.net/def/crs/EPSG/0/4326
+            const epsgMatch = crsUrl.match(/\/EPSG\/\d+\/(\d+)/);
+
+            if (epsgMatch) {
+                return `EPSG:${epsgMatch[1]}`;
+            }
+
+            return null;
         },
 
         /**
@@ -379,6 +417,12 @@ export default {
         parseAndAddFeatures (features) {
             layerCollection.getLayerById(infrastructureLayerId)?.getLayerSource().clear();
             const olFeatures = ConvertFeature.geoJsonToOpenlayers(features);
+
+            // DEBUG: Log first feature's properties
+            if (olFeatures.length > 0) {
+                console.warn("First OL Feature properties:", olFeatures[0].getProperties());
+                console.warn("ShownProperties config:", this.getPropertiesToShow);
+            }
 
             if (this.isShowToggleChecked) {
                 this.getLayerSource().addFeatures(olFeatures);

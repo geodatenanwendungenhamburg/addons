@@ -2,13 +2,17 @@
 import InputText from "../../../../../src/shared/modules/inputs/components/InputText.vue";
 import SliderItem from "../../../../../src/shared/modules/slider/components/SliderItem.vue";
 import SwitchInput from "../../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
+import DatetimeInput from "./DatetimeInput.vue";
+import GeometryInput from "./GeometryInput.vue";
 
 export default {
     name: "DynamicInputByType",
     components: {
         InputText,
         SliderItem,
-        SwitchInput
+        SwitchInput,
+        DatetimeInput,
+        GeometryInput
     },
     props: {
         aria: {
@@ -32,11 +36,11 @@ export default {
             required: true
         },
         max: {
-            type: Number,
+            type: [Number, String],
             default: 100
         },
         min: {
-            type: Number,
+            type: [Number, String],
             default: 0
         },
         placeholder: {
@@ -51,6 +55,10 @@ export default {
             type: [String, Number, Boolean, Object],
             default: undefined,
             required: false
+        },
+        geometryType: {
+            type: String,
+            default: "Polygon"
         }
     },
     emits: ["update:value", "update:checked"],
@@ -144,6 +152,25 @@ export default {
                 :step="step"
                 :value="value"
                 :interaction="($event) => $emit('update:value', Number($event.target.value))"
+            />
+        </template>
+        <template v-else-if="inputType === 'datetime'">
+            <DatetimeInput
+                :id="id"
+                :label="label"
+                :value="value"
+                :min="min"
+                :max="max"
+                @update:value="$emit('update:value', $event)"
+            />
+        </template>
+        <template v-else-if="inputType === 'geometry'">
+            <GeometryInput
+                :id="id"
+                :label="label"
+                :value="value"
+                :geometry-type="geometryType"
+                @update:value="$emit('update:value', $event)"
             />
         </template>
     </div>

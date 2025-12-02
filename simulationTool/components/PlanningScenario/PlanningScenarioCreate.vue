@@ -34,7 +34,7 @@ export default {
             currentScenarioData: {
                 id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 name: "Neues Planungsszenario",
-                dataSourceId: "default",
+                dataSourceId: "stadtrad",
                 inputs: {}
             },
             isValid: true,
@@ -75,14 +75,17 @@ export default {
          * Gets the maximum side length that is configured in the currently selected data source.
          * @returns {Number} The maximum side length of the current data source.
          */
+        /* DISABLED: Bounding box size limitation removed for bike stations
         maxSideLengthFromConfig () {
             return this.currentDataSource?.maxSideLength ? this.currentDataSource.maxSideLength : 450;
         },
+        */
 
         /**
          * Checks constraints for the buffered simulation area (BBox).
          * @returns {Object} Object with constraint status.
          */
+        /* DISABLED: Bounding box size limitation removed for bike stations
         bufferConstraintStatus () {
             if (!this.source?.getFeatures()?.length) {
                 return {sideLengthExceeded: false};
@@ -100,16 +103,19 @@ export default {
                 return {sideLengthExceeded: false};
             }
         },
+        */
 
         /**
          * Checks if any constraint is exceeded on the buffered area.
          * @returns {Boolean} True if any constraint is exceeded.
          */
+        /* DISABLED: Bounding box size limitation removed for bike stations
         isMaxConstraintExceeded () {
             const {sideLengthExceeded} = this.bufferConstraintStatus;
 
             return sideLengthExceeded;
         }
+        */
     },
     watch: {
         /**
@@ -117,6 +123,7 @@ export default {
          * Changes the style of the simulation area.
          * @param {Boolean} val value if the max constraint is exceeded.
          */
+        /* DISABLED: Bounding box size limitation removed for bike stations
         isMaxConstraintExceeded (val) {
             const bboxFeature = this.source?.getFeatures().find(feature => feature.get("id") === "simulation-area");
 
@@ -124,6 +131,7 @@ export default {
                 val ? this.simulationAreaStyleInvalid : this.simulationAreaStyle
             ));
         },
+        */
 
         /**
          * Decides if to remove edit interaction according to selected draw type.
@@ -382,14 +390,15 @@ export default {
             return isMetric
                 ? Math.sqrt(Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2))
                 : getDistance(point1, point2);
-        },
+        }
 
+        /* DISABLED: Bounding box size limitation removed for bike stations
         /**
          * Checks if bbox feature exceeds side length constraint.
          * @param {ol/Feature} bboxFeature The bbox feature to check.
          * @param {Boolean} isMetric Whether the projection is metric.
          * @returns {Boolean} True if side length constraint is exceeded.
-         */
+         *\/
         checkBboxSideLengthConstraint (bboxFeature, isMetric) {
             if (!bboxFeature || !this.maxSideLengthFromConfig) {
                 return false;
@@ -418,7 +427,7 @@ export default {
         /**
          * Returns the info text for the exceeded constraint, if any.
          * @returns {String} The constraint violation message.
-         */
+         *\/
         constraintExceededInfoText () {
             const {sideLengthExceeded} = this.bufferConstraintStatus;
 
@@ -431,6 +440,7 @@ export default {
             }
             return "";
         }
+        */
     }
 };
 
@@ -564,6 +574,7 @@ export default {
                     :type="'number'"
                     @update:modelValue="modifyBBoxByBuffer"
                 />
+                <!-- DISABLED: Bounding box size limitation removed for bike stations
                 <div
                     v-if="isMaxConstraintExceeded"
                     class="alert alert-danger"
@@ -571,6 +582,7 @@ export default {
                 >
                     {{ constraintExceededInfoText() }}
                 </div>
+                -->
                 <div
                     class="d-flex justify-content-between"
                 >
@@ -585,7 +597,7 @@ export default {
                         :aria-label="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
                         :interaction="() => create()"
                         :text="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
-                        :disabled="!isValid || source?.getFeatures().length === 0 || isMaxConstraintExceeded"
+                        :disabled="!isValid || source?.getFeatures().length === 0"
                     />
                 </div>
             </form>

@@ -1,0 +1,203 @@
+{
+  "datasources": [
+    {
+      "id": "stadtrad",
+      "title": "StadtRAD-Stationen (für Radfahrer-Simulation)",
+      "inputs": {
+        "rentalStations": {
+          "editable": true,
+          "label": "StadtRAD-Stationen",
+          "propertiesMapping": {
+            "name": "Stationsname",
+            "anzahl_raeder": "Verfügbare Räder gesamt",
+            "anzahl_bike": "Normale Räder",
+            "anzahl_pedelec": "E-Bikes (Pedelec)",
+            "anzahl_cargobike_electric": "Elektro-Lastenräder",
+            "anzahl_cargobike": "Normale Lastenräder",
+            "anzahl_scooter": "Normale Scooter",
+            "anzahl_scooter_electric": "Elektro-Scooter",
+            "art_der_station": "Stationstyp",
+            "uid": "Eindeutige ID"
+          },
+          "propertiesToShow": [
+            "name",
+            "anzahl_raeder",
+            "anzahl_bike",
+            "anzahl_pedelec",
+            "anzahl_cargobike_electric",
+            "anzahl_cargobike",
+            "anzahl_scooter",
+            "anzahl_scooter_electric",
+            "art_der_station"
+          ],
+          "sortBy": "name",
+          "source": {
+            "type": "oaf",
+            "collection": "stadtrad_stationen",
+            "url": "https://api.hamburg.de/datasets/v1/stadtrad/collections/stadtrad_stationen/items",
+            "nativeCrs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+          }
+        },
+        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+      }
+    }
+  ],
+  "simulations": [
+    {
+      "id": "mars:sim-green4Bikes-default",
+      "title": "Green4Bikes Radfahrer-Simulation",
+      "inputs": {
+        "startPoint": {
+          "schema": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "menu": "primary",
+          "propertiesMapping": {
+            "startPoint": "Startzeitpunkt"
+          }
+        },
+        "endPoint": {
+          "schema": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "menu": "primary",
+          "propertiesMapping": {
+            "endPoint": "Endzeitpunkt"
+          }
+        },
+        "cycleTravelerSource": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "geometry": {
+                "type": "object",
+                "description": "Source area geometry (Polygon)"
+              },
+              "startTime": {
+                "type": "string",
+                "format": "datetime",
+                "description": "Start time for spawning (must be >= startPoint)"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "datetime",
+                "description": "End time for spawning (must be <= endPoint)"
+              },
+              "spawningAmount": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 10,
+                "description": "Number of cyclists to spawn per interval"
+              },
+              "spawningIntervalInMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 10,
+                "description": "Interval in minutes for spawning cyclists"
+              },
+              "hasOwnBikeProbability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 0.5,
+                "description": "Probability that a cyclist has their own bike (0.0-1.0)"
+              },
+              "gender": {
+                "type": "string",
+                "enum": [
+                  "male",
+                  "female"
+                ],
+                "default": "male",
+                "description": "Gender of cyclists"
+              },
+              "mass": {
+                "type": "number",
+                "minimum": 40,
+                "maximum": 150,
+                "default": 70,
+                "description": "Mass of cyclist in kg"
+              },
+              "perceptionInMeter": {
+                "type": "number",
+                "minimum": 0,
+                "default": 1.0,
+                "description": "Perception distance in meters"
+              }
+            },
+            "required": [
+              "geometry",
+              "spawningAmount"
+            ]
+          },
+          "menu": "primary",
+          "propertiesMapping": {
+            "geometry": "Startbereich",
+            "startTime": "Startzeit (innerhalb Simulationsperiode)",
+            "endTime": "Endzeit (innerhalb Simulationsperiode)",
+            "spawningAmount": "Anzahl Radfahrer pro Intervall",
+            "spawningIntervalInMinutes": "Erzeugungsintervall (Minuten)",
+            "hasOwnBikeProbability": "Wahrscheinlichkeit eigenes Rad",
+            "gender": "Geschlecht",
+            "mass": "Masse (kg)",
+            "perceptionInMeter": "Wahrnehmungsdistanz (m)"
+          },
+          "primaryProperties": [
+            "geometry",
+            "spawningAmount",
+            "spawningIntervalInMinutes"
+          ]
+        },
+        "cycleTravelerTarget": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "geometry": {
+                "type": "object",
+                "description": "Target area geometry (Polygon)"
+              }
+            },
+            "required": [
+              "geometry"
+            ]
+          },
+          "menu": "primary",
+          "propertiesMapping": {
+            "geometry": "Zielbereich"
+          }
+        },
+        "rentalStations": {
+          "editable": true,
+          "menu": "primary",
+          "propertiesMapping": {
+            "rentalStations": "StadtRAD-Stationen"
+          }
+        }
+      },
+      "outputs": {
+        "agents": {
+          "propertiesMapping": {
+            "hasBike": "Hat Fahrrad",
+            "routeLength": "Routenlänge (m)",
+            "velocity": "Geschwindigkeit (m/s)",
+            "time": "Zeit",
+            "gender": "Geschlecht",
+            "currentlyCarDriving": "Fährt Auto",
+            "routeMainModalChoice": "Hauptverkehrsmittel",
+            "expectedTravelTime": "Erwartete Reisezeit (s)"
+          }
+        }
+      },
+      "processes": [
+        {
+          "id": "mars:sim-green4Bikes-default",
+          "title": "Green4Bikes Cyclist Simulation",
+          "url": "http://ump-lgv.germanywestcentral.cloudapp.azure.com/api/",
+          "pollingInterval": 1000
+        }
+      ]
+    }
+  ]
+}
