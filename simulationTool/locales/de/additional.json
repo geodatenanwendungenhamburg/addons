@@ -86,6 +86,7 @@
           "landuseTitle": "Daten in {{label}} ändern",
           "createbuildings": "Neue Gebäude erstellen",
           "createroads": "Neue Straßen erstellen",
+          "createstations": "Neue Stationen erstellen",
           "dataSourceForPlanningScenario": "Datenquelle für {{label}}",
           "drawLanduse": "einzeichnen",
           "drawbuildings": "Gebäude einzeichnen",
