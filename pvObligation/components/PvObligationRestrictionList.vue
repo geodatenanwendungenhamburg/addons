@@ -21,10 +21,6 @@ export default {
         isDisabled: {
             type: Boolean,
             required: true
-        },
-        disabledMessage: {
-            type: String,
-            required: true
         }
     },
     emits: [
@@ -38,28 +34,9 @@ export default {
             blueprintIdIndex: 0
         };
     },
-    watch: {
-        itemSelectedCreate (value) {
-            if (this.indexPrefix.startsWith("S")) {
-                this.setStepNetRestrictedAreasIsDrawing(value !== null);
-            }
-            else {
-                this.setStepNetAreaIsDrawing(value !== null);
-            }
-        },
-        itemSelectedEdit (value) {
-            if (this.indexPrefix.startsWith("S")) {
-                this.setStepNetRestrictedAreasIsDrawing(value !== null);
-            }
-            else {
-                this.setStepNetAreaIsDrawing(value !== null);
-            }
-        }
-    },
     methods: {
         ...mapMutations("Modules/PvObligation", [
-            "setStepNetAreaIsDrawing",
-            "setStepNetRestrictedAreasIsDrawing"
+            "setIsDrawing"
         ]),
         formDataItemBlueprint () {
             this.blueprintIdIndex++;
@@ -73,6 +50,7 @@ export default {
         onButtonAdd () {
             this.itemSelectedCreate = this.formDataItemBlueprint();
             this.itemSelectedEdit = null;
+            this.setIsDrawing(true);
         },
         onButtonEdit (item) {
             this.itemSelectedEdit = JSON.parse(JSON.stringify(item));

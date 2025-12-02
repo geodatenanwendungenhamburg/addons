@@ -25,15 +25,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetRestrictedArea
                         PvObligation: {
                             namespaced: true,
                             state: {
-                                stepNetRestrictedAreasIsDrawing: false,
-                                stepNetAreaIsDrawing: false
+                                isDrawing: false
                             },
                             getters: {
-                                stepNetRestrictedAreasIsDrawing: state => state.stepNetRestrictedAreasIsDrawing,
-                                stepNetAreaIsDrawing: state => state.stepNetAreaIsDrawing
-                            },
-                            actions: {},
-                            mutations: {}
+                                isDrawing: state => state.isDrawing
+                            }
                         }
                     }
                 }
