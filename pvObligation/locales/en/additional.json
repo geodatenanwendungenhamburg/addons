@@ -54,8 +54,7 @@
                     "personalInformation": {
                         "wizardTitle": "Personal information",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
-                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "introduction": "Please enter the name of the owner here.",
                             "form": {
                                 "propertyOwnerFullName": "First and surname (Property owner)",
                                 "street": "Stret",
@@ -68,8 +67,7 @@
                     "personalNotes": {
                         "wizardTitle": "Personal notes",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
-                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "introduction": "Here you have the option to add your own explanations about the areas that you consider relevant.",
                             "form": {
                                 "personalNote": "Add explanations or comments here..."
                             }
@@ -78,7 +76,7 @@
                     "generateReport": {
                         "wizardTitle": "Generate report",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
+                            "introduction": "Below you can generate a PDF report containing the information you provided. You can keep this as proof for your records.",
                             "createReport": "Generate PDF",
                             "generalError": "Error: Not all required fields are filled in. Please complete the missing information to generate the report."
                         }

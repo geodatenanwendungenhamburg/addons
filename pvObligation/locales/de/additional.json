@@ -54,8 +54,7 @@
                     "personalInformation": {
                         "wizardTitle": "Persönliche Daten",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
-                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "introduction": "Bitte geben Sie hier den Namen der Eigentümerin oder des Eigentümers ein.",
                             "form": {
                                 "propertyOwnerFullName": "Vor- und Nachname (Eigentümer:in)",
                                 "street": "Straße",
@@ -68,8 +67,7 @@
                     "personalNotes": {
                         "wizardTitle": "eigene Erläuterungen",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
-                            "dataPrivacyInfo": "TODO: Insert data privacy text",
+                            "introduction": "Hier besteht die Möglichkeit, eigene Erläuterungen zu den Flächen einzufügen, die aus Ihrer Sicht relevant sind.",
                             "form": {
                                 "personalNote": "Erläuterungen oder Anmerkungen hier eintragen..."
                             }
@@ -78,7 +76,7 @@
                     "generateReport": {
                         "wizardTitle": "Report erzeugen",
                         "component": {
-                            "introduction": "TODO: Insert introduction text",
+                            "introduction": "Im folgenden können Sie einen PDF-Bericht erzeugen, der die von Ihnen gemachten Angaben Angaben enthält. Sie können diesen als Nachweis für Ihre Unterlagen aufbewahren.",
                             "createReport": "PDF erzeugen",
                             "generalError": "Fehler: Nicht alle Pflichtfelder sind ausgefüllt. Bitte ergänzen Sie die fehlenden Informationen, um den Report zu erzeugen."
                         }
