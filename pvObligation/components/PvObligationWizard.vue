@@ -74,7 +74,9 @@ export default {
         };
     },
     computed: {
-        ...mapGetters("Modules/PvObligation", []),
+        ...mapGetters("Modules/PvObligation", [
+            "isDrawing"
+        ]),
         wizardStepsFormData () {
             const wizardStepsFormData = {};
 
@@ -90,6 +92,7 @@ export default {
     },
     mounted () {
         this.collectFormDataFromWizardSteps();
+        this.blockAccordionItemsByDraw();
     },
     methods: {
         wizardStepIsActive (componentName) {
@@ -116,7 +119,7 @@ export default {
             }
         },
         nextWizardStep () {
-            if (this.wizardStepIsValid()) {
+            if (this.wizardStepIsValid() && !this.isDrawing) {
                 for (let i = 0; i < this.wizardSteps.length; i++) {
                     if (this.wizardSteps[i].isOpen === true) {
                         this.wizardSteps[i].isOpen = false;
@@ -134,7 +137,7 @@ export default {
             }
         },
         previousWizardStep () {
-            if (this.wizardStepIsValid()) {
+            if (this.wizardStepIsValid() && !this.isDrawing) {
                 for (let i = 0; i < this.wizardSteps.length; i++) {
                     if (this.wizardSteps[i].isOpen === true) {
                         this.wizardSteps[i].isOpen = false;
@@ -194,6 +197,25 @@ export default {
                     instance.resetWizardStepData();
                 }
             });
+        },
+        /**
+         * Blocks accordion items by draw.
+         */
+        async blockAccordionItemsByDraw () {
+            const accordionItems = await document.getElementsByClassName("step");
+
+            accordionItems.forEach(accordionItem => {
+                accordionItem.addEventListener("show.bs.collapse", event => {
+                    if (this.isDrawing) {
+                        event.preventDefault();
+                    }
+                });
+                accordionItem.addEventListener("hide.bs.collapse", event => {
+                    if (this.isDrawing) {
+                        event.preventDefault();
+                    }
+                });
+            });
         }
     }
 };
@@ -225,11 +247,15 @@ export default {
                         v-for="(step, index) in wizardSteps"
                         :id="`wizard-item-${index}`"
                         :key="index"
+                        class="step"
                         :title="step.title"
                         :is-open="step.isOpen"
                         :icon="step.componentFormDataIsValid === false ? 'bi-exclamation-triangle-fill' : ''"
                         :coloured-header="true"
-                        :class="step.componentFormDataIsValid === false ? 'error' : ''"
+                        :class="[
+                            step.componentFormDataIsValid === false ? 'error' : '',
+                            isDrawing && !step.isOpen ? 'disabledAccordionItem' : ''
+                        ]"
                         @click="openWizardStep($event, index)"
                     >
                         <component
@@ -252,10 +278,9 @@ export default {
                     :text="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     icon="bi-backspace"
                     :secondary="true"
+                    :disabled="isDrawing"
                     @click="previousWizardStep()"
                 />
-
-                <div class="spacer-div" />
 
                 <FlatButton
                     v-if="showNextWizardStepButton"
@@ -263,6 +288,7 @@ export default {
                     :text="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     icon="bi-backspace-reverse"
                     :secondary="true"
+                    :disabled="isDrawing"
                     @click="nextWizardStep()"
                 />
             </div>
@@ -295,6 +321,14 @@ export default {
 
                 :deep(.error button.accordion-button) {
                     color: $light_red;
+                }
+
+                :deep(.disabledAccordionItem) {
+                    .accordion-button {
+                        background-color: $light_grey_inactive;
+                        pointer-events: none;
+                        opacity: 0.65;
+                    }
                 }
             }
 
