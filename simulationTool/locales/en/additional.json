@@ -135,7 +135,7 @@
           "planningScenarioDownload": "Download {{label}}",
           "planningScenarioDownloads": "Download all {{labelPlural}}",
           "planningScenarioEdit": "Edit {{label}}",
-          "planningScenarioEmptyFeature": "At least 1 existing or created Feature from buildings and roads is required so that die Simulation works later",
+          "planningScenarioEmptyFeature": "At least 1 existing or created Feature of the type \"{{feature}}\" is required so that the simulation works later",
           "planningScenarioImported": "The {{label}} <b>{{name}}</b> with Id {{id}} is imported.",
           "planningScenarioInvalidName": "Please enter a name for the {{label}}!",
           "planningScenarioMissedKey": "{{key}} is required.",

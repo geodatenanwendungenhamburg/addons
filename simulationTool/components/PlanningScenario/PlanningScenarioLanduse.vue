@@ -162,6 +162,18 @@ export default {
         },
 
         /**
+         * Gets the first key of an input that has no features, or null if all have features.
+         * @returns {String|null} The key of the first empty input, or null.
+         */
+        emptyFeature () {
+            const emptyKey = Object.keys(this.editableInputs).find(key => {
+                return typeof this.planningScenario?.inputs[key]?.features === "undefined" || !this.planningScenario?.inputs[key]?.features.length;
+            });
+
+            return emptyKey || null;
+        },
+
+        /**
          * Checks if the value for the currentEditableInput is true which results in a checked toggle.
          * @returns {Boolean} true if the toggle is checked.
          */
@@ -770,7 +782,7 @@ export default {
                 class="alert alert-danger"
                 role="alert"
             >
-                {{ $t('additional:modules.tools.simulationTool.planningScenarioEmptyFeature') }}
+                {{ $t('additional:modules.tools.simulationTool.planningScenarioEmptyFeature', { feature: $t(`additional:modules.tools.simulationTool.${emptyFeature}`)}) }}
             </div>
             <div
                 v-if="isLoaded"

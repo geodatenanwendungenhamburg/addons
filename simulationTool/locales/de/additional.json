@@ -136,7 +136,7 @@
           "planningScenarioDownload": "{{label}} herunterladen",
           "planningScenarioDownloads": "Alle {{labelPlural}} herunterladen",
           "planningScenarioEdit": "{{label}} bearbeiten",
-          "planningScenarioEmptyFeature": "Es muss mindestens 1 Gebäude und mindestens 1 Straße vorhanden sein (im Bestand oder erstellt), damit die Simulation später funktioniert.",
+          "planningScenarioEmptyFeature": "Es muss mindestens 1 Objekt vom Typ \"{{feature}}\" vorhanden sein (im Bestand oder erstellt), damit die Simulation später funktioniert.",
           "planningScenarioImported": "Das {{label}} <b>{{name}}</b> mit der Id {{id}} ist importiert.",
           "planningScenarioInvalidName": "Bitte geben Sie einen Namen für das {{label}} ein!",
           "planningScenarioMissedKey": "{{key}} ist erforderlich.",
