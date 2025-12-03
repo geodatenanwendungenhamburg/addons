@@ -33,7 +33,8 @@ export default {
             // Shared form data for this component, accessible by other wizard steps
             componentFormData: {},
             // Form error fields, should match keys in componentFormData for consistency
-            componentFormErrors: {}
+            componentFormErrors: {},
+            wizardStepVisited: null
         };
     },
     computed: {
@@ -50,6 +51,19 @@ export default {
         }
     },
     methods: {
+        /**
+         * Returns true if this step is being visited for the first time.
+         * Useful in wizardStepIsActive watcher to trigger actions only after initial visit.
+         */
+        wizardStepVisitedFirstTime () {
+            if (!this.wizardStepVisited) {
+                this.wizardStepVisited = true;
+
+                return true;
+            }
+
+            return false;
+        },
         /**
          * Called from PvObligationWizard.vue, see wizardStepIsValid()
          * Validates the component form data and add validation errors.

@@ -57,8 +57,8 @@
                             "disabledMessage": "The drawing in net roof area is not yet finished"
                         }
                     },
-                    "personalInformation": {
-                        "wizardTitle": "Personal information",
+                    "buildingDetails": {
+                        "wizardTitle": "Building details",
                         "component": {
                             "introduction": "Please enter the name of the owner here.",
                             "form": {
