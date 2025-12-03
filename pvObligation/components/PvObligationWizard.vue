@@ -6,7 +6,7 @@ import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import PvObligationWizardStepGrossArea from "./PvObligationWizardStepGrossArea.vue";
 import PvObligationWizardStepNetArea from "./PvObligationWizardStepNetArea.vue";
 import PvObligationWizardStepNetRestrictedAreas from "./PvObligationWizardStepNetRestrictedAreas.vue";
-import PvObligationWizardStepPersonalInformation from "./PvObligationWizardStepPersonalInformation.vue";
+import PvObligationWizardStepBuildingDetails from "./PvObligationWizardStepBuildingDetails.vue";
 import PvObligationWizardStepPersonalNotes from "./PvObligationWizardStepPersonalNotes.vue";
 import PvObligationWizardStepGenerateReport from "./PvObligationWizardStepGenerateReport.vue";
 
@@ -18,7 +18,7 @@ export default {
         PvObligationWizardStepGrossArea,
         PvObligationWizardStepNetArea,
         PvObligationWizardStepNetRestrictedAreas,
-        PvObligationWizardStepPersonalInformation,
+        PvObligationWizardStepBuildingDetails,
         PvObligationWizardStepPersonalNotes,
         PvObligationWizardStepGenerateReport
 
@@ -48,16 +48,16 @@ export default {
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.personalInformation.wizardTitle"),
+                    title: this.$t("additional:modules.pvObligation.wizard.step.personalNotes.wizardTitle"),
                     isOpen: false,
-                    component: markRaw(PvObligationWizardStepPersonalInformation),
+                    component: markRaw(PvObligationWizardStepPersonalNotes),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.personalNotes.wizardTitle"),
+                    title: this.$t("additional:modules.pvObligation.wizard.step.buildingDetails.wizardTitle"),
                     isOpen: false,
-                    component: markRaw(PvObligationWizardStepPersonalNotes),
+                    component: markRaw(PvObligationWizardStepBuildingDetails),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },

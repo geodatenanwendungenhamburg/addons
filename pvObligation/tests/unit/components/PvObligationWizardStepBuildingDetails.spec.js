@@ -1,11 +1,11 @@
 import {config, shallowMount} from "@vue/test-utils";
 import {createStore} from "vuex";
 import {expect} from "chai";
-import Component from "../../../components/PvObligationWizardStepPersonalInformation.vue";
+import Component from "../../../components/PvObligationWizardStepBuildingDetails.vue";
 
 config.global.mocks.$t = key => key;
 
-describe("PvObligationWizardStepPersonalInformation.vue", () => {
+describe("PvObligationWizardStepBuildingDetails.vue", () => {
     let wrapper,
         store;
 
@@ -44,7 +44,7 @@ describe("PvObligationWizardStepPersonalInformation.vue", () => {
 
     it("could load the component and root HTML element contains correct ID", async () => {
         expect(wrapper.exists()).to.be.true;
-        expect(wrapper.attributes().id).equals("pvObligationWizardStepPersonalInformation");
+        expect(wrapper.attributes().id).equals("pvObligationWizardStepBuildingDetails");
     });
 
     it("validates and returns false and sets errors for missing fields", () => {

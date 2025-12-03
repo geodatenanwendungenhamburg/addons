@@ -56,8 +56,8 @@
                             "additionalInfo": "Sie haben hier die Möglichkeit, Flächen anzugeben, auf denen die Pflicht entfällt. Gründe können sein: Unvereinbarkeit mit dem Denkmalschutz, Anforderungen aus der HBauO (Abstandsflächen), Flächen, die mehr als geringfügig verschattet sind, aber auch technische Unmöglichkeiten."
                         }
                     },
-                    "personalInformation": {
-                        "wizardTitle": "Persönliche Daten",
+                    "buildingDetails": {
+                        "wizardTitle": "Angaben zum Gebäude",
                         "component": {
                             "introduction": "Bitte geben Sie hier den Namen der Eigentümerin oder des Eigentümers ein.",
                             "form": {
@@ -70,7 +70,7 @@
                         }
                     },
                     "personalNotes": {
-                        "wizardTitle": "eigene Erläuterungen",
+                        "wizardTitle": "Eigene Erläuterungen",
                         "component": {
                             "introduction": "Hier besteht die Möglichkeit, eigene Erläuterungen zu den Flächen einzufügen, die aus Ihrer Sicht relevant sind.",
                             "form": {
