@@ -4,7 +4,7 @@ import InputText from "@shared/modules/inputs/components/InputText.vue";
 import {mapActions, mapGetters} from "vuex";
 
 export default {
-    name: "PvObligationWizardStepPersonalInformation",
+    name: "PvObligationWizardStepBuildingDetails",
     components: {
         InputText
     },
@@ -35,6 +35,14 @@ export default {
         ])
     },
     watch: {
+        wizardStepIsActive: {
+            handler (isNowActive) {
+                if (isNowActive && !this.wizardStepVisitedFirstTime()) {
+                    this.componentFormDataValidate();
+                }
+            },
+            immediate: true
+        },
         selectedRoofId: {
             handler: async function (newValue) {
                 if (!newValue) {
@@ -111,17 +119,17 @@ export default {
 </script>
 
 <template lang="html">
-    <div id="pvObligationWizardStepPersonalInformation">
+    <div id="pvObligationWizardStepBuildingDetails">
         <p>
-            {{ $t("additional:modules.pvObligation.wizard.step.personalInformation.component.introduction") }}
+            {{ $t("additional:modules.pvObligation.wizard.step.buildingDetails.component.introduction") }}
         </p>
 
         <form>
             <InputText
                 id="componentFormDataPropertyOwnerFullName"
                 v-model="componentFormData.propertyOwnerFullName"
-                :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.propertyOwnerFullName') + ' *'"
-                :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.propertyOwnerFullName')"
+                :label="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.propertyOwnerFullName') + ' *'"
+                :placeholder="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.propertyOwnerFullName')"
                 :error-message="componentFormErrors.propertyOwnerFullName"
             />
 
@@ -130,16 +138,16 @@ export default {
                     id="componentFormDataStreet"
                     v-model="componentFormData.street"
                     class="componentFormDataStreet"
-                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street') + ' *'"
-                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.street')"
+                    :label="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.street') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.street')"
                     :error-message="componentFormErrors.street"
                 />
 
                 <InputText
                     id="componentFormDataHouseNumber"
                     v-model="componentFormData.houseNumber"
-                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.houseNumber') + ' *'"
-                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.houseNumber')"
+                    :label="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.houseNumber') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.houseNumber')"
                     :error-message="componentFormErrors.houseNumber"
                 />
             </div>
@@ -148,8 +156,8 @@ export default {
                 <InputText
                     id="componentFormDataPostalCode"
                     v-model="componentFormData.postalCode"
-                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode') + ' *'"
-                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.postalCode')"
+                    :label="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.postalCode') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.postalCode')"
                     :error-message="componentFormErrors.postalCode"
                 />
 
@@ -157,8 +165,8 @@ export default {
                     id="componentFormDataCity"
                     v-model="componentFormData.city"
                     class="componentFormDataCity"
-                    :label="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city') + ' *'"
-                    :placeholder="$t('additional:modules.pvObligation.wizard.step.personalInformation.component.form.city')"
+                    :label="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.city') + ' *'"
+                    :placeholder="$t('additional:modules.pvObligation.wizard.step.buildingDetails.component.form.city')"
                     :error-message="componentFormErrors.city"
                 />
             </div>
@@ -169,7 +177,7 @@ export default {
 <style lang="scss" scoped>
     @import "~variables";
 
-    #pvObligationWizardStepPersonalInformation {
+    #pvObligationWizardStepBuildingDetails {
         margin: 1rem 0;
 
         form {

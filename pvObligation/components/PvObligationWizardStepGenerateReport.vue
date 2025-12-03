@@ -20,13 +20,13 @@ export default {
         ]),
         createPDF () {
             this.exportPDF({
-                author: this.wizardStepsFormData.PvObligationWizardStepPersonalInformation.formData.propertyOwnerFullName,
+                author: this.wizardStepsFormData.PvObligationWizardStepBuildingDetails.formData.propertyOwnerFullName,
                 brutto: this.wizardStepsFormData.PvObligationWizardStepGrossArea.formData.grossRoofArea,
                 netto: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea,
                 pvObligation: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea * 0.3,
                 nettoReduceAreas: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.restrictedListItems,
                 restrictedAreas: this.wizardStepsFormData.PvObligationWizardStepNetRestrictedAreas.formData.restrictedListItems,
-                personalData: this.wizardStepsFormData.PvObligationWizardStepPersonalInformation.formData,
+                personalData: this.wizardStepsFormData.PvObligationWizardStepBuildingDetails.formData,
                 additionalInformation: this.wizardStepsFormData.PvObligationWizardStepPersonalNotes.formData.personalNote
             });
         }
