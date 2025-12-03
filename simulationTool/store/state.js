@@ -72,12 +72,18 @@ const state = {
         fillColor: [60, 95, 148],
         fillTransparency: 0,
         strokeColor: [0, 0, 0],
-        strokeWidth: 2
+        strokeWidth: 2,
+        pointRadius: 10,
+        type: "circle"
     },
     landuseRoadDrawIcons: {
         line: "bi-slash-lg"
     },
     landuseRoadDrawTypesMain: ["line"],
+    landuseStationDrawIcons: {
+        point: "bi-circle-fill"
+    },
+    landuseStationDrawTypesMain: ["point"],
     mode: "home-panel",
     onJobStatusChange: 0,
     planningScenarios: [],
@@ -101,7 +107,12 @@ const state = {
         strokeWidth: 4
     },
     planningScenarioSelectInteraction: null,
-    drawTypeLabels: [{type: "polygon", label: "additional:modules.tools.simulationTool.freeForm"}, {type: "box", label: "additional:modules.tools.simulationTool.rectangle"}, {type: "line", label: "additional:modules.tools.simulationTool.line"}],
+    drawTypeLabels: [
+        {type: "polygon", label: "additional:modules.tools.simulationTool.freeForm"},
+        {type: "box", label: "additional:modules.tools.simulationTool.rectangle"},
+        {type: "line", label: "additional:modules.tools.simulationTool.line"},
+        {type: "point", label: "additional:modules.tools.simulationTool.point"}
+    ],
     planningScenarioSelectedDrawType: "",
     planningScenarioSelectedDrawTypeMain: "",
     planningScenarioSelectedInteraction: null,

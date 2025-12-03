@@ -194,6 +194,7 @@
           "tutorial": "Tutorial",
           "rectangle": "Rectangle",
           "line": "Line",
+          "point": "Point",
           "finished": "Finished",
           "legend": "Legend",
           "welcome": "Welcome",
