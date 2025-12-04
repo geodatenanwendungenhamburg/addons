@@ -25,7 +25,8 @@ export default class OgcApiProcess {
     */
     async getDescription (accessToken) {
         try {
-            const url = new URL(`processes/${this.processId}`, this.baseUrl),
+            const encodedProcessId = encodeURIComponent(this.processId);
+            const url = new URL(`processes/${encodedProcessId}`, this.baseUrl),
                 response = await axios.get(url, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`
@@ -106,12 +107,21 @@ export default class OgcApiProcess {
      * @returns {Promise<Object>} The response data from the process execution. Normally a job status object with job ID.
      */
     async execute (requestBody, accessToken) {
-        const url = new URL(`processes/${this.processId}/execution`, this.baseUrl),
-            response = await axios.post(url, requestBody, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const encodedProcessId = encodeURIComponent(this.processId);
+        const url = new URL(`processes/${encodedProcessId}/execution`, this.baseUrl);
+        
+        console.log("=== OGC API Process Execute ===");
+        console.log("Process ID:", this.processId);
+        console.log("Encoded Process ID:", encodedProcessId);
+        console.log("Base URL:", this.baseUrl);
+        console.log("Full URL:", url.toString());
+        console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+        
+        const response = await axios.post(url, requestBody, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
 
         return response.data;
     }

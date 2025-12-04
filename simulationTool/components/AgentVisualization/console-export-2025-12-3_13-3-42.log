@@ -1,0 +1,34 @@
+[WDS] Disconnected! index.js:134:9
+[WDS] Live Reloading enabled. index.js:37:9
+GET
+https://localhost:9001/portal/connected_urban_simulations_new/portalconfigs/connected_urban_simulations/resources/img/Logo.jpg
+[HTTP/1.1 404 Not Found 1ms]
+
+// Holt den aktuellen Token aus dem Cookie
+const token = document.cookie.split('; ').find(row => row.startsWith('token=')).split('=')[1];
+console.log('Current token:', token);
+
+// Dann direkt den Request mit dem frischen Token…
+Current token: eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ6SFhpcHhpdFg5U2ZVeXFVMzZhWUJ4b2hNSlZVUmNmbUZ0R05MMVYyUEhZIn0.eyJleHAiOjE3NjQ3NjM0NTUsImlhdCI6MTc2NDc2MzE1NSwiYXV0aF90aW1lIjoxNzY0NzU2NjE5LCJqdGkiOiJiZDJlZGQ2Ni00NTJkLTRmNDAtOGZjMy0zZTk1YzU1MDVlZmMiLCJpc3MiOiJodHRwczovL3VtcC1sZ3YuZ2VybWFueXdlc3RjZW50cmFsLmNsb3VkYXBwLmF6dXJlLmNvbS9hdXRoL3JlYWxtcy9VcmJhbk1vZGVsUGxhdGZvcm0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZjM4NzcyMzEtY2M4MC00NDQ0LTk3ZGItODBkZTg0ODJkNGQ0IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2NlbmFyaW8tZXhwbG9yZXItdGVzdC1kcCIsInNpZCI6IjNiMzhhY2M4LTFkZWMtNGYzNC04NmZjLTczNzgzZjhkMTUzZiIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiIiwiaHR0cHM6Ly91bXAtbGd2Lmdlcm1hbnl3ZXN0Y2VudHJhbC5jbG91ZGFwcC5henVyZS5jb20iXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtdXJiYW5tb2RlbHBsYXRmb3JtIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7InNjZW5hcmlvLWV4cGxvcmVyLXRlc3QtZHAiOnsicm9sZXMiOlsibm9pc2VfdjQiLCJtYXJzIiwibWFyc19zaW0tZ3JlZW40QmlrZXMtZGVmYXVsdCJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiRmlubiBSYXNtdXMiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJmaW5uIiwiZ2l2ZW5fbmFtZSI6IkZpbm4iLCJmYW1pbHlfbmFtZSI6IlJhc211cyIsImVtYWlsIjoiZmlubi1yYXNtdXMuZGFyZ2VAZGF0YXBvcnQuZGUifQ.BgJOaQ0J6zVYa1Q3vtl7XCwA5b_NbDb7xy0PyKN6TofVYygh9MCtNp4bzaXsOuLQjLVhVLzsaxMZ5UP1E2IwdlcMpw24jb4OhcC5AgvxT2sWaRgLBm8Ygo3Hsb-VcxoSEFWyC6jqjfY56-fjXXphPT97_hPTzN1wr_Jn3wLeDSqWGyyhsWYB20k_VWe6v1bVNUBjlDo928SrP-6dDnHF4AFW-TKcREbCRJ0LhR-RTbDTjiTerXjjw_M98DA6i5rs1s7yPBKRwFiO9G-ufv8aGeNVtz85f-oQGzwF6mZAM0dpe5nYJrRTT-rvblKd9Oz5u-iqttS6wPXndQSxmo0B1w debugger eval code:3:9
+Promise { <state>: "pending" }
+
+XHRPOST
+https://ump-lgv.germanywestcentral.cloudapp.azure.com/api/processes/mars:sim-green4Bikes-default/execution
+[HTTP/2 400  205ms]
+
+Success: 
+Object { detail: `Job could not be started remotely due to {'title': 'Invalid request.', 'status': 400, 'detail': "Selected input 'cycleTravelerSource' is not provided by process sim-green4Bikes-default", 'instance': '/processes/sim-green4Bikes-default/execution', 'errorId': 'ea1fb52a-afe8-49dd-8da9-91653a972aa0', 'validation': [{'propertyName': 'execute.inputs[2]', 'errorMessage': "Selected input 'cycleTravelerSource' is not provided by process sim-green4Bikes-default", 'severity': 0, 'errorCode': 'PredicateValidator'}, {'propertyName': 'execute.inputs[3]', 'errorMessage': "Selected input 'cycleTravelerTarget' is not provided by process sim-green4Bikes-default", 'severity': 0, 'errorCode': 'PredicateValidator'}]}`, instance: "/processes/mars:sim-green4Bikes-default/jobs", status: 400, title: "Remote job submission failed", type: "about:blank" }
+debugger eval code:51:20
+fetch(`https://ump-lgv.germanywestcentral.cloudapp.azure.com/api/processes/mars:sim-green4Bikes-default`, {
+  headers: { 'Authorization': `Bearer ${token}` }
+}).then(r => r.json()).then(d => {
+  console.log('Process Description:', d);
+  console.log('Inputs:', d.inputs);…
+Promise { <state>: "pending" }
+
+Process Description: 
+Object { description: "Travelling model to simulate the mobility behavior of people walking and cycling from selected starts and stops in the area of Hamburg Harburg.", id: "mars:sim-green4Bikes-default", inputs: {…}, jobControlOptions: (2) […], keywords: (3) […], outputTransmission: (1) […], outputs: {…}, title: "SOH - Green4Bikes Model", version: "1.0.0" }
+debugger eval code:4:11
+Inputs: 
+Object { config: {…}, cycleTravelerLayer: {…}, endPoint: {…}, rentalBicycle: {…}, rentalStations: {…}, roadNetwork: {…}, startPoint: {…}, steps: {…} }
+debugger eval code:5:11

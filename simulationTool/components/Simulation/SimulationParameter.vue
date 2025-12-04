@@ -746,13 +746,42 @@ export default {
 
             this.processDescriptions.forEach(
                 description => filteredProcessDescriptions.push(this.removeUnwantedProperty(description, this.ignoreProperties)));
-            this.requestBodies = filteredProcessDescriptions.map(description => ({
-                inputs: {
-                    ...OgcApiProcess.getInputDefaultsFromDescription(description),
-                    ...this.currentPlanningScenario.inputs
-                },
-                outputs: {}
-            }));
+            this.requestBodies = filteredProcessDescriptions.map(description => {
+                const defaults = OgcApiProcess.getInputDefaultsFromDescription(description);
+                
+                // Apply defaults from simulation config
+                Object.keys(this.simulation.inputs || {}).forEach(inputKey => {
+                    const inputConfig = this.simulation.inputs[inputKey];
+                    
+                    // Apply top-level default
+                    if (inputConfig.schema?.default !== undefined && !defaults[inputKey]) {
+                        defaults[inputKey] = inputConfig.schema.default;
+                    }
+                    
+                    // Apply nested property defaults (for objects like cycleTravelerSource)
+                    if (inputConfig.schema?.type === "object" && inputConfig.schema?.properties) {
+                        if (!defaults[inputKey]) {
+                            defaults[inputKey] = {};
+                        }
+                        
+                        Object.keys(inputConfig.schema.properties).forEach(propKey => {
+                            const propConfig = inputConfig.schema.properties[propKey];
+                            
+                            if (propConfig.default !== undefined && !defaults[inputKey][propKey]) {
+                                defaults[inputKey][propKey] = propConfig.default;
+                            }
+                        });
+                    }
+                });
+                
+                return {
+                    inputs: {
+                        ...defaults,
+                        ...this.currentPlanningScenario.inputs
+                    },
+                    outputs: {}
+                };
+            });
         },
 
         /** Prepares the request body for the simulation.

@@ -1,0 +1,145 @@
+cycleTravelerLayer schema: {
+  "description": "Cycle traveler event layer, spawning new agents with source and target",
+  "minOccurs": 1,
+  "schema": {
+    "contentSchema": "application/geo+json",
+    "format": "geojson-feature-collection",
+    "properties": {
+      "endTime": {
+        "description": "The end time when this spawn event ends to occur.",
+        "example": "01-09-2020T14:00",
+        "format": "date",
+        "title": "Event End Time",
+        "type": "string"
+      },
+      "gender": {
+        "default": "male",
+        "description": "The biological gender with impact on the walking speed",
+        "enum": [
+          "female",
+          "male"
+        ],
+        "example": "female",
+        "title": "Gender",
+        "type": "string"
+      },
+      "gradient": {
+        "description": "The speed gradient to determine the speed change",
+        "nullable": true,
+        "title": "Gradient",
+        "type": "number"
+      },
+      "hasOwnBikeProbability": {
+        "default": 0,
+        "description": "The probability of the spawned agent to owning a personal bike instead of using a rental one.",
+        "example": 10,
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Bike Owner Probability",
+        "type": "integer"
+      },
+      "mass": {
+        "default": 80,
+        "description": "The mass of the traveler with impact on the walking speed",
+        "title": "Mass",
+        "type": "number"
+      },
+      "spawningAmount": {
+        "default": 0,
+        "description": "The amount of agents to spawn for each occured event.",
+        "example": 50,
+        "title": "Spawning Amount",
+        "type": "integer"
+      },
+      "spawningIntervalInMinutes": {
+        "description": "The interval in minutes how often this events occur between the start and end.",
+        "example": 20,
+        "nullable": true,
+        "title": "Spawning Interval",
+        "type": "integer"
+      },
+      "startTime": {
+        "description": "The start time when this spawn event occurs.",
+        "example": "01-09-2020T07:00",
+        "format": "date",
+        "title": "Event Start Time",
+        "type": "string"
+      }
+    },
+    "required": [
+      "startTime",
+      "endTime"
+    ],
+    "type": "string"
+  },
+  "title": "Cycle Traveler Agent Layer"
+} debugger eval code:5:11
+rentalBicycle schema: {
+  "description": "Different types of used rental bicycle types",
+  "minOccurs": 1,
+  "schema": {
+    "properties": {
+      "height": {
+        "description": "The height of this bike.",
+        "title": "Height",
+        "type": "number"
+      },
+      "length": {
+        "description": "The length of this bike.",
+        "title": "Length",
+        "type": "number"
+      },
+      "maxAcceleration": {
+        "description": "The maximum acceleration of this bike.",
+        "title": "Max Acceleration",
+        "type": "number"
+      },
+      "maxDeceleration": {
+        "description": "The maximum deceleration of this bike.",
+        "title": "Max  Deceleration",
+        "type": "number"
+      },
+      "maxSpeed": {
+        "description": "The maximum speed of this bike.",
+        "title": "Max Speed"
+      },
+      "type": {
+        "description": "The bike type name e.g., electric bike or pedelec",
+        "title": "Bike Type",
+        "type": "string"
+      },
+      "width": {
+        "description": "The width of this bike.",
+        "title": "Width",
+        "type": "number"
+      }
+    },
+    "type": "object"
+  },
+  "title": "Rental Bike Types"
+} debugger eval code:6:11
+roadNetwork schema: {
+  "description": "The input network used to represent the environment where the agents can move on",
+  "minOccurs": 1,
+  "schema": {
+    "allOf": [
+      {
+        "format": "geojson-geometry"
+      }
+    ],
+    "contentSchema": "application/geo+json",
+    "format": "geojson-feature-collection",
+    "properties": {
+      "lanes": {
+        "description": "The count of lanes of this road segment",
+        "example": "2",
+        "minimum": 1,
+        "nullable": true,
+        "title": "Lanes",
+        "type": "integer"
+      }
+    },
+    "type": "string"
+  },
+  "title": "Moving Network Environment"
+}

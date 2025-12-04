@@ -133,7 +133,7 @@ export default {
             }, {root: true});
             return false;
         }
-        else if (typeof val.inputs === "undefined" || (typeof val.inputs.buildings === "undefined" && typeof val.inputs.roads === "undefined")) {
+        else if (typeof val.inputs === "undefined" || Object.keys(val.inputs).length === 0) {
             dispatch("Alerting/addSingleAlert", {
                 category: "error",
                 content: i18next.t("additional:modules.tools.simulationTool.planningScenarioWrongFormat") + "<br>" + i18next.t("additional:modules.tools.simulationTool.planningScenarioMissedKey", {key: "inputs"})

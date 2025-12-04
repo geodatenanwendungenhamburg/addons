@@ -50,7 +50,8 @@
         "startPoint": {
           "schema": {
             "type": "string",
-            "format": "datetime"
+            "format": "datetime",
+            "default": "2024-12-01T07:00:00"
           },
           "menu": "primary",
           "propertiesMapping": {
@@ -60,7 +61,8 @@
         "endPoint": {
           "schema": {
             "type": "string",
-            "format": "datetime"
+            "format": "datetime",
+            "default": "2024-12-01T08:00:00"
           },
           "menu": "primary",
           "propertiesMapping": {
@@ -86,11 +88,13 @@
               },
               "startTime": {
                 "type": "string",
-                "format": "datetime"
+                "format": "datetime",
+                "default": "2024-12-01T07:00:00"
               },
               "endTime": {
                 "type": "string",
-                "format": "datetime"
+                "format": "datetime",
+                "default": "2024-12-01T07:30:00"
               },
               "hasOwnBikeProbability": {
                 "type": "number",
@@ -172,7 +176,7 @@
         {
           "id": "mars:sim-green4Bikes-default",
           "title": "Green4Bikes Cyclist Simulation",
-          "url": "http://ump-lgv.germanywestcentral.cloudapp.azure.com/api/",
+          "url": "https://ump-lgv.germanywestcentral.cloudapp.azure.com/api/",
           "pollingInterval": 1000
         }
       ]
