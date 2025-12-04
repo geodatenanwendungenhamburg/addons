@@ -6,7 +6,8 @@ export default {
     computed: {
         ...mapGetters("Modules/SimulationTool", [
             "mode",
-            "hiddenSideMenus"
+            "hiddenSideMenus",
+            "planningScenarioLabel"
         ]),
         ...mapGetters("Modules/Login", [
             "loggedIn"
@@ -76,7 +77,7 @@ export default {
             v-if="!hiddenSideMenus.includes('planningScenario')"
             class="btn btn-link"
             :class="{ active: mode.includes('planningScenario') }"
-            :title="$t('additional:modules.tools.simulationTool.planningScenario')"
+            :title="planningScenarioLabel"
             @click="() => setMode('planningScenario')"
         >
             <i class="bi bi-bounding-box-circles" />
