@@ -33,7 +33,7 @@ export default {
             currentModifyInteraction: null,
             currentScenarioData: {
                 id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-                name: "Neues Planungsszenario",
+                name: "",
                 dataSourceId: "",
                 inputs: {}
             },
@@ -144,6 +144,11 @@ export default {
         }
     },
     mounted () {
+        // Set default name with translated label
+        if (!this.currentScenarioData.name) {
+            this.currentScenarioData.name = this.$t("additional:modules.tools.simulationTool.newScenario", {label: this.$t(this.planningScenarioLabel)});
+        }
+
         this.deleteSource();
         if (typeof layerCollection.getLayerById("planning-scenario") !== "undefined") {
             layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
@@ -443,11 +448,11 @@ export default {
 <template>
     <div class="planning-scenario">
         <SectionHeader
-            :title="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+            :title="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
             icon="bi bi-person-fill"
         />
         <h5 class="mb-3">
-            {{ $t('additional:modules.tools.simulationTool.planingAreaDraw') }}
+            {{ $t('additional:modules.tools.simulationTool.planingAreaDraw', {label: $t(planningScenarioLabel)}) }}
         </h5>
         <div
             id="draw-types"
@@ -546,7 +551,7 @@ export default {
                         id="dataSourceForPlanning"
                         v-model="currentScenarioData.dataSourceId"
                         class="form-select"
-                        :aria-label="$t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario')"
+                        :aria-label="$t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario', {label: $t(planningScenarioLabel)})"
                     >
                         <option
                             v-for="dataSource in dataSources"
@@ -557,7 +562,7 @@ export default {
                         </option>
                     </select>
                     <label for="dataSourceForPlanning">
-                        {{ $t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario') }}
+                        {{ $t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario', {label: $t(planningScenarioLabel)}) }}
                     </label>
                 </div>
                 <InputText

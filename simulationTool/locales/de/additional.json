@@ -119,7 +119,7 @@
           "openResults": "Ergebnisse öffnen",
           "openSimulation": "Simulation öffnen",
           "parameters": "Parameter",
-          "planingAreaDraw": "Planungsgebiet einzeichnen",
+          "planingAreaDraw": "{{label}} einzeichnen",
           "planningScenario": "Planungsszenario",
           "planningScenarios": "Planungsszenarien",
           "planningScenarioGeneric": "{{label}}",
