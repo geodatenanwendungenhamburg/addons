@@ -50,6 +50,7 @@ export default {
             "planningScenarioCurrentLayout",
             "planningScenarioDrawIcons",
             "planningScenarioDrawTypesMain",
+            "planningScenarioLabel",
             "drawTypeLabels",
             "planningScenarios",
             "planningScenarioSelectedDrawType",
@@ -585,9 +586,9 @@ export default {
                     />
                     <FlatButton
                         id="save"
-                        :aria-label="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
+                        :aria-label="$t('additional:modules.tools.simulationTool.createUrbanPlanning', {label: $t(planningScenarioLabel)})"
                         :interaction="() => create()"
-                        :text="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
+                        :text="$t('additional:modules.tools.simulationTool.createUrbanPlanning', {label: $t(planningScenarioLabel)})"
                         :disabled="!isValid || source?.getFeatures().length === 0 || isMaxConstraintExceeded"
                     />
                 </div>

@@ -22,6 +22,7 @@ export default {
     computed: {
         ...mapGetters("Modules/SimulationTool", [
             "planningScenarios",
+            "planningScenarioLabel",
             "simulationIdForResults"
         ]),
 
@@ -242,10 +243,10 @@ export default {
             <div class="col col-6 create-scenario">
                 <FlatButton
                     class="pe-2 mt-4"
-                    :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+                    :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
                     :icon="'bi bi-pencil-square'"
                     :interaction="() => openCreatePlanningScenario()"
-                    :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+                    :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
                 />
             </div>
         </div>

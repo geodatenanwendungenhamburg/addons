@@ -51,6 +51,7 @@ export default {
         ...mapGetters("Modules/SimulationTool", [
             "currentPlanningScenarioId",
             "planningScenarios",
+            "planningScenarioLabel",
             "previousComponentOfSimulation",
             "simulations",
             "dataSources"
@@ -1165,7 +1166,7 @@ export default {
                         <select
                             id="planingScenario"
                             class="form-select"
-                            :aria-label="$t('additional:modules.tools.simulationTool.selectPlanningScenario')"
+                            :aria-label="$t('additional:modules.tools.simulationTool.selectPlanningScenario', {label: $t(planningScenarioLabel)})"
                             :value="currentPlanningScenarioId"
                             @change="onPlanningScenarioChange"
                         >
@@ -1178,17 +1179,17 @@ export default {
                             </option>
                         </select>
                         <label for="simulateForPlanning">
-                            {{ $t('additional:modules.tools.simulationTool.selectPlanningScenario') }}
+                            {{ $t('additional:modules.tools.simulationTool.selectPlanningScenario', {label: $t(planningScenarioLabel)}) }}
                         </label>
                     </div>
                 </div>
                 <div class="col-md-6 create-scenario pt-0">
                     <FlatButton
                         class="pe-2"
-                        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+                        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
                         :icon="'bi bi-pencil-square'"
                         :interaction="() => openCreatePlanningScenario()"
-                        :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+                        :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
                     />
                 </div>
             </div>

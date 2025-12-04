@@ -21,6 +21,8 @@
  * @property {Object[]} planningScenarioCurrentLayout - The current layout object as style.
  * @property {Object[]} planningScenarioDrawIcons - The draw icons.
  * @property {Object[]} planningScenarioDrawTypesMain - The main draw types.
+ * @property {String} planningScenarioLabel - The term to describe planning scenarios in the UI for the user.
+ * @property {String} planningScenarioLabelPlural - The plural term to describe planning scenarios in the UI for the user.
  * @property {Object[]} planningScenarioHighlightFeatureStyle - The highlight feature style.
  * @property {ol/interaction/Select} planningScenarioSelectInteraction - The current select interactions.
  * @property {Object[]} planningScenarioSelectedDrawType - The selected draw type.
@@ -90,6 +92,8 @@ const state = {
         polygon: "bi-octagon"
     },
     planningScenarioDrawTypesMain: ["polygon", "box"],
+    planningScenarioLabel: "additional:modules.tools.simulationTool.planningScenario",
+    planningScenarioLabelPlural: "additional:modules.tools.simulationTool.planningScenarios",
     planningScenarioHighlightFeatureStyle: {
         fillColor: [0, 0, 0],
         fillTransparency: 100,

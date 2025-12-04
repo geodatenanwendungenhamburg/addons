@@ -41,6 +41,8 @@ export default {
             "dataSources",
             "landuseActiveTab",
             "planningScenarios",
+            "planningScenarioLabel",
+            "planningScenarioLabelPlural",
             "simulations",
             "simulationAreaStyle",
             "simulationAreaStyleInvalid",
@@ -531,7 +533,7 @@ export default {
 <template>
     <div class="vh-100 overflow-y-auto">
         <h4 class="text-decoration-underline mt-3">
-            {{ $t("additional:modules.tools.simulationTool.landuseTitle") }}
+            {{ $t("additional:modules.tools.simulationTool.landuseTitle", {label: $t(planningScenarioLabel)}) }}
         </h4>
         <div class="d-flex flex-column rounded shadow mt-4">
             <div class="position-sticky mt-2 mx-3 top-0 z-2 bg-body">
@@ -665,7 +667,7 @@ export default {
                 />
                 <FlatButton
                     class="m-3"
-                    :text="!isEmptyFeature ? $t('additional:modules.tools.simulationTool.planningScenarioSave') : $t('additional:modules.tools.simulationTool.planningScenarioCancel')"
+                    :text="!isEmptyFeature ? $t('additional:modules.tools.simulationTool.planningScenarioSave', {label: $t(planningScenarioLabel)}) : $t('additional:modules.tools.simulationTool.planningScenarioCancel', {label: $t(planningScenarioLabel)})"
                     :interaction="() => !isEmptyFeature ? save() : cancel()"
                 />
             </div>

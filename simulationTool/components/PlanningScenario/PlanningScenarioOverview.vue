@@ -16,7 +16,7 @@ export default {
     },
     emits: ["openCreateScenario"],
     computed: {
-        ...mapGetters("Modules/SimulationTool", ["planningScenarios"])
+        ...mapGetters("Modules/SimulationTool", ["planningScenarios", "planningScenarioLabel", "planningScenarioLabelPlural"])
     },
     mounted () {
         if (typeof layerCollection.getLayerById("planning-scenario") !== "undefined") {
@@ -96,24 +96,24 @@ export default {
 </script>
 <template>
     <h4 class="text-decoration-underline mt-3">
-        {{ $t("additional:modules.tools.simulationTool.planningScenarioOverview") }}
+        {{ $t("additional:modules.tools.simulationTool.planningScenarioOverview", {labelPlural: $t(planningScenarioLabelPlural)}) }}
     </h4>
     <PlanningScenarioOverviewList
         @download="download"
     />
     <FlatButton
         class="pe-2 mt-4"
-        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
         :icon="'bi bi-pencil-square'"
         :interaction="() => $emit('openCreateScenario')"
-        :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+        :text="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
     />
     <FlatButton
         class="pe-2 mt-4"
-        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioDownloads')"
+        :aria-label="$t('additional:modules.tools.simulationTool.planningScenarioDownloads', {labelPlural: $t(planningScenarioLabelPlural)})"
         :icon="'bi bi-download'"
         :interaction="() => download(planningScenarios)"
-        :text="$t('additional:modules.tools.simulationTool.planningScenarioDownloads')"
+        :text="$t('additional:modules.tools.simulationTool.planningScenarioDownloads', {labelPlural: $t(planningScenarioLabelPlural)})"
         :disabled="!Array.isArray(planningScenarios) || !planningScenarios.length"
     />
     <FileUpload
