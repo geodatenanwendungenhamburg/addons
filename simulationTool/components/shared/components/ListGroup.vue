@@ -426,11 +426,11 @@ export default {
                 </div>
                 <div
                     v-if="hasMultipleProperties"
-                    :class="typeof getShownProperties(feature, shownProperties) === 'undefined' ? 'flex-grow-1' : ''"
+                    :class="'d-flex align-items-center ' + (typeof getShownProperties(feature, shownProperties) === 'undefined' ? 'flex-grow-1' : '')"
                 >
                     <i
                         v-if="hasUndefinedProperty(feature)"
-                        class="bi-exclamation-triangle-fill text-warning"
+                        class="bi-exclamation-triangle-fill text-warning me-2"
                         role="img"
                     />
                     <button
