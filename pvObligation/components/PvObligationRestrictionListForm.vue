@@ -1,12 +1,9 @@
 <script>
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
-import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import {Style, Stroke, Fill, Text as OlText} from "ol/style";
-import {createBox} from "ol/interaction/Draw";
 import {Draw} from "ol/interaction";
-import {fromCircle} from "ol/geom/Polygon";
 import GeoJSON from "ol/format/GeoJSON";
 import booleanIntersects from "@turf/boolean-intersects";
 import intersect from "@turf/intersect";
@@ -17,8 +14,7 @@ import booleanEqual from "@turf/boolean-equal";
 export default {
     name: "PvObligationRestrictionListForm",
     components: {
-        FlatButton,
-        IconButton
+        FlatButton
     },
     props: {
         // Set, if the form should handle create or edit.
@@ -50,25 +46,9 @@ export default {
                 description: null,
                 features: null
             },
-            shapes: {
-                polygon: {
-                    icon: "bi bi-pentagon",
-                    geometryType: "Polygon"
-                },
-                // circle: {
-                //     icon: "bi bi-circle",
-                //     geometryType: "Circle"
-                // },
-                rectangle: {
-                    icon: "bi bi-square",
-                    geometryType: "Circle",
-                    geometryFunction: createBox()
-                }
-            },
             drawState: {
                 layer: null,
-                interaction: null,
-                activeShapeId: "polygon"
+                interaction: null
             }
         };
     },
@@ -131,19 +111,6 @@ export default {
             return !Object.values(this.formErrors).some(Boolean);
         },
         /**
-         * Sets the active shape used for drawing and recreates the draw interaction if changed.
-         * @param {string} shapeId Identifier of the shape inside `shapes`.
-         * @returns {void}
-         */
-        setSelectedShape (shapeId) {
-            if (this.drawState.activeShapeId === shapeId) {
-                return;
-            }
-
-            this.drawState.activeShapeId = shapeId;
-            this.createDrawInteraction();
-        },
-        /**
          * Ensures a vector layer for drawing exists and initializes the draw interaction.
          * @returns {Promise<void>} Resolves when the layer is ready and interaction created.
          */
@@ -165,8 +132,7 @@ export default {
 
             this.drawState.interaction = new Draw({
                 source: this.drawState.layer.getSource(),
-                type: this.shapes[this.drawState.activeShapeId].geometryType,
-                geometryFunction: this.shapes[this.drawState.activeShapeId].geometryFunction,
+                type: "Polygon",
                 stopClick: true,
                 style: new Style({
                     fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
@@ -185,20 +151,6 @@ export default {
          */
         handleDrawEnd (event) {
             this.cutDrawnFeatures(event.feature);
-        },
-        /**
-         * Calculates area of given geometry. Supports polygons and circles.
-         * @param {import('ol/geom/Geometry').default} geometry Geometry to calculate area from.
-         * @returns {number|null} Area in map units or null if unsupported.
-         */
-        calculateArea (geometry) {
-            if (typeof geometry.getArea === "function") {
-                return geometry.getArea();
-            }
-            if (geometry.getType?.() === "Circle") {
-                return fromCircle(geometry).getArea();
-            }
-            return null;
         },
         /**
          * Removes current draw interaction from map and unregisters the drawend listener.
@@ -376,7 +328,7 @@ export default {
          * @returns {void}
          */
         addFeatureWithProperties (feature, featureGeoJson) {
-            const area2D = this.calculateArea(feature.getGeometry());
+            const area2D = feature.getGeometry().getArea();
 
             // Add a text label style
             feature.setStyle(new Style({
@@ -392,7 +344,7 @@ export default {
             }));
 
             feature.setProperties({
-                type: this.drawState.activeShapeId,
+                type: "polygon",
                 id: this.formData.id,
                 area2D: area2D,
                 area3D: area2D / Math.cos((featureGeoJson.properties.dachneig * Math.PI) / 180)
@@ -415,26 +367,6 @@ export default {
                         :title="$t('additional:modules.pvObligation.components.restrictionList.numberExplaination', {id: formData.id})"
                     >
                         {{ formData.id }}
-                    </div>
-
-                    <div
-                        v-if="formMode === 'create'"
-                        class="actionsDrawButtons"
-                    >
-                        <span>
-                            {{ $t("additional:modules.pvObligation.components.restrictionList.selectDrawTool") }}
-                        </span>
-
-                        <div class="buttonGroup">
-                            <IconButton
-                                v-for="(shape, shapeId) in shapes"
-                                :key="shapeId"
-                                :aria="$t(`additional:modules.pvObligation.components.restrictionList.drawTypes.${shapeId}`)"
-                                :icon="shape.icon"
-                                :interaction="() => setSelectedShape(shapeId)"
-                                :class-array="drawState.activeShapeId === shapeId ? ['btn-primary'] : ['btn-light']"
-                            />
-                        </div>
                     </div>
                 </div>
 
@@ -523,17 +455,6 @@ export default {
             align-items: center;
             gap: 1rem;
             margin-bottom: 1rem;
-
-            div.actionsDrawButtons {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-
-                div.buttonGroup {
-                    display: flex;
-                    gap: 0.25rem;
-                }
-            }
         }
 
         div.formContainer {
