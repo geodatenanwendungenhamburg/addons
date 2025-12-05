@@ -665,11 +665,11 @@ export default {
             <div class="position-sticky mt-2 mx-3 top-0 z-2 bg-body">
                 <h5>{{ planningScenario?.name }}</h5>
                 <hr>
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <div
                         v-for="(value, key) in editableInputs"
                         :key="key"
-                        class="form-check form-check-inline"
+                        class="form-check form-check-inline radio-class"
                     >
                         <input
                             :id="key"
@@ -847,5 +847,9 @@ export default {
 
 .tab-content {
     z-index: 0;
+}
+
+.radio-class {
+  padding-top: 0.25rem !important
 }
 </style>
