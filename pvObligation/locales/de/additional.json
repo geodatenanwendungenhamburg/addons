@@ -95,7 +95,7 @@
             "components": {
                 "restrictionList": {
                     "formHeaderCreate": "Relevante Fläche hinzufügen",
-                    "formHeaderCreateDescription": "Zeichnen Sie mit einem der unten auswählbaren Zeichenwerkzeugen einen relevanten Bereich auf Ihrem Dach und fügen Sie eine Anmerkung hinzu. Nach dem Speichern können Sie weitere Bereiche erfassen oder diese in der Liste bearbeiten.",
+                    "formHeaderCreateDescription": "Zeichnen Sie einen relevanten Bereich auf Ihrem Dach und fügen Sie eine Anmerkung hinzu. Nach dem Speichern können Sie weitere Bereiche erfassen oder diese in der Liste bearbeiten.",
                     "listHeader": "Liste Ihrer erfassten Flächen",
                     "buttonAdd": "relevante Flächen hinzufügen",
                     "buttonDelete": "Entfernen",
@@ -112,7 +112,7 @@
                     },
                     "helpFormDrawCreate": {
                         "hint": "Zeichnen in der Karte:",
-                        "text": "Um eine neue relevante Fläche hinzuzufügen, zeichnen Sie diese direkt auf Ihrer Dachfläche in der Karte. Ihnen stehen die Formen Rechteck, Kreis und Polygon zur Verfügung. Beim Zeichnen eines Polygons setzen Sie nacheinander die gewünschten Eckpunkte und schließen die Eingabe mit einem Doppelklick ab."
+                        "text": "Um eine neue relevante Fläche hinzuzufügen, zeichnen Sie diese direkt auf Ihrer Dachfläche in der Karte. Beim Zeichnen setzen Sie nacheinander die gewünschten Eckpunkte und schließen die Eingabe mit einem Doppelklick ab."
                     },
                     "helpFormDrawModify": {
                         "hint": "Zeichnungen auf der Karte bearbeiten:",
