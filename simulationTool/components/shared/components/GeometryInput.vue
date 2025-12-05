@@ -1,6 +1,10 @@
 <script>
 import {mapActions} from "vuex";
 import Draw from "ol/interaction/Draw";
+import Style from "ol/style/Style";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
+import GeoJSON from "ol/format/GeoJSON";
 import layerCollection from "../../../../../src/core/layers/js/layerCollection";
 import ConvertFeature from "../../../js/convertFeatures";
 
@@ -34,6 +38,14 @@ export default {
             type: String,
             default: "Polygon",
             validator: (value) => ["Point", "Polygon"].includes(value)
+        },
+        fillColor: {
+            type: String,
+            default: "rgba(0, 123, 255, 0.3)"
+        },
+        strokeColor: {
+            type: String,
+            default: "rgba(0, 123, 255, 0.8)"
         }
     },
     emits: ["update:value"],
@@ -75,8 +87,25 @@ export default {
             return layer ? layer.getLayerSource() : null;
         }
     },
+    mounted () {
+        this.renderExistingGeometry();
+    },
     unmounted () {
         this.removeDrawInteraction();
+        this.clearFeatureFromMap();
+    },
+    watch: {
+        value: {
+            handler (newValue) {
+                if (newValue) {
+                    this.renderExistingGeometry();
+                }
+                else {
+                    this.clearFeatureFromMap();
+                }
+            },
+            deep: true
+        }
     },
     methods: {
         ...mapActions("Maps", ["addInteraction", "removeInteraction"]),
@@ -126,6 +155,18 @@ export default {
 
             this.drawnFeature = event.feature;
 
+            // Apply custom style to the feature
+            const style = new Style({
+                fill: new Fill({
+                    color: this.fillColor
+                }),
+                stroke: new Stroke({
+                    color: this.strokeColor,
+                    width: 2
+                })
+            });
+            this.drawnFeature.setStyle(style);
+
             // Convert to GeoJSON
             const geoJsonFeatures = ConvertFeature.openlayersToGeoJson([event.feature]);
 
@@ -149,10 +190,7 @@ export default {
          * @returns {void}
          */
         clearGeometry () {
-            if (this.drawnFeature && this.layerSource) {
-                this.layerSource.removeFeature(this.drawnFeature);
-                this.drawnFeature = null;
-            }
+            this.clearFeatureFromMap();
             this.$emit("update:value", null);
         },
 
@@ -164,6 +202,61 @@ export default {
             if (this.drawInteraction) {
                 this.removeInteraction(this.drawInteraction);
                 this.drawInteraction = null;
+            }
+        },
+
+        /**
+         * Clears the feature from the map without emitting update.
+         * @returns {void}
+         */
+        clearFeatureFromMap () {
+            if (this.drawnFeature && this.layerSource) {
+                this.layerSource.removeFeature(this.drawnFeature);
+                this.drawnFeature = null;
+            }
+        },
+
+        /**
+         * Renders an existing geometry value on the map.
+         * @returns {void}
+         */
+        renderExistingGeometry () {
+            if (!this.value || !this.layerSource) {
+                return;
+            }
+
+            // Clear existing feature first
+            this.clearFeatureFromMap();
+
+            try {
+                // Convert GeoJSON geometry to OpenLayers feature
+                const geoJsonFormat = new GeoJSON();
+                const feature = geoJsonFormat.readFeature({
+                    type: "Feature",
+                    geometry: this.value
+                }, {
+                    dataProjection: "EPSG:4326",
+                    featureProjection: "EPSG:25832"
+                });
+
+                // Apply custom style
+                const style = new Style({
+                    fill: new Fill({
+                        color: this.fillColor
+                    }),
+                    stroke: new Stroke({
+                        color: this.strokeColor,
+                        width: 2
+                    })
+                });
+                feature.setStyle(style);
+
+                // Add to layer and store reference
+                this.layerSource.addFeature(feature);
+                this.drawnFeature = feature;
+            }
+            catch (error) {
+                console.warn("Error rendering existing geometry:", error);
             }
         }
     }

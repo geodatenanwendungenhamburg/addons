@@ -248,7 +248,8 @@
           "QstoredData": "Wo werden meine Daten gespeichert?",
           "AstoredData": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
           "QsharedData": "Welche Daten sind einsehbar beim Teilen meiner Arbeiten?",
-          "AsharedData": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          "AsharedData": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+          "missingRectangles": "Bitte zeichnen Sie sowohl den Startbereich als auch den Zielbereich für die Green4Bikes Simulation ein, bevor Sie die Simulation starten."
         }
       }
     }

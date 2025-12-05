@@ -1,0 +1,357 @@
+{
+  "description": "Travelling model to simulate the mobility behavior of people walking and cycling from selected starts and stops in the area of Hamburg Harburg.",
+  "id": "mars:sim-green4Bikes-default",
+  "inputs": {
+    "config": {
+      "additionalParameters": {
+        "href": "https://www.mars-group.org/docs/category/configuration",
+        "title": "Simulation config documentation"
+      },
+      "description": "The global configuration used to parameterize all settings of the scenarios, allowing to override each configuration and used resource.",
+      "minOccurs": 1,
+      "schema": {
+        "contentMediaType": "application/json",
+        "nullable": true
+      },
+      "title": "An optional scenario configuration to override each setting."
+    },
+    "cycleTravelerLayer": {
+      "description": "Cycle traveler event layer, spawning new agents with source and target",
+      "minOccurs": 1,
+      "schema": {
+        "contentSchema": "application/geo+json",
+        "format": "geojson-feature-collection",
+        "properties": {
+          "endTime": {
+            "description": "The end time when this spawn event ends to occur.",
+            "example": "01-09-2020T14:00",
+            "format": "date",
+            "title": "Event End Time",
+            "type": "string"
+          },
+          "gender": {
+            "default": "male",
+            "description": "The biological gender with impact on the walking speed",
+            "enum": [
+              "female",
+              "male"
+            ],
+            "example": "female",
+            "title": "Gender",
+            "type": "string"
+          },
+          "gradient": {
+            "description": "The speed gradient to determine the speed change",
+            "nullable": true,
+            "title": "Gradient",
+            "type": "number"
+          },
+          "hasOwnBikeProbability": {
+            "default": 0,
+            "description": "The probability of the spawned agent to owning a personal bike instead of using a rental one.",
+            "example": 10,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Bike Owner Probability",
+            "type": "integer"
+          },
+          "mass": {
+            "default": 80,
+            "description": "The mass of the traveler with impact on the walking speed",
+            "title": "Mass",
+            "type": "number"
+          },
+          "spawningAmount": {
+            "default": 0,
+            "description": "The amount of agents to spawn for each occured event.",
+            "example": 50,
+            "title": "Spawning Amount",
+            "type": "integer"
+          },
+          "spawningIntervalInMinutes": {
+            "description": "The interval in minutes how often this events occur between the start and end.",
+            "example": 20,
+            "nullable": true,
+            "title": "Spawning Interval",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": "The start time when this spawn event occurs.",
+            "example": "01-09-2020T07:00",
+            "format": "date",
+            "title": "Event Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime"
+        ],
+        "type": "string"
+      },
+      "title": "Cycle Traveler Agent Layer"
+    },
+    "endPoint": {
+      "description": "The time point when the simulation end internally. Specified as ISO 8601 format",
+      "minOccurs": 1,
+      "schema": {
+        "format": "dateTime",
+        "nullable": true,
+        "type": "string"
+      },
+      "title": "The concrete end datetime of the simulation time to calculate"
+    },
+    "rentalBicycle": {
+      "description": "Different types of used rental bicycle types",
+      "minOccurs": 1,
+      "schema": {
+        "properties": {
+          "height": {
+            "description": "The height of this bike.",
+            "title": "Height",
+            "type": "number"
+          },
+          "length": {
+            "description": "The length of this bike.",
+            "title": "Length",
+            "type": "number"
+          },
+          "maxAcceleration": {
+            "description": "The maximum acceleration of this bike.",
+            "title": "Max Acceleration",
+            "type": "number"
+          },
+          "maxDeceleration": {
+            "description": "The maximum deceleration of this bike.",
+            "title": "Max  Deceleration",
+            "type": "number"
+          },
+          "maxSpeed": {
+            "description": "The maximum speed of this bike.",
+            "title": "Max Speed"
+          },
+          "type": {
+            "description": "The bike type name e.g., electric bike or pedelec",
+            "title": "Bike Type",
+            "type": "string"
+          },
+          "width": {
+            "description": "The width of this bike.",
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "title": "Rental Bike Types"
+    },
+    "rentalStations": {
+      "description": "Different stations within the simulation, used rental bicycles for movement",
+      "minOccurs": 1,
+      "schema": {
+        "allOf": [
+          {
+            "format": "geojson-geometry"
+          }
+        ],
+        "contentSchema": "application/geo+json",
+        "format": "geojson-feature-collection",
+        "properties": {
+          "amount_bicycles": {
+            "description": "The amount of rentable bicycles",
+            "example": "15",
+            "minimum": 0,
+            "title": "Bicycle Amount",
+            "type": "integer"
+          }
+        },
+        "type": "string"
+      },
+      "title": "Rental Bicycle Stations"
+    },
+    "roadNetwork": {
+      "description": "The input network used to represent the environment where the agents can move on",
+      "minOccurs": 1,
+      "schema": {
+        "allOf": [
+          {
+            "format": "geojson-geometry"
+          }
+        ],
+        "contentSchema": "application/geo+json",
+        "format": "geojson-feature-collection",
+        "properties": {
+          "lanes": {
+            "description": "The count of lanes of this road segment",
+            "example": "2",
+            "minimum": 1,
+            "nullable": true,
+            "title": "Lanes",
+            "type": "integer"
+          }
+        },
+        "type": "string"
+      },
+      "title": "Moving Network Environment"
+    },
+    "startPoint": {
+      "description": "The time point when the simulation starts internally. Specified as ISO 8601 format",
+      "minOccurs": 1,
+      "schema": {
+        "format": "dateTime",
+        "nullable": true,
+        "type": "string"
+      },
+      "title": "The concrete start datetime of the simulation time to calculate"
+    },
+    "steps": {
+      "description": "The amount of steps in seconds to simulate used instead of end time point, starting from start time point",
+      "minOccurs": 1,
+      "schema": {
+        "maximum": 1000,
+        "minimum": 0,
+        "type": "number"
+      },
+      "title": "The amount of steps in seconds to simulate."
+    }
+  },
+  "jobControlOptions": [
+    "sync-execute",
+    "async-execute"
+  ],
+  "keywords": [
+    "cycling",
+    "travelling",
+    "simulation"
+  ],
+  "outputTransmission": [
+    "value"
+  ],
+  "outputs": {
+    "agents": {
+      "format": {
+        "mediaType": "application/geo+json"
+      },
+      "schema": {
+        "contentMediaType": "application/geo+json",
+        "default": {
+          "features": [],
+          "type": "FeatureCollection"
+        },
+        "example": {
+          "features": [
+            {
+              "geometry": {
+                "coordinates": [
+                  9.978667786160287,
+                  53.54407542750305
+                ],
+                "type": "Point"
+              },
+              "properties": {
+                "ActiveCapability": "Walking",
+                "DistanceStartGoal": 6281.220268477454,
+                "RouteLength": 8838,
+                "dateTime": "2024-12-01T07:20:01",
+                "tick": 12
+              },
+              "type": "Feature"
+            }
+          ],
+          "type": "FeatureCollection"
+        },
+        "title": "Point-based output of each agent and their values with different simulation times."
+      }
+    },
+    "soh_output_avg_road_count": {
+      "format": {
+        "mediaType": "application/json"
+      },
+      "schema": {
+        "contentMediaType": "application/json",
+        "default": [
+          {
+            "DateTime": "2025-12-03T10:00:00+00:00",
+            "Tick": 1,
+            "Value": 3.123
+          },
+          {
+            "DateTime": "2025-12-03T10:00:01+00:00",
+            "Tick": 2,
+            "Value": 3.314
+          },
+          {
+            "DateTime": "2025-12-03T10:00:02+00:00",
+            "Tick": 3,
+            "Value": 3.458
+          },
+          {
+            "DateTime": "2025-12-03T10:00:03+00:00",
+            "Tick": 4,
+            "Value": 3.513
+          }
+        ],
+        "description": "The time series of average amount of agents on each road of the selected area.",
+        "title": "Time series of average road occupation"
+      }
+    },
+    "soh_output_sum_modality_usage": {
+      "format": {
+        "mediaType": "application/json"
+      },
+      "schema": {
+        "contentMediaType": "application/json",
+        "default": {
+          "CarDriving": [
+            {
+              "DateTime": "2025-12-03T10:00:00+00:00",
+              "Tick": 1,
+              "Value": 1031
+            },
+            {
+              "DateTime": "2025-12-03T10:00:01+00:00",
+              "Tick": 2,
+              "Value": 1037
+            },
+            {
+              "DateTime": "2025-12-03T10:00:02+00:00",
+              "Tick": 3,
+              "Value": 1037
+            },
+            {
+              "DateTime": "2025-12-03T10:00:03+00:00",
+              "Tick": 4,
+              "Value": 1037
+            }
+          ],
+          "Walking": [
+            {
+              "DateTime": "2025-12-03T10:00:00+00:00",
+              "Tick": 1,
+              "Value": 3400
+            },
+            {
+              "DateTime": "2025-12-03T10:00:01+00:00",
+              "Tick": 2,
+              "Value": 3431
+            },
+            {
+              "DateTime": "2025-12-03T10:00:02+00:00",
+              "Tick": 3,
+              "Value": 3438
+            },
+            {
+              "DateTime": "2025-12-03T10:00:03+00:00",
+              "Tick": 4,
+              "Value": 3442
+            }
+          ]
+        },
+        "description": "The time series of usage of current active modality of all agents.",
+        "title": "The time series of active modality."
+      }
+    }
+  },
+  "title": "SOH - Green4Bikes Model",
+  "version": "1.0.0"
+}

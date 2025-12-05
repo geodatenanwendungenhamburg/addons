@@ -69,85 +69,11 @@
             "endPoint": "Endzeitpunkt"
           }
         },
-        "cycleTravelerSource": {
-          "schema": {
-            "type": "object",
-            "format": "geojson-feature",
-            "properties": {
-              "spawningAmount": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 100,
-                "default": 10
-              },
-              "spawningIntervalInMinutes": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 60,
-                "default": 10
-              },
-              "startTime": {
-                "type": "string",
-                "format": "datetime",
-                "default": "2024-12-01T07:00:00"
-              },
-              "endTime": {
-                "type": "string",
-                "format": "datetime",
-                "default": "2024-12-01T07:30:00"
-              },
-              "hasOwnBikeProbability": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-                "default": 0.5
-              },
-              "gender": {
-                "type": "string",
-                "enum": ["male", "female"],
-                "default": "male"
-              },
-              "mass": {
-                "type": "number",
-                "minimum": 40,
-                "maximum": 150,
-                "default": 70
-              },
-              "perceptionInMeter": {
-                "type": "number",
-                "minimum": 0,
-                "default": 1.0
-              }
-            },
-            "required": ["spawningAmount"]
-          },
+        "cycleTravelerLayer": {
           "menu": "primary",
-          "geometryType": "Point",
+          "customInput": true,
           "propertiesMapping": {
-            "cycleTravelerSource": "Radfahrer-Startbereich",
-            "spawningAmount": "Anzahl Radfahrer pro Intervall",
-            "spawningIntervalInMinutes": "Erzeugungsintervall (Minuten)",
-            "startTime": "Startzeit (innerhalb Simulationsperiode)",
-            "endTime": "Endzeit (innerhalb Simulationsperiode)",
-            "hasOwnBikeProbability": "Wahrscheinlichkeit eigenes Rad",
-            "gender": "Geschlecht",
-            "mass": "Masse (kg)",
-            "perceptionInMeter": "Wahrnehmungsdistanz (m)"
-          },
-          "primaryProperties": [
-            "spawningAmount",
-            "spawningIntervalInMinutes"
-          ]
-        },
-        "cycleTravelerTarget": {
-          "schema": {
-            "type": "object",
-            "format": "geojson-geometry"
-          },
-          "menu": "primary",
-          "geometryType": "Point",
-          "propertiesMapping": {
-            "cycleTravelerTarget": "Radfahrer-Zielbereich"
+            "cycleTravelerLayer": "Radfahrer-Events (Start/Ziel)"
           }
         },
         "rentalStations": {

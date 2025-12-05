@@ -56,6 +56,23 @@ export default {
         ...mapGetters("Modules/Login", ["accessToken"]),
 
         /**
+         * Checks if required rectangles are drawn for Green4Bikes simulation.
+         * @returns {boolean} True if both rectangles are drawn or not required, false otherwise.
+         */
+        areRequiredRectanglesDrawn () {
+            // Only check for Green4Bikes simulation
+            if (!this.currentSimulationId || !this.currentSimulationId.includes("green4Bikes")) {
+                return true;
+            }
+
+            // Check if both cycleTravelerSource and cycleTravelerTarget geometries are set
+            const sourceGeometry = this.getRequestBodyInputByKey("cycleTravelerSource", null, null)?.geometry;
+            const targetGeometry = this.getRequestBodyInputByKey("cycleTravelerTarget", null, null);
+
+            return !!(sourceGeometry && targetGeometry);
+        },
+
+        /**
          * Gets the current planning scenario.
          * If no scenario is selected, it defaults to the first scenario.
          * @returns {Object} The current planning scenario.
@@ -463,15 +480,51 @@ export default {
                     return;
                 }
 
+                // Handle custom input types (like cycleTravelerLayer)
+                if (inputConfig?.customInput) {
+                    result[inputKey] = {
+                        type: "cycleTravelerLayer",
+                        inputKey: inputKey,
+                        propertyKey: null,
+                        default: null
+                    };
+                    return;
+                }
+
                 if (input.schema?.type === "object" && includeObjectProperties) {
                     // Handle GeoJSON Feature format
                     if (input.schema?.format === "geojson-feature") {
+                        const allProperties = input.schema.properties || {};
+                        const primaryProperties = inputConfig?.primaryProperties || [];
+                        
+                        // Filter properties based on menu type
+                        let filteredProperties = {};
+                        
+                        if (menuType === "primary") {
+                            // Only include primary properties for primary menu
+                            filteredProperties = Object.fromEntries(
+                                Object.entries(allProperties).filter(([propKey]) => 
+                                    primaryProperties.includes(propKey)
+                                )
+                            );
+                        } else if (menuType === "advanced") {
+                            // Only include non-primary properties for advanced menu
+                            filteredProperties = Object.fromEntries(
+                                Object.entries(allProperties).filter(([propKey]) => 
+                                    !primaryProperties.includes(propKey)
+                                )
+                            );
+                        } else {
+                            // Include all properties if no menu type specified
+                            filteredProperties = allProperties;
+                        }
+                        
                         result[inputKey] = {
                             type: "geojson-feature",
                             inputKey: inputKey,
                             propertyKey: null,
                             geometryType: inputConfig?.geometryType || "Point",
-                            properties: input.schema.properties || {},
+                            properties: filteredProperties,
                             default: null
                         };
                         return;
@@ -869,6 +922,16 @@ export default {
             if (!this.isLoggedIn()) {
                 return;
             }
+
+            // Validate required rectangles for Green4Bikes
+            if (!this.areRequiredRectanglesDrawn) {
+                this.addSingleAlert({
+                    category: "error",
+                    content: this.$t("additional:modules.tools.simulationTool.missingRectangles")
+                });
+                return;
+            }
+
             this.removeEmptyCollections(this.requestBodies);
             this.requestBodies = this.replaceEnumValueObjects(this.requestBodies);
 
@@ -1081,6 +1144,8 @@ export default {
                             :min="input.minimum"
                             :max="input.maximum"
                             :geometry-type="input.geometryType"
+                            :fill-color="simulation?.inputs?.[input.inputKey]?.fillColor"
+                            :stroke-color="simulation?.inputs?.[input.inputKey]?.strokeColor"
                             :aria="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
                             @update:value="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
                             @update:checked="setRequestBodyInput(input.inputKey, propertyKey, $event, Boolean(input.enum))"
@@ -1092,6 +1157,8 @@ export default {
                             :label="getMappedProperty(propertyKey, simulation?.inputs?.[input.inputKey]?.propertiesMapping)"
                             :value="getRequestBodyInputByKey(input.inputKey, null, input.default)"
                             :geometry-type="input.geometryType"
+                            :fill-color="simulation?.inputs?.[input.inputKey]?.fillColor"
+                            :stroke-color="simulation?.inputs?.[input.inputKey]?.strokeColor"
                             @update:value="setRequestBodyInput(input.inputKey, null, $event, false)"
                         >
                             <template #properties>
@@ -1282,7 +1349,7 @@ export default {
                         :interaction="startSimulation"
                         :aria-label="$t('additional:modules.tools.simulationTool.simulationStart')"
                         :text="$t('additional:modules.tools.simulationTool.simulationStart')"
-                        :disabled="!currentPlanningScenario || isSomeOafLoading || !currentSimulationId"
+                        :disabled="!currentPlanningScenario || isSomeOafLoading || !currentSimulationId || !areRequiredRectanglesDrawn"
                     />
                 </div>
             </form>

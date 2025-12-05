@@ -4,6 +4,7 @@ import SliderItem from "../../../../../src/shared/modules/slider/components/Slid
 import SwitchInput from "../../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
 import DatetimeInput from "./DatetimeInput.vue";
 import GeometryInput from "./GeometryInput.vue";
+import CycleTravelerLayerInput from "./CycleTravelerLayerInput.vue";
 
 export default {
     name: "DynamicInputByType",
@@ -12,7 +13,8 @@ export default {
         SliderItem,
         SwitchInput,
         DatetimeInput,
-        GeometryInput
+        GeometryInput,
+        CycleTravelerLayerInput
     },
     props: {
         aria: {
@@ -59,6 +61,14 @@ export default {
         geometryType: {
             type: String,
             default: "Polygon"
+        },
+        fillColor: {
+            type: String,
+            default: "rgba(0, 123, 255, 0.3)"
+        },
+        strokeColor: {
+            type: String,
+            default: "rgba(0, 123, 255, 0.8)"
         },
         nestedProperties: {
             type: Object,
@@ -190,6 +200,8 @@ export default {
                 :label="label"
                 :value="value"
                 :geometry-type="geometryType"
+                :fill-color="fillColor"
+                :stroke-color="strokeColor"
                 @update:value="$emit('update:value', $event)"
             />
         </template>
@@ -199,6 +211,8 @@ export default {
                 :label="label"
                 :value="value"
                 :geometry-type="geometryType"
+                :fill-color="fillColor"
+                :stroke-color="strokeColor"
                 @update:value="$emit('update:value', $event)"
             />
         </template>
@@ -209,10 +223,20 @@ export default {
                     :label="label"
                     :value="value?.geometry"
                     :geometry-type="geometryType"
+                    :fill-color="fillColor"
+                    :stroke-color="strokeColor"
                     @update:value="updateFeatureGeometry($event)"
                 />
                 <slot name="properties" />
             </div>
+        </template>
+        <template v-else-if="inputType === 'cycleTravelerLayer'">
+            <CycleTravelerLayerInput
+                :id="id"
+                :label="label"
+                :value="value"
+                @update:value="$emit('update:value', $event)"
+            />
         </template>
     </div>
 </template>
