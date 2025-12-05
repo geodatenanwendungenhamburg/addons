@@ -98,6 +98,7 @@
           "loadingEnsembles": "Lade Ensembles",
           "loadingModels": "Lade Modelle",
           "loadingScenarios": "Lade Szenarien",
+          "missingParameters": "Fehlende Parameter",
           "model": "Modell",
           "modelDetails": "Modell Details",
           "modelInformation": "Modellinformationen",

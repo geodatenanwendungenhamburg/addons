@@ -432,6 +432,7 @@ export default {
                         v-if="hasUndefinedProperty(feature)"
                         class="bi-exclamation-triangle-fill text-warning me-2"
                         role="img"
+                        :title="$t('additional:modules.tools.simulationTool.missingParameters')"
                     />
                     <button
                         type="button"
@@ -477,6 +478,7 @@ export default {
                                 v-if="feature.get(key) === undefined"
                                 class="bi-exclamation-triangle-fill text-warning fs-5 me-2"
                                 role="img"
+                                :title="$t('additional:modules.tools.simulationTool.missingParameters')"
                             />
                             {{ getMappedProperty(key, propertiesMapping) }}
                         </label>
