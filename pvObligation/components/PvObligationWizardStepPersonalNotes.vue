@@ -51,7 +51,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepPersonalNotes{
-        margin: 1rem 0;
+        margin-top: 0.5rem;
     }
 </style>
 

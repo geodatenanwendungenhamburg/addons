@@ -10,19 +10,18 @@
                     "back": "previous step",
                     "next": "next step"
                 },
-                "introduction": "This application is intended to assist in calculating the area that must be covered with photovoltaics when “significant roof modifications” are carried out. The PDF report is for your personal records and serves as proof in the event of a random check. You can find more information on the PV obligation here:",
-                "introductionLinkFurtherInfo": "PV obligation in Hamburg - hamburg.de",
-                "introductionPart2": "None of the information provided below is stored on servers. The PDF is created locally on your computer. Data is handled in accordance with the DSGVO.",
-                "introductionLinkPrivacyPolicy": "Privacy Policy",
+                "introduction": "This application is intended to assist in calculating the roof area that must be covered with photovoltaics (PV) when \"major roof renovations\" are carried out. The PDF report that you can create at the end is for your personal records and also serves as proof in the event of a random check by the responsible authority.",
+                "introductionInfoPvApp": "However, please read the information about this application at the following link:",
+                "introductionInfoPvAppLink": "LINK to INFO page",
+                "introductionInfoPvObligation": "General information on the PV obligation can be found here:",
+                "introductionInfoPvObligationLink": "PV obligation in Hamburg - hamburg.de.",
                 "step": {
                     "grossArea": {
                         "wizardTitle": "Gross roof area",
                         "component": {
                             "introduction": "Click on the desired building in the map to determine the gross roof area.",
-                            "hintSearch": "(Tip: Use the search to find and display the building more quickly.)",
-                            "grossAreaDescription": "The gross roof area includes the entire roof area of the building, including all sub-areas regardless of orientation, use, or shading. If this area exceeds 50 m², it is subject to the PV obligation if ‘significant roof modifications’ are carried out.",
-                            "grossAreaText": "The gross roof area of the selected building is: ",
-                            "grossAreaHint": "(Note: The roof areas have been recorded automatically. There may be deviations from the actual area. Please take this into account in the next step or under ‘Personal notes’.)",
+                            "introductionHint": "Note: The roof areas of the selected building have been recorded automatically.",
+                            "tableCellGrossAreaLabel": "The gross roof area of the selected building is:",
                             "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²).",
                             "confirmModal": {
                                 "header": "Really change roof area?",
@@ -39,12 +38,12 @@
                             "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
                             "missingStepGrossAreaMessage": "Afterwards, the initial net roof area will be displayed here, and you can, if necessary, draw areas that should additionally be excluded.",
                             "drawingIsNotCompletedError": "The drawing is not yet complete. Please select Save or Cancel before proceeding to the next step.",
-                            "introduction": "The net roof area is the gross roof area minus roof structures, skylights, other necessary roof uses and the north-facing portion of the roof with a slope of over 10 degrees. At least 30% of this must be covered with PV. We have automatically determined a net roof area for your building, taking into account roof areas facing “north” with an inclination of more than 10 degrees.",
-                            "netRoofAreaText": "The selected net roof area is: {{ displayNetRoofArea }} m²",
-                            "obligatedAreaText": "Minimum area for PV is:{{ obligatedArea }} m² (30% of the net roof area).",
-                            "additionalNetAreaText": "Here you have the option of adding additional areas that are relevant for calculating the net roof area. These are taken into account in the above-mentioned areas.",
-                            "netAreaNoteText": "(Note: Shading and other technical impossibilities must only be taken into account in the next step)",
-                            "disabledMessage": "The drawing in net restricted area is not yet finished"
+                            "introduction": "Add areas here that are relevant for calculating the net roof area. Relevant areas include existing skylights, existing roof structures, other necessary existing roof uses, and north-facing roof areas with a slope of over 10 degrees, provided these areas have not already been automatically recorded.",
+                            "introductionHint": "Note: Shading is only recorded in the next step.",
+                            "substractFromNetArea": "The drawn areas are additionally subtracted from the gross roof area.",
+                            "substractFromNetAreaLabel": "The net roof area of the building is:",
+                            "minPvRequirement": "According to the Hamburg Climate Protection Act, you must cover at least 30% of the net roof area with PV.",
+                            "minPvRequirementLabel": "You must cover at least the following area with PV:"
                         }
                     },
                     "netRestrictedAreas": {
@@ -52,18 +51,19 @@
                         "component": {
                             "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
                             "missingStepGrossAreaMessage": "Afterwards, you can, if necessary, draw areas here that you want to designate as restricted areas.",
-                            "introduction": "At least 30% of the net roof area must be covered with PV. This is the duty. This obligation may not apply if other public law regulations or technical impossibilities conflict with this. If there are several of these areas, it is possible that (justifiably) less than 30% of the net roof area can be occupied.",
-                            "additionalInfo": "Here you have the option of specifying areas where the obligation does not apply. Reasons can be: incompatibility with monument protection, requirements from the HBauO (distance areas), areas that are more than slightly shaded, but also technical impossibilities.",
-                            "disabledMessage": "The drawing in net roof area is not yet finished"
+                            "introduction": "If roof areas cannot be used for PV, the PV obligation does not apply to the extent that these areas limit the obligation. Add \"restricted areas\" here that do not have to be covered with PV.",
+                            "tableCellRestrictedAreasSumLabel": "The sum of the restricted areas is:",
+                            "tableCellPvAreaRequirementLabel": "The area that must still be covered with PV is:",
+                            "tableCellPvAreaRequirementReducedLabel": "The area that must be covered with PV is reduced from {{squareMeters}} m² to"
                         }
                     },
                     "buildingDetails": {
                         "wizardTitle": "Building details",
                         "component": {
-                            "introduction": "Please enter the name of the owner here.",
+                            "introduction": "Enter the name(s) of the owner(s) of the building here.",
                             "form": {
                                 "propertyOwnerFullName": "First and surname (Property owner)",
-                                "street": "Stret",
+                                "street": "Street",
                                 "postalCode": "Postal code",
                                 "city": "City",
                                 "houseNumber": "House Number"
@@ -73,7 +73,7 @@
                     "personalNotes": {
                         "wizardTitle": "Personal notes",
                         "component": {
-                            "introduction": "Here you have the option to add your own explanations about the areas that you consider relevant.",
+                            "introduction": "You have the option to add your own explanations here.",
                             "form": {
                                 "personalNote": "Add explanations or comments here..."
                             }
@@ -83,6 +83,8 @@
                         "wizardTitle": "Generate report",
                         "component": {
                             "introduction": "Below you can generate a PDF report containing the information you provided. You can keep this as proof for your records.",
+
+                            "introductionHint": "Note: The data you provide is only used to create the PDF report. No data is stored or transmitted to the responsible authority.",
                             "createReport": "Generate PDF",
                             "generalError": "Error: Not all required fields are filled in. Please complete the missing information to generate the report."
                         }
@@ -98,7 +100,7 @@
                     "formHeaderCreate": "Add relevant area",
                     "formHeaderCreateDescription": "Use the drawing tool below to mark a relevant area on your roof and add a note. After saving, you can record more areas or edit them in the list.",
                     "listHeader": "List of your recorded areas",
-                    "buttonAdd": "Add relevant areas",
+                    "buttonAdd": "Draw relevant areas",
                     "buttonDelete": "remove",
                     "buttonEdit": "Edit",
                     "buttonSave": "Save",
@@ -111,7 +113,7 @@
                         "rectangle": "Rechteck",
                         "circle": "Circle"
                     },
-                    "helpFormDraw": {
+                    "helpFormDrawCreate": {
                         "hint": "Drawing on the map:",
                         "text": "To add a new relevant area, draw it directly on your roof area in the map. When drawing a polygon, place the desired corner points one after another and finish the input with a double click."
                     },

@@ -1,5 +1,5 @@
 import {createStore} from "vuex";
-import {config, shallowMount} from "@vue/test-utils";
+import {config, mount, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepGrossArea.vue";
 import axios from "axios";
@@ -99,17 +99,12 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
 
         await wrapper.vm.$nextTick();
 
-        // eslint-disable-next-line
-        const grossAreaEl = wrapper.find("strong.grossRoofAreaValue"),
-            tooSmallEl = wrapper.find("p.noOblicagionText");
-
-        expect(grossAreaEl.exists()).to.be.true;
-        expect(grossAreaEl.text()).to.contain("49,8");
-        expect(tooSmallEl.exists()).to.be.true;
+        expect(wrapper.find("p.noOblicagionText").exists()).to.be.true;
+        expect(wrapper.find("p.noOblicagionText").text() === "additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText").to.be.true;
     });
 
     it("renders only grossRoofArea text when grossRoofArea >= 50", async () => {
-        const wrapper = shallowMount(Component, {
+        const wrapper = mount(Component, {
             propsData: {
                 wizardStepsFormData: {},
                 wizardStepIsActive: true
@@ -124,12 +119,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
 
         await wrapper.vm.$nextTick();
 
-        // eslint-disable-next-line
-        const grossAreaElement = wrapper.find("strong.grossRoofAreaValue"),
-            tooSmallElement = wrapper.find("p.noOblicagionText");
-
-        expect(grossAreaElement.exists()).to.be.true;
-        expect(grossAreaElement.text()).to.contain("120");
-        expect(tooSmallElement.exists()).to.be.false;
+        expect(wrapper.find("p.noOblicagionText").exists()).to.be.false;
+        expect(wrapper.findAll("table#PvObligationSimpleTable tr")[0].find("td.cellValue").text()).to.contain("120 m²");
     });
 });
