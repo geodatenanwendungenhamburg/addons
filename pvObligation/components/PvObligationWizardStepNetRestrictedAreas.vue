@@ -2,7 +2,10 @@
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
-import {mapGetters} from "vuex";
+import {mapGetters, mapActions} from "vuex";
+import {Style, Stroke, Fill} from "ol/style";
+import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
+import calculateRestrictedArea from "../js/calculateRestrictedArea";
 
 export default {
     name: "PvObligationWizardStepNetRestrictedAreas",
@@ -15,16 +18,52 @@ export default {
         return {
             /** @override */
             componentFormData: {
+                netRoofArea: 0,
+                netRoofAreaWithoutExcludes: 0,
+                restrictedArea: 0,
                 restrictedListItems: []
-            }
+            },
+            stepNetAreaDataObligatedArea: 0,
+            stepNetNetAreaWithoutRestrictedArea: 0,
+            restrictedAreaSum: 0,
+            netAreaMinusSubstractedArea: 0,
+            isNetAreaMinusSubstractedAreaHigher: false
         };
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "isDrawing"
+            "isDrawing",
+            "selectedRoofId"
         ])
     },
+    watch: {
+        /** @override */
+        wizardStepIsActive: {
+            handler (isNowActive) {
+                if (isNowActive && this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
+                    this.defineNetArea({layerName: "Module/pvObligation/layer/roofArea_pv_suitable"});
+
+                    const layer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(l => {
+                        return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
+                    });
+
+                    if (layer) {
+                        layer.setVisible(true);
+                    }
+                }
+            },
+            immediate: true
+        }
+    },
     methods: {
+        ...mapActions("Modules/PvObligation", [
+            "dissolveRoofFeaturesAndCalculateArea",
+            "calculateNetAreaAndRestrictedAreas"
+        ]),
+        ...mapActions("Maps", [
+            "addNewLayerIfNotExists",
+            "zoomToExtent"
+        ]),
         /** @override */
         resetWizardStepData () {
             if (!this.componentFormData.restrictedListItems.length) {
@@ -43,8 +82,37 @@ export default {
 
             this.componentFormData.restrictedListItems.splice(0);
         },
+        async defineNetArea (payload) {
+            const outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
+
+            outlineLayer.setStyle(new Style({
+                stroke: new Stroke({color: "rgba(192, 12, 247, 1)", width: 3}),
+                fill: new Fill({color: "rgba(0, 0, 0, 0)"})
+            }));
+
+            // eslint-disable-next-line
+            const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
+                layer: outlineLayer,
+                restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
+            });
+
+            this.stepNetAreaDataObligatedArea = stepNetAreaData.obligatedArea;
+            this.stepNetNetAreaWithoutRestrictedArea = stepNetAreaData.netAreaWithoutRestrictedArea;
+
+            this.calculateData();
+        },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+
+            this.calculateData();
+        },
+        calculateData () {
+            this.restrictedAreaSum = calculateRestrictedArea(this.componentFormData.restrictedListItems);
+            this.netAreaMinusSubstractedArea = Math.round((this.stepNetNetAreaWithoutRestrictedArea - this.restrictedAreaSum) * 10) / 10;
+            this.isNetAreaMinusSubstractedAreaHigher = this.netAreaMinusSubstractedArea > this.stepNetAreaDataObligatedArea;
+        },
+        formatNumberForArea (value) {
+            return thousandsSeparator(Math.round(value * 10) / 10);
         }
     }
 };
@@ -81,27 +149,35 @@ export default {
             />
 
             <PvObligationSimpleTable
+                v-if="isNetAreaMinusSubstractedAreaHigher"
                 :rows="[
-                    {
-                        label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellRestrictedAreasSumLabel'),
-                        value: `000 m²`
-                    },
+                    restrictedAreaSum
+                        ? {
+                            label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellRestrictedAreasSumLabel'),
+                            value: `${formatNumberForArea(restrictedAreaSum)} m²`
+                        }
+                        : null,
                     {
                         label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellPvAreaRequirementLabel'),
-                        value: `000 m²`
+                        value: `${formatNumberForArea(stepNetAreaDataObligatedArea)} m²`
                     }
-                ]"
+                ].filter(row => row !== null)"
             />
 
             <PvObligationSimpleTable
+                v-else
                 :rows="[
+                    {
+                        label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellRestrictedAreasSumLabel'),
+                        value: `${formatNumberForArea(restrictedAreaSum)} m²`
+                    },
                     {
                         label: $t(
                             'additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellPvAreaRequirementReducedLabel', {
-                                squareMeters: '000'
+                                squareMeters: formatNumberForArea(stepNetAreaDataObligatedArea)
                             }
                         ),
-                        value: `000 m²`
+                        value: `${formatNumberForArea(netAreaMinusSubstractedArea)} m²`
                     }
                 ]"
             />

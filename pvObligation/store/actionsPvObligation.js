@@ -11,6 +11,7 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import {getFooterSvg} from "../js/getSvg";
 import dayjs from "dayjs";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
+import calculateRestrictedArea from "../js/calculateRestrictedArea";
 
 export default {
     /**
@@ -426,5 +427,32 @@ export default {
         }
 
         return address;
+    },
+    /**
+     * Calculates the net roof area and restricted areas.
+     *
+     * @param {Object} payload - The payload containing required parameters.
+     * @param {Object} payload.layer - The openlayers vector layer containing roof features.
+     * @param {Array<Object>} payload.restrictedAreaItems - Array of restricted area features.
+     * @returns {Object} An object containing:
+     *   {number} netArea - The calculated net roof area in m².
+     *   {number} netAreaWithoutRestrictedArea - The net roof area minus restricted areas in m².
+     *   {number} restrictedArea - The total restricted area in m².
+     *   {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
+     */
+    async calculateNetAreaAndRestrictedAreas ({state, dispatch}, payload) {
+        const netArea = await dispatch("dissolveRoofFeaturesAndCalculateArea", {
+                roofId: state.selectedRoofId,
+                outlineLayer: payload.layer,
+                layerName: "PV-geeignete Dachflächen"
+            }),
+            restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems);
+
+        return {
+            netArea: Math.round(netArea * 10) / 10,
+            netAreaWithoutRestrictedArea: Math.round((netArea - restrictedArea) * 10) / 10,
+            restrictedArea: Math.round(restrictedArea * 10) / 10,
+            obligatedArea: Math.round((netArea - restrictedArea) * 10 * 0.3) / 10
+        };
     }
 };
