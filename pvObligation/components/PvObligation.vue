@@ -17,7 +17,8 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport",
-            "relevantLayerIds"
+            "relevantLayerIds",
+            "isDrawing"
         ]),
         spinnerInfoText () {
             if (!this.allRoofsLoaded) {
@@ -28,6 +29,11 @@ export default {
             }
 
             return "";
+        }
+    },
+    watch: {
+        isDrawing (value) {
+            document.querySelector("div.controls-element")?.classList.toggle("d-none", value);
         }
     },
     async mounted () {
