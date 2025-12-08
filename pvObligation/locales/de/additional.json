@@ -149,7 +149,8 @@
               "author": "Ersteller:In",
               "page": "Seite",
               "creationDate": "Erstellt am:"
-            }
+            },
+            "screenToSmallMessage": "Das PV Pflicht Portal ist für diese Bildschirmgröße nicht optimiert. Bitte nutzen Sie einen größeren Bildschirm!"
         }
     }
 }
