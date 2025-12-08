@@ -19,8 +19,10 @@ export default {
             /** @override */
             componentFormData: {
                 netRoofArea: null,
+                netRoofAreaWithoutExcludes: null,
                 restrictedListItems: []
             },
+            excludedArea: 0,
             obligatedArea: null,
             displayNetRoofArea: 0
         };
@@ -120,12 +122,32 @@ export default {
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
-            this.obligatedArea = thousandsSeparator(Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10);
-            this.displayNetRoofArea = thousandsSeparator(this.componentFormData.netRoofArea);
+            this.componentFormData.netRoofArea = await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"});
+            this.obligatedArea = this.componentFormData.netRoofArea * 0.3;
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+
+            this.excludedArea = this.calculateUserExcludedArea(
+                this.componentFormData.restrictedListItems
+            );
+
+            this.componentFormData.netRoofAreaWithoutExcludes = this.componentFormData.netRoofArea - this.excludedArea;
+            this.obligatedArea = this.componentFormData.netRoofAreaWithoutExcludes * 0.3;
+        },
+        calculateUserExcludedArea (items) {
+            let excludedArea = 0;
+
+            items.forEach(item => {
+                excludedArea += item.features.reduce((sum, feature) => {
+                    return sum + feature.values_.area3D;
+                }, 0);
+            });
+
+            return excludedArea;
+        },
+        formatNumberForArea (value) {
+            return thousandsSeparator(Math.round(value * 10) / 10);
         }
     }
 };
@@ -171,10 +193,17 @@ export default {
 
             <PvObligationSimpleTable
                 :rows="[
-                    {
-                        label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaLabel'),
-                        value: `${displayNetRoofArea} m²`
-                    }
+                    excludedArea === 0
+                        ? {
+                            label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaLabel'),
+                            value: `${formatNumberForArea(componentFormData.netRoofArea)} m²`
+                        }
+                        : {
+                            label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaValueLabel', {
+                                squareMeters: formatNumberForArea(excludedArea)
+                            }),
+                            value: `${formatNumberForArea(componentFormData.netRoofAreaWithoutExcludes)} m²`
+                        }
                 ]"
             />
 
@@ -186,7 +215,7 @@ export default {
                 :rows="[
                     {
                         label: $t('additional:modules.pvObligation.wizard.step.netArea.component.minPvRequirementLabel'),
-                        value: `${obligatedArea} m²`
+                        value: `${formatNumberForArea(obligatedArea)} m²`
                     }
                 ]"
             />

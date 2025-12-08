@@ -43,6 +43,7 @@
                             "introductionHint": "Hinweis: Verschattungen werden erst im nächsten Schritt erfasst.",
                             "substractFromNetArea": "Die eingezeichneten Flächen werden zusätzlich von der Bruttodachfläche abgezogen.",
                             "substractFromNetAreaLabel": "Die Nettodachfläche des Gebäudes beträgt:",
+                            "substractFromNetAreaValueLabel": "Die Nettodachfläche des Gebäudes, abzüglich {{squareMeters}} m², beträgt:",
                             "minPvRequirement": "Nach Hamburgischen Klimaschutzgesetz müssen Sie mindestens 30% der Nettodachfläche mit PV belegen.",
                             "minPvRequirementLabel": "Folgende Fläche müssen Sie mindestens mit PV belegen:"
                         }
