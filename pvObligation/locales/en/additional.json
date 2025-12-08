@@ -150,7 +150,8 @@
               "author": "Author",
               "page": "Page",
               "creationDate": "Created on:"
-            }
+            },
+            "screenToSmallMessage": "The PV Obligation Portal has not been optimized for this screen size. Please use a larger screen!"
         }
     }
 }

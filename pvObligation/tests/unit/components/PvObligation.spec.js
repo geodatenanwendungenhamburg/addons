@@ -34,6 +34,11 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
                     }
                 }
             }
+        },
+        getters: {
+            isMobile () {
+                return false;
+            }
         }
     });
 
