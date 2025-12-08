@@ -6,11 +6,13 @@ import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import axios from "axios";
 import ConfirmModalItem from "./shared/ConfirmModalItem.vue";
+import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
 export default {
     name: "PvObligationWizardStepGrossArea",
     components: {
-        ConfirmModalItem
+        ConfirmModalItem,
+        PvObligationSimpleTable
     },
     extends: PvObligationWizardStepScriptExtends,
     data () {
@@ -172,41 +174,29 @@ export default {
             {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.introduction") }}
         </p>
 
-        <p v-if="!componentFormData.grossRoofArea">
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.hintSearch") }}
-        </p>
-
         <p>
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaDescription") }}
+            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.introductionHint") }}
         </p>
+
+        <PvObligationSimpleTable
+            v-if="componentFormData.grossRoofArea !== null && componentFormData.grossRoofArea >= 50"
+            :rows="[
+                {
+                    label: $t('additional:modules.pvObligation.wizard.step.grossArea.component.tableCellGrossAreaLabel'),
+                    value: `${displayGrossRoofArea} m²`
+                }
+            ]"
+        />
 
         <p
-            v-if="componentFormData.grossRoofArea !== null"
-            class="grossRoofAreaText"
-        >
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaText") }}
-        </p>
-
-        <strong
-            v-if="componentFormData.grossRoofArea !== null"
-            class="grossRoofAreaValue"
-        >
-            {{ displayGrossRoofArea }} m²
-        </strong>
-
-        <p v-if="componentFormData.grossRoofArea !== null">
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.grossAreaHint") }}
-        </p>
-
-        <p
-            v-if="componentFormData.grossRoofArea < 50 && componentFormData.grossRoofArea !== null"
+            v-else-if="componentFormData.grossRoofArea !== null"
             class="noOblicagionText"
         >
             {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText") }}
         </p>
 
         <ConfirmModalItem
-            modal-inner-wrapper-style="max-width: 400px"
+            modal-inner-wrapper-style="max-width: 25rem"
             :show-modal="showConfirmModal"
             :modal-title="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.header')"
             :button-confirm-label="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.actionButtonConfirmLabel')"
@@ -229,7 +219,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepGrossArea {
-        margin: 1rem 0;
+        margin-top: 0.5rem;
 
         strong.grossRoofAreaValue {
             display: flex;
@@ -238,9 +228,10 @@ export default {
         }
 
         p.noOblicagionText {
-            border: 0.125rem dotted grey;
+            font-size: 1.125rem;
+            border: solid 0.0625rem $light_grey;
             padding: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
     }
 </style>

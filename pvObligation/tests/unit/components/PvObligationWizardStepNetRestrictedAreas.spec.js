@@ -91,6 +91,5 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetRestrictedArea
         const paragraphs = wrapper.findAll("p").map(p => p.text());
 
         expect(paragraphs.some(text => text.includes("introduction"))).to.be.true;
-        expect(paragraphs.some(text => text.includes("additionalInfo"))).to.be.true;
     });
 });

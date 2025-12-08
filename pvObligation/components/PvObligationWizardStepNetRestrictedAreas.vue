@@ -1,12 +1,14 @@
 <script>
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
+import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import {mapGetters} from "vuex";
 
 export default {
     name: "PvObligationWizardStepNetRestrictedAreas",
     components: {
-        PvObligationRestrictionList
+        PvObligationRestrictionList,
+        PvObligationSimpleTable
     },
     extends: PvObligationWizardStepScriptExtends,
     data () {
@@ -71,15 +73,37 @@ export default {
                 {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.introduction") }}
             </p>
 
-            <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.additionalInfo") }}
-            </p>
-
             <PvObligationRestrictionList
                 class="restrictionList"
                 index-prefix="S"
                 :is-disabled="false"
                 @list-items="onListItems"
+            />
+
+            <PvObligationSimpleTable
+                :rows="[
+                    {
+                        label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellRestrictedAreasSumLabel'),
+                        value: `000 m²`
+                    },
+                    {
+                        label: $t('additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellPvAreaRequirementLabel'),
+                        value: `000 m²`
+                    }
+                ]"
+            />
+
+            <PvObligationSimpleTable
+                :rows="[
+                    {
+                        label: $t(
+                            'additional:modules.pvObligation.wizard.step.netRestrictedAreas.component.tableCellPvAreaRequirementReducedLabel', {
+                                squareMeters: '000'
+                            }
+                        ),
+                        value: `000 m²`
+                    }
+                ]"
             />
         </div>
     </div>
@@ -89,7 +113,11 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepNetRestrictedAreas{
-        margin: 1rem 0;
+        margin-top: 0.5rem;
+
+        div.restrictionList {
+            margin: 1.5rem 0;
+        }
 
         p.error {
             color: $light_red;

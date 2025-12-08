@@ -572,7 +572,7 @@ export default {
     @import "~variables";
 
     #pvObligationRestrictionListForm{
-        border: solid 1px $light_grey;
+        border: solid 0.0625rem $light_grey;
         border-radius: 0.5rem;
         background-color: #EFEFEF;
         padding: 1rem 1rem 0 1rem;
@@ -592,7 +592,7 @@ export default {
 
             div.number {
                 font-weight: bold;
-                border: solid 1px $light_grey;
+                border: solid 0.0625rem $light_grey;
                 background-color: $white;
                 padding: 0.5rem;
                 align-self: flex-start;
@@ -636,7 +636,7 @@ export default {
 
         p.helpDraw {
             padding-top: 1rem;
-            border-top: solid 1px $light_grey;
+            border-top: solid 0.0625rem $light_grey;
         }
     }
 </style>

@@ -228,17 +228,28 @@ export default {
                 <div class="intro">
                     <p>
                         {{ $t("additional:modules.pvObligation.wizard.introduction") }}
+                    </p>
+
+                    <p>
+                        {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvApp") }}
 
                         <a
                             href="https://www.hamburg.de/politik-und-verwaltung/behoerden/bukea/themen/energie/erneuerbare-energien/photovoltaik/pv-pflicht-in-hamburg"
                             target="_blank"
                         >
-                            {{ $t("additional:modules.pvObligation.wizard.introductionLinkFurtherInfo") }}
+                            {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvAppLink") }}
                         </a>
                     </p>
 
                     <p>
-                        {{ $t("additional:modules.pvObligation.wizard.introductionPart2") }}
+                        {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvObligation") }}
+
+                        <a
+                            href="https://www.hamburg.de/politik-und-verwaltung/behoerden/bukea/themen/energie/erneuerbare-energien/photovoltaik/pv-pflicht-in-hamburg"
+                            target="_blank"
+                        >
+                            {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvObligationLink") }}
+                        </a>
                     </p>
                 </div>
 
@@ -344,7 +355,7 @@ export default {
                 bottom: 0;
                 background: $white;
                 z-index: 10;
-                box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+                box-shadow: 0 -0.125rem 0.5rem rgba(0,0,0,0.04);
 
                 button.nextButton:only-child {
                     margin-left: auto;
