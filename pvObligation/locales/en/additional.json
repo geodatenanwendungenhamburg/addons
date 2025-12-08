@@ -42,6 +42,7 @@
                             "introductionHint": "Note: Shading is only recorded in the next step.",
                             "substractFromNetArea": "The drawn areas are additionally subtracted from the gross roof area.",
                             "substractFromNetAreaLabel": "The net roof area of the building is:",
+                            "substractFromNetAreaValueLabel": "The net roof area of the building minus {{squareMeters}} m² is:",
                             "minPvRequirement": "According to the Hamburg Climate Protection Act, you must cover at least 30% of the net roof area with PV.",
                             "minPvRequirementLabel": "You must cover at least the following area with PV:"
                         }
