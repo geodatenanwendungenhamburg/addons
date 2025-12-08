@@ -6,6 +6,7 @@ import {Style, Stroke, Fill} from "ol/style";
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
+import calculateRestrictedArea from "../js/calculateRestrictedArea";
 
 export default {
     name: "PvObligationWizardStepNetArea",
@@ -19,19 +20,21 @@ export default {
             /** @override */
             componentFormData: {
                 netRoofArea: null,
+                netRoofAreaWithoutExcludes: null,
                 restrictedListItems: []
             },
-            obligatedArea: null,
-            displayNetRoofArea: 0
+            excludedArea: 0,
+            obligatedArea: null
         };
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "selectedRoofId",
             "selectedRoofExtent",
             "isDrawing"
         ]),
-        ...mapGetters("Menu", ["expanded"]),
+        ...mapGetters("Menu", [
+            "expanded"
+        ]),
         /**
          * Checks if the menu sides are open or closed and
          * calculates the padding for the zoomToExtent function, depending on the opening state
@@ -84,7 +87,8 @@ export default {
     },
     methods: {
         ...mapActions("Modules/PvObligation", [
-            "dissolveRoofFeaturesAndCalculateArea"
+            "dissolveRoofFeaturesAndCalculateArea",
+            "calculateNetAreaAndRestrictedAreas"
         ]),
         ...mapActions("Maps", [
             "addNewLayerIfNotExists",
@@ -107,25 +111,37 @@ export default {
             });
 
             this.componentFormData.netRoofArea = null;
+            this.componentFormData.netRoofAreaWithoutExcludes = null;
             this.componentFormData.restrictedListItems.splice(0);
-            this.displayNetRoofArea = 0;
+            this.excludedArea = 0;
             this.obligatedArea = null;
         },
         async defineNetArea (payload) {
-            const roofId = this.selectedRoofId,
-                outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
+            const outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
 
             outlineLayer.setStyle(new Style({
                 stroke: new Stroke({color: "rgba(192, 12, 247, 1)", width: 3}),
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
-            this.obligatedArea = thousandsSeparator(Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10);
-            this.displayNetRoofArea = thousandsSeparator(this.componentFormData.netRoofArea);
+            // eslint-disable-next-line
+            const areaData = await this.calculateNetAreaAndRestrictedAreas({
+                layer: outlineLayer,
+                restrictedAreaItems: this.componentFormData.restrictedListItems ?? []
+            });
+
+            this.componentFormData.netRoofArea = areaData.netArea;
+            this.obligatedArea = areaData.obligatedArea;
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+
+            this.excludedArea = calculateRestrictedArea(this.componentFormData.restrictedListItems);
+            this.componentFormData.netRoofAreaWithoutExcludes = this.componentFormData.netRoofArea - this.excludedArea;
+            this.obligatedArea = this.componentFormData.netRoofAreaWithoutExcludes * 0.3;
+        },
+        formatNumberForArea (value) {
+            return thousandsSeparator(Math.round(value * 10) / 10);
         }
     }
 };
@@ -171,10 +187,17 @@ export default {
 
             <PvObligationSimpleTable
                 :rows="[
-                    {
-                        label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaLabel'),
-                        value: `${displayNetRoofArea} m²`
-                    }
+                    excludedArea === 0
+                        ? {
+                            label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaLabel'),
+                            value: `${formatNumberForArea(componentFormData.netRoofArea)} m²`
+                        }
+                        : {
+                            label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaValueLabel', {
+                                squareMeters: formatNumberForArea(excludedArea)
+                            }),
+                            value: `${formatNumberForArea(componentFormData.netRoofAreaWithoutExcludes)} m²`
+                        }
                 ]"
             />
 
@@ -186,7 +209,7 @@ export default {
                 :rows="[
                     {
                         label: $t('additional:modules.pvObligation.wizard.step.netArea.component.minPvRequirementLabel'),
-                        value: `${obligatedArea} m²`
+                        value: `${formatNumberForArea(obligatedArea)} m²`
                     }
                 ]"
             />

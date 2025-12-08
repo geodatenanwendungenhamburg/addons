@@ -3,6 +3,7 @@ import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import PvObligationRestrictionListForm from "./PvObligationRestrictionListForm.vue";
 import {mapMutations} from "vuex";
+import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 
 export default {
     name: "PvObligationRestrictionList",
@@ -93,9 +94,12 @@ export default {
             this.itemSelectedEdit = null;
         },
         getArea3D (id) {
-            return this.listItems.find(item => item.id === id).features.reduce((sum, feature) => {
-                return Math.round(sum + feature.values_.area3D) * 10 / 10;
-            }, 0);
+            return this.formatNumberForArea(this.listItems.find(item => item.id === id).features.reduce((sum, feature) => {
+                return sum + feature.values_.area3D;
+            }, 0));
+        },
+        formatNumberForArea (value) {
+            return thousandsSeparator(Math.round(value * 10) / 10);
         }
     }
 };

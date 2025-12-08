@@ -139,7 +139,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         const tables = wrapper.findAll("table#PvObligationSimpleTable");
 
         expect(tables.length).to.equal(2);
-        expect(tables[0].find("td.cellValue").text() === "123.456 m²").to.be.true;
+        expect(tables[0].find("td.cellValue").text() === "123,5 m²").to.be.true;
         expect(tables[1].find("td.cellValue").text() === "37 m²").to.be.true;
     });
 
