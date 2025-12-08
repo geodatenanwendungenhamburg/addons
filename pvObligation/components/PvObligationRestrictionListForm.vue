@@ -197,44 +197,51 @@ export default {
             netAreaFeatures.forEach(async netAreaFeature => {
                 let intersectionFeature = null;
 
-                if (netAreaFeature.getGeometry().getType() === "MultiPolygon") {
-                    const featureGeoJson = olGeoJson.writeFeatureObject(netAreaFeature);
+                try {
+                    if (netAreaFeature.getGeometry().getType() === "MultiPolygon") {
+                        const featureGeoJson = olGeoJson.writeFeatureObject(netAreaFeature);
 
-                    // Ensure featureGeoJson is valid
-                    if (!featureGeoJson || !featureGeoJson.geometry) {
-                        console.warn("Net area feature polygon is invalid or missing geometry.");
-                        return;
+                        // Ensure featureGeoJson is valid
+                        if (!featureGeoJson || !featureGeoJson.geometry) {
+                            console.warn("Net area feature polygon is invalid or missing geometry.");
+                            return;
+                        }
+
+                        intersectionFeature = await this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
+
+                        // eslint-disable-next-line one-var
+                        const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature, drawFeature);
+
+                        if (differenceFeature) {
+                            differenceFeature.forEach(feature => {
+                                this.addFeatureWithProperties(feature, featureGeoJson);
+                            });
+                        }
                     }
+                    else if (netAreaFeature.getGeometry().getType() === "Polygon") {
+                        const polyFeature = netAreaFeature.clone();
 
-                    intersectionFeature = await this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
+                        polyFeature.setGeometry(netAreaFeature.getGeometry().clone());
 
-                    // eslint-disable-next-line one-var
-                    const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature, drawFeature);
+                        // eslint-disable-next-line one-var
+                        const featureGeoJson = olGeoJson.writeFeatureObject(polyFeature);
 
-                    if (differenceFeature) {
-                        differenceFeature.forEach(feature => {
-                            this.addFeatureWithProperties(feature, featureGeoJson);
-                        });
+                        intersectionFeature = this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
+
+                        // eslint-disable-next-line one-var
+                        const differenceFeature = this.cutOverlappingFeatures(intersectionFeature);
+
+                        if (differenceFeature) {
+                            differenceFeature.forEach(feature => {
+                                this.addFeatureWithProperties(feature, featureGeoJson);
+                            });
+                        }
                     }
                 }
-                else if (netAreaFeature.getGeometry().getType() === "Polygon") {
-                    const polyFeature = netAreaFeature.clone();
-
-                    polyFeature.setGeometry(netAreaFeature.getGeometry().clone());
-
-                    // eslint-disable-next-line one-var
-                    const featureGeoJson = olGeoJson.writeFeatureObject(polyFeature);
-
-                    intersectionFeature = this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
-
-                    // eslint-disable-next-line one-var
-                    const differenceFeature = this.cutOverlappingFeatures(intersectionFeature);
-
-                    if (differenceFeature) {
-                        differenceFeature.forEach(feature => {
-                            this.addFeatureWithProperties(feature, featureGeoJson);
-                        });
-                    }
+                catch (error) {
+                    // Remove the invalid drawn feature so user can draw again
+                    this.drawState.layer.getSource().removeFeature(drawFeature);
+                    console.error("Error processing net area feature:", error);
                 }
             });
         },
@@ -245,14 +252,20 @@ export default {
          * @returns {Feature} The intersection feature if an intersection exists, otherwise null.
          */
         async intersectFeature (featureGeoJson, drawFeatureGeoJson) {
-            const intersection = intersect(featureCollection([featureGeoJson, drawFeatureGeoJson])),
-                olGeoJson = new GeoJSON();
+            const olGeoJson = new GeoJSON();
 
             let intersectionFeature = null;
 
-            if (intersection && intersection.geometry) {
-                // Convert Turf intersection (GeoJSON) to OpenLayers feature
-                intersectionFeature = olGeoJson.readFeature(intersection);
+            try {
+                const intersection = intersect(featureCollection([featureGeoJson, drawFeatureGeoJson]));
+
+                if (intersection && intersection.geometry) {
+                    // Convert Turf intersection (GeoJSON) to OpenLayers feature
+                    intersectionFeature = olGeoJson.readFeature(intersection);
+                }
+            }
+            catch (error) {
+                console.error("Error during intersection calculation:", error);
             }
 
             // Remove the original drawn feature from the layer
@@ -274,7 +287,8 @@ export default {
         },
         /**
          * Removes or cuts overlapping features from a given set of features.
-         * @param {Feature} feature - The feature to process.
+         * @param {Feature} intersectionFeature - The feature to process.
+         * @param {Feature} drawFeature - The original drawn feature for comparison.
          * @returns {Promise<Array<Object>} The array of features with overlaps removed or cut.
          */
         async cutOverlappingFeatures (intersectionFeature, drawFeature) {
@@ -283,42 +297,59 @@ export default {
             }
 
             const olGeoJson = new GeoJSON(),
-                drawFeatures = this.drawState.layer.getSource().getFeatures(),
-                differenceFeatures = [];
+                drawFeatures = this.drawState.layer.getSource().getFeatures();
+            // Start with the intersection geometry
+            let currentGeoJson = olGeoJson.writeFeatureObject(intersectionFeature);
 
-            let intersectionFeatureGeojson = olGeoJson.writeFeatureObject(intersectionFeature),
-                differenceFeature = null;
-
-            drawFeatures.forEach((feature) => {
+            // Subtract each overlapping drawn feature
+            for (const feature of drawFeatures) {
+                // Skip the feature if it's the same as the current drawFeature
                 const drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature),
-                    euqalAsDrawGeometry = booleanEqual(drawFeatureGeoJson, olGeoJson.writeFeatureObject(feature));
+                    featureGeoJson = olGeoJson.writeFeatureObject(feature);
 
-                if (euqalAsDrawGeometry) {
-                    return;
+                if (booleanEqual(drawFeatureGeoJson, featureGeoJson)) {
+                    continue;
                 }
 
-                // eslint-disable-next-line one-var
-                const featureGeoJson = olGeoJson.writeFeatureObject(feature),
-                    featuresIntersecting = booleanIntersects(intersectionFeatureGeojson, featureGeoJson);
+                if (booleanIntersects(currentGeoJson, featureGeoJson)) {
+                    let differenceResult = null;
 
-                if (featuresIntersecting) {
-                    const differenceResult = difference(featureCollection([intersectionFeatureGeojson, featureGeoJson]));
+                    try {
+                        // check if the feature geometries overlap and keep the non-overlapping part
+                        differenceResult = difference(featureCollection([currentGeoJson, featureGeoJson]));
+                    }
+                    catch (error) {
+                        console.error("Error during difference calculation:", error);
+                        this.drawState.layer.getSource().removeFeature(drawFeature);
+                        return [];
+                    }
 
-                    if (differenceResult && differenceResult.geometry) {
-                        differenceFeature = olGeoJson.readFeature(differenceResult);
-                        intersectionFeatureGeojson = differenceResult;
+                    // check for invalid result
+                    if (!differenceResult || !differenceResult.geometry || !this.isValidPolygon(differenceResult)) {
+                        this.drawState.layer.getSource().removeFeature(drawFeature);
+                        return [];
+                    }
+
+                    const validFeatures = this.extractValidPolygons(differenceResult);
+
+                    if (validFeatures.length) {
+                        currentGeoJson = validFeatures[0];
+                    }
+                    else {
+                        this.drawState.layer.getSource().removeFeature(drawFeature);
+                        return [];
                     }
                 }
-            });
-
-            if (differenceFeature) {
-                differenceFeatures.push(differenceFeature);
-            }
-            else {
-                differenceFeatures.push(intersectionFeature);
             }
 
-            return differenceFeatures;
+            if (currentGeoJson && currentGeoJson.geometry && this.isValidPolygon(currentGeoJson)) {
+                const validFeatures = this.extractValidPolygons(currentGeoJson);
+
+                if (validFeatures.length) {
+                    return validFeatures.map(f => olGeoJson.readFeature(f));
+                }
+            }
+            return [];
         },
         /**
          * Adds a new feature to the map with the specified properties.
@@ -352,6 +383,104 @@ export default {
 
             this.drawState.layer.getSource().addFeature(feature);
             this.formData.features.push(feature);
+        },
+        /**
+         * Checks if the given geoJson contains a valid polygon.
+         * A valid polygon must have at least three distinct points.
+         *
+         * @param {GeoJson}} geoJson - GeoJson containing the feature to check.
+         * @returns {boolean} True if the polygon is valid, false otherwise.
+         */
+        isValidPolygon (geoJson) {
+            if (!geoJson) {
+                return false;
+            }
+
+            // Helper to count distinct points in a ring
+            // A valid polygon must have at least three distinct points.
+            // eslint-disable-next-line
+            function distinctPoints (ring) {
+                const unique = new Set(ring.slice(0, -1).map(coord => coord.join(",")));
+
+                return unique.size;
+            }
+
+            // Handle FeatureCollection
+            if (geoJson.type === "FeatureCollection" && Array.isArray(geoJson.features)) {
+                return geoJson.features.some(f => this.isValidPolygon(f));
+            }
+
+            // Handle GeometryCollection
+            if (geoJson.type === "GeometryCollection" && Array.isArray(geoJson.geometries)) {
+                return geoJson.geometries.some(g => this.isValidPolygon({type: "Feature", geometry: g}));
+            }
+
+            // Handle Feature
+            if (geoJson.type === "Feature" && geoJson.geometry) {
+                return this.isValidPolygon(geoJson.geometry);
+            }
+
+            // Polygon: all rings must have at least 4 points and at least 3 distinct points
+            if (geoJson.type === "Polygon") {
+                return Array.isArray(geoJson.coordinates) &&
+                    geoJson.coordinates.length > 0 &&
+                    geoJson.coordinates.every(ring => Array.isArray(ring) &&
+                        ring.length >= 4 &&
+                        distinctPoints(ring) >= 3
+                    );
+            }
+
+            // MultiPolygon: all rings of all polygons must have at least 4 points and at least 3 distinct points
+            if (geoJson.type === "MultiPolygon") {
+                return Array.isArray(geoJson.coordinates) &&
+                    geoJson.coordinates.length > 0 &&
+                    geoJson.coordinates.every(
+                        poly => Array.isArray(poly) &&
+                            poly.length > 0 &&
+                            poly.every(ring => Array.isArray(ring) &&
+                                ring.length >= 4 &&
+                                distinctPoints(ring) >= 3
+                            )
+                    );
+            }
+            return false;
+        },
+        /**
+         * Extracts valid polygons from a given array of polygon objects.
+         * A valid polygon is determined based on custom validation logic.
+         *
+         * @param {GeoJson} geoJson - The GeoJson containing the polygon to be validated and extracted.
+         * @returns {Array<Object>} An array containing only the valid polygon objects.
+         */
+        extractValidPolygons (geoJson) {
+            const validFeatures = [];
+
+            // FeatureCollection
+            if (geoJson.type === "FeatureCollection") {
+                geoJson.features.forEach(f => {
+                    if (this.isValidPolygon(f)) {
+                        validFeatures.push(f);
+                    }
+                });
+            }
+            // GeometryCollection
+            else if (geoJson.type === "GeometryCollection") {
+                geoJson.geometries.forEach(g => {
+                    if (this.isValidPolygon({type: "Feature", geometry: g})) {
+                        validFeatures.push({type: "Feature", geometry: g});
+                    }
+                });
+            }
+            // Single Feature
+            else if (geoJson.type === "Feature" && this.isValidPolygon(geoJson)) {
+                validFeatures.push(geoJson);
+            }
+            // Single Polygon/MultiPolygon
+            else if ((geoJson.type === "Polygon" || geoJson.type === "MultiPolygon") && this.isValidPolygon(geoJson)) {
+                validFeatures.push({type: "Feature", geometry: geoJson});
+            }
+
+            return validFeatures;
         }
     }
 };
