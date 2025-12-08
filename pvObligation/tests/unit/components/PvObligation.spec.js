@@ -14,13 +14,17 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
                 modules: {
                     PvObligation: {
                         namespaced: true,
+                        state: () => ({
+                            isDrawing: false
+                        }),
                         getters: {
                             isCreatingReport () {
                                 return false;
                             },
                             relevantLayerIds () {
                                 return [];
-                            }
+                            },
+                            isDrawing: state => state.isDrawing
                         },
                         mutations: {
                             setIsCreatingReport () {
