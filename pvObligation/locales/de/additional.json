@@ -10,19 +10,18 @@
                     "back": "voriger Schritt",
                     "next": "nächster Schritt"
                 },
-                "introduction": "Diese Anwendung soll zur Unterstützung bei der Berechnung der Fläche dienen, die mit Photovoltaik belegt werden muss, wenn “wesentliche Umbauten des Daches” durchgeführt werden. Der PDF-Bericht ist für Ihre persönlichen Unterlagen und dient als Nachweismöglichkeit für den Fall einer Stichprobe. Nähere Informationen zur PV-Pflicht finden Sie hier:",
-                "introductionLinkFurtherInfo": "PV-Pflicht in Hamburg - hamburg.de",
-                "introductionPart2": "Alle im folgenden gemachten Angaben werden nicht auf Servern gespeichert. Die Erstellung des PDF erfolgt lokal auf Ihrem Rechner. Der Umgang mit Daten erfolgt im Einklang mit der DSGVO.",
-                "introductionLinkPrivacyPolicy": "Datenschutzerklärung",
+                "introduction": "Diese Anwendung soll zur Unterstützung bei der Berechnung der Dachfläche dienen, die mit Photovoltaik (PV) belegt werden muss, wenn \"wesentliche Umbauten des Daches\" durchgeführt werden. Der PDF-Bericht, den Sie am Ende erstellen können, ist für Ihre persönlichen Unterlagen bestimmt und dient auch als Nachweismöglichkeit für den Fall einer Stichprobe durch die zuständige Behörde.",
+                "introductionInfoPvApp": "Lesen Sie jedoch bitte die Informationen zu dieser Anwendung unter folgendem Link:",
+                "introductionInfoPvAppLink": "LINK zur INFO-Seite",
+                "introductionInfoPvObligation": "Informationen zur PV-Pflicht allgemein finden Sie hier:",
+                "introductionInfoPvObligationLink": "PV-Pflicht in Hamburg - hamburg.de.",
                 "step": {
                     "grossArea": {
                         "wizardTitle": "Bruttodachfläche",
                         "component": {
                             "introduction": "Klicken Sie in der Karte auf das gewünschte Gebäude, um die Bruttodachfläche zu ermitteln.",
-                            "hintSearch": "(Tipp: Nutzen Sie die Suche, um das Gebäude schneller zu finden und anzuzeigen.)",
-                            "grossAreaDescription": "Die Bruttodachfläche umfasst die gesamte Dachfläche des Gebäudes, inkl. aller Teilflächen unabhängig von Ausrichtung, Nutzung oder Verschattung. Beträgt diese mehr als 50 m², unterliegt sie der PV-Pflicht sofern “wesentliche Umbauten des Daches” durchgeführt werden. ",
-                            "grossAreaText": "Die Bruttodachfläche zum ausgewählten Gebäude beträgt: ",
-                            "grossAreaHint": "(Hinweis: Die Dachflächen wurden automatisiert erfasst. Es können Abweichungen zur realen Fläche auftreten. Bitte berücksichtigen Sie diese im folgenden Schritt oder unter “Eigene Erläuterungen”)",
+                            "introductionHint": "Hinweis: Die Dachflächen des ausgewählten Gebäudes wurden automatisiert erfasst.",
+                            "tableCellGrossAreaLabel": "Die Bruttodachfläche des ausgewählten Gebäudes beträgt:",
                             "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²).",
                             "confirmModal": {
                                 "header": "Dachfläche wirklich ändern?",
@@ -40,11 +39,12 @@
                             "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
                             "missingStepGrossAreaMessage": "Im Anschluss wird Ihnen hier die initiale Nettodachfläche angezeigt, und Sie können gegebenenfalls Flächen einzeichnen, die zusätzlich ausgeschlossen werden sollen.",
                             "drawingIsNotCompletedError": "Die Zeichnung ist noch nicht abgeschlossen. Bitte wählen Sie Speichern oder Abbrechen, bevor Sie den Schritt wechseln",
-                            "introduction": "Die Nettodachfläche ist die Bruttodachfläche abzüglich Dachaufbauten, Dachfenstern, anderer notwendiger Dachnutzungen und der nach Norden ausgerichteten Flächenanteile des Daches mit Neigung über 10 Grad. Mindestens 30% davon müssen mit PV belegt werden. Wir haben für Ihr Gebäude automatisch eine Nettodachfläche ermittelt und dabei nach “Norden” ausgerichtete Dachflächen mit mehr als 10 Grad Neigung berücksichtigt.",
-                            "netRoofAreaText": "Die Nettodachfläche beträgt: {{ displayNetRoofArea }} m²",
-                            "obligatedAreaText": "Mindestfläche für PV: {{ obligatedArea }} m² (30% der Nettodachfläche).",
-                            "additionalNetAreaText": "Sie haben hier die Möglichkeit weitere Flächen hinzuzufügen, die für die Berechnung der Nettodachfläche relevant sind. Diese werden in den o.g. Flächen berücksichtigt.",
-                            "netAreaNoteText": "(Hinweis: Verschattung, andere technische Unmöglichkeiten sind erst im nächsten Schritt zu berücksichtigen.)"
+                            "introduction": "Ergänzen Sie hier Flächen, die für die Berechnung der Nettodachfläche relevant sind. Relevante Flächen sind bestehende Dachfenster, bestehende Dachaufbauten, andere bestehende notwendige Dachnutzungen sowie Dachflächen nach Norden mit Neigung über 10 Grad sofern diese Flächen nicht bereits automatisch erfasst sind.",
+                            "introductionHint": "Hinweis: Verschattungen werden erst im nächsten Schritt erfasst.",
+                            "substractFromNetArea": "Die eingezeichneten Flächen werden zusätzlich von der Bruttodachfläche abgezogen.",
+                            "substractFromNetAreaLabel": "Die Nettodachfläche des Gebäudes beträgt:",
+                            "minPvRequirement": "Nach Hamburgischen Klimaschutzgesetz müssen Sie mindestens 30% der Nettodachfläche mit PV belegen.",
+                            "minPvRequirementLabel": "Folgende Fläche müssen Sie mindestens mit PV belegen:"
                         }
                     },
                     "netRestrictedAreas": {
@@ -52,14 +52,16 @@
                         "component": {
                             "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
                             "missingStepGrossAreaMessage": "Im Anschluss können Sie hier gegebenenfalls Flächen einzeichnen, die Sie als Sperrflächen ausweisen wollen.",
-                            "introduction": "Die Nettodachfläche ist zu mindestens 30% mit PV zu belegen. Dies ist die Pflicht. Diese Pflicht kann entfallen, soweit andere öffentlich-rechtliche Vorschriften oder technische Unmöglichkeiten entgegenstehen. Gibt es mehrere dieser Flächen, besteht die Möglichkeit, dass (begründet) weniger als die 30% der Nettodachfläche belegt werden können.",
-                            "additionalInfo": "Sie haben hier die Möglichkeit, Flächen anzugeben, auf denen die Pflicht entfällt. Gründe können sein: Unvereinbarkeit mit dem Denkmalschutz, Anforderungen aus der HBauO (Abstandsflächen), Flächen, die mehr als geringfügig verschattet sind, aber auch technische Unmöglichkeiten."
+                            "introduction": "Falls Dachflächen nicht für PV genutzt werden können, entfällt die PV-Pflicht soweit diese Flächen die Pflicht einschränken. Fügen Sie hier \"Sperrflächen\" ein, die nicht mit PV belegt werden müssen.",
+                            "tableCellRestrictedAreasSumLabel": "Die Summe der Sperrflächen beträgt:",
+                            "tableCellPvAreaRequirementLabel": "Die mit PV zu belegende Fläche beträgt weiterhin:",
+                            "tableCellPvAreaRequirementReducedLabel": "Die mit PV zu belegende Fläche reduziert sich von {{squareMeters}} m² auf"
                         }
                     },
                     "buildingDetails": {
                         "wizardTitle": "Angaben zum Gebäude",
                         "component": {
-                            "introduction": "Bitte geben Sie hier den Namen der Eigentümerin oder des Eigentümers ein.",
+                            "introduction": "Geben Sie hier den/die Namen der Eigentümer:In des Gebäudes ein.",
                             "form": {
                                 "propertyOwnerFullName": "Vor- und Nachname (Eigentümer:in)",
                                 "street": "Straße",
@@ -72,7 +74,7 @@
                     "personalNotes": {
                         "wizardTitle": "Eigene Erläuterungen",
                         "component": {
-                            "introduction": "Hier besteht die Möglichkeit, eigene Erläuterungen zu den Flächen einzufügen, die aus Ihrer Sicht relevant sind.",
+                            "introduction": "Sie haben hier die Möglichkeit, eigene Erläuterungen einzufügen.",
                             "form": {
                                 "personalNote": "Erläuterungen oder Anmerkungen hier eintragen..."
                             }
@@ -81,7 +83,8 @@
                     "generateReport": {
                         "wizardTitle": "Report erzeugen",
                         "component": {
-                            "introduction": "Im folgenden können Sie einen PDF-Bericht erzeugen, der die von Ihnen gemachten Angaben Angaben enthält. Sie können diesen als Nachweis für Ihre Unterlagen aufbewahren.",
+                            "introduction": "Sie können sich hier die gemachten Angaben in einem PDF-Bericht herunterladen und für Ihre Unterlagen aufbewahren.",
+                            "introductionHint": "Hinweis: Die von Ihnen gemachten Daten werden nur für die Erstellung des PDF-Berichts genutzt. Es werden keine Daten gespeichert oder an die zuständige Behörde übertragen.",
                             "createReport": "PDF erzeugen",
                             "generalError": "Fehler: Nicht alle Pflichtfelder sind ausgefüllt. Bitte ergänzen Sie die fehlenden Informationen, um den Report zu erzeugen."
                         }
@@ -97,7 +100,7 @@
                     "formHeaderCreate": "Relevante Fläche hinzufügen",
                     "formHeaderCreateDescription": "Zeichnen Sie einen relevanten Bereich auf Ihrem Dach und fügen Sie eine Anmerkung hinzu. Nach dem Speichern können Sie weitere Bereiche erfassen oder diese in der Liste bearbeiten.",
                     "listHeader": "Liste Ihrer erfassten Flächen",
-                    "buttonAdd": "relevante Flächen hinzufügen",
+                    "buttonAdd": "relevante Flächen einzeichnen",
                     "buttonDelete": "Entfernen",
                     "buttonEdit": "Bearbeiten",
                     "buttonSave": "Speichern",

@@ -178,7 +178,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepBuildingDetails {
-        margin: 1rem 0;
+        margin-top: 0.5rem;
 
         form {
             .error {
