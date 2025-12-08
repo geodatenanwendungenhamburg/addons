@@ -20,6 +20,9 @@ export default {
             "relevantLayerIds",
             "isDrawing"
         ]),
+        ...mapGetters([
+            "isMobile"
+        ]),
         spinnerInfoText () {
             if (!this.allRoofsLoaded) {
                 return this.$t("additional:modules.pvObligation.roofsAreLoadingSpinner");
@@ -29,6 +32,13 @@ export default {
             }
 
             return "";
+        },
+        isMobileDevice () {
+            const userAgentCheck = (/Mobi|Android|iPhone|iPad|iPod|Windows Phone/i).test(navigator.userAgent),
+                touchCheck = "ontouchstart" in window || navigator.maxTouchPoints > 0,
+                screenSizeCheck = this.isMobile;
+
+            return userAgentCheck || (touchCheck && screenSizeCheck);
         }
     },
     watch: {
@@ -98,7 +108,10 @@ export default {
 </script>
 
 <template lang="html">
-    <div id="pvObligation">
+    <div
+        v-if="!isMobileDevice"
+        id="pvObligation"
+    >
         <PvObligationWizard />
 
         <div
@@ -112,6 +125,13 @@ export default {
 
             <p> {{ spinnerInfoText }} </p>
         </div>
+    </div>
+
+    <div
+        v-else
+        class="mobileMessage"
+    >
+        <p> {{ $t("additional:modules.pvObligation.screenToSmallMessage") }} </p>
     </div>
 </template>
 
@@ -147,6 +167,17 @@ export default {
             p {
                 background-color: white;
             }
+        }
+    }
+
+    div.mobileMessage {
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        p {
+            max-width: 19rem;
         }
     }
 </style>
