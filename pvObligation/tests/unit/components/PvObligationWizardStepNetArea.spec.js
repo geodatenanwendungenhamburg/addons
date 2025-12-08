@@ -1,4 +1,4 @@
-import {shallowMount} from "@vue/test-utils";
+import {mount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepNetArea.vue";
 import sinon from "sinon";
@@ -58,7 +58,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
             }
         });
 
-        wrapper = shallowMount(Component, {
+        wrapper = mount(Component, {
             propsData: {
                 wizardStepsFormData: {
                     PvObligationWizardStepGrossArea: {
@@ -100,10 +100,6 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
     });
 
     it("renders all net roof area paragraphs when netRoofArea is set", async () => {
-        wrapper.vm.$t = (key, addon) => {
-            return key + (addon ? Object.values(addon).join(",") : "");
-        };
-
         await wrapper.setProps({
             wizardStepsFormData: {PvObligationWizardStepGrossArea: {isValid: true}},
             wizardStepIsActive: true
@@ -117,16 +113,15 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        expect(wrapper.findAll("strong").length).to.equal(2);
-        expect(wrapper.findAll("strong")[0].text()).to.contain("100");
-        expect(wrapper.findAll("strong")[1].text()).to.contain("30");
+        // eslint-disable-next-line
+        const tables = wrapper.findAll("table#PvObligationSimpleTable");
+
+        expect(tables.length).to.equal(2);
+        expect(tables[0].find("td.cellValue").text() === "100 m²").to.be.true;
+        expect(tables[1].find("td.cellValue").text() === "30 m²").to.be.true;
     });
 
     it("renders correct obligatedArea rounding", async () => {
-        wrapper.vm.$t = (key, addon) => {
-            return key + (addon ? Object.values(addon).join(",") : "");
-        };
-
         await wrapper.setProps({
             wizardStepsFormData: {PvObligationWizardStepGrossArea: {isValid: true}},
             wizardStepIsActive: true
@@ -140,9 +135,12 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        expect(wrapper.findAll("strong").length).to.equal(2);
-        expect(wrapper.findAll("strong")[0].text()).to.contain("123.456");
-        expect(wrapper.findAll("strong")[1].text()).to.contain(Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10);
+        // eslint-disable-next-line
+        const tables = wrapper.findAll("table#PvObligationSimpleTable");
+
+        expect(tables.length).to.equal(2);
+        expect(tables[0].find("td.cellValue").text() === "123.456 m²").to.be.true;
+        expect(tables[1].find("td.cellValue").text() === "37 m²").to.be.true;
     });
 
     it("mapZoomToExtentPadding has the correct structure", () => {

@@ -80,15 +80,15 @@ export default {
 
 <template lang="html">
     <div id="pvObligationWizardStepGenerateReport">
-        <p>
-            {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.introduction") }}
-        </p>
-
         <p
             v-if="!allWizardStepsValid"
             class="error"
         >
             {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.generalError") }}
+        </p>
+
+        <p>
+            {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.introduction") }}
         </p>
 
         <FlatButton
@@ -97,6 +97,10 @@ export default {
             icon="bi bi-box"
             :disabled="!allWizardStepsValid || isCreatingReport"
         />
+
+        <p>
+            {{ $t("additional:modules.pvObligation.wizard.step.generateReport.component.introductionHint") }}
+        </p>
     </div>
 </template>
 
@@ -104,7 +108,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepGenerateReport{
-        margin: 1rem 0;
+        margin-top: 0.5rem;
 
         p.error {
             color: $light_red;

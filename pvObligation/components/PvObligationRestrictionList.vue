@@ -108,16 +108,7 @@ export default {
             {{ disabledMessage }}
         </span>
 
-        <FlatButton
-            v-if="!itemSelectedCreate"
-            class="buttonAdd"
-            :text="$t('additional:modules.pvObligation.components.restrictionList.buttonAdd')"
-            :interaction="() => onButtonAdd()"
-            icon="bi bi-plus-circle"
-            :disabled="isDisabled"
-        />
-
-        <template v-else>
+        <template v-if="itemSelectedCreate">
             <h4 class="listFormCreateIntroduction">
                 {{ $t("additional:modules.pvObligation.components.restrictionList.formHeaderCreate") }}
             </h4>
@@ -189,6 +180,15 @@ export default {
                 </template>
             </div>
         </div>
+
+        <FlatButton
+            v-if="!itemSelectedCreate"
+            class="buttonAdd"
+            :text="$t('additional:modules.pvObligation.components.restrictionList.buttonAdd')"
+            :interaction="() => onButtonAdd()"
+            icon="bi bi-plus-circle"
+            :disabled="isDisabled"
+        />
     </div>
 </template>
 
@@ -201,7 +201,8 @@ export default {
         }
 
         button.buttonAdd {
-            margin-top: 1rem;
+            margin: 1.5rem 0;
+            margin: 0 auto;
         }
 
         h4.listFormCreateIntroduction {
@@ -209,12 +210,12 @@ export default {
         }
 
         div.list {
-            border: solid 1px $light_grey;
+            border: solid 0.0625rem $light_grey;
             border-radius: 0.5rem;
             margin: 1rem 0;
 
             div.listItem {
-                border-bottom: solid 1px $light_grey;
+                border-bottom: solid 0.0625rem $light_grey;
                 padding: 1rem 1rem 0 1rem;
 
                 &:last-child {
@@ -227,7 +228,7 @@ export default {
 
                     div.number {
                         font-weight: bold;
-                        border: solid 1px $light_grey;
+                        border: solid 0.0625rem $light_grey;
                         background-color: $white;
                         padding: 0.5rem;
                         align-self: flex-start;

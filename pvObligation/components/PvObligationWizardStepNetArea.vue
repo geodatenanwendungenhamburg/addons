@@ -5,11 +5,13 @@ import {mapActions, mapGetters} from "vuex";
 import {Style, Stroke, Fill} from "ol/style";
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
+import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
 export default {
     name: "PvObligationWizardStepNetArea",
     components: {
-        PvObligationRestrictionList
+        PvObligationRestrictionList,
+        PvObligationSimpleTable
     },
     extends: PvObligationWizardStepScriptExtends,
     data () {
@@ -152,20 +154,8 @@ export default {
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.introduction") }}
             </p>
 
-            <strong>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {displayNetRoofArea: displayNetRoofArea}) }}
-            </strong>
-
-            <strong>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
-            </strong>
-
             <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
-            </p>
-
-            <p>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netAreaNoteText") }}
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.introductionHint") }}
             </p>
 
             <PvObligationRestrictionList
@@ -173,6 +163,32 @@ export default {
                 index-prefix="N"
                 :is-disabled="false"
                 @list-items="onListItems"
+            />
+
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetArea") }}
+            </p>
+
+            <PvObligationSimpleTable
+                :rows="[
+                    {
+                        label: $t('additional:modules.pvObligation.wizard.step.netArea.component.substractFromNetAreaLabel'),
+                        value: `${displayNetRoofArea} m²`
+                    }
+                ]"
+            />
+
+            <p>
+                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.minPvRequirement") }}
+            </p>
+
+            <PvObligationSimpleTable
+                :rows="[
+                    {
+                        label: $t('additional:modules.pvObligation.wizard.step.netArea.component.minPvRequirementLabel'),
+                        value: `${obligatedArea} m²`
+                    }
+                ]"
             />
         </div>
     </div>
@@ -182,7 +198,7 @@ export default {
     @import "~variables";
 
     #pvObligationWizardStepNetArea{
-        margin: 1rem 0;
+        margin-top: 0.5rem;
 
         strong {
             display: block;
@@ -192,7 +208,7 @@ export default {
         }
 
         div.restrictionList {
-            margin-top: 1rem;
+            margin: 1.5rem 0;
         }
 
         p.error {
