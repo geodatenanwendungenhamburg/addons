@@ -105,9 +105,9 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        expect(wrapper.findAll("strong").length).to.equal(2);
-        expect(wrapper.findAll("strong")[0].text()).to.contain("100");
-        expect(wrapper.findAll("strong")[1].text()).to.contain("30");
+        expect(wrapper.findAll("div.highlight").length).to.equal(2);
+        expect(wrapper.findAll("div.highlight")[0].text()).to.contain("100");
+        expect(wrapper.findAll("div.highlight")[1].text()).to.contain("30");
     });
 
     it("renders correct obligatedArea rounding", async () => {
@@ -128,8 +128,12 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        expect(wrapper.findAll("strong").length).to.equal(2);
-        expect(wrapper.findAll("strong")[0].text()).to.contain("123.456");
-        expect(wrapper.findAll("strong")[1].text()).to.contain(Math.round(wrapper.vm.componentFormData.netRoofArea * 0.3 * 10) / 10);
+        expect(wrapper.findAll("div.highlight").length).to.equal(2);
+        expect(wrapper.findAll("div.highlight")[0].text()).to.contain(
+            "additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText 123,5 m²"
+        );
+        expect(wrapper.findAll("div.highlight")[1].text()).to.contain(
+            "additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText37"
+        );
     });
 });

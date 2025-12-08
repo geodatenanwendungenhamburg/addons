@@ -17,6 +17,8 @@ export default {
             /** @override */
             componentFormData: {
                 netRoofArea: null,
+                netRoofAreaUpdated: null,
+                userExlucedArea: 0,
                 restrictedListItems: []
             },
             obligatedArea: null,
@@ -76,7 +78,6 @@ export default {
 
             this.componentFormData.netRoofArea = null;
             this.componentFormData.restrictedListItems.splice(0);
-            this.displayNetRoofArea = 0;
             this.obligatedArea = null;
         },
         async defineNetArea (payload) {
@@ -88,12 +89,32 @@ export default {
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            this.componentFormData.netRoofArea = Math.round(await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"}) * 10) / 10;
-            this.obligatedArea = thousandsSeparator(Math.round(this.componentFormData.netRoofArea * 0.3 * 10) / 10);
-            this.displayNetRoofArea = thousandsSeparator(this.componentFormData.netRoofArea);
+            this.componentFormData.netRoofArea = await this.dissolveRoofFeaturesAndCalculateArea({roofId, outlineLayer, layerName: "PV-geeignete Dachflächen"});
+            this.obligatedArea = this.componentFormData.netRoofArea * 0.3;
         },
         onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
+
+            this.componentFormData.userExlucedArea = this.calculateUserExcludedArea(
+                this.componentFormData.restrictedListItems
+            );
+
+            this.componentFormData.netRoofAreaUpdated = this.componentFormData.netRoofArea - this.componentFormData.userExlucedArea;
+            this.obligatedArea = this.componentFormData.netRoofAreaUpdated * 0.3;
+        },
+        calculateUserExcludedArea (items) {
+            let userExlucedArea = 0;
+
+            items.forEach(item => {
+                userExlucedArea += item.features.reduce((sum, feature) => {
+                    return sum + feature.values_.area3D;
+                }, 0);
+            });
+
+            return userExlucedArea;
+        },
+        formatNumberForArea (value) {
+            return thousandsSeparator(Math.round(value * 10) / 10);
         }
     }
 };
@@ -122,13 +143,37 @@ export default {
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.introduction") }}
             </p>
 
-            <strong>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText", {displayNetRoofArea: displayNetRoofArea}) }}
-            </strong>
+            <div class="netRoofData">
+                <div class="highlight">
+                    <template v-if="!componentFormData.userExlucedArea">
+                        {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaText") }}
 
-            <strong>
-                {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: obligatedArea}) }}
-            </strong>
+                        <em>
+                            {{ formatNumberForArea(componentFormData.netRoofArea) }} m²
+                        </em>
+                    </template>
+
+                    <template v-else>
+                        {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaTextUpdated") }}
+
+                        <em>
+                            {{ formatNumberForArea(componentFormData.netRoofAreaUpdated) }} m²
+                        </em>
+                    </template>
+                </div>
+
+                <p v-if="componentFormData.userExlucedArea">
+                    {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.netRoofAreaTextAddedAreas") }}
+
+                    <em>
+                        {{ formatNumberForArea(componentFormData.userExlucedArea) }} m²
+                    </em>
+                </p>
+
+                <div class="highlight">
+                    {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.obligatedAreaText", {obligatedArea: formatNumberForArea(obligatedArea)}) }}
+                </div>
+            </div>
 
             <p>
                 {{ $t("additional:modules.pvObligation.wizard.step.netArea.component.additionalNetAreaText") }}
@@ -154,11 +199,18 @@ export default {
     #pvObligationWizardStepNetArea{
         margin: 1rem 0;
 
-        strong {
-            display: block;
-            margin-bottom: 1rem;
+        div.netRoofData {
             text-align: center;
-            font-size: 1.25rem;
+            margin-bottom: 1rem;
+
+            div {
+                margin-bottom: 1rem;
+                font-size: 1.25rem;
+
+                &.highlight {
+                    font-weight: bold;
+                }
+            }
         }
 
         div.restrictionList {
