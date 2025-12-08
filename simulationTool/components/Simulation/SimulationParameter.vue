@@ -1,5 +1,6 @@
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
+import CycleTravelerLayerInput from "../shared/components/CycleTravelerLayerInput.vue";
 import DynamicInputByType from "../shared/components/DynamicInputByType.vue";
 import FileUpload from "../../../../src/shared/modules/inputs/components/FileUpload.vue";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
@@ -22,6 +23,7 @@ export default {
     name: "SimulationParameter",
     components: {
         AccordionItem,
+        CycleTravelerLayerInput,
         DynamicInputByType,
         FileUpload,
         FlatButton,
@@ -1130,6 +1132,16 @@ export default {
                     <h6 class="mt-5 mb-3">
                         {{ $t('additional:modules.tools.simulationTool.parameters') }}
                     </h6>
+                    
+                    <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
+                    <CycleTravelerLayerInput
+                        v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
+                        id="cycleTravelerLayer"
+                        :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
+                        :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
+                        @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
+                    />
+                    
                     <div
                         v-for="(input, propertyKey) in primaryTypeInputs"
                         :key="propertyKey"

@@ -1,6 +1,6 @@
 <script>
 import {mapActions} from "vuex";
-import Draw from "ol/interaction/Draw";
+import Draw, {createBox} from "ol/interaction/Draw";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
@@ -179,7 +179,7 @@ export default {
             this.drawInteraction = new Draw({
                 source: this.layerSource,
                 type: "Circle",
-                geometryFunction: Draw.createBox()
+                geometryFunction: createBox()
             });
 
             this.drawInteraction.on("drawend", (event) => {
