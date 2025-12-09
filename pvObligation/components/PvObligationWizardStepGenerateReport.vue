@@ -57,17 +57,38 @@ export default {
     },
     methods: {
         ...mapActions("Modules/PvObligation", [
-            "exportPDF"
+            "exportPDF",
+            "calculateNetAreaAndRestrictedAreas",
+            "calculateNetRestrictedAreaAndRestrictedAreas"
         ]),
         ...mapActions("Maps", [
+            "addNewLayerIfNotExists",
             "zoomToExtent"
         ]),
-        createPDF () {
+        async createPDF () {
+            const outlineLayer = await this.addNewLayerIfNotExists({
+                layerName: "Module/pvObligation/layer/roofArea_pv_suitable",
+                alwaysOnTop: true
+            });
+
+            outlineLayer.setStyle(null);
+
+            // eslint-disable-next-line
+            const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
+                    layer: outlineLayer,
+                    restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
+                }),
+                stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
+                    restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetRestrictedAreas?.formData?.restrictedListItems ?? [],
+                    stepNetNetAreaWithoutRestrictedArea: stepNetAreaData?.netAreaWithoutRestrictedArea,
+                    stepNetAreaDataObligatedArea: stepNetAreaData?.obligatedArea
+                });
+
             this.exportPDF({
                 author: this.wizardStepsFormData.PvObligationWizardStepBuildingDetails.formData.propertyOwnerFullName,
                 brutto: this.wizardStepsFormData.PvObligationWizardStepGrossArea.formData.grossRoofArea,
-                netto: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea,
-                pvObligation: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.netRoofArea * 0.3,
+                netto: stepNetAreaData.netAreaWithoutRestrictedArea,
+                pvObligation: stepNetRestrictedAreaData.obligatedArea,
                 nettoReduceAreas: this.wizardStepsFormData.PvObligationWizardStepNetArea.formData.restrictedListItems,
                 restrictedAreas: this.wizardStepsFormData.PvObligationWizardStepNetRestrictedAreas.formData.restrictedListItems,
                 personalData: this.wizardStepsFormData.PvObligationWizardStepBuildingDetails.formData,

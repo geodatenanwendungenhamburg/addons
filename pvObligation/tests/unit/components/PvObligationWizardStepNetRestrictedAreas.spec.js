@@ -29,6 +29,11 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetRestrictedArea
                             },
                             getters: {
                                 isDrawing: state => state.isDrawing
+                            },
+                            actions: {
+                                dissolveRoofFeaturesAndCalculateArea: () => sinon.stub(),
+                                calculateNetAreaAndRestrictedAreas: () => sinon.stub(),
+                                calculateNetRestrictedAreaAndRestrictedAreas: () => sinon.stub()
                             }
                         }
                     }

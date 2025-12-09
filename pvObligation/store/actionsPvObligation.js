@@ -553,7 +553,7 @@ export default {
         return address;
     },
     /**
-     * Calculates the net roof area and restricted areas.
+     * Calculates the net roof area data.
      *
      * @param {Object} payload - The payload containing required parameters.
      * @param {Object} payload.layer - The openlayers vector layer containing roof features.
@@ -577,6 +577,33 @@ export default {
             netAreaWithoutRestrictedArea: Math.round((netArea - restrictedArea) * 10) / 10,
             restrictedArea: Math.round(restrictedArea * 10) / 10,
             obligatedArea: Math.round((netArea - restrictedArea) * 10 * 0.3) / 10
+        };
+    },
+    /**
+     * Calculates the net restricted roof area data.
+     *
+     * @param {Object} payload - The payload containing required parameters.
+     * @param {Array<Object>} payload.restrictedAreaItems - Array of restricted area features.
+     * @param {Array<Object>} payload.stepNetNetAreaWithoutRestrictedArea - Net roof area without restricted areas.
+     * @param {Array<Object>} payload.stepNetAreaDataObligatedArea - Obligated area from step net area data.
+     * @returns {Object} An object containing:
+     *  {number} netAreaMinusSubstractedArea - The net roof area minus restricted areas in m².
+     *  {number} restrictedArea - The total restricted area in m².
+     *  {boolean} isNetAreaMinusSubstractedAreaHigher - Flag indicating if net area minus subtracted area is higher than obligated area.
+     *  {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
+     */
+    async calculateNetRestrictedAreaAndRestrictedAreas (_, payload) {
+        const restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems),
+            netAreaMinusSubstractedArea = Math.round((payload.stepNetNetAreaWithoutRestrictedArea - restrictedArea) * 10) / 10,
+            isNetAreaMinusSubstractedAreaHigher = netAreaMinusSubstractedArea > payload.stepNetAreaDataObligatedArea;
+
+        return {
+            restrictedArea: Math.round(restrictedArea * 10) / 10,
+            netAreaMinusSubstractedArea: netAreaMinusSubstractedArea,
+            isNetAreaMinusSubstractedAreaHigher: isNetAreaMinusSubstractedAreaHigher,
+            obligatedArea: isNetAreaMinusSubstractedAreaHigher
+                ? payload.stepNetAreaDataObligatedArea
+                : netAreaMinusSubstractedArea
         };
     }
 };

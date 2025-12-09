@@ -14,7 +14,8 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
             Maps: {
                 namespaced: true,
                 actions: {
-                    zoomToExtent: sinon.stub()
+                    zoomToExtent: sinon.stub(),
+                    addNewLayerIfNotExists: sinon.stub()
                 }
             },
             Menu: {
@@ -44,7 +45,9 @@ describe("addons/pvObligation/components/PvObligationWizardStepGenerateReport.vu
                             }
                         },
                         actions: {
-                            exportPDF: () => sinon.stub()
+                            exportPDF: () => sinon.stub(),
+                            calculateNetAreaAndRestrictedAreas: () => sinon.stub(),
+                            calculateNetRestrictedAreaAndRestrictedAreas: () => sinon.stub()
                         }
                     }
                 }
