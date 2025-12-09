@@ -64,12 +64,14 @@ export default {
             const drawLayer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(layer => {
                     return layer.get("id") === "module/pvObligation/drawLayer";
                 }),
-                removeFeatures = drawLayer?.getSource().getFeatures().filter(feature => {
-                    return feature.get("id") === itemSelectedEdit.id;
+                keepFeatures = drawLayer?.getSource().getFeatures().filter(feature => {
+                    return feature.get("id") !== itemSelectedEdit.id;
                 });
 
-            removeFeatures?.forEach(feature => {
-                drawLayer?.getSource().removeFeature(feature);
+            drawLayer?.getSource().clear();
+
+            keepFeatures?.forEach(feature => {
+                drawLayer?.getSource().addFeature(feature);
             });
         },
         onListFormInteractionCreate (interaction) {
