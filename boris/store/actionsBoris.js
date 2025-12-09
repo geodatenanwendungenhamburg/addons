@@ -1,10 +1,12 @@
 import axios from "axios";
-import helpers from "../js/helpers.js";
-import thousandsSeparator from "../../../src/shared/js/utils/thousandsSeparator.js";
-import {WFS, WMSGetFeatureInfo} from "ol/format.js";
-import layerCollection from "../../../src/core/layers/js/layerCollection.js";
-import WPS from "../../../src/shared/js/api/wps.js";
-import mapCollection from "../../../src/core/maps/js/mapCollection.js";
+import helpers from "../js/helpers";
+import thousandsSeparator from "../../../src/shared/js/utils/thousandsSeparator";
+import {WMSGetFeatureInfo} from "ol/format.js";
+import WFS from "ol/format/WFS";
+import GML32 from "ol/format/GML32";
+import layerCollection from "../../../src/core/layers/js/layerCollection";
+import WPS from "../../../src/shared/js/api/wps";
+import mapCollection from "../../../src/core/maps/js/mapCollection";
 
 const actions = {
     /**
@@ -407,52 +409,7 @@ const actions = {
 
                 console.log(xmlDoc, members);
 
-                let result = null;
-
-                for (let i = 0; i < members.length; i++) {
-                    const member = members[i],
-                        jsonText = member.getElementsByTagName("de.hh.up:nutzungsart")[0]?.textContent;
-
-                    console.log("JSONTExt", jsonText);
-
-                    if (!jsonText) {
-                        continue;
-                    }
-
-                    let json;
-
-                    try {
-                        json = JSON.parse(jsonText);
-                    }
-                    catch (e) {
-                        console.error("JSON parse error in nutzungsart:", e);
-                        continue;
-                    }
-
-                    const nutzung = json.nutzungen.find(n => n.richtwertnummer === brwNumber);
-
-                    if (nutzung) {
-                        result = {
-                            feature: member,
-                            nutzung: nutzung
-                        };
-                        break;
-                    }
-                }
-
-                if (result) {
-                    dispatch("handleGetFeatureResponse", {
-                        response: result,
-                        status: response.status,
-                        year: featureYear
-                    });
-                }
-                else {
-                    dispatch("Alerting/addSingleAlert",
-                        i18next.t("additional:modules.boris.alertMessage:noData"),
-                        {root: true}
-                    );
-                }
+                dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
             }
         }).catch((error) => {
             console.error(error.response);
@@ -469,8 +426,19 @@ const actions = {
      * @returns {void}
      */
     async handleGetFeatureResponse ({dispatch, commit}, {response, year}) {
-        const features = new WFS().readFeatures(response),
+        const format = new WFS({
+                gmlFormat: new GML32()
+            }),
+            features = format.readFeatures(response, {
+                featureNS: "https://registry.gdi-de.org/id/de.hh.up",
+                featureType: "bodenrichtwerte_flaechendeckend",
+                dataProjection: "EPSG:25832",
+                featureProjection: "EPSG:3857"
+            }),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
+
+        console.log("handleGFI", response);
+        console.log(features);
 
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
@@ -484,6 +452,8 @@ const actions = {
      */
     async combineFeatureWithSelectedDate ({dispatch, getters}, feature) {
         const date = await getters.getDateBySelectedLayerName;
+
+        console.log("Datum", date);
 
         if (feature !== undefined) {
             dispatch("extendFeatureAttributes", {feature, date});
