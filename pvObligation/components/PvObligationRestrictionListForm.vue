@@ -167,12 +167,14 @@ export default {
          * @returns {void}
          */
         removeDrawnFeatures () {
-            const removeFeature = this.drawState.layer.getSource().getFeatures().filter(feature => {
-                return feature.get("id") === this.formData.id;
+            const keepFeatures = this.drawState.layer.getSource().getFeatures().filter(feature => {
+                return feature.get("id") !== this.formData.id;
             });
 
-            removeFeature.forEach(feature => {
-                this.drawState.layer.getSource().removeFeature(feature);
+            this.drawState.layer.getSource().clear();
+
+            keepFeatures.forEach(feature => {
+                this.drawState.layer.getSource().addFeature(feature);
             });
         },
         /**
@@ -360,6 +362,10 @@ export default {
          */
         addFeatureWithProperties (feature, featureGeoJson) {
             const area2D = feature.getGeometry().getArea();
+
+            if (area2D < 0.1) {
+                return;
+            }
 
             // Add a text label style
             feature.setStyle(new Style({
