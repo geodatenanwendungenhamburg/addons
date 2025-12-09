@@ -103,4 +103,114 @@ describe("PvObligationRestrictionList.vue", () => {
         expect(listItems[1].find("div.number").text()).equals("X2");
         expect(listItems[2].find("div.number").text()).equals("X3");
     });
+
+    it("sets correct index for list items", async () => {
+        let newlistItem = wrapper.vm.formDataItemBlueprint();
+
+        expect(newlistItem).to.be.an("object");
+        expect(newlistItem).to.have.own.property("id");
+        expect(newlistItem.id).equals("X1");
+
+        // add the list item manually since we do not draw a polygon for the newly created formdata (= add it to the list)
+        wrapper.setData({
+            listItems: [
+                {
+                    id: "X1",
+                    description: "Text for x1",
+                    features: []
+                }
+            ]
+        });
+
+        await nextTick();
+
+        newlistItem = wrapper.vm.formDataItemBlueprint();
+
+        expect(newlistItem).to.be.an("object");
+        expect(newlistItem).to.have.own.property("id");
+        expect(newlistItem.id).equals("X2");
+
+        // add the list item manually since we do not draw a polygon for the newly created formdata (= add it to the list)
+        wrapper.setData({
+            listItems: [
+                {
+                    id: "X1",
+                    description: "Text for x1",
+                    features: []
+                },
+                {
+                    id: "X2",
+                    description: "Text for x2",
+                    features: []
+                }
+            ]
+        });
+
+        await nextTick();
+
+        newlistItem = wrapper.vm.formDataItemBlueprint();
+
+        expect(newlistItem).to.be.an("object");
+        expect(newlistItem).to.have.own.property("id");
+        expect(newlistItem.id).equals("X3");
+
+        // add the list item manually since we do not draw a polygon for the newly created formdata (= add it to the list)
+        wrapper.setData({
+            listItems: [
+                {
+                    id: "X1",
+                    description: "Text for x1",
+                    features: []
+                },
+                {
+                    id: "X2",
+                    description: "Text for x2",
+                    features: []
+                },
+                {
+                    id: "X3",
+                    description: "Text for x3",
+                    features: []
+                }
+            ]
+        });
+
+        await nextTick();
+
+        // delete one feature from list
+        wrapper.vm.onButtonDelete({
+            id: "X2",
+            description: "Text for x2",
+            features: []
+        });
+
+        await nextTick();
+
+        newlistItem = wrapper.vm.formDataItemBlueprint();
+
+        expect(newlistItem).to.be.an("object");
+        expect(newlistItem).to.have.own.property("id");
+        expect(newlistItem.id).equals("X4");
+
+        // empty list completely
+        wrapper.vm.onButtonDelete({
+            id: "X1",
+            description: "Text for x1",
+            features: []
+        });
+
+        wrapper.vm.onButtonDelete({
+            id: "X3",
+            description: "Text for x3",
+            features: []
+        });
+
+        await nextTick();
+
+        newlistItem = wrapper.vm.formDataItemBlueprint();
+
+        expect(newlistItem).to.be.an("object");
+        expect(newlistItem).to.have.own.property("id");
+        expect(newlistItem.id).equals("X1");
+    });
 });
