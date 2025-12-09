@@ -110,7 +110,7 @@ const actions = {
             dispatch("requestGFI", {processFromParametricUrl: false, center: null});
         }
         else {
-            dispatch("Maps/removePolygonMarker", null, {root: true});
+            dispatch("MapMarker/removePolygonMarker", null, {root: true});
             if (rootGetters["Maps/clickCoordinate"] && !(previousYear > 2008 && currentYear <= 2008)) {
                 dispatch("requestGFI", {processFromParametricUrl: false, center: null});
             }
@@ -119,7 +119,7 @@ const actions = {
             dispatch("requestGFI", {processFromParametricUrl: false, center: null});
         }
         else if (currentYear > 2008 && previousYear <= 2008) {
-            dispatch("Maps/removePointMarker", null, {root: true});
+            dispatch("MapMarker/removePointMarker", null, {root: true});
             commit("setSelectedBrwFeature", {});
             commit("setTextIds", []);
         }
@@ -264,7 +264,7 @@ const actions = {
             }
             else {
                 commit("setBrwFeatures", feature);
-                dispatch("Maps/placingPointMarker", coordinate, {root: true});
+                dispatch("MapMarker/placingPointMarker", coordinate, {root: true});
                 dispatch("Maps/setCenter", coordinate, {root: true});
                 dispatch("combineFeatureWithSelectedDate", feature);
                 commit("setSelectedPolygon", null);
@@ -272,8 +272,8 @@ const actions = {
         }
         else {
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noBrw"), {root: true});
-            dispatch("Maps/removePolygonMarker", null, {root: true});
-            dispatch("Maps/removePointMarker", null, {root: true});
+            dispatch("MapMarker/removePolygonMarker", null, {root: true});
+            dispatch("MapMarker/removePointMarker", null, {root: true});
             commit("setSelectedBrwFeature", {});
             commit("setSelectedPolygon", null);
             commit("setSelectedLanduse", "");
@@ -291,36 +291,31 @@ const actions = {
     getFeatureRequestById ({dispatch}, {featureId, featureYear}) {
         const yearInt = parseInt(featureYear, 10),
             index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index),
-            startIndex = 0,
-            count = 10;
+            url = Config.layerConf.substring(0, index);
 
         let typeName,
             urlParams = null,
             geometryName = "geom_zone";
 
         if (featureId.indexOf("FLAECHE") > -1) {
-            typeName = "de.hh.up:bodenrichtwerte_flaechendeckend";
+            typeName = "app:v_brw_zonen_geom_flaeche_" + featureYear;
             geometryName = "geom_zone_flaeche";
         }
-        else if (featureId.indexOf("GRUNDSTUECK") > -1) {
-            typeName = "de.hh.up:bodenrichtwertgrundstuecke";
+        else if (yearInt <= 2008) {
+            typeName = "lgv_brw_lagetypisch_alle";
+        }
+        else if (yearInt <= 2014) {
+            typeName = "lgv_brw_zoniert_" + featureYear;
         }
         else {
-            typeName = "de.hh.up:bodenrichtwertzonen";
+            typeName = "lgv_brw_zonen_" + featureYear;
         }
-        urlParams = `typeName=${typeName}&featureID=${featureId}`;
-
-        console.log("Ganzer Reuqesut", url + "/wfs_bodenrichtwerte_hamburg_zeitreihe?Service=WFS&version=2.0.0&request=GetFeature&" + urlParams);
+        urlParams = "typeName" + typeName + "&featureID=" + featureId;
 
 
-        axios.get("https://qs-geodienste.hamburg.de/wfs_bodenrichtwerte_hamburg_zeitreihe?Service=WFS&Version=2.0.0&request=GetFeature&typeName=de.hh.up:bodenrichtwerte_flaechendeckend&filter=<Filter><PropertyIsEqualTo><PropertyName>jahrgang</PropertyName><Literal>2025</Literal></PropertyIsEqualTo></Filter>")
+        axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
             .then((response) =>{
                 const feature = new WFS().readFeature(response.data);
-
-                console.log("WFS Feature:", feature);
-                console.log("Properties:", feature.getProperties());
-                console.log("Entwicklungszustand", feature.get("entwicklungszustand"));
 
                 if (feature) {
                     feature.unset("geom_brw_grdstk");
@@ -365,28 +360,39 @@ const actions = {
      * @returns {void}
      */
     postFeatureRequestByBrwNumber ({dispatch}, {brwNumber, featureYear}) {
-        const typeName = parseInt(featureYear, 10) > 2008 ? "bodenrichtwerte_flaechendeckend" : "bodenrichtwertzonen",
+        const typeName = parseInt(featureYear, 10) > 2008 ? "bodenrichtwerte_flaechendeckend" : "bodenrichtwertgrundstuecke",
             index = Config.layerConf.lastIndexOf("/"),
             url = Config.layerConf.substring(0, index),
-            wfsString = `<GetFeature version='2.0.0' xmlns:wfs='http://www.opengis.net/wfs/2.0'>
-            <wfs:Query typeNames='${typeName}'>
-                <Filter xmlns='http://www.opengis.net/wfs/2.0'>
-                <And>
-                    <PropertyIsEqualTo>
-                        <PropertyName>richtwertnummer</PropertyName>
-                        <Literal>${brwNumber}</Literal>
-                    </PropertyIsEqualTo>
-                                    <PropertyIsEqualTo>
-                    <PropertyName>jahrgang</PropertyName>
-                    <Literal>${featureYear}</Literal>
-                </PropertyIsEqualTo>
-                </And>
-                </Filter>
-            </wfs:Query>
-        </GetFeature>
+            zonenNr = brwNumber.slice(-5),
+            wfsString = `
+                <wfs:GetFeature service="WFS" version="2.0.0"
+                    xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                    xmlns:fes="http://www.opengis.net/fes/2.0"
+                    xmlns:de.hh.up="https://registry.gdi-de.org/id/de.hh.up">
+
+                    <wfs:Query typeNames="de.hh.up:${typeName}">
+                        <fes:Filter>
+                            <fes:And>
+
+                                <fes:PropertyIsEqualTo>
+                                    <fes:ValueReference>de.hh.up:jahrgang</fes:ValueReference>
+                                    <fes:Literal>${featureYear}</fes:Literal>
+                                </fes:PropertyIsEqualTo>
+
+                                <fes:PropertyIsEqualTo>
+                                    <fes:ValueReference>de.hh.up:zonen_nr</fes:ValueReference>
+                                    <fes:Literal>${zonenNr}</fes:Literal>
+                                </fes:PropertyIsEqualTo>
+
+                            </fes:And>
+                        </fes:Filter>
+                    </wfs:Query>
+
+                </wfs:GetFeature>
                 `;
 
-        console.log(typeName, brwNumber, featureYear);
+        console.log("brwNumeber:", brwNumber);
+        console.log("Zonen-Nummer:", zonenNr);
 
         axios({
             method: "post",
@@ -395,8 +401,58 @@ const actions = {
             headers: {"Content-Type": "text/xml"}
         }).then((response) => {
             if (response.status === 200) {
-                console.log("Response", response.data);
-                dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
+                const parser = new DOMParser(),
+                    xmlDoc = parser.parseFromString(response.data, "application/xml"),
+                    members = xmlDoc.getElementsByTagNameNS("https://registry.gdi-de.org/id/de.hh.up", "bodenrichtwerte_flaechendeckend");
+
+                console.log(xmlDoc, members);
+
+                let result = null;
+
+                for (let i = 0; i < members.length; i++) {
+                    const member = members[i],
+                        jsonText = member.getElementsByTagName("de.hh.up:nutzungsart")[0]?.textContent;
+
+                    console.log("JSONTExt", jsonText);
+
+                    if (!jsonText) {
+                        continue;
+                    }
+
+                    let json;
+
+                    try {
+                        json = JSON.parse(jsonText);
+                    }
+                    catch (e) {
+                        console.error("JSON parse error in nutzungsart:", e);
+                        continue;
+                    }
+
+                    const nutzung = json.nutzungen.find(n => n.richtwertnummer === brwNumber);
+
+                    if (nutzung) {
+                        result = {
+                            feature: member,
+                            nutzung: nutzung
+                        };
+                        break;
+                    }
+                }
+
+                if (result) {
+                    dispatch("handleGetFeatureResponse", {
+                        response: result,
+                        status: response.status,
+                        year: featureYear
+                    });
+                }
+                else {
+                    dispatch("Alerting/addSingleAlert",
+                        i18next.t("additional:modules.boris.alertMessage:noData"),
+                        {root: true}
+                    );
+                }
             }
         }).catch((error) => {
             console.error(error.response);
