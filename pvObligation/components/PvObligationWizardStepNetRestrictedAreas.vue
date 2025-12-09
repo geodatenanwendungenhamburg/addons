@@ -5,7 +5,6 @@ import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptE
 import {mapGetters, mapActions} from "vuex";
 import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
-import calculateRestrictedArea from "../js/calculateRestrictedArea";
 
 export default {
     name: "PvObligationWizardStepNetRestrictedAreas",
@@ -58,7 +57,8 @@ export default {
     methods: {
         ...mapActions("Modules/PvObligation", [
             "dissolveRoofFeaturesAndCalculateArea",
-            "calculateNetAreaAndRestrictedAreas"
+            "calculateNetAreaAndRestrictedAreas",
+            "calculateNetRestrictedAreaAndRestrictedAreas"
         ]),
         ...mapActions("Maps", [
             "addNewLayerIfNotExists",
@@ -99,17 +99,23 @@ export default {
             this.stepNetAreaDataObligatedArea = stepNetAreaData.obligatedArea;
             this.stepNetNetAreaWithoutRestrictedArea = stepNetAreaData.netAreaWithoutRestrictedArea;
 
-            this.calculateData();
+            await this.calculateData();
         },
-        onListItems (listItems) {
+        async onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
 
-            this.calculateData();
+            await this.calculateData();
         },
-        calculateData () {
-            this.restrictedAreaSum = calculateRestrictedArea(this.componentFormData.restrictedListItems);
-            this.netAreaMinusSubstractedArea = Math.round((this.stepNetNetAreaWithoutRestrictedArea - this.restrictedAreaSum) * 10) / 10;
-            this.isNetAreaMinusSubstractedAreaHigher = this.netAreaMinusSubstractedArea > this.stepNetAreaDataObligatedArea;
+        async calculateData () {
+            const stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
+                restrictedAreaItems: this.componentFormData.restrictedListItems,
+                stepNetNetAreaWithoutRestrictedArea: this.stepNetNetAreaWithoutRestrictedArea,
+                stepNetAreaDataObligatedArea: this.stepNetAreaDataObligatedArea
+            });
+
+            this.isNetAreaMinusSubstractedAreaHigher = stepNetRestrictedAreaData.isNetAreaMinusSubstractedAreaHigher;
+            this.restrictedAreaSum = stepNetRestrictedAreaData.restrictedArea;
+            this.netAreaMinusSubstractedArea = stepNetRestrictedAreaData.netAreaMinusSubstractedArea;
         },
         formatNumberForArea (value) {
             return thousandsSeparator(Math.round(value * 10) / 10);
