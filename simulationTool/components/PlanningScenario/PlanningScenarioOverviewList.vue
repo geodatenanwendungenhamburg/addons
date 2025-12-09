@@ -11,7 +11,7 @@ export default {
     },
     emits: ["download"],
     computed: {
-        ...mapGetters("Modules/SimulationTool", ["currentPlanningScenarioId", "planningScenarios"]),
+        ...mapGetters("Modules/SimulationTool", ["currentPlanningScenarioId", "planningScenarios", "planningScenarioLabel"]),
         /**
          * Returns the list of planning scenarios sorted by name.
          * @returns {Object[]} Sorted list of planning scenarios.
@@ -139,11 +139,11 @@ export default {
                     <IconButton
                         :class-array="['btn-light', 'me-2']"
                         :icon="'bi-gear'"
-                        :aria="$t('additional:modules.tools.simulationTool.planningScenarioEdit')"
+                        :aria="$t('additional:modules.tools.simulationTool.planningScenarioEdit', {label: $t(planningScenarioLabel)})"
                         :interaction="() => openLanduseById(scenario.id)"
                     />
                     <IconButton
-                        :aria="$t('additional:modules.tools.simulationTool.planningScenarioDownload')"
+                        :aria="$t('additional:modules.tools.simulationTool.planningScenarioDownload', {label: $t(planningScenarioLabel)})"
                         :class-array="['btn-light', 'me-2']"
                         :icon="'bi-download'"
                         :interaction="() => $emit('download', [scenario], scenario.name)"

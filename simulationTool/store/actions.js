@@ -337,19 +337,22 @@ export default {
             olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(feat.style));
             layerSource.addFeature(olFeature);
         });
-        
-        // Add all input features (buildings, roads, rentalStations, etc.)
-        Object.keys(currentPlanningScenario.inputs).forEach(inputKey => {
-            const input = currentPlanningScenario.inputs[inputKey];
 
-            if (input?.features && Array.isArray(input.features)) {
-                input.features.forEach(feature => {
-                    const olFeature = geoJsonParser.readFeature(feature);
+        // Add all input features to the layer
+        if (currentPlanningScenario.inputs && isObject(currentPlanningScenario.inputs)) {
+            Object.entries(currentPlanningScenario.inputs).forEach(([inputKey, inputValue]) => {
+                if (inputValue?.features && Array.isArray(inputValue.features)) {
+                    inputValue.features.forEach(feature => {
+                        const olFeature = geoJsonParser.readFeature(feature);
 
-                    layerSourceForObjects.addFeature(olFeature);
-                });
-            }
-        });
+                        layerSourceForObjects.addFeature(olFeature);
+                    });
+                }
+                else {
+                    console.warn(`[SimulationTool] No features present for input '${inputKey}' in scenario id=${currentPlanningScenario.id}, dataSourceId=${currentPlanningScenario.dataSourceId}`);
+                }
+            });
+        }
     },
 
     /**

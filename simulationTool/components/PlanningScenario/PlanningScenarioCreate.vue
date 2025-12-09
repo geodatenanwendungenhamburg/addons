@@ -33,8 +33,8 @@ export default {
             currentModifyInteraction: null,
             currentScenarioData: {
                 id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-                name: "Neues Planungsszenario",
-                dataSourceId: "stadtrad",
+                name: "",
+                dataSourceId: "",
                 inputs: {}
             },
             isValid: true,
@@ -50,6 +50,7 @@ export default {
             "planningScenarioCurrentLayout",
             "planningScenarioDrawIcons",
             "planningScenarioDrawTypesMain",
+            "planningScenarioLabel",
             "drawTypeLabels",
             "planningScenarios",
             "planningScenarioSelectedDrawType",
@@ -69,7 +70,7 @@ export default {
             return this.dataSources.find(
                 ds => ds.id === this.currentScenarioData.dataSourceId
             ) || {};
-        },
+        }
 
         /**
          * Gets the maximum side length that is configured in the currently selected data source.
@@ -146,8 +147,16 @@ export default {
     },
     created () {
         this.source = this.getLayerSource();
+        if (this.dataSources.length > 0) {
+            this.currentScenarioData.dataSourceId = this.dataSources[0].id;
+        }
     },
     mounted () {
+        // Set default name with translated label
+        if (!this.currentScenarioData.name) {
+            this.currentScenarioData.name = this.$t("additional:modules.tools.simulationTool.newScenario", {label: this.$t(this.planningScenarioLabel)});
+        }
+
         this.deleteSource();
         if (typeof layerCollection.getLayerById("planning-scenario") !== "undefined") {
             layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
@@ -449,11 +458,11 @@ export default {
 <template>
     <div class="planning-scenario">
         <SectionHeader
-            :title="$t('additional:modules.tools.simulationTool.planningScenarioCreate')"
+            :title="$t('additional:modules.tools.simulationTool.planningScenarioCreate', {label: $t(planningScenarioLabel)})"
             icon="bi bi-person-fill"
         />
         <h5 class="mb-3">
-            {{ $t('additional:modules.tools.simulationTool.planingAreaDraw') }}
+            {{ $t('additional:modules.tools.simulationTool.planingAreaDraw', {label: $t(planningScenarioLabel)}) }}
         </h5>
         <div
             id="draw-types"
@@ -552,7 +561,7 @@ export default {
                         id="dataSourceForPlanning"
                         v-model="currentScenarioData.dataSourceId"
                         class="form-select"
-                        :aria-label="$t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario')"
+                        :aria-label="$t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario', {label: $t(planningScenarioLabel)})"
                     >
                         <option
                             v-for="dataSource in dataSources"
@@ -563,7 +572,7 @@ export default {
                         </option>
                     </select>
                     <label for="dataSourceForPlanning">
-                        {{ $t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario') }}
+                        {{ $t('additional:modules.tools.simulationTool.dataSourceForPlanningScenario', {label: $t(planningScenarioLabel)}) }}
                     </label>
                 </div>
                 <InputText
@@ -594,10 +603,10 @@ export default {
                     />
                     <FlatButton
                         id="save"
-                        :aria-label="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
+                        :aria-label="$t('additional:modules.tools.simulationTool.createUrbanPlanning', {label: $t(planningScenarioLabel)})"
                         :interaction="() => create()"
-                        :text="$t('additional:modules.tools.simulationTool.createUrbanPlanning')"
-                        :disabled="!isValid || source?.getFeatures().length === 0"
+                        :text="$t('additional:modules.tools.simulationTool.createUrbanPlanning', {label: $t(planningScenarioLabel)})"
+                        :disabled="!isValid || source?.getFeatures().length === 0 || isMaxConstraintExceeded"
                     />
                 </div>
             </form>

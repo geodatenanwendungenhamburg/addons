@@ -1,4 +1,6 @@
 <script>
+import ArrayInput from "./ArrayInput.vue";
+import EnumInput from "./EnumInput.vue";
 import InputText from "../../../../../src/shared/modules/inputs/components/InputText.vue";
 import SliderItem from "../../../../../src/shared/modules/slider/components/SliderItem.vue";
 import SwitchInput from "../../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
@@ -9,6 +11,8 @@ import CycleTravelerLayerInput from "./CycleTravelerLayerInput.vue";
 export default {
     name: "DynamicInputByType",
     components: {
+        ArrayInput,
+        EnumInput,
         InputText,
         SliderItem,
         SwitchInput,
@@ -134,24 +138,20 @@ export default {
             />
         </template>
         <template v-else-if="inputType === 'enum'">
-            <label :for="id">
-                {{ label }}
-            </label>
-            <select
+            <EnumInput
                 :id="id"
-                class="form-select m-2"
-                :aria-label="label"
-                :value="selectedEnumValue"
-                @change="$emit('update:value', $event.target.value)"
-            >
-                <option
-                    v-for="(val, index) in enumValues"
-                    :key="index"
-                    :value="val"
-                >
-                    {{ val }}
-                </option>
-            </select>
+                :label="label"
+                :enum-object="value"
+                @update:enumValue="$emit('update:value', $event)"
+            />
+        </template>
+        <template v-else-if="inputType === 'array'">
+            <ArrayInput
+                :id="id"
+                :label="label"
+                :array-object="value"
+                @update:arrayValue="$emit('update:value', $event)"
+            />
         </template>
         <template v-else-if="inputType === 'boolean'">
             <div class="form-switch">

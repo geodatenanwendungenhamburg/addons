@@ -42,6 +42,8 @@ export default {
             "landuseCurrentLayout",
             "landuseRoadDrawIcons",
             "landuseRoadDrawTypesMain",
+            "landuseStationDrawIcons",
+            "landuseStationDrawTypesMain",
             "planningScenarioDrawIcons",
             "planningScenarioDrawTypesMain",
             "planningScenarioHighlightFeatureStyle",
@@ -75,6 +77,26 @@ export default {
                     return value.editable;
                 })
             );
+        },
+        drawIcons () {
+            switch (this.currentInputName) {
+                case "roads":
+                    return this.landuseRoadDrawIcons;
+                case "stations":
+                    return this.landuseStationDrawIcons;
+                default:
+                    return this.planningScenarioDrawIcons;
+            }
+        },
+        drawTypesMain () {
+            switch (this.currentInputName) {
+                case "roads":
+                    return this.landuseRoadDrawTypesMain;
+                case "stations":
+                    return this.landuseStationDrawTypesMain;
+                default:
+                    return this.planningScenarioDrawTypesMain;
+            }
         },
 
         /**
@@ -256,19 +278,12 @@ export default {
         setFeatureProperties (feature, propertiesToShow) {
             const uniqId = parseInt(uniqueId(), 10);
 
-            if (!this.getInputFeatures(this.currentEditableInput).length) {
-                feature.set("created", true);
-                feature.setId(uniqId);
-                feature.set("id", uniqId);
-
-                return feature;
-            }
-
             propertiesToShow.forEach(property => {
                 if (feature.getProperties()[property] === undefined) {
                     feature.set(property, null);
                 }
             });
+
             feature.set("created", true);
             feature.setId(uniqId);
             feature.set("id", uniqId);
@@ -339,8 +354,8 @@ export default {
                     >
                         <DrawTypes
                             :current-layout="landuseCurrentLayout"
-                            :draw-icons="currentInputName === 'roads' ? landuseRoadDrawIcons : planningScenarioDrawIcons"
-                            :draw-types="currentInputName === 'roads' ? landuseRoadDrawTypesMain : planningScenarioDrawTypesMain"
+                            :draw-icons="drawIcons"
+                            :draw-types="drawTypesMain"
                             :draw-type-labels="drawTypeLabels"
                             :selected-draw-type="planningScenarioSelectedDrawType"
                             :selected-draw-type-main="planningScenarioSelectedDrawTypeMain"

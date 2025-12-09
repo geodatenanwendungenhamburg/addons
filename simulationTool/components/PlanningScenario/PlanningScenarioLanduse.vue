@@ -3,20 +3,20 @@ import ConvertFeature from "../../js/convertFeatures";
 import ConvertStyle from "../../js/convertStyle";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import getBBOXGeometry from "../shared/js/getBBoxGeometry";
+import {GeoJSON} from "ol/format";
 import getOAFFeature from "../../../../src/shared/js/api/oaf/getOAFFeature";
 import isObject from "../../../../src/shared/js/utils/isObject";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
 import ListGroup from "../shared/components/ListGroup.vue";
-import mapCollection from "../../../../src/core/maps/js/mapCollection";
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import NavTab from "../../../../src/shared/modules/tabs/components/NavTab.vue";
+import oafUtils from "../shared/js/oafUtils";
 import {Select} from "ol/interaction";
 import {singleClick} from "ol/events/condition";
 import SpinnerItem from "../../../../src/shared/modules/spinner/components/SpinnerItem.vue";
 import SwitchInput from "../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
 import {infrastructureLayerId} from "../../layerIds.js";
-import {transform} from "ol/proj";
 
 export default {
     name: "PlanningScenarioLanduse",
@@ -43,6 +43,8 @@ export default {
             "dataSources",
             "landuseActiveTab",
             "planningScenarios",
+            "planningScenarioLabel",
+            "planningScenarioLabelPlural",
             "simulations",
             "simulationAreaStyle",
             "simulationAreaStyleInvalid",
@@ -160,6 +162,18 @@ export default {
         },
 
         /**
+         * Gets the first key of an input that has no features, or null if all have features.
+         * @returns {String|null} The key of the first empty input, or null.
+         */
+        emptyFeature () {
+            const emptyKey = Object.keys(this.editableInputs).find(key => {
+                return typeof this.planningScenario?.inputs[key]?.features === "undefined" || !this.planningScenario?.inputs[key]?.features.length;
+            });
+
+            return emptyKey || null;
+        },
+
+        /**
          * Checks if the value for the currentEditableInput is true which results in a checked toggle.
          * @returns {Boolean} true if the toggle is checked.
          */
@@ -176,6 +190,44 @@ export default {
          */
         sortBy () {
             return this.editableInputs[this.currentEditableInput]?.sortBy;
+        },
+        newInputButtonKey () {
+            let newInputButtonKey = "newButton";
+
+            switch (this.currentEditableInput) {
+                case "buildings":
+                    newInputButtonKey = "newBuilding";
+                    break;
+                case "roads":
+                    newInputButtonKey = "newRoad";
+                    break;
+                case "stations":
+                    newInputButtonKey = "newStation";
+                    break;
+                default:
+                    newInputButtonKey = "newButton";
+            }
+            return this.$t(`additional:modules.tools.simulationTool.${newInputButtonKey}`);
+        },
+
+        /**
+         * Gets the effective current editable input, adjusting for cases where only one input exists.
+         * @returns {String} The current editable input key.
+         */
+        effectiveCurrentEditableInput () {
+            const inputKeys = Object.keys(this.editableInputs);
+
+            // If only one input exists, always use that one
+            if (inputKeys.length === 1) {
+                return inputKeys[0];
+            }
+
+            // If currentEditableInput is not set or invalid, default to "buildings" or first available
+            if (!this.currentEditableInput || !this.editableInputs[this.currentEditableInput]) {
+                return inputKeys.includes("buildings") ? "buildings" : inputKeys[0];
+            }
+
+            return this.currentEditableInput;
         }
     },
     watch: {
@@ -184,6 +236,19 @@ export default {
             if (typeof this.getInputSource !== "undefined") {
                 this.schema = await getOAFFeature.getCollectionSchema(this.getInputSource.url, this.getInputSource?.collection);
             }
+        },
+
+        /**
+         * Syncs the store with the effective current editable input.
+         * @param {String} newValue - The new effective current editable input.
+         */
+        effectiveCurrentEditableInput: {
+            handler (newValue) {
+                if (newValue !== this.currentEditableInput) {
+                    this.setCurrentEditableInput(newValue);
+                }
+            },
+            immediate: true
         },
 
         /**
@@ -306,61 +371,86 @@ export default {
          * @return {void}
          */
         async fetchFeatures (scenario, inputs, bboxGeometry, crs) {
-            const entries = Object.entries(inputs),
-                mapProjection = mapCollection.getMapView("2D").getProjection().getCode();
+            const entries = Object.entries(inputs);
 
             for (let i = 0; i < entries.length; i++) {
                 const [inputKey, input] = entries[i];
 
                 if (input?.source?.type === "oaf") {
-                    // Transform geometry if datasource CRS differs from map projection
-                    let geometryForFilter = bboxGeometry.clone();
-                    const targetCrsCode = this.extractEpsgCode(crs);
+                    // Check if filtering is supported
+                    const filterSupport = await oafUtils.supportsFiltering(input.source.url);
+                    let features;
 
-                    if (targetCrsCode && targetCrsCode !== mapProjection) {
-                        geometryForFilter.transform(mapProjection, targetCrsCode);
+                    if (filterSupport.supportsFilter) {
+                        // Try with CQL filter
+                        try {
+                            // Get the correct geometry property name
+                            const geometryProperty = await oafUtils.getGeometryPropertyName(input.source.url, input.source.collection),
+                                filter = getOAFFeature.getOAFGeometryFilter(bboxGeometry, geometryProperty, "intersects");
+
+                            console.warn(`Using ${filterSupport.filterType} filter with geometry property: ${geometryProperty}`);
+
+                            features = await getOAFFeature.getOAFFeatureGet(input.source.url, input.source.collection, {
+                                limit: 100,
+                                filter,
+                                filterCrs: crs,
+                                crs
+                            });
+                        }
+                        catch (error) {
+                            console.warn(`CQL filter failed for ${inputKey}, falling back to bbox:`, error);
+                            features = await this.fetchWithBbox(input.source, bboxGeometry, crs);
+                        }
                     }
-
-                    // Use bbox parameter instead of filter for APIs that don't support CQL filters
-                    const extent = geometryForFilter.getExtent();
-                    const bboxString = `${extent[0]},${extent[1]},${extent[2]},${extent[3]}`;
+                    else {
+                        console.warn(`Service does not support CQL filters, using bbox for ${inputKey}`);
+                        features = await this.fetchWithBbox(input.source, bboxGeometry, crs);
+                    }
 
                     scenario.inputs[inputKey] = {
                         type: "FeatureCollection",
-                        features: await getOAFFeature.getOAFFeatureGet(input.source.url, input.source.collection, {
-                            limit: 100,
-                            bbox: bboxString,
-                            bboxCrs: crs,
-                            crs
-                        })
+                        features: features
+                    };
+                }
+                else if (input?.source?.type === "geojson") {
+                    const response = await fetch(input.source.url),
+                        geojson = await response.json();
+
+                    scenario.inputs[inputKey] = {
+                        type: "FeatureCollection",
+                        features: geojson.features || []
                     };
                 }
             }
         },
 
         /**
-         * Extracts EPSG code from CRS URL format.
-         * @param {String} crsUrl - The CRS URL (e.g., "http://www.opengis.net/def/crs/OGC/1.3/CRS84" or "http://www.opengis.net/def/crs/EPSG/0/4326").
-         * @returns {String|null} The EPSG code (e.g., "EPSG:4326") or null if not parseable.
+         * Fetches features using bbox instead of CQL filter.
+         * @param {Object} source - The source configuration.
+         * @param {ol/Geometry/Polygon} bboxGeometry - The polygon geometry.
+         * @param {String} crs - The coordinate reference system.
+         * @returns {Promise<Object[]>} Array of features.
          */
-        extractEpsgCode (crsUrl) {
-            if (!crsUrl) {
-                return null;
-            }
+        async fetchWithBbox (source, bboxGeometry, crs) {
+            const extent = bboxGeometry.getExtent(),
+                bbox = extent.join(","),
+                features = await getOAFFeature.getOAFFeatureGet(source.url, source.collection, {
+                    limit: 100,
+                    bbox: bbox,
+                    bboxCrs: crs,
+                    crs
+                }),
+                format = new GeoJSON();
 
-            // Handle CRS84 (which is essentially WGS84 with lon/lat order)
-            if (crsUrl.includes("/CRS84")) {
-                return "EPSG:4326";
-            }
+            // Client-side filtering: only keep features that actually intersect
+            return features.filter(feature => {
+                if (!feature.geometry) {
+                    return false;
+                }
+                const olFeature = format.readFeature(feature);
 
-            // Handle EPSG format: http://www.opengis.net/def/crs/EPSG/0/4326
-            const epsgMatch = crsUrl.match(/\/EPSG\/\d+\/(\d+)/);
-
-            if (epsgMatch) {
-                return `EPSG:${epsgMatch[1]}`;
-            }
-
-            return null;
+                return bboxGeometry.intersectsExtent(olFeature.getGeometry().getExtent());
+            });
         },
 
         /**
@@ -575,24 +665,24 @@ export default {
 <template>
     <div class="vh-100 overflow-y-auto">
         <h4 class="text-decoration-underline mt-3">
-            {{ $t("additional:modules.tools.simulationTool.landuseTitle") }}
+            {{ $t("additional:modules.tools.simulationTool.landuseTitle", {label: $t(planningScenarioLabel)}) }}
         </h4>
         <div class="d-flex flex-column rounded shadow mt-4">
             <div class="position-sticky mt-2 mx-3 top-0 z-2 bg-body">
                 <h5>{{ planningScenario?.name }}</h5>
                 <hr>
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <div
                         v-for="(value, key) in editableInputs"
                         :key="key"
-                        class="form-check form-check-inline"
+                        class="form-check form-check-inline radio-class"
                     >
                         <input
                             :id="key"
                             :value="key"
                             class="form-check-input"
                             type="radio"
-                            :checked="key === currentEditableInput"
+                            :checked="key === effectiveCurrentEditableInput"
                             @input="setCurrentEditableInput(key)"
                         >
                         <label
@@ -646,10 +736,13 @@ export default {
                     tabindex="0"
                 >
                     <div
+                        v-if="currentEditableInput === 'roads'"
                         class="alert alert-warning mb-3"
                         role="alert"
                     >
-                        <span class="text-muted">
+                        <span
+                            class="text-muted"
+                        >
                             {{ $t("additional:modules.tools.simulationTool.noteNoLiability") }}
                         </span>
                     </div>
@@ -695,7 +788,7 @@ export default {
                 class="alert alert-danger"
                 role="alert"
             >
-                {{ $t('additional:modules.tools.simulationTool.planningScenarioEmptyFeature') }}
+                {{ $t('additional:modules.tools.simulationTool.planningScenarioEmptyFeature', { feature: $t(`additional:modules.tools.simulationTool.${emptyFeature}`)}) }}
             </div>
             <div
                 v-if="isLoaded"
@@ -703,13 +796,13 @@ export default {
             >
                 <FlatButton
                     class="m-3"
-                    :text="currentEditableInput === 'buildings' ? $t('additional:modules.tools.simulationTool.newBuilding') : $t('additional:modules.tools.simulationTool.newRoad')"
+                    :text="newInputButtonKey"
                     icon="bi-pencil-square"
                     :interaction="() => [setCurrentPlanningComponent('newLanduse'), setCurrentInputName(currentEditableInput)]"
                 />
                 <FlatButton
                     class="m-3"
-                    :text="!isEmptyFeature ? $t('additional:modules.tools.simulationTool.planningScenarioSave') : $t('additional:modules.tools.simulationTool.planningScenarioCancel')"
+                    :text="!isEmptyFeature ? $t('additional:modules.tools.simulationTool.planningScenarioSave', {label: $t(planningScenarioLabel)}) : $t('additional:modules.tools.simulationTool.planningScenarioCancel', {label: $t(planningScenarioLabel)})"
                     :interaction="() => !isEmptyFeature ? save() : cancel()"
                 />
             </div>
@@ -760,5 +853,9 @@ export default {
 
 .tab-content {
     z-index: 0;
+}
+
+.radio-class {
+  padding-top: 0.25rem !important
 }
 </style>

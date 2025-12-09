@@ -186,6 +186,29 @@ export default {
         getMappedProperty,
 
         /**
+         * Gets the value of a property from a feature, with special handling for 'id'.
+         * If the key is 'id' and not present in properties, returns feature.getId().
+         * @param {ol/Feature} feature - The feature.
+         * @param {String} key - The property key.
+         * @returns {*} The property value or undefined.
+         */
+        getFeatureValue (feature, key) {
+            const properties = feature.getProperties();
+
+            if (Object.prototype.hasOwnProperty.call(properties, key)) {
+                return properties[key];
+            }
+
+            // Special handling for 'id': if it's in propertiesMapping but not in properties,
+            // use feature.getId()
+            if (key === "id" && this.propertiesMapping && Object.prototype.hasOwnProperty.call(this.propertiesMapping, "id")) {
+                return feature.getId();
+            }
+
+            return undefined;
+        },
+
+        /**
          * Gets the properties of a feature to be shown in list.
          * @param {ol/Feature} feature - The feature.
          * @param {String[]} shownProperties - the properties of features to be shown in list.
@@ -199,8 +222,10 @@ export default {
             const result = {};
 
             shownProperties.forEach(key => {
-                if (Object.prototype.hasOwnProperty.call(feature.getProperties(), key)) {
-                    result[key] = feature.getProperties()[key];
+                const value = this.getFeatureValue(feature, key);
+
+                if (value !== undefined) {
+                    result[key] = value;
                 }
             });
 
@@ -370,6 +395,7 @@ export default {
         },
         /**
          * Checks if a feature has any properties that are undefined.
+         * Uses getFeatureValue to handle 'id' correctly.
          * @param {Object} feature
          */
         hasUndefinedProperty (feature) {
@@ -377,7 +403,7 @@ export default {
                 return false;
             }
             return Object.keys(this.propertiesMapping).some(
-                key => feature.get(key) === undefined
+                key => this.getFeatureValue(feature, key) === undefined
             );
         }
     }
@@ -426,12 +452,13 @@ export default {
                 </div>
                 <div
                     v-if="hasMultipleProperties"
-                    :class="typeof getShownProperties(feature, shownProperties) === 'undefined' ? 'flex-grow-1' : ''"
+                    :class="'d-flex align-items-center ' + (typeof getShownProperties(feature, shownProperties) === 'undefined' ? 'flex-grow-1' : '')"
                 >
                     <i
                         v-if="hasUndefinedProperty(feature)"
-                        class="bi-exclamation-triangle-fill text-warning"
+                        class="bi-exclamation-triangle-fill text-warning me-2"
                         role="img"
+                        :title="$t('additional:modules.tools.simulationTool.missingParameters')"
                     />
                     <button
                         type="button"
@@ -467,25 +494,26 @@ export default {
                     :key="idx"
                     class="m-3 d-flex justify-content-between no-stepper-arrows"
                 >
-                    <template v-if="getMappedProperty(key, propertiesMapping) !== key">
+                    <template v-if="getMappedProperty(key, propertiesMapping) !== key && (itemSchema?.properties?.[key] || key === 'id')">
                         <label
                             :for="`${key}-${feature.getId()}`"
                             class="col-form-label"
                             @click.prevent
                         >
                             <i
-                                v-if="feature.get(key) === undefined"
+                                v-if="getFeatureValue(feature, key) === undefined"
                                 class="bi-exclamation-triangle-fill text-warning fs-5 me-2"
                                 role="img"
+                                :title="$t('additional:modules.tools.simulationTool.missingParameters')"
                             />
                             {{ getMappedProperty(key, propertiesMapping) }}
                         </label>
                         <input
                             :id="`${key}-${feature.getId()}`"
-                            :type="itemSchema.properties[key].type === 'number' ? 'number' : 'text'"
+                            :type="itemSchema?.properties?.[key]?.type === 'number' ? 'number' : 'text'"
                             class="form-control text-end w-50"
-                            :value="getInputValue(feature, key, feature.get(key))"
-                            :inputmode="itemSchema.properties[key].type === 'number' ? 'decimal' : 'text'"
+                            :value="getInputValue(feature, key, getFeatureValue(feature, key))"
+                            :inputmode="itemSchema?.properties?.[key]?.type === 'number' ? 'decimal' : 'text'"
                             @input="handleInput($event, key, feature)"
                             @blur="onBlurCommit($event, key, feature)"
                             @keydown.enter.prevent="onEnterCommit($event, key, feature)"
