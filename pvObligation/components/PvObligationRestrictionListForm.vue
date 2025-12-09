@@ -185,7 +185,7 @@ export default {
          */
         cutDrawnFeatures (drawFeature) {
             const netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
-                    return layer.get("name") === "PV-geeignete Dachflächen";
+                    return layer.get("name") === "PV-geeignete Dachflächen"; // xxx
                 }),
                 netAreaFeatures = netAreaLayer.getSource().getFeatures().filter(feature => {
                     return feature.get("gebaeude_id") === this.selectedRoofId;

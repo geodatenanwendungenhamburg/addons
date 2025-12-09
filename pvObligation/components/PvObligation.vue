@@ -11,7 +11,7 @@ export default {
     },
     data () {
         return {
-            allRoofsLoaded: false
+            allRoofsLoaded: true
         };
     },
     computed: {
@@ -72,29 +72,29 @@ export default {
                                 resolve();
                             }
                         }
-                        else {
-                            this.replaceByIdInLayerConfig({
-                                layerConfigs: [{
-                                    id: layerId,
-                                    layer: {
-                                        visibility: true,
-                                        showInLayerTree: true
-                                    }
-                                }]
-                            }, {root: true}).then(() => {
-                                const source = layers.find(l => l.get("id") === layerId).getSource();
+                        // else {
+                        //     this.replaceByIdInLayerConfig({
+                        //         layerConfigs: [{
+                        //             id: layerId,
+                        //             layer: {
+                        //                 visibility: true,
+                        //                 showInLayerTree: true
+                        //             }
+                        //         }]
+                        //     }, {root: true}).then(() => {
+                        //         const source = layers.find(l => l.get("id") === layerId).getSource();
 
-                                // Info: This workaround does not work, if a layer has no features at all.
-                                if (!source.getFeatures().length) {
-                                    source.once("featuresloadend", resolve);
-                                }
-                                else {
-                                    resolve();
-                                }
-                            }).catch(() => {
-                                resolve();
-                            });
-                        }
+                        //         // Info: This workaround does not work, if a layer has no features at all.
+                        //         if (!source.getFeatures().length) {
+                        //             source.once("featuresloadend", resolve);
+                        //         }
+                        //         else {
+                        //             resolve();
+                        //         }
+                        //     }).catch(() => {
+                        //         resolve();
+                        //     });
+                        // }
                     })
                 );
             });

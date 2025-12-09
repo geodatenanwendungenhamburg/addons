@@ -8,6 +8,8 @@ import axios from "axios";
 import ConfirmModalItem from "./shared/ConfirmModalItem.vue";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
+import getOAFFeature from "@shared/js/api/oaf/getOAFFeature";
+
 export default {
     name: "PvObligationWizardStepGrossArea",
     components: {
@@ -29,7 +31,8 @@ export default {
             displayGrossRoofArea: 0,
             grossAreaStyle: {},
             showConfirmModal: false,
-            pendingRoofId: null
+            pendingRoofId: null,
+            isClicked: false
         };
     },
     computed: {
@@ -43,7 +46,8 @@ export default {
         wizardStepIsActive: {
             handler (isNowActive, wasActiveBefore) {
                 if (wasActiveBefore) {
-                    this.grossAreaSelection.setActive(false);
+                    this.isClicked = false
+                    // this.grossAreaSelection.setActive(false);
 
                     const roofLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
                         return l.get("id") === "Module/pvObligation/layer/roofArea";
@@ -51,8 +55,8 @@ export default {
 
                     roofLayer.setVisible(false);
                 }
-                else if (isNowActive && this.grossAreaSelection) {
-                    this.grossAreaSelection.setActive(true);
+                else if (isNowActive && this.isClicked) {
+                    // this.grossAreaSelection.setActive(true);
 
                     const grossAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
                             return l.get("id") === "Module/pvObligation/layer/roofArea";
@@ -60,6 +64,8 @@ export default {
                         netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
                             return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
                         });
+
+                        console.log(netAreaLayer)
 
                     if (netAreaLayer) {
                         netAreaLayer.setVisible(false);
@@ -78,7 +84,8 @@ export default {
             return style.styleId === "dachflaechen";
         }).rules[0].style;
 
-        this.defineGrossArea({layerName: "Module/pvObligation/layer/roofArea"});
+        this.addSingleClickToWMSLayer();
+        // this.defineGrossArea({layerName: "Module/pvObligation/layer/roofArea"});
     },
     methods: {
         ...mapMutations("Modules/PvObligation", [
@@ -115,7 +122,7 @@ export default {
             this.addInteraction(selectInteraction);
             this.grossAreaSelection = selectInteraction;
 
-            selectInteraction.on("select", async (e) => {
+            selectInteraction.on("select", async (e) => {                
                 const selectedFeature = e.selected[0],
                     roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
 
@@ -163,7 +170,116 @@ export default {
 
             this.componentFormData.grossRoofArea = Math.round(area * 10) / 10;
             this.displayGrossRoofArea = thousandsSeparator(this.componentFormData.grossRoofArea);
-        }
+        },
+        addSingleClickToWMSLayer () {
+            const map = mapCollection.getMap("2D");
+
+            map.on("singleclick", async (event) => {
+                this.isClicked = true
+                
+                wmsLayer = map.getLayers().getArray().find(layer => layer.get("id") === "34754"),
+                viewResolution = map.getView().getResolution(),
+                url = wmsLayer?.getSource().getFeatureInfoUrl(
+                    event.coordinate,
+                    viewResolution,
+                    map.getView().getProjection(),
+                    {
+                        'INFO_FORMAT': 'text/xml',
+                        'FEATURE_COUNT': 1
+                    }
+                );
+
+                try {
+                    const response = await fetch(url),
+                        xmlText = await response.text(),
+                        buildingId = xmlText.split('<de.hh.up:gebaeude_id>')[1]?.split('</')[0];
+                    
+                    this.setSelectedRoofId(buildingId);
+
+
+
+                    const features = await this.getFeatureById(buildingId)
+                    const features2 = await this.getFeatureById2(buildingId)
+                    this.addFeaturesToLayers(features2, "Dachflächen2")
+
+                    this.addFeaturesToLayers(features, "Dachflächen")
+                    this.addFeaturesToLayers(features, "Module/pvObligation/layer/roofArea", true)
+                    this.addFeaturesToLayers(features, "Module/pvObligation/layer/roofArea_pv_suitable")
+                    this.addFeaturesToLayers(features, "PV-geeignete Dachflächen")
+
+                } catch (error) {
+                    console.error("GetFeatureInfo error:", error);
+                }
+            })
+        },
+
+        async getFeatureById (buildingId) {
+            const baseUrl = "https://qs-api.hamburg.de/datasets/v1/pv_geeignete_dachflaechen",
+                collection = "pv_geeignete_dachflaechen",           
+                filter = `gebaeude_id='${buildingId}'`;
+
+             try {
+                 const geoJson = await getOAFFeature.getOAFFeatureGet(baseUrl, collection, {
+                            filter,
+                            filterCrs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                        }),
+                    features = getOAFFeature.readAllOAFToGeoJSON(geoJson, {
+                        dataProjection: "EPSG:4326",
+                        featureProjection: "EPSG:25832"
+                    });
+
+                    return features;
+                }
+             catch (error) {
+                console.error("Error fetching features: ", error);
+             }
+        },
+
+        // will be merged with 1
+        async getFeatureById2 (buildingId) {
+            const baseUrl = "https://qs-api.hamburg.de/datasets/v1/dachflaechen",
+                collection = "dachflaechen",           
+                filter = `gebaeude_id='${buildingId}'`;
+
+             try {
+                 const geoJson = await getOAFFeature.getOAFFeatureGet(baseUrl, collection, {
+                            filter,
+                            filterCrs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                        }),
+                    features = getOAFFeature.readAllOAFToGeoJSON(geoJson, {
+                        dataProjection: "EPSG:4326",
+                        featureProjection: "EPSG:25832"
+                    });
+
+                    return features;
+                }
+             catch (error) {
+                console.error("Error fetching features: ", error);
+             }
+        },
+
+        async addFeaturesToLayers(features, layerName, alwaysOnTop=false) {
+            const layer = await this.addNewLayerIfNotExists({layerName: layerName, alwaysOnTop: alwaysOnTop});
+            
+            layer.getSource().clear();
+            layer.getSource().addFeatures(features)
+
+            layer.setVisible(true)
+
+            // style will be parametric..
+            if (alwaysOnTop) {
+                console.log(layer.name)
+                layer.setStyle(new Style({
+                    stroke: new Stroke({color: "rgba(12, 247, 227, 1)", width: 3}),
+                    fill: new Fill({color: "rgba(0, 0, 0, 0)"})
+                }));
+            }
+
+            // it can be checked differently....
+            if(layerName === "Module/pvObligation/layer/roofArea") {
+                this.setAndDisolveRoofId(this.selectedRoofId, layer);
+            }
+        },
     }
 };
 </script>
