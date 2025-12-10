@@ -51,7 +51,8 @@ export default {
                 pageMargins: [40, 60, 40, 60],
                 borderColor: ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"]
             },
-            mapContent = await dispatch("addMap"),
+            mapContent = await dispatch("addMap", false),
+            mapBaseLayerContent = await dispatch("addMap", true),
             A4PageWidth = 595.28,
             maxHeight = 700,
             maxContentWidth = Math.max(0, A4PageWidth - docDefinition.pageMargins[0] - docDefinition.pageMargins[2]),
@@ -186,6 +187,15 @@ export default {
             pageBreak: "before"
         });
 
+        // Map, only BaseLayers
+        // /////////////////////
+        docDefinition.content.push({
+            image: mapBaseLayerContent.base64Image,
+            width: idealMapWidthInPDF,
+            alignment: "center",
+            pageBreak: "before"
+        });
+
         // Footer
         // /////////////////////
         docDefinition.footer = (currentPage, pageCount) => {
@@ -221,12 +231,13 @@ export default {
      * draws a 2px black border around the cropped area, and returns the result as a base64 image.
      *
      * @param {Object} Object Vuex context
+     * @param {Boolean} hideDrawAndRoofLayers indicates whether only base layers shall be shown or all layers that are activated
      * @returns {Object} An object containing:
      *   {string} base64Image - The base64-encoded PNG image of the cropped map.
      *   {number} width - The width of the cropped image in pixels.
      *   {number} height - The height of the cropped image in pixels.
      */
-    addMap () {
+    async addMap ({dispatch}, hideDrawAndRoofLayers) {
         const map = mapCollection.getMap("2D"),
             canvas = map.getViewport().querySelector("canvas"),
             rigthMenuWidth = document.getElementById("mp-menu-secondaryMenu").offsetWidth,
@@ -234,9 +245,15 @@ export default {
             cropWidth = canvas.width - leftMenuWidth - rigthMenuWidth,
             cropHeight = canvas.height,
             offscreenCanvas = document.createElement("canvas");
+        let changedLayers = [];
 
         offscreenCanvas.width = cropWidth;
         offscreenCanvas.height = cropHeight;
+
+        // hide all subjectlayers
+        if (hideDrawAndRoofLayers) {
+            changedLayers = await dispatch("changeDrawAndRoofLayers");
+        }
 
         const ctx = offscreenCanvas.getContext("2d");
 
@@ -254,12 +271,27 @@ export default {
         ctx.lineWidth = 2;
         ctx.strokeRect(1, 1, cropWidth - 2, cropHeight - 2);
 
+        if (hideDrawAndRoofLayers) {
+            await dispatch("restoreDrawAndRoofLayers", changedLayers);
+        }
+
         return {
             base64Image: offscreenCanvas.toDataURL("image/png"),
             width: cropWidth,
             height: cropHeight
         };
     },
+    /**
+     * Generates a table for drawn areas (e.g. restricted or reduced areas) for PDF export.
+     * The table includes area numbers and descriptions, or a fallback text if no areas exist.
+     *
+     * @param {Object} _ - Vuex context (unused).
+     * @param {Object} payload - Data for the table.
+     * @param {Array<Object>} payload.drawnAreaData - Array of area objects to display.
+     * @param {String} payload.title - Table title.
+     * @param {String} payload.noAreasTitle - Text to show if no areas exist.
+     * @returns {Array<Object>} Array of PDFMake content objects for the table.
+     */
     async addDrawnAreaTable (_, payload) {
         const content = [];
 
@@ -302,6 +334,98 @@ export default {
         }
 
         return content;
+    },
+    /**
+     * Hides all subject layers and draw layers except base layers on the map.
+     * Show baselayers if they are currently invisible
+     * Stores the changed layers and their previous visibility state for later restoration.
+     * Uses the layer config to change visibility where possible, otherwise sets directly.
+     *
+     * @param {Object} context - Vuex context.
+     * @param {Object} context.rootGetters - Vuex root getters.
+     * @param {Function} context.dispatch - Vuex dispatch function.
+     * @returns {Promise<Array<Object>>} Array of changed layer objects for restoration.
+     */
+    async changeDrawAndRoofLayers ({rootGetters, dispatch}) {
+        const newLayerConfigs = [],
+            changedLayers = [];
+
+        mapCollection.getMap("2D").getLayers().getArray().forEach((layer) => {
+            const layerConfig = rootGetters.allLayerConfigs.find(layerConf => layerConf.id === layer.get("id"));
+
+            // the layer is configured in the config.json
+            if (layerConfig) {
+                // the layer is a baselayer and currently not visible => make it visible
+                if (layerConfig.baselayer && !layer.isVisible()) {
+                    newLayerConfigs.push({
+                        id: layer.get("id"),
+                        layer: {
+                            id: layer.get("id"),
+                            visibility: true,
+                            showInLayerTree: true
+                        }
+                    });
+
+                    changedLayers.push({layer: layer, config: true, changeVisBackTo: false});
+                }
+                // the layer is a subjectlayer or draw layer and currently visible => hide it
+                else if (!layerConfig.baselayer && layer.isVisible()) {
+                    newLayerConfigs.push({
+                        id: layer.get("id"),
+                        layer: {
+                            id: layer.get("id"),
+                            visibility: false
+                        }
+                    });
+
+                    changedLayers.push({layer: layer, config: true, changeVisBackTo: true});
+                }
+            }
+            // the layer is not configured in the config.json but visible
+            // and it is not one of the marker layers for search module
+            // then hide it
+            else if (layer.isVisible() && !layer.get("id").match(/marker_.*_layer/g)) {
+                layer.setVisible(false);
+
+                changedLayers.push({layer: layer, config: false, changeVisBackTo: true});
+            }
+        });
+
+        // wait a short moment after changing the visibility to be sure that all layers have the correct state now
+        await dispatch("replaceByIdInLayerConfig", {layerConfigs: newLayerConfigs}, {root: true});
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        return changedLayers;
+    },
+    /**
+     * Restores the visibility of layers previously changed by changeDrawAndRoofLayers.
+     * Uses the layer config to restore visibility where possible, otherwise sets directly.
+     *
+     * @param {Object} context - Vuex context.
+     * @param {Function} context.dispatch - Vuex dispatch function.
+     * @param {Array<Object>} changedLayers - Array of changed layer objects to restore.
+     * @returns {Promise<void>}
+     */
+    async restoreDrawAndRoofLayers ({dispatch}, changedLayers) {
+        const newChangedLayerConfigs = [];
+
+        // change back all previously changed layer visibility states
+        changedLayers.forEach((changedLayer) => {
+            if (!changedLayer.config) {
+                changedLayer.layer.setVisible(changedLayer.changeVisBackTo);
+            }
+            else {
+                newChangedLayerConfigs.push({
+                    id: changedLayer.layer.get("id"),
+                    layer: {
+                        id: changedLayer.layer.get("id"),
+                        visibility: changedLayer.changeVisBackTo
+                    }
+                });
+            }
+        });
+
+        await dispatch("replaceByIdInLayerConfig", {layerConfigs: newChangedLayerConfigs}, {root: true});
     },
     /**
      * Dissolves roof features with the same roofId from a given layer, calculates the total roof area,
