@@ -22,24 +22,24 @@
                     >
                         <span class="filter-icon walking-icon" />
                         Zu Fuß
-                        <span class="badge bg-success">{{ walkingCount }}</span>
+                        <span class="badge bg-primary">{{ walkingCount }}</span>
                     </label>
                 </div>
                 <div class="form-check">
                     <input
-                        id="filter-bike"
-                        v-model="filters.bike"
+                        id="filter-rental-bike"
+                        v-model="filters.rentalBike"
                         type="checkbox"
                         class="form-check-input"
-                        @change="updateFilter('bike', filters.bike)"
+                        @change="updateFilter('rentalBike', filters.rentalBike)"
                     >
                     <label
                         class="form-check-label"
-                        for="filter-bike"
+                        for="filter-rental-bike"
                     >
-                        <span class="filter-icon bike-icon" />
-                        Fahrrad
-                        <span class="badge bg-warning">{{ bikeCount }}</span>
+                        <span class="filter-icon rental-bike-icon" />
+                        Leihrad
+                        <span class="badge bg-success">{{ rentalBikeCount }}</span>
                     </label>
                 </div>
             </div>
@@ -147,7 +147,7 @@ export default {
         return {
             filters: {
                 walking: true,
-                bike: true
+                rentalBike: true
             },
             showTrails: true,
             trailLength: 5,
@@ -168,28 +168,98 @@ export default {
          * Count walking agents at current time
          */
         walkingCount () {
-            if (!this.features) {
+            if (!this.features || !this.currentTime) {
                 return 0;
             }
 
-            return this.features.filter(f =>
-                f.properties.time === this.currentTime &&
-                f.properties.activeCapability === "walking"
-            ).length;
+            // Group features by agentId
+            const agentMap = new Map();
+
+            this.features.forEach(f => {
+                const agentId = f.properties.agentId;
+
+                if (!agentId) {
+                    return;
+                }
+
+                if (!agentMap.has(agentId)) {
+                    agentMap.set(agentId, []);
+                }
+                agentMap.get(agentId).push(f);
+            });
+
+            // Count agents with walking capability at current time
+            let count = 0;
+
+            agentMap.forEach((agentFeatures) => {
+                // Find closest feature to current time
+                let closestFeature = agentFeatures[0],
+                    minTimeDiff = Math.abs(this.currentTime - agentFeatures[0].properties.time);
+
+                for (const feature of agentFeatures) {
+                    const timeDiff = Math.abs(this.currentTime - feature.properties.time);
+
+                    if (timeDiff < minTimeDiff && feature.properties.time <= this.currentTime) {
+                        minTimeDiff = timeDiff;
+                        closestFeature = feature;
+                    }
+                }
+
+                if (closestFeature.properties.activeCapability === "walking") {
+                    count++;
+                }
+            });
+
+            return count;
         },
 
         /**
-         * Count bike agents at current time
+         * Count rental bike agents at current time
          */
-        bikeCount () {
-            if (!this.features) {
+        rentalBikeCount () {
+            if (!this.features || !this.currentTime) {
                 return 0;
             }
 
-            return this.features.filter(f =>
-                f.properties.time === this.currentTime &&
-                f.properties.activeCapability === "bike"
-            ).length;
+            // Group features by agentId
+            const agentMap = new Map();
+
+            this.features.forEach(f => {
+                const agentId = f.properties.agentId;
+
+                if (!agentId) {
+                    return;
+                }
+
+                if (!agentMap.has(agentId)) {
+                    agentMap.set(agentId, []);
+                }
+                agentMap.get(agentId).push(f);
+            });
+
+            // Count agents with rental bike capability at current time
+            let count = 0;
+
+            agentMap.forEach((agentFeatures) => {
+                // Find closest feature to current time
+                let closestFeature = agentFeatures[0],
+                    minTimeDiff = Math.abs(this.currentTime - agentFeatures[0].properties.time);
+
+                for (const feature of agentFeatures) {
+                    const timeDiff = Math.abs(this.currentTime - feature.properties.time);
+
+                    if (timeDiff < minTimeDiff && feature.properties.time <= this.currentTime) {
+                        minTimeDiff = timeDiff;
+                        closestFeature = feature;
+                    }
+                }
+
+                if (closestFeature.properties.activeCapability === "cyclingRentalBike") {
+                    count++;
+                }
+            });
+
+            return count;
         }
     },
     mounted () {
@@ -200,7 +270,7 @@ export default {
         this.renderMode = this.$store.state.agentVisualization.renderMode;
         this.showHeatmap = this.$store.state.agentVisualization.showHeatmap;
         this.filters.walking = this.$store.state.agentVisualization.filters.walking;
-        this.filters.bike = this.$store.state.agentVisualization.filters.bike;
+        this.filters.rentalBike = this.$store.state.agentVisualization.filters.rentalBike || true;
     },
     methods: {
         /**
@@ -317,11 +387,12 @@ export default {
     border-radius: 50%;
 
     &.walking-icon {
-        background: #28a745;
+        background: #4287f5; // blue
     }
 
-    &.bike-icon {
-        background: #fd7e14;
+    &.rental-bike-icon {
+        background: #28a745; // green
+        border: 2px solid #155724;
     }
 }
 

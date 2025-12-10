@@ -1,0 +1,1046 @@
+
+=== OGC API Process Execute === ogcApiProcess.js:128:1
+Process ID: mars:sim-green4Bikes-default ogcApiProcess.js:129:1
+Encoded Process ID: mars%3Asim-green4Bikes-default ogcApiProcess.js:130:1
+Base URL: https://ump-lgv.germanywestcentral.cloudapp.azure.com/api/ ogcApiProcess.js:131:1
+Full URL: https://ump-lgv.germanywestcentral.cloudapp.azure.com/api/processes/mars%3Asim-green4Bikes-default/execution ogcApiProcess.js:132:1
+Request Body: 
+{
+  "inputs": {
+    "endPoint": "2024-10-10T08:00:00",
+    "rentalStations": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.07512610000009,
+              53.59193889999997
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 17,
+            "uid": "12794afd-1ed2-4d22-8223-d1f25f25a43f",
+            "name": "U Wandsbek-Gartenstadt / Ostpreußenplatz",
+            "stand": "20250716113254.8083159",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "17",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.079610400000094,
+              53.58490309999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 6,
+            "uid": "991a732c-2934-41f5-b56b-dcf7b75f11d7",
+            "name": "Friedrich-Ebert-Damm / Lomerstraße",
+            "stand": "20250716113254.8077392",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "6",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.095910200000079,
+              53.58820909999994
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 21,
+            "uid": "20aee48a-da8f-4353-9c86-dce20abd5f62",
+            "name": "Friedrich-Ebert-Damm / Helbingtwiete",
+            "stand": "20250716113254.8099582",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "21",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.106814400000093,
+              53.59145689999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 3,
+            "uid": "653e67b8-6474-47c0-aa70-b2f0c1d1ebb6",
+            "name": "Friedrich-Ebert-Damm / Charlie-Mills-Straße",
+            "stand": "20250716113254.8118427",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.117941200000098,
+              53.57786599999997
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 20,
+            "uid": "0e56325d-dfb1-4190-bc28-d9e2ceffc661",
+            "name": "Kuehnstraße / Albert-Schweitzer-Ring",
+            "stand": "20250716113254.8116658",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "20",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.125009800000113,
+              53.58646069999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 18,
+            "uid": "39b8e860-d1b5-4946-8b2b-61f3475e34fe",
+            "name": "Tonndorfer Hauptstraße / Sonnenweg",
+            "stand": "20250716113254.8138588",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "18",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.058116500000079,
+              53.57619309999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 23,
+            "uid": "b9c82e96-d026-4f76-856f-1741c7135001",
+            "name": "S Friedrichsberg / Krausestraße",
+            "stand": "20250716113254.8026949",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "23",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.064384200000076,
+              53.57913499999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 2,
+            "uid": "2bec7ee7-2edd-4330-aefb-1227eaf85ec8",
+            "name": "Elsässer Straße / Stormarner Straße",
+            "stand": "20250716113254.8045964",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "1",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.065436300000071,
+              53.58550479999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 23,
+            "uid": "14da48a5-b4a3-4f54-b53c-5f7de04418e7",
+            "name": "U Alter Teichweg / Nordschleswiger Straße",
+            "stand": "20250716113254.8060669",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "23",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.068142600000076,
+              53.58190939999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 3,
+            "uid": "3d50f080-5792-4d39-b0df-bcd48ad09873",
+            "name": "U Straßburger Straße / Nordschleswiger Straße",
+            "stand": "20250716113254.8056081",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.071807200000086,
+              53.58356559999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 3,
+            "uid": "5939aa0f-7a7c-42cc-9f4a-bfa234ab339a",
+            "name": "Eulenkamp / Straßburger Stieg",
+            "stand": "20250716113254.8065138",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.090510000000082,
+              53.56985999999994
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 7,
+            "uid": "b7b4670d-a5a5-4ac4-bdc8-958a45a851c0",
+            "name": "Alphonsstraße / Asklepios Klinik Wandsbek",
+            "stand": "20250716113254.8073741",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "7",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.059683900000065,
+              53.57046299999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 2,
+            "uid": "5f3e8fa0-296f-48f7-838f-a165a6e88b0d",
+            "name": "S+U Wandsbeker Chaussee / Börnestraße",
+            "stand": "20250716113254.8020416",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "2",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.06843430000009,
+              53.57172669999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": "0",
+            "uid": "8df157d3-0712-4611-9b56-16d950532e2e",
+            "name": "U Wandsbek Markt / Schlossgarten",
+            "stand": "20250716113254.8037672",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "0",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.068989800000075,
+              53.572459099999946
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 12,
+            "uid": "b14f9a93-2ba0-4c49-8646-d418ff68f28b",
+            "name": "U Wandsbek Markt / Wandsbeker Marktstraße",
+            "stand": "20250716113254.8042456",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "11",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.105052500000093,
+              53.570592799999964
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 11,
+            "uid": "bb84ce97-01a0-4706-a0eb-5c9fd4e11a77",
+            "name": "Universität der Bundeswehr / Rodigallee",
+            "stand": "20250716113254.8095912",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "11",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.041543100000073,
+              53.58010189999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 8,
+            "uid": "80a16dd9-54f7-47fd-a8ba-c58c515f9911",
+            "name": "U Dehnhaide / Barmbeker Markt",
+            "stand": "20250716113254.8008486",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "8",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.043225500000077,
+              53.58710139999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 6,
+            "uid": "f7b90c02-968d-4b73-afc5-a00535446033",
+            "name": "S+U Barmbek / Wiesendamm",
+            "stand": "20250716113254.8032595",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "6",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.04599020000007,
+              53.57836269999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 6,
+            "uid": "b9f860d8-81ae-4fdc-b412-fbe791eac07a",
+            "name": "Von-Essen-Straße / Dehnhaide",
+            "stand": "20250716113254.8011587",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "5",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.04626780000007,
+              53.58775609999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 5,
+            "uid": "bda4b7e5-6dca-4fa0-a44a-87947463e9da",
+            "name": "S+U Barmbek / Piazzetta-Ralph-Giordano",
+            "stand": "20250716113254.8036646",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "4",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.046511300000079,
+              53.58271329999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 11,
+            "uid": "7c90e113-5673-4119-99fd-753b3833b0c7",
+            "name": "Bramfelder Straße / Pfenningsbusch",
+            "stand": "20250716113254.8023439",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "11",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.043957100000078,
+              53.59166269999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 19,
+            "uid": "31097390-f3ad-455c-a795-9fa7a2b8ce14",
+            "name": "Fuhlsbüttler Straße / Hellbrookstraße",
+            "stand": "20250716113254.8044961",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "19",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.056930600000074,
+              53.58685859999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 12,
+            "uid": "d0001611-e433-4796-984e-e1ca49f25731",
+            "name": "Lämmersieth / Wachtelstraße",
+            "stand": "20250716113254.8048117",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "12",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.050639700000076,
+              53.59372599999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 20,
+            "uid": "99a48824-923f-40b3-b499-00b7cef85fcd",
+            "name": "U Habichtstraße / Steilshooper Straße",
+            "stand": "20250716113254.8058227",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "20",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.044507300000062,
+              53.56716419999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 19,
+            "uid": "eede63ae-b49c-47b2-bd60-72aed90ef8f1",
+            "name": "U Ritterstraße / Wandsbeker Chaussee",
+            "stand": "20250716113254.7978057",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "19",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.046052300000074,
+              53.56396349999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 12,
+            "uid": "03596dc5-4098-402f-8e3c-51d753c1024a",
+            "name": "Hasselbrookstraße / Ritterstraße",
+            "stand": "20250716113254.7972863",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "12",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.049517300000076,
+              53.57359769999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 20,
+            "uid": "8f572d44-cc84-4e0c-a347-5e9362f0f13d",
+            "name": "Lortzingstraße / Friedrichsberger Straße",
+            "stand": "20250716113254.8004153",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "19",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.054615500000084,
+              53.564823599999954
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 11,
+            "uid": "fa1888b7-86df-4a5d-8eae-32adb40db8c0",
+            "name": "S Hasselbrook / Papenstraße",
+            "stand": "20250716113254.7998914",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "11",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.025830100000064,
+              53.580860399999956
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 6,
+            "uid": "170211af-17fd-43a5-976f-55005fd5ca8d",
+            "name": "Weidestraße / Johannes-Prassek-Park",
+            "stand": "20250716113254.7984955",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "5",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.03033990000007,
+              53.59141849999997
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 3,
+            "uid": "f63e623a-603e-4f8f-9963-59f8f60b95f3",
+            "name": "Südring / Stadthallenbrücke",
+            "stand": "20250716113254.8028069",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.032860000000067,
+              53.58871999999994
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 1,
+            "uid": "5af480e2-15a8-49f3-b561-2a832dcecc68",
+            "name": "U Saarlandstraße / Wiesendamm",
+            "stand": "20250716113254.8021394",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "1",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.03343050000007,
+              53.58407749999994
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 15,
+            "uid": "f5cd3175-1f86-4995-9189-ab92aca53aae",
+            "name": "Schleidenstraße / Osterbekstraße",
+            "stand": "20250716113254.8006544",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "15",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.034089300000064,
+              53.58005449999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 9,
+            "uid": "fdeb5c3c-659e-40cc-a419-d1f1b53f876e",
+            "name": "Weidestraße / Biedermannplatz",
+            "stand": "20250716113254.7995482",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "9",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.041308100000066,
+              53.55573689999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 20,
+            "uid": "b8689038-8372-4b1e-8033-831d590c326d",
+            "name": "U Burgstraße / Hammer Landstraße",
+            "stand": "20250716113254.7942283",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "20",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.055790400000069,
+              53.556305399999964
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 5,
+            "uid": "a69e372e-72bc-4ece-a1df-c7357896a784",
+            "name": "U Hammer Kirche / Hammer Park",
+            "stand": "20250716113254.7990043",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "5",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.050330000000065,
+              53.55769999999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 5,
+            "uid": "51039a1d-942a-416d-aa00-402473bfb906",
+            "name": "Carl-Petersen-Straße / Stoeckhardtstraße",
+            "stand": "20250716113254.7973831",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "5",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.052537200000083,
+              53.56082259999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 3,
+            "uid": "e93a5c34-df7f-4cde-b3e4-36f81f8d5726",
+            "name": "Sievekingsallee / Sievekingdamm",
+            "stand": "20250716113254.7987856",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.10744700000009,
+              53.55921499999997
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 13,
+            "uid": "223bc0a3-d43b-44a9-8b15-745f4dc1a6c2",
+            "name": "Manshardtstraße / Einkaufszentrum Manshardtstraße",
+            "stand": "20250716113254.8093463",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "13",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.026759100000058,
+              53.56497329999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 19,
+            "uid": "c8b0de1f-a770-4b2a-a44a-4adf8824cb47",
+            "name": "U Uhlandstraße / Eilenau",
+            "stand": "20250716113254.7919638",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "18",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.03176880000007,
+              53.56701849999997
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 6,
+            "uid": "3646f120-1e50-4275-99e9-4e2a45b7c8e8",
+            "name": "Lerchenfeld / Uferstraße",
+            "stand": "20250716113254.7940092",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "6",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.027179200000061,
+              53.56962719999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 16,
+            "uid": "add6cce4-6668-4b2b-a151-91be39150d2c",
+            "name": "U Mundsburg / Schürbeker Straße",
+            "stand": "20250716113254.793746",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "15",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.040204400000073,
+              53.57114649999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 23,
+            "uid": "9fdcdb83-27da-4828-a74d-8d241a74ef52",
+            "name": "Uferstraße / Wagnerstraße",
+            "stand": "20250716113254.7979009",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "23",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.037131600000073,
+              53.57466399999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 4,
+            "uid": "6d521215-f470-4f3d-9d9b-82877daeccde",
+            "name": "U Hamburger Straße / Wagnerstraße",
+            "stand": "20250716113254.798266",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.029236800000072,
+              53.57579609999995
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": "0",
+            "uid": "d8b84f95-ab96-44eb-bdfe-4f50da355d8c",
+            "name": "Bartholomäusstraße / Beim Alten Schützenhof",
+            "stand": "20250716113254.7968436",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "0",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.02229690000007,
+              53.561496899999966
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 1,
+            "uid": "c5d7c362-8e65-4d5b-bd14-708122bdc7b6",
+            "name": "Alsterschwimmhalle / Ifflandstraße",
+            "stand": "20250716113254.7905307",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "1",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.02855590000006,
+              53.55979079999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 4,
+            "uid": "38afd965-0071-46bb-bbfd-b8badbc1f54a",
+            "name": "Lübecker Straße / Marienkrankenhaus",
+            "stand": "20250716113254.7914917",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "3",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.034100000000079,
+              53.56359999999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 22,
+            "uid": "821c4d6e-9873-4515-807c-b26814c4b994",
+            "name": "U Wartenau / Lübecker Straße",
+            "stand": "20250716113254.7935379",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "22",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.03711550000007,
+              53.561045599999964
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 18,
+            "uid": "3d11899d-8118-461e-9616-046fdfc153b2",
+            "name": "S Landwehr / Ramazan-Avci-Platz",
+            "stand": "20250716113254.7938562",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "17",
+            "anzahl_cargobike_electric": "1",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.061699600000084,
+              53.559865499999965
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 9,
+            "uid": "4c52fb24-88d0-4473-a063-aadb4193a72f",
+            "name": "Caspar-Voght-Straße / Sievekingsallee",
+            "stand": "20250716113254.8009424",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "9",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              10.066811600000074,
+              53.55551629999996
+            ]
+          },
+          "properties": {
+            "anzahl_raeder": 8,
+            "uid": "3fa92d4d-3227-4e15-844d-9b0c120a918a",
+            "name": "U Rauhes Haus / Horner Weg",
+            "stand": "20250716113254.8017377",
+            "anzahl_pedelec": "0",
+            "anzahl_bike": "8",
+            "anzahl_cargobike_electric": "0",
+            "art_der_station": "bike"
+          }
+        }
+      ]
+    },
+    "startPoint": "2024-10-10T07:00:00",
+    "cycleTravelerSource": {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.049557842822527,
+          53.60380137674482
+        ]
+      },
+      "properties": {
+        "spawningAmount": "10"
+      }
+    },
+    "cycleTravelerTarget": {
+      "type": "Point",
+      "coordinates": [
+        10.10735370621727,
+        53.542419027853434
+      ]
+    }
+  },
+  "outputs": {
+    "agents": {}
+  },
+  "response": "document"
+}
+ogcApiProcess.js:133:1
+
+​
+

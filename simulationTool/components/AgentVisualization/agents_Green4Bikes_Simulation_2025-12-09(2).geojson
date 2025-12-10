@@ -1,0 +1,1555 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "7a90c578-b04b-450c-982f-e3bf4e1d73e1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bc9d46f8-8347-4c2d-8a98-5b65d0708133",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "efd7fb51-1c17-4908-b166-9086b8916ffc",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "05df0451-1824-4c6d-9e30-134f69630918",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "03125664-5549-4d3b-ad62-4d3a9b4f9fbe",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "45512d4f-d900-43b0-a30d-8da205cbb523",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "efcdbddb-4e27-4c74-b969-6e7c16e34de2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "16d174d3-a66e-448a-a573-d6da138a9256",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "8c097ffe-eea7-44a4-bde2-6b5e6c9ecc1e",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "c48489d4-0a6b-422a-bc86-9e0bb4f6b643",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "2c47bdd1-da24-4eef-a0f4-4e7728f1aa41",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "a347119a-c85d-47f2-bbc0-a6487d10310e",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "708999c3-8845-4298-898e-0ea607643f80",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ed48ba82-f7ff-4fca-964a-255c0fe298d7",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "66b8b611-9d83-4bef-9763-94e121be2bc9",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "44206d04-b590-44c8-a728-6f451859dfd0",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "68d28897-14e4-4a5a-8b17-1a8d3aae722d",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "c48f457f-d9a9-40c4-a5d9-30e0829e2763",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fa67d0e3-0127-4a17-a275-b4a9712929f6",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "d0628e85-79de-4212-98c1-aa34da0af5a7",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "4208c94f-3878-42a6-8a81-b8f3a96df710",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "5609ad6e-340d-48d0-8d65-af593bb81a1d",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "f27a62ed-6fcf-415d-a320-9b5ddf924541",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "8cc6c8ea-4f7f-4b3f-867d-9572d077f638",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "005d303b-3ee1-4243-88b1-e43ed36b713a",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "31ab7f45-2867-4f0c-97a6-7335186b4c40",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "b3df9bae-e2b9-46c0-ac21-fff92672365a",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "4a4717a6-b9c5-4d67-9126-a5b7826644cc",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "1fb4f905-bd51-4c0b-8987-54b9815d3ad4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "4f39dca3-922f-4fa6-bbc9-14d0671a5e99",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "e97df8b1-3a23-4b5a-a16b-8a4c0fe66713",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "196f2f44-7e45-4901-a040-cc4186833d2f",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "aa2147e2-9a03-4024-bcd2-6508193dbdd6",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "a91cc9b9-807b-43fe-9e40-9ef6c12a32cd",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "5daa83b2-1db7-4a49-a03b-4a55dd43c401",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "801cde1c-4de2-4555-a891-feaf1710b3dd",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "b3f142b2-a2fb-43da-b71c-7cc3044af0a9",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "d1870f8d-8f58-4fdc-8d59-c577ae1eeffb",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "8916dd4a-5021-4435-aabf-646490e6a0af",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "669080e7-d756-4770-88ee-ad174fb1540e",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "62eded4e-ec0a-427f-ab83-23dc90ba2bd4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "d3325bcc-db92-49ab-8731-4eb0fe92fa0d",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "c2a94ff7-4531-454e-8b25-0443791639b1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "a56900a1-8963-43bb-af12-5377abb6eccf",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "60833cf5-45cd-452e-b28f-91afd76e5789",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "5c6d79a0-f200-48c7-ba70-b61b422a2755",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "b00ed706-aba7-4dca-aa61-b524fc5ee229",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "c8ca9c21-4657-47ae-b12b-252d6781f20a",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "26580b6d-c8c3-4abc-9b50-6c2cb2b8a6f7",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "439d70a0-ffa3-4d05-a18b-423ccb392f53",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          9.992011097600457,
+          53.55930424911098
+        ]
+      },
+      "properties": {
+        "activeCapability": "walking",
+        "carRadiusToStartPosition": 0,
+        "currentlyCarDriving": false,
+        "distanceStartGoal": 0,
+        "expectedTravelTime": 0,
+        "gender": "male",
+        "goalX": 0,
+        "goalY": 0,
+        "hasBike": false,
+        "routeLength": 0,
+        "routeMainModalChoice": "walking",
+        "routeMainModalRouteLength": 0,
+        "routeModalityCount": 0,
+        "startX": 0,
+        "startY": 0,
+        "velocity": 0,
+        "step": 1,
+        "time": "2024-12-01T06:45:01"
+      }
+    }
+  ]
+}

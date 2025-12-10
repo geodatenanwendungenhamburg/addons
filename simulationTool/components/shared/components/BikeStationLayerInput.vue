@@ -25,37 +25,88 @@ export default {
     emits: ["update:value"],
     data () {
         return {
-            stationCount: 0
+            stationCount: 0,
+            sourceChangeListener: null
         };
     },
     computed: {
-        planningScenarioLayer () {
-            // The planning scenario layer contains the stations features
-            return layerCollection.getLayerById("planning-scenario");
+        stationsLayer () {
+            // Stations are stored in the infrastructure layer (buildings-and-roads-features)
+            // NOT in the planning-scenario layer!
+            return layerCollection.getLayerById("buildings-and-roads-features");
+        }
+    },
+    watch: {
+        stationsLayer: {
+            handler (newLayer, oldLayer) {
+                // Clean up old listener
+                if (oldLayer && this.sourceChangeListener) {
+                    const oldSource = oldLayer.getLayerSource();
+
+                    if (oldSource) {
+                        oldSource.un("change", this.sourceChangeListener);
+                    }
+                }
+
+                // Setup new listener
+                if (newLayer) {
+                    const source = newLayer.getLayerSource();
+
+                    if (source) {
+                        this.sourceChangeListener = () => {
+                            this.loadStationsFromLayer();
+                        };
+                        source.on("change", this.sourceChangeListener);
+                        // Load immediately
+                        this.loadStationsFromLayer();
+                    }
+                }
+            },
+            immediate: true
         }
     },
     mounted () {
         // Auto-load stations from layer if available
         this.loadStationsFromLayer();
     },
+    beforeUnmount () {
+        // Clean up listener
+        if (this.stationsLayer && this.sourceChangeListener) {
+            const source = this.stationsLayer.getLayerSource();
+
+            if (source) {
+                source.un("change", this.sourceChangeListener);
+            }
+        }
+    },
     methods: {
         /**
          * Loads stations from the planning scenario layer.
          */
         loadStationsFromLayer () {
-            const layer = this.planningScenarioLayer;
+            console.warn("=== BikeStationLayerInput.loadStationsFromLayer() called ===");
+            
+            const layer = this.stationsLayer;
 
             if (!layer) {
-                console.warn("Planning scenario layer not found");
+                console.warn("BikeStationLayerInput: Infrastructure layer (buildings-and-roads-features) not found");
+                this.stationCount = 0;
+                this.$emit("update:value", null);
                 return;
             }
+
+            console.warn("BikeStationLayerInput: Infrastructure layer found:", layer);
 
             const source = layer.getLayerSource();
 
             if (!source) {
-                console.warn("Source for planning scenario layer not found");
+                console.warn("BikeStationLayerInput: Source for planning scenario layer not found");
+                this.stationCount = 0;
+                this.$emit("update:value", null);
                 return;
             }
+
+            console.warn("BikeStationLayerInput: Source found");
 
             const features = source.getFeatures();
 
@@ -168,7 +219,7 @@ export default {
                 class="alert alert-warning mb-0"
             >
                 <i class="bi bi-exclamation-triangle" />
-                Keine Radstationen gefunden. Bitte zeichnen Sie zuerst ein Planungsszenario mit der DataSource "StadtRAD-Stationen Hamburg".
+                Keine Radstationen gefunden. Bitte wählen Sie im Planning Scenario Step die DataSource "StadtRAD-Stationen Hamburg" aus und speichern Sie das Szenario.
             </div>
         </div>
     </div>

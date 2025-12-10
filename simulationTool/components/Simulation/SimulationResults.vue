@@ -2,6 +2,7 @@
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import SwitchInput from "../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
 import ConvertFeature from "../../js/convertFeatures";
+import {downloadBlobPerHTML5, downloadBlobPerNavigator} from "../../../../src/shared/modules/buttons/js/exportButtonUtils.js";
 import ConvertStyle from "../../js/convertStyle";
 import CircleStyle from "ol/style/Circle";
 import {getMappedProperty} from "../shared/js/getMappedProperty";
@@ -322,6 +323,99 @@ export default {
                 });
 
             return allZValues || [];
+        },
+
+        /**
+         * Downloads the simulation results as JSON file.
+         * @param {String} format - The format to download: "complete" or "geojson"
+         * @returns {void}
+         */
+        downloadResults (format = "complete") {
+            if (this.worstJobStatusTag !== "successful" || !this.currentSimulation) {
+                return;
+            }
+
+            let data, fileName, fileType;
+            const baseName = this.currentSimulation.name.replace(/[^a-z0-9]/gi, '_');
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            if (format === "geojson") {
+                // Download agent data as GeoJSON for AgentVisualization
+                const agentData = this.extractAgentGeoJSON();
+
+                if (!agentData || !agentData.features || agentData.features.length === 0) {
+                    console.warn("No agent data available for download");
+                    alert("Keine Agenten-Daten zum Herunterladen verfügbar.");
+                    return;
+                }
+
+                data = agentData;
+                fileName = `agents_${baseName}_${dateStr}.geojson`;
+                fileType = "application/geo+json";
+            }
+            else {
+                // Download complete simulation results
+                data = {
+                    simulationName: this.currentSimulation.name,
+                    scenarioName: this.currentPlanningScenario?.name,
+                    configId: this.currentSimulation.configId,
+                    simulationId: this.simulationIdForResults,
+                    timestamp: new Date().toISOString(),
+                    status: this.worstJobStatusTag,
+                    startTime: this.earliestStartTime,
+                    finishedTime: this.latestFinishedTime,
+                    inputs: this.inputsToShow,
+                    jobs: Object.fromEntries(
+                        Object.entries(this.jobs).map(([jobId, job]) => [
+                            jobId,
+                            {
+                                jobStatus: job.jobStatus,
+                                jobResults: job.jobResults,
+                                requestBody: job.requestBody
+                            }
+                        ])
+                    )
+                };
+                fileName = `simulation_${baseName}_${dateStr}.json`;
+                fileType = "application/json";
+            }
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: fileType});
+            const succeed = downloadBlobPerNavigator(blob, fileName);
+
+            if (!succeed) {
+                downloadBlobPerHTML5(blob, fileName);
+            }
+        },
+
+        /**
+         * Extracts agent GeoJSON data from job results.
+         * @returns {Object|null} GeoJSON FeatureCollection or null if not found
+         */
+        extractAgentGeoJSON () {
+            for (const job of Object.values(this.jobs)) {
+                // Check for agents in jobResults
+                if (job.jobResults && job.jobResults.agents) {
+                    const agents = job.jobResults.agents;
+
+                    // Validate that it's a valid FeatureCollection with data
+                    if (agents.type === "FeatureCollection" && 
+                        agents.features && 
+                        Array.isArray(agents.features) && 
+                        agents.features.length > 0) {
+                        return agents;
+                    }
+                }
+                // Check if jobResults itself is a FeatureCollection with data
+                if (job.jobResults && 
+                    job.jobResults.type === "FeatureCollection" && 
+                    job.jobResults.features && 
+                    Array.isArray(job.jobResults.features) && 
+                    job.jobResults.features.length > 0) {
+                    return job.jobResults;
+                }
+            }
+            return null;
         },
 
         /**
@@ -952,6 +1046,24 @@ export default {
                         :text="$t('additional:modules.tools.simulationTool.showProperties')"
                         @click="() => setMode('simulationParameter')"
                     />
+                    <div v-if="worstJobStatusTag === 'successful'">
+                        <FlatButton
+                            id="download-results-complete"
+                            class="me-2"
+                            :icon="'bi bi-download'"
+                            :aria-label="$t('additional:modules.tools.simulationTool.downloadResults')"
+                            :text="$t('additional:modules.tools.simulationTool.downloadComplete')"
+                            @click="() => downloadResults('complete')"
+                        />
+                        <FlatButton
+                            v-if="extractAgentGeoJSON()"
+                            id="download-results-geojson"
+                            :icon="'bi bi-geo-alt'"
+                            :aria-label="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
+                            :text="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
+                            @click="() => downloadResults('geojson')"
+                        />
+                    </div>
                     <!-- If print module is available, show print button -->
                     <!--<FlatButton
                         v-if="isPrintModuleAvailable"

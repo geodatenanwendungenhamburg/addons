@@ -132,13 +132,23 @@ export default class OgcApiProcess {
         console.log("Full URL:", url.toString());
         console.log("Request Body:", JSON.stringify(requestBody, null, 2));
         
-        const response = await axios.post(url, requestBody, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        });
+        try {
+            const response = await axios.post(url, requestBody, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
 
-        return response.data;
+            return response.data;
+        }
+        catch (error) {
+            console.error("=== OGC API Process Execute FAILED ===");
+            console.error("Status:", error.response?.status);
+            console.error("Status Text:", error.response?.statusText);
+            console.error("Error Data:", error.response?.data);
+            console.error("Full Error:", error);
+            throw error;
+        }
     }
 
     /**

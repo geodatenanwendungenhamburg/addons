@@ -241,6 +241,9 @@ export default {
             else if (properties.activeCapability === "bike" || properties.hasBike) {
                 color = [255, 153, 0]; // orange
             }
+            else if (properties.activeCapability === "cyclingRentalBike") {
+                color = [40, 167, 69]; // green (Bootstrap success color)
+            }
 
             return new Style({
                 image: new Circle({
@@ -324,10 +327,10 @@ export default {
                         geometry: new LineString(trailCoords),
                         isTrail: true,
                         agentId: agentId
-                    });
+                    }),
 
-                // Get color based on agent capability
-                const baseColor = this.getTrailColor(currentFeature.properties);
+                    // Get color based on agent capability
+                    baseColor = this.getTrailColor(currentFeature.properties);
 
                 trailFeature.setStyle(this.getTrailStyle(baseColor, this.agentTrails[agentId].length));
                 layerSource.addFeature(trailFeature);
@@ -346,7 +349,28 @@ export default {
             else if (properties.activeCapability === "bike" || properties.hasBike) {
                 return [255, 153, 0]; // orange
             }
+            else if (properties.activeCapability === "cyclingRentalBike") {
+                return [40, 167, 69]; // green
+            }
             return [100, 100, 100]; // gray
+        },
+
+        /**
+         * Get badge class for capability
+         * @param {String} capability - The active capability
+         * @returns {String} Bootstrap badge class
+         */
+        getCapabilityBadgeClass (capability) {
+            if (capability === "walking") {
+                return "bg-primary"; // blue
+            }
+            else if (capability === "bike") {
+                return "bg-warning"; // orange
+            }
+            else if (capability === "cyclingRentalBike") {
+                return "bg-success"; // green
+            }
+            return "bg-secondary"; // gray
         },
 
         /**
@@ -361,8 +385,8 @@ export default {
 
             // Main line with gradient-like opacity
             for (let i = 0; i < trailPoints - 1; i++) {
-                const opacity = (i + 1) / trailPoints; // 0.2, 0.4, 0.6, 0.8, 1.0
-                const width = 2 + (i / trailPoints) * 3; // 2 to 5 pixels
+                const opacity = (i + 1) / trailPoints, // 0.2, 0.4, 0.6, 0.8, 1.0
+                    width = 2 + (i / trailPoints) * 3; // 2 to 5 pixels
 
                 styles.push(new Style({
                     stroke: new Stroke({
@@ -631,7 +655,7 @@ export default {
                             <td>
                                 <span
                                     class="badge"
-                                    :class="selectedAgent.activeCapability === 'walking' ? 'bg-primary' : 'bg-warning'"
+                                    :class="getCapabilityBadgeClass(selectedAgent.activeCapability)"
                                 >
                                     {{ selectedAgent.activeCapability || '---' }}
                                 </span>

@@ -102,7 +102,7 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Fortbewegung:</strong></td>
-                                    <td>{{ selectedAgent.activeCapability === 'walking' ? 'Zu Fuß' : 'Fahrrad' }}</td>
+                                    <td>{{ getCapabilityLabel(selectedAgent.activeCapability) }}</td>
                                 </tr>
                                 <tr v-if="selectedAgent.velocity">
                                     <td><strong>Geschwindigkeit:</strong></td>
@@ -204,6 +204,11 @@ export default {
 
             this.updateVisualization();
         },
+        "$store.state.agentVisualization.planningScenarioData" (newData) {
+            if (newData) {
+                this.renderPlanningScenarioData(newData);
+            }
+        },
         "$store.state.agentVisualization.filters": {
             handler () {
                 this.updateVisualization();
@@ -241,6 +246,13 @@ export default {
 
             // Initialize layer
             this.initializeLayer();
+
+            // Render planning scenario data if available
+            const planningScenarioData = this.$store.state.agentVisualization.planningScenarioData;
+
+            if (planningScenarioData) {
+                this.renderPlanningScenarioData(planningScenarioData);
+            }
         },
 
         /**
@@ -308,14 +320,53 @@ export default {
             }
 
             try {
-                const text = await file.text(),
-                    geojson = JSON.parse(text);
+                const text = await file.text();
+                let geojson = JSON.parse(text);
+
+                // Check if this is a simulation export file (complete format)
+                if (geojson.jobs && geojson.simulationId) {
+                    console.log("Detected simulation export format, extracting agent data...");
+                    
+                    // Try to extract agent GeoJSON from jobs
+                    let agentData = null;
+
+                    for (const job of Object.values(geojson.jobs)) {
+                        if (job.jobResults && job.jobResults.agents) {
+                            agentData = job.jobResults.agents;
+                            break;
+                        }
+                        // Check if jobResults itself is a FeatureCollection
+                        if (job.jobResults && job.jobResults.type === "FeatureCollection") {
+                            agentData = job.jobResults;
+                            break;
+                        }
+                    }
+
+                    if (!agentData) {
+                        throw new Error("Keine Agenten-Daten in der Simulationsdatei gefunden. Bitte exportieren Sie das GeoJSON-Format.");
+                    }
+
+                    geojson = agentData;
+                }
+
+                // Validate GeoJSON format
+                if (!geojson.type || geojson.type !== "FeatureCollection") {
+                    throw new Error("Ungültiges Format. Es wird eine GeoJSON FeatureCollection erwartet.");
+                }
+
+                if (!geojson.features || !Array.isArray(geojson.features)) {
+                    throw new Error("Keine Features in der GeoJSON-Datei gefunden.");
+                }
+
+                if (geojson.features.length === 0) {
+                    throw new Error("Die GeoJSON-Datei enthält keine Daten (leere Features-Array).");
+                }
 
                 this.loadAgentData(geojson);
             }
             catch (error) {
                 console.error("Error loading file:", error);
-                alert("Fehler beim Laden der Datei. Bitte stellen Sie sicher, dass es sich um eine gültige GeoJSON-Datei handelt.");
+                alert(`Fehler beim Laden der Datei: ${error.message}\n\nBitte stellen Sie sicher, dass es sich um eine gültige GeoJSON-Datei mit Agenten-Daten handelt.`);
             }
         },
 
@@ -324,11 +375,11 @@ export default {
          */
         async loadSampleData () {
             try {
-                // Try multiple possible paths for sample data
+                // Try multiple possible paths for green4bikes results data
                 const possiblePaths = [
-                    "./sampleData.json",
-                    "../addons/simulationTool/components/AgentVisualization/sampleData.json",
-                    "../../addons/simulationTool/components/AgentVisualization/sampleData.json"
+                    "./green4bikes-results-2025-12-08T08-01-01-224Z.geojson",
+                    "../addons/simulationTool/components/AgentVisualization/green4bikes-results-2025-12-08T08-01-01-224Z.geojson",
+                    "../../addons/simulationTool/components/AgentVisualization/green4bikes-results-2025-12-08T08-01-01-224Z.geojson"
                 ];
 
                 let geojson = null;
@@ -350,8 +401,9 @@ export default {
                 }
 
                 if (!geojson) {
-                    // Use inline sample data as fallback
-                    geojson = this.getInlineSampleData();
+                    console.error("Could not load green4bikes results data from any path:", lastError);
+                    alert("Fehler beim Laden der Green4Bikes-Ergebnisdaten. Bitte laden Sie die Datei manuell hoch.");
+                    return;
                 }
 
                 this.loadAgentData(geojson);
@@ -445,6 +497,41 @@ export default {
         },
 
         /**
+         * Render planning scenario data (scenario area, source, target)
+         * @param {Object} geojson - GeoJSON FeatureCollection
+         */
+        renderPlanningScenarioData (geojson) {
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario");
+
+            if (!planningScenarioLayer) {
+                console.warn("Planning scenario layer not found");
+                return;
+            }
+
+            const layerSource = planningScenarioLayer.getLayerSource(),
+                GeoJSON = require("ol/format/GeoJSON").default,
+                geoJsonFormat = new GeoJSON();
+
+            // Clear existing features
+            layerSource.clear();
+
+            // Add features from planning scenario data
+            if (geojson && geojson.features) {
+                const features = geoJsonFormat.readFeatures(geojson, {
+                    dataProjection: "EPSG:4326",
+                    featureProjection: "EPSG:25832"
+                });
+
+                features.forEach(feature => {
+                    layerSource.addFeature(feature);
+                });
+            }
+
+            // Make layer visible
+            planningScenarioLayer.layer.setVisible(true);
+        },
+
+        /**
          * Update visualization for current time
          */
         updateVisualization () {
@@ -480,13 +567,27 @@ export default {
                 let visibleCount = 0;
 
                 interpolatedPositions.forEach((position, agentId) => {
-                    // Find original feature for properties
-                    const originalFeature = this.$store.state.agentVisualization.features.find(
+                    // Find feature for this agent at or near current time
+                    // Since activeCapability can change, we need the feature closest to current time
+                    const agentFeatures = this.$store.state.agentVisualization.features.filter(
                         f => f.properties.agentId === agentId
                     );
 
-                    if (!originalFeature) {
+                    if (agentFeatures.length === 0) {
                         return;
+                    }
+
+                    // Find the feature with time closest to (but not after) currentTime
+                    let originalFeature = agentFeatures[0];
+                    let minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+
+                    for (const feature of agentFeatures) {
+                        const timeDiff = Math.abs(currentTime - feature.properties.time);
+
+                        if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
+                            minTimeDiff = timeDiff;
+                            originalFeature = feature;
+                        }
                     }
 
                     // Apply filters
@@ -497,6 +598,10 @@ export default {
                     }
 
                     if (capability === "bike" && !filters.bike) {
+                        return;
+                    }
+
+                    if (capability === "cyclingRentalBike" && !filters.rentalBike) {
                         return;
                     }
 
@@ -563,13 +668,26 @@ export default {
             heatmapSource.clear();
 
             interpolatedPositions.forEach((position, agentId) => {
-                // Find original feature for properties
-                const originalFeature = this.$store.state.agentVisualization.features.find(
+                // Find feature for this agent at or near current time
+                const agentFeatures = this.$store.state.agentVisualization.features.filter(
                     f => f.properties.agentId === agentId
                 );
 
-                if (!originalFeature) {
+                if (agentFeatures.length === 0) {
                     return;
+                }
+
+                // Find the feature with time closest to (but not after) currentTime
+                let originalFeature = agentFeatures[0];
+                let minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+
+                for (const feature of agentFeatures) {
+                    const timeDiff = Math.abs(currentTime - feature.properties.time);
+
+                    if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
+                        minTimeDiff = timeDiff;
+                        originalFeature = feature;
+                    }
                 }
 
                 // Apply filters
@@ -580,6 +698,10 @@ export default {
                 }
 
                 if (capability === "bike" && !filters.bike) {
+                    return;
+                }
+
+                if (capability === "cyclingRentalBike" && !filters.rentalBike) {
                     return;
                 }
 
@@ -603,13 +725,16 @@ export default {
          * Get style for agent
          */
         getAgentStyle (properties) {
-            let color = [100, 100, 100];
+            let color = [100, 100, 100]; // default gray
 
             if (properties.activeCapability === "walking") {
-                color = [40, 167, 69]; // green
+                color = [66, 135, 245]; // blue
             }
             else if (properties.activeCapability === "bike") {
                 color = [253, 126, 20]; // orange
+            }
+            else if (properties.activeCapability === "cyclingRentalBike") {
+                color = [40, 167, 69]; // green
             }
 
             return new Style({
@@ -625,13 +750,16 @@ export default {
          * Get trail style
          */
         getTrailStyle (properties) {
-            let color = [100, 100, 100];
+            let color = [100, 100, 100]; // default gray
 
             if (properties.activeCapability === "walking") {
-                color = [40, 167, 69];
+                color = [66, 135, 245]; // blue
             }
             else if (properties.activeCapability === "bike") {
-                color = [253, 126, 20];
+                color = [253, 126, 20]; // orange
+            }
+            else if (properties.activeCapability === "cyclingRentalBike") {
+                color = [40, 167, 69]; // green
             }
 
             return new Style({
@@ -653,6 +781,19 @@ export default {
                     stroke: new Stroke({color: "#000", width: 2})
                 })
             });
+        },
+
+        /**
+         * Get capability label for display
+         */
+        getCapabilityLabel (capability) {
+            const labels = {
+                "walking": "Zu Fuß",
+                "bike": "Fahrrad",
+                "cyclingRentalBike": "Leihrad"
+            };
+
+            return labels[capability] || capability;
         },
 
         /**

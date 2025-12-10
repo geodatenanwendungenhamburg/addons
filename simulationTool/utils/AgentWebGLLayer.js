@@ -90,7 +90,7 @@ export default class AgentWebGLLayer {
 
     /**
      * Update color mapping for filters (simplified for WebGL compatibility)
-     * @param {Object} filters - Filter settings {walking: true/false, bike: true/false}
+     * @param {Object} filters - Filter settings {walking: true/false, bike: true/false, rentalBike: true/false}
      */
     updateFilters (filters) {
         // Note: WebGL layer style updates are complex in OL9
@@ -107,6 +107,10 @@ export default class AgentWebGLLayer {
             }
 
             if (capability === "bike" && !filters.bike) {
+                return false;
+            }
+
+            if (capability === "cyclingRentalBike" && !filters.rentalBike) {
                 return false;
             }
 

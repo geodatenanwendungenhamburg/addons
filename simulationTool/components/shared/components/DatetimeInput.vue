@@ -55,12 +55,9 @@ export default {
          * @returns {String} The minimum date in YYYY-MM-DD format.
          */
         minDate () {
-            if (!this.min) {
-                return "";
-            }
-            const minMoment = dayjs(this.min);
-
-            return minMoment.isValid() ? minMoment.format("YYYY-MM-DD") : "";
+            // Don't restrict date input to allow any date selection
+            // Users should be able to select dates in the past or future
+            return "";
         },
 
         /**
@@ -68,12 +65,9 @@ export default {
          * @returns {String} The maximum date in YYYY-MM-DD format.
          */
         maxDate () {
-            if (!this.max) {
-                return "";
-            }
-            const maxMoment = dayjs(this.max);
-
-            return maxMoment.isValid() ? maxMoment.format("YYYY-MM-DD") : "";
+            // Don't restrict date input to allow any date selection
+            // Users should be able to select dates in the past or future
+            return "";
         },
 
         /**
@@ -173,22 +167,22 @@ export default {
                 return;
             }
 
-            // Validate against min
+            // Validate against min (only if min is a valid date after year 2000)
             if (this.min) {
                 const minMoment = dayjs(this.min);
 
-                if (moment.isBefore(minMoment)) {
+                if (minMoment.isValid() && minMoment.year() >= 2000 && moment.isBefore(minMoment)) {
                     this.validationError = `Zeitpunkt darf nicht vor ${minMoment.format("DD.MM.YYYY HH:mm")} liegen`;
                     this.$emit("update:value", "");
                     return;
                 }
             }
 
-            // Validate against max
+            // Validate against max (only if max is a valid date after year 2000)
             if (this.max) {
                 const maxMoment = dayjs(this.max);
 
-                if (moment.isAfter(maxMoment)) {
+                if (maxMoment.isValid() && maxMoment.year() >= 2000 && moment.isAfter(maxMoment)) {
                     this.validationError = `Zeitpunkt darf nicht nach ${maxMoment.format("DD.MM.YYYY HH:mm")} liegen`;
                     this.$emit("update:value", "");
                     return;

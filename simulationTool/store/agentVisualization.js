@@ -6,6 +6,7 @@
 const state = {
     // Data
     agentData: null,
+    planningScenarioData: null,
     timeSteps: [],
     features: [],
     
@@ -19,6 +20,7 @@ const state = {
     filters: {
         walking: true,
         bike: true,
+        rentalBike: true,
         zones: [],
         agentIds: []
     },
@@ -58,6 +60,10 @@ const getters = {
             }
 
             if (props.activeCapability === "bike" && !state.filters.bike) {
+                return false;
+            }
+
+            if (props.activeCapability === "cyclingRentalBike" && !state.filters.rentalBike) {
                 return false;
             }
 
@@ -142,6 +148,13 @@ const mutations = {
      */
     setAgentData (state, data) {
         state.agentData = data;
+    },
+
+    /**
+     * Set planning scenario data
+     */
+    setPlanningScenarioData (state, data) {
+        state.planningScenarioData = data;
     },
 
     /**
@@ -292,8 +305,6 @@ const actions = {
         // Extract features
         const features = geojson.features || [];
 
-        commit("setFeatures", features);
-
         // Extract unique timesteps and convert to timestamps if needed
         const timeSet = new Set();
 
@@ -313,14 +324,24 @@ const actions = {
 
             // Extract agentId from feature.id if not in properties
             if (!feature.properties.agentId && feature.id) {
-                // Format: "agent-0-t0" -> agentId = "agent-0"
+                // For new green4bikes data: the UUID IS the agentId (same UUID = same agent over time)
+                // For old format: "agent-0-t0" -> agentId = "agent-0"
                 const idParts = feature.id.split("-");
 
-                if (idParts.length >= 2) {
+                // Check if it's a UUID (5 parts) or old format (2-3 parts)
+                if (idParts.length === 5) {
+                    // UUID format: the entire UUID identifies the agent
+                    feature.properties.agentId = feature.id;
+                }
+                else if (idParts.length >= 2) {
+                    // Old format
                     feature.properties.agentId = idParts[0] + "-" + idParts[1];
                 }
             }
         });
+
+        // Commit features AFTER time conversion so they have numeric timestamps
+        commit("setFeatures", features);
 
         const timeSteps = Array.from(timeSet).sort((a, b) => a - b);
 
@@ -341,6 +362,13 @@ const actions = {
         });
 
         commit("setAgentCount", agentIds.size);
+    },
+
+    /**
+     * Load planning scenario data (scenario area, source, target)
+     */
+    loadPlanningScenarioData ({commit}, geojson) {
+        commit("setPlanningScenarioData", geojson);
     },
 
     /**

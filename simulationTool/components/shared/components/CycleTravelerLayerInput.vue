@@ -1,15 +1,16 @@
 <script>
 import {mapActions} from "vuex";
-import Draw, {createBox} from "ol/interaction/Draw";
+import Draw from "ol/interaction/Draw";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
+import Circle from "ol/style/Circle";
 import GeoJSON from "ol/format/GeoJSON";
 import layerCollection from "../../../../../src/core/layers/js/layerCollection";
 
 /**
  * Custom input for Green4Bikes cycleTravelerLayer.
- * Allows drawing two rectangles: source (orange) and target (purple).
+ * Allows drawing two polygons: source (orange) and target (purple).
  */
 export default {
     name: "CycleTravelerLayerInput",
@@ -25,16 +26,29 @@ export default {
         value: {
             type: String,
             default: null
+        },
+        startPoint: {
+            type: String,
+            default: null
+        },
+        endPoint: {
+            type: String,
+            default: null
+        },
+        agentCount: {
+            type: Number,
+            default: 50
         }
     },
-    emits: ["update:value"],
+    emits: ["update:value", "update:agentCount"],
     data () {
         return {
             drawInteraction: null,
             sourceFeature: null,
             targetFeature: null,
             sourceGeometry: null,
-            targetGeometry: null
+            targetGeometry: null,
+            localAgentCount: 50
         };
     },
     computed: {
@@ -58,6 +72,7 @@ export default {
         }
     },
     mounted () {
+        this.localAgentCount = this.agentCount || 50;
         this.parseExistingValue();
     },
     unmounted () {
@@ -126,11 +141,26 @@ export default {
                     }, {
                         dataProjection: "EPSG:4326",
                         featureProjection: "EPSG:25832"
-                    }),
+                    });
+
+                let style;
+
+                // Different style for Point vs Polygon
+                if (geometry.type === "Point") {
+                    style = new Style({
+                        image: new Circle({
+                            radius: 8,
+                            fill: new Fill({color: colors[type].stroke}),
+                            stroke: new Stroke({color: "#fff", width: 2})
+                        })
+                    });
+                }
+                else {
                     style = new Style({
                         fill: new Fill({color: colors[type].fill}),
                         stroke: new Stroke({color: colors[type].stroke, width: 2})
                     });
+                }
 
                 feature.setStyle(style);
                 this.layerSource.addFeature(feature);
@@ -154,10 +184,11 @@ export default {
         },
 
         /**
-         * Starts drawing a rectangle.
+         * Starts drawing a geometry.
          * @param {String} type - "source" or "target"
+         * @param {String} geometryType - "Polygon" or "Point"
          */
-        startDrawing (type) {
+        startDrawing (type, geometryType = "Polygon") {
             this.removeDrawInteraction();
 
             if (!this.layerSource) {
@@ -178,8 +209,7 @@ export default {
 
             this.drawInteraction = new Draw({
                 source: this.layerSource,
-                type: "Circle",
-                geometryFunction: createBox()
+                type: geometryType
             });
 
             this.drawInteraction.on("drawend", (event) => {
@@ -205,15 +235,30 @@ export default {
             }
 
             const feature = event.feature,
-                style = new Style({
-                    fill: new Fill({color: colors.fill}),
-                    stroke: new Stroke({color: colors.stroke, width: 2})
-                }),
                 geoJsonFormat = new GeoJSON(),
                 geoJsonFeature = geoJsonFormat.writeFeatureObject(feature, {
                     dataProjection: "EPSG:4326",
                     featureProjection: "EPSG:25832"
                 });
+
+            // Set style based on geometry type
+            let style;
+
+            if (geoJsonFeature.geometry.type === "Point") {
+                style = new Style({
+                    image: new Circle({
+                        radius: 8,
+                        fill: new Fill({color: colors.stroke}),
+                        stroke: new Stroke({color: "#fff", width: 2})
+                    })
+                });
+            }
+            else {
+                style = new Style({
+                    fill: new Fill({color: colors.fill}),
+                    stroke: new Stroke({color: colors.stroke, width: 2})
+                });
+            }
 
             feature.setStyle(style);
 
@@ -268,19 +313,62 @@ export default {
 
         /**
          * Updates the value prop with current geometries.
+         * Creates a GeoJSON FeatureCollection with source and target polygon features.
          */
         updateValue () {
-            if (!this.sourceGeometry && !this.targetGeometry) {
+            if (!this.sourceGeometry || !this.targetGeometry) {
                 this.$emit("update:value", null);
                 return;
             }
 
-            // Format as CSV: "source_geojson;target_geojson"
-            const sourceJson = this.sourceGeometry ? JSON.stringify(this.sourceGeometry) : "",
-                targetJson = this.targetGeometry ? JSON.stringify(this.targetGeometry) : "",
-                csvValue = `${sourceJson};${targetJson}`;
+            // Store both polygon geometries as a FeatureCollection with metadata
+            const featureCollection = {
+                type: "FeatureCollection",
+                features: [
+                    {
+                        type: "Feature",
+                        id: "cycleTravelerSource",
+                        geometry: this.sourceGeometry,
+                        properties: {
+                            type: "source",
+                            spawningAmount: this.localAgentCount
+                        }
+                    },
+                    {
+                        type: "Feature",
+                        id: "cycleTravelerTarget",
+                        geometry: this.targetGeometry,
+                        properties: {
+                            type: "target"
+                        }
+                    }
+                ]
+            };
 
-            this.$emit("update:value", csvValue);
+            this.$emit("update:value", JSON.stringify(featureCollection));
+        },
+
+        /**
+         * Calculates the centroid of a polygon geometry.
+         * @param {Object} geometry - GeoJSON Polygon geometry
+         * @returns {Array} [longitude, latitude]
+         */
+        calculateCentroid (geometry) {
+            if (geometry.type !== "Polygon" || !geometry.coordinates || !geometry.coordinates[0]) {
+                return [0, 0];
+            }
+
+            const coords = geometry.coordinates[0],
+                count = coords.length - 1; // Exclude duplicate last point
+            let sumLon = 0,
+                sumLat = 0;
+
+            for (let i = 0; i < count; i++) {
+                sumLon += coords[i][0];
+                sumLat += coords[i][1];
+            }
+
+            return [sumLon / count, sumLat / count];
         },
 
         /**
@@ -290,6 +378,20 @@ export default {
             if (this.drawInteraction) {
                 this.removeInteraction(this.drawInteraction);
                 this.drawInteraction = null;
+            }
+        },
+
+        /**
+         * Updates the agent count and emits the change.
+         * @param {Event} event - Input event
+         */
+        updateAgentCount (event) {
+            const value = parseInt(event.target.value, 10);
+
+            if (!isNaN(value) && value > 0) {
+                this.localAgentCount = value;
+                this.$emit("update:agentCount", value);
+                this.updateValue();
             }
         }
     }
@@ -301,7 +403,26 @@ export default {
         <div class="mb-3">
             <strong>{{ label }}</strong>
         </div>
-        
+
+        <div class="mb-3 p-3 border rounded">
+            <label
+                for="agentCountInput"
+                class="form-label mb-2"
+            >
+                <i class="bi bi-people-fill" />
+                Anzahl der Agenten
+            </label>
+            <input
+                id="agentCountInput"
+                type="number"
+                class="form-control mb-3"
+                :value="localAgentCount"
+                min="1"
+                max="1000"
+                @input="updateAgentCount"
+            >
+        </div>
+
         <div class="mb-3 p-3 border rounded">
             <h6 class="mb-2">
                 <i
@@ -314,10 +435,18 @@ export default {
                 <button
                     type="button"
                     class="btn btn-primary btn-sm"
-                    @click="startDrawing('source')"
+                    @click="startDrawing('source', 'Point')"
                 >
-                    <i class="bi bi-pencil" />
-                    Rechteck aufziehen
+                    <i class="bi bi-geo-alt-fill" />
+                    Punkt
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="startDrawing('source', 'Polygon')"
+                >
+                    <i class="bi bi-pentagon" />
+                    Polygon
                 </button>
                 <button
                     v-if="hasSourceGeometry"
@@ -330,7 +459,12 @@ export default {
                 </button>
             </div>
             <div class="small text-muted">
-                {{ hasSourceGeometry ? 'Startbereich gezeichnet' : 'Kein Startbereich gezeichnet' }}
+                <span v-if="hasSourceGeometry">
+                    ✓ {{ sourceGeometry?.type === 'Point' ? 'Startpunkt' : 'Startbereich' }} gezeichnet
+                </span>
+                <span v-else>
+                    Kein Startbereich gezeichnet
+                </span>
             </div>
         </div>
 
@@ -346,10 +480,18 @@ export default {
                 <button
                     type="button"
                     class="btn btn-primary btn-sm"
-                    @click="startDrawing('target')"
+                    @click="startDrawing('target', 'Point')"
                 >
-                    <i class="bi bi-pencil" />
-                    Rechteck aufziehen
+                    <i class="bi bi-geo-alt-fill" />
+                    Punkt
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="startDrawing('target', 'Polygon')"
+                >
+                    <i class="bi bi-pentagon" />
+                    Polygon
                 </button>
                 <button
                     v-if="hasTargetGeometry"
@@ -362,7 +504,12 @@ export default {
                 </button>
             </div>
             <div class="small text-muted">
-                {{ hasTargetGeometry ? 'Zielbereich gezeichnet' : 'Kein Zielbereich gezeichnet' }}
+                <span v-if="hasTargetGeometry">
+                    ✓ {{ targetGeometry?.type === 'Point' ? 'Zielpunkt' : 'Zielbereich' }} gezeichnet
+                </span>
+                <span v-else>
+                    Kein Zielbereich gezeichnet
+                </span>
             </div>
         </div>
     </div>

@@ -127,8 +127,12 @@
                 class="chart-tooltip"
                 :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
             >
-                <div class="tooltip-time">{{ tooltip.time }}</div>
-                <div class="tooltip-value">{{ tooltip.label }}: {{ tooltip.value }}</div>
+                <div class="tooltip-time">
+                    {{ tooltip.time }}
+                </div>
+                <div class="tooltip-value">
+                    {{ tooltip.label }}: {{ tooltip.value }}
+                </div>
             </div>
         </div>
     </div>
@@ -233,8 +237,8 @@ export default {
          * Generate grid lines
          */
         gridLines () {
-            const lines = [];
-            const numLines = 5;
+            const lines = [],
+                numLines = 5;
 
             for (let i = 0; i <= numLines; i++) {
                 const y = this.padding.top + (i / numLines) * this.chartArea.height;
@@ -254,8 +258,8 @@ export default {
          * Generate Y-axis labels
          */
         yAxisLabels () {
-            const labels = [];
-            const numLabels = 5;
+            const labels = [],
+                numLabels = 5;
 
             for (let i = 0; i <= numLabels; i++) {
                 const value = Math.round((1 - i / numLabels) * this.maxValue),
@@ -422,10 +426,10 @@ export default {
          */
         handleChartClick (event) {
             const rect = this.$refs.chartSvg.getBoundingClientRect(),
-                x = event.clientX - rect.left;
+                x = event.clientX - rect.left,
 
-            // Convert X to time
-            const ratio = (x - this.padding.left) / this.chartArea.width,
+                // Convert X to time
+                ratio = (x - this.padding.left) / this.chartArea.width,
                 range = this.timeRange,
                 clickedTime = range.min + ratio * (range.max - range.min);
 

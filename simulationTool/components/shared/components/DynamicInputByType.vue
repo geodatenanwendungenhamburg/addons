@@ -7,6 +7,7 @@ import SwitchInput from "../../../../../src/shared/modules/checkboxes/components
 import DatetimeInput from "./DatetimeInput.vue";
 import GeometryInput from "./GeometryInput.vue";
 import CycleTravelerLayerInput from "./CycleTravelerLayerInput.vue";
+import BikeStationLayerInput from "./BikeStationLayerInput.vue";
 
 export default {
     name: "DynamicInputByType",
@@ -18,7 +19,8 @@ export default {
         SwitchInput,
         DatetimeInput,
         GeometryInput,
-        CycleTravelerLayerInput
+        CycleTravelerLayerInput,
+        BikeStationLayerInput
     },
     props: {
         aria: {
@@ -232,6 +234,14 @@ export default {
         </template>
         <template v-else-if="inputType === 'cycleTravelerLayer'">
             <CycleTravelerLayerInput
+                :id="id"
+                :label="label"
+                :value="value"
+                @update:value="$emit('update:value', $event)"
+            />
+        </template>
+        <template v-else-if="inputType === 'bikeStations'">
+            <BikeStationLayerInput
                 :id="id"
                 :label="label"
                 :value="value"

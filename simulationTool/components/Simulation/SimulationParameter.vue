@@ -46,7 +46,8 @@ export default {
             ignoreProperties: [],
             flatInputs: {},
             nestedInputs: {},
-            areInputParameterPrepared: false
+            areInputParameterPrepared: false,
+            agentCount: 50
         };
     },
     computed: {
@@ -61,8 +62,8 @@ export default {
         ...mapGetters("Modules/Login", ["accessToken"]),
 
         /**
-         * Checks if required rectangles are drawn for Green4Bikes simulation.
-         * @returns {boolean} True if both rectangles are drawn or not required, false otherwise.
+         * Checks if required geometries are drawn for Green4Bikes simulation.
+         * @returns {boolean} True if both source and target geometries are drawn or not required, false otherwise.
          */
         areRequiredRectanglesDrawn () {
             // Only check for Green4Bikes simulation
@@ -70,11 +71,21 @@ export default {
                 return true;
             }
 
-            // Check if both cycleTravelerSource and cycleTravelerTarget geometries are set
-            const sourceGeometry = this.getRequestBodyInputByKey("cycleTravelerSource", null, null)?.geometry;
-            const targetGeometry = this.getRequestBodyInputByKey("cycleTravelerTarget", null, null);
+            // Check if cycleTravelerLayer is set (contains both source and target)
+            const cycleTravelerLayerStr = this.getRequestBodyInputByKey("cycleTravelerLayer", "", null);
 
-            return !!(sourceGeometry && targetGeometry);
+            if (!cycleTravelerLayerStr) {
+                return false;
+            }
+
+            try {
+                const featureCollection = JSON.parse(cycleTravelerLayerStr);
+
+                return Boolean(featureCollection?.features?.[0]?.geometry);
+            }
+            catch (error) {
+                return false;
+            }
         },
 
         /**
@@ -324,9 +335,16 @@ export default {
         }
     },
     unmounted () {
-        if (typeof layerCollection.getLayerById("planning-scenario") !== "undefined") {
-            layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
+        // Don't clear planning-scenario layer if switching to AgentVisualization
+        // (it needs to display the scenario area, source, and target)
+        const isGoingToAgentVisualization = this.$store?.state?.Modules?.SimulationTool?.mode === "agentVisualization";
+
+        if (!isGoingToAgentVisualization) {
+            if (typeof layerCollection.getLayerById("planning-scenario") !== "undefined") {
+                layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
+            }
         }
+        
         if (typeof layerCollection.getLayerById(infrastructureLayerId) !== "undefined") {
             layerCollection.getLayerById(infrastructureLayerId).getLayerSource().clear();
         }
@@ -486,11 +504,11 @@ export default {
                 processed.default = property.schema.default ?? property.default;
                 processed.minimum = property.schema.minimum ?? property.minimum;
                 processed.maximum = property.schema.maximum ?? property.maximum;
-                
+
                 // Handle datetime format with dynamic min/max
                 if (property.schema.format === "datetime") {
                     processed.type = "datetime";
-                    
+
                     // For startTime in cycleTravelerSource: min = startPoint
                     if (inputKey === "cycleTravelerSource" && propertyKey === "startTime") {
                         processed.minimum = this.getRequestBodyInputByKey("startPoint", null, null);
@@ -567,31 +585,31 @@ export default {
                 if (input.schema?.type === "object" && includeObjectProperties) {
                     // Handle GeoJSON Feature format
                     if (input.schema?.format === "geojson-feature") {
-                        const allProperties = input.schema.properties || {};
-                        const primaryProperties = inputConfig?.primaryProperties || [];
-                        
+                        const allProperties = input.schema.properties || {},
+                            primaryProperties = inputConfig?.primaryProperties || [];
+
                         // Filter properties based on menu type
                         let filteredProperties = {};
-                        
+
                         if (menuType === "primary") {
                             // Only include primary properties for primary menu
                             filteredProperties = Object.fromEntries(
-                                Object.entries(allProperties).filter(([propKey]) => 
-                                    primaryProperties.includes(propKey)
+                                Object.entries(allProperties).filter(([propKey]) => primaryProperties.includes(propKey)
                                 )
                             );
-                        } else if (menuType === "advanced") {
+                        }
+                        else if (menuType === "advanced") {
                             // Only include non-primary properties for advanced menu
                             filteredProperties = Object.fromEntries(
-                                Object.entries(allProperties).filter(([propKey]) => 
-                                    !primaryProperties.includes(propKey)
+                                Object.entries(allProperties).filter(([propKey]) => !primaryProperties.includes(propKey)
                                 )
                             );
-                        } else {
+                        }
+                        else {
                             // Include all properties if no menu type specified
                             filteredProperties = allProperties;
                         }
-                        
+
                         result[inputKey] = {
                             type: "geojson-feature",
                             inputKey: inputKey,
@@ -833,6 +851,29 @@ export default {
         },
 
         /**
+         * Calculates the centroid of a polygon geometry.
+         * @param {Object} geometry - GeoJSON Polygon geometry
+         * @returns {Array} [longitude, latitude]
+         */
+        calculateCentroid (geometry) {
+            if (!geometry || geometry.type !== "Polygon" || !geometry.coordinates || !geometry.coordinates[0]) {
+                return [0, 0];
+            }
+
+            const coords = geometry.coordinates[0],
+                count = coords.length - 1; // Exclude duplicate last point
+            let sumLon = 0,
+                sumLat = 0;
+
+            for (let i = 0; i < count; i++) {
+                sumLon += coords[i][0];
+                sumLat += coords[i][1];
+            }
+
+            return [sumLon / count, sumLat / count];
+        },
+
+        /**
          * Initializes the process handlers for the simulation.
          * @returns {void}
          */
@@ -873,32 +914,32 @@ export default {
                 description => filteredProcessDescriptions.push(this.removeUnwantedProperty(description, this.ignoreProperties)));
             this.requestBodies = filteredProcessDescriptions.map(description => {
                 const defaults = OgcApiProcess.getInputDefaultsFromDescription(description);
-                
+
                 // Apply defaults from simulation config
                 Object.keys(this.simulation.inputs || {}).forEach(inputKey => {
                     const inputConfig = this.simulation.inputs[inputKey];
-                    
+
                     // Apply top-level default
                     if (inputConfig.schema?.default !== undefined && !defaults[inputKey]) {
                         defaults[inputKey] = inputConfig.schema.default;
                     }
-                    
+
                     // Apply nested property defaults (for objects like cycleTravelerSource)
                     if (inputConfig.schema?.type === "object" && inputConfig.schema?.properties) {
                         if (!defaults[inputKey]) {
                             defaults[inputKey] = {};
                         }
-                        
+
                         Object.keys(inputConfig.schema.properties).forEach(propKey => {
                             const propConfig = inputConfig.schema.properties[propKey];
-                            
+
                             if (propConfig.default !== undefined && !defaults[inputKey][propKey]) {
                                 defaults[inputKey][propKey] = propConfig.default;
                             }
                         });
                     }
                 });
-                
+
                 return {
                     inputs: {
                         ...defaults,
@@ -1183,7 +1224,6 @@ export default {
             }
 
             this.removeEmptyCollections(this.requestBodies);
-            this.requestBodies = this.replaceEnumValueObjects(this.requestBodies);
 
             const requestBodiesDeepCopy = JSON.parse(JSON.stringify(this.requestBodies));
             let requestBodiesToSend = null,
@@ -1194,9 +1234,15 @@ export default {
                 newSimulationId = null,
                 newSimulation = null;
 
-
             this.removeEmptyCollections(requestBodiesDeepCopy);
             requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
+
+            // Process Green4Bikes specific inputs on the copy that will be sent
+            if (this.currentSimulationId && this.currentSimulationId.includes("green4Bikes")) {
+                requestBodiesToSend.forEach(requestBody => {
+                    this.processGreen4BikesRequestBody(requestBody);
+                });
+            }
 
             scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId); // Cannot use computed property here, which may change during async call.
             executeResponses = await Promise.all(
@@ -1221,6 +1267,8 @@ export default {
 
             newSimulation.jobs = Object.fromEntries(jobIDs.map(ID => [ID, {}]));
 
+            const isGreen4Bikes = this.currentSimulationId && this.currentSimulationId.includes("green4Bikes");
+
             Object.values(newSimulation.jobs).forEach(async (job, index) => {
                 job.requestBody = JSON.parse(JSON.stringify(requestBodiesToSend[index]));
                 job.jobStatus = {status: initialStatuses[index]};
@@ -1232,7 +1280,319 @@ export default {
                     jobStatus => this.onProgressUpdate(jobStatus, job)
                 );
                 this.jobStatusChanged();
+
+                // Auto-switch to AgentVisualization for Green4Bikes
+                if (isGreen4Bikes && job.jobResults) {
+                    this.switchToAgentVisualization(job.jobResults);
+                }
             });
+        },
+
+        /**
+         * Processes Green4Bikes specific inputs for a single request body.
+         * Transforms cycleTravelerLayer, rentalStations and removes unwanted parameters.
+         * @param {Object} requestBody - The request body to process.
+         * @returns {void}
+         */
+        processGreen4BikesRequestBody (requestBody) {
+            if (!requestBody?.inputs) {
+                return;
+            }
+
+            const cycleTravelerLayerStr = requestBody.inputs.cycleTravelerLayer;
+
+            if (cycleTravelerLayerStr && typeof cycleTravelerLayerStr === "string") {
+                try {
+                    const featureCollection = JSON.parse(cycleTravelerLayerStr);
+
+                    if (featureCollection?.features?.length >= 2) {
+                        // Extract source and target features
+                        const sourceFeature = featureCollection.features.find(f => f.id === "cycleTravelerSource" || f.properties?.type === "source"),
+                            targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
+
+                        if (sourceFeature) {
+                            // Convert Polygon to Point (use centroid)
+                            let sourceGeometry = sourceFeature.geometry;
+
+                            if (sourceGeometry.type === "Polygon") {
+                                sourceGeometry = {
+                                    type: "Point",
+                                    coordinates: this.calculateCentroid(sourceGeometry)
+                                };
+                            }
+
+                            // Only keep spawningAmount in properties
+                            const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
+
+                            requestBody.inputs.cycleTravelerSource = {
+                                type: "Feature",
+                                geometry: sourceGeometry,
+                                properties: {
+                                    spawningAmount: String(spawningAmount)
+                                }
+                            };
+                        }
+
+                        if (targetFeature) {
+                            // Convert Polygon to Point (use centroid) and simplify structure
+                            let targetGeometry = targetFeature.geometry;
+
+                            if (targetGeometry.type === "Polygon") {
+                                targetGeometry = {
+                                    type: "Point",
+                                    coordinates: this.calculateCentroid(targetGeometry)
+                                };
+                            }
+
+                            // Target is just a Point geometry, no Feature wrapper needed
+                            requestBody.inputs.cycleTravelerTarget = targetGeometry;
+                        }
+
+                        // Remove the temporary cycleTravelerLayer
+                        delete requestBody.inputs.cycleTravelerLayer;
+                    }
+                }
+                catch (error) {
+                    console.warn("Error processing cycleTravelerLayer:", error);
+                }
+            }
+
+            // Process rentalStations if present (renamed from bikeStations)
+            // Remove unsupported parameters for Green4Bikes API
+            // crs and stations are NOT supported by the API (will cause 400 error)
+            // Remove empty or unwanted optional parameters
+            const rentalStationsStr = requestBody.inputs.rentalStations,
+                parametersToRemove = ["crs", "stations"],
+                parametersToClean = ["rentalBicycle", "roadNetwork"];
+
+            if (rentalStationsStr && typeof rentalStationsStr === "string") {
+                try {
+                    requestBody.inputs.rentalStations = JSON.parse(rentalStationsStr);
+                }
+                catch (error) {
+                    console.warn("Error parsing rentalStations:", error);
+                    delete requestBody.inputs.rentalStations;
+                }
+            }
+            else if (!rentalStationsStr || rentalStationsStr === "null") {
+                // Remove if null or empty
+                delete requestBody.inputs.rentalStations;
+            }
+
+            parametersToRemove.forEach(key => {
+                delete requestBody.inputs[key];
+            });
+
+            parametersToClean.forEach(key => {
+                const value = requestBody.inputs[key];
+
+                // Remove if: null, undefined, empty object, or empty array
+                if (value === null ||
+                    value === undefined ||
+                    (typeof value === "object" && Object.keys(value).length === 0) ||
+                    (Array.isArray(value) && value.length === 0)) {
+                    delete requestBody.inputs[key];
+                }
+            });
+
+            // Remove empty startPoint and endPoint
+            if (!requestBody.inputs.startPoint || requestBody.inputs.startPoint === "") {
+                delete requestBody.inputs.startPoint;
+            }
+            if (!requestBody.inputs.endPoint || requestBody.inputs.endPoint === "") {
+                delete requestBody.inputs.endPoint;
+            }
+        },
+
+        /**
+         * Processes Green4Bikes specific inputs to transform cycleTravelerLayer into separate source/target.
+         * @returns {void}
+         */
+        processGreen4BikesInputs () {
+            this.requestBodies.forEach(requestBody => {
+                if (!requestBody?.inputs) {
+                    return;
+                }
+
+                const cycleTravelerLayerStr = requestBody.inputs.cycleTravelerLayer;
+
+                if (cycleTravelerLayerStr && typeof cycleTravelerLayerStr === "string") {
+                    try {
+                        const featureCollection = JSON.parse(cycleTravelerLayerStr);
+
+                        if (featureCollection?.features?.length >= 2) {
+                            // Extract source and target features
+                            const sourceFeature = featureCollection.features.find(f => f.id === "cycleTravelerSource" || f.properties?.type === "source"),
+                                targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
+
+                            if (sourceFeature) {
+                                // Convert Polygon to Point (use centroid)
+                                let sourceGeometry = sourceFeature.geometry;
+
+                                if (sourceGeometry.type === "Polygon") {
+                                    sourceGeometry = {
+                                        type: "Point",
+                                        coordinates: this.calculateCentroid(sourceGeometry)
+                                    };
+                                }
+
+                                // Only keep spawningAmount in properties
+                                const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
+
+                                requestBody.inputs.cycleTravelerSource = {
+                                    type: "Feature",
+                                    geometry: sourceGeometry,
+                                    properties: {
+                                        spawningAmount: String(spawningAmount)
+                                    }
+                                };
+                            }
+
+                            if (targetFeature) {
+                                // Convert Polygon to Point (use centroid) and simplify structure
+                                let targetGeometry = targetFeature.geometry;
+
+                                if (targetGeometry.type === "Polygon") {
+                                    targetGeometry = {
+                                        type: "Point",
+                                        coordinates: this.calculateCentroid(targetGeometry)
+                                    };
+                                }
+
+                                // Target is just a Point geometry, no Feature wrapper needed
+                                requestBody.inputs.cycleTravelerTarget = targetGeometry;
+                            }
+
+                            // Remove the temporary cycleTravelerLayer
+                            delete requestBody.inputs.cycleTravelerLayer;
+                        }
+                    }
+                    catch (error) {
+                        console.warn("Error processing cycleTravelerLayer:", error);
+                    }
+                }
+
+                // Process rentalStations if present (renamed from bikeStations)
+                const rentalStationsStr = requestBody.inputs.rentalStations;
+
+                if (rentalStationsStr && typeof rentalStationsStr === "string") {
+                    try {
+                        requestBody.inputs.rentalStations = JSON.parse(rentalStationsStr);
+                    }
+                    catch (error) {
+                        console.warn("Error parsing rentalStations:", error);
+                        delete requestBody.inputs.rentalStations;
+                    }
+                }
+                else if (!rentalStationsStr || rentalStationsStr === "null") {
+                    // Remove if null or empty
+                    delete requestBody.inputs.rentalStations;
+                }
+
+                // Remove empty or unwanted parameters
+                const parametersToClean = ["rentalBicycle", "roadNetwork", "crs", "stations"];
+
+                parametersToClean.forEach(key => {
+                    const value = requestBody.inputs[key];
+
+                    // Remove if: null, undefined, empty object, or empty array
+                    if (value === null ||
+                        value === undefined ||
+                        (typeof value === "object" && Object.keys(value).length === 0) ||
+                        (Array.isArray(value) && value.length === 0)) {
+                        delete requestBody.inputs[key];
+                    }
+                });
+            });
+        },
+
+        /**
+         * Switches to AgentVisualization mode and loads the results.
+         * @param {Object} jobResults - The job results from Green4Bikes simulation
+         * @returns {void}
+         */
+        switchToAgentVisualization (jobResults) {
+            try {
+                // Find the first GeoJSON result
+                let geojsonData = null;
+
+                if (jobResults && typeof jobResults === "object") {
+                    // Try to find GeoJSON in various result structures
+                    if (jobResults.type === "FeatureCollection") {
+                        geojsonData = jobResults;
+                    }
+                    else if (jobResults.outputs) {
+                        // Check outputs for GeoJSON
+                        for (const key in jobResults.outputs) {
+                            const output = jobResults.outputs[key];
+
+                            if (output?.value?.type === "FeatureCollection") {
+                                geojsonData = output.value;
+                                break;
+                            }
+                            else if (output?.type === "FeatureCollection") {
+                                geojsonData = output;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (geojsonData) {
+                    // Collect planning scenario geometries (scenario area, source, target)
+                    const planningScenarioData = this.collectPlanningScenarioGeometries();
+
+                    // Load data into AgentVisualization store
+                    this.$store.dispatch("agentVisualization/loadAgentData", geojsonData);
+
+                    // Load planning scenario geometries
+                    if (planningScenarioData) {
+                        this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
+                    }
+
+                    // Switch to AgentVisualization mode
+                    this.setMode("agentVisualization");
+                }
+                else {
+                    console.warn("No GeoJSON data found in job results");
+                }
+            }
+            catch (error) {
+                console.warn("Error switching to AgentVisualization:", error);
+            }
+        },
+
+        /**
+         * Collects geometries from planning scenario layer (scenario area, source, target)
+         * @returns {Object|null} GeoJSON FeatureCollection or null
+         */
+        collectPlanningScenarioGeometries () {
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario");
+
+            if (!planningScenarioLayer) {
+                return null;
+            }
+
+            const layerSource = planningScenarioLayer.getLayerSource(),
+                features = layerSource.getFeatures();
+
+            if (!features || features.length === 0) {
+                return null;
+            }
+
+            const GeoJSON = require("ol/format/GeoJSON").default,
+                geoJsonFormat = new GeoJSON(),
+                geoJsonFeatures = features.map(feature => {
+                    return geoJsonFormat.writeFeatureObject(feature, {
+                        dataProjection: "EPSG:4326",
+                        featureProjection: "EPSG:25832"
+                    });
+                });
+
+            return {
+                type: "FeatureCollection",
+                features: geoJsonFeatures
+            };
         },
 
         /**
@@ -1424,13 +1784,47 @@ export default {
                             </div>
                         </div>
 
-                        <!-- Custom CycleTravelerLayer Input for Green4Bikes -->
+                        <!-- Green4Bikes: Custom datetime inputs for simulation time range -->
+                        <template v-if="currentSimulationId && currentSimulationId.includes('green4Bikes')">
+                            <DynamicInputByType
+                                v-if="combinedInputs.startPoint"
+                                id="startPoint"
+                                input-type="datetime"
+                                :label="getMappedProperty('startPoint', simulation?.inputs?.startPoint?.propertiesMapping) || 'Startzeit'"
+                                :value="getRequestBodyInputByKey('startPoint', '', null)"
+                                @update:value="setRequestBodyInput('startPoint', '', $event)"
+                            />
+                            <DynamicInputByType
+                                v-if="combinedInputs.endPoint"
+                                id="endPoint"
+                                input-type="datetime"
+                                :label="getMappedProperty('endPoint', simulation?.inputs?.endPoint?.propertiesMapping) || 'Endzeit'"
+                                :value="getRequestBodyInputByKey('endPoint', '', null)"
+                                @update:value="setRequestBodyInput('endPoint', '', $event)"
+                            />
+                        </template>
+
+                        <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
                         <CycleTravelerLayerInput
                             v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
                             id="cycleTravelerLayer"
                             :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
                             :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
+                            :start-point="getRequestBodyInputByKey('startPoint', null, null)"
+                            :end-point="getRequestBodyInputByKey('endPoint', null, null)"
+                            :agent-count="agentCount"
                             @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
+                            @update:agentCount="agentCount = $event"
+                        />
+
+                        <!-- Green4Bikes: Bike Stations Input -->
+                        <DynamicInputByType
+                            v-if="currentSimulationId && currentSimulationId.includes('green4Bikes')"
+                            id="rentalStations"
+                            input-type="bikeStations"
+                            :label="getMappedProperty('rentalStations', simulation?.inputs?.rentalStations?.propertiesMapping) || 'Radstationen'"
+                            :value="getRequestBodyInputByKey('rentalStations', '', null)"
+                            @update:value="setRequestBodyInput('rentalStations', '', $event)"
                         />
 
                         <div
