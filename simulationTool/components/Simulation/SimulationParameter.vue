@@ -227,6 +227,8 @@ export default {
             this.flatInputs = {};
 
             Object.entries(this.combinedInputs).forEach(([inputKey, input]) => {
+                console.log("%c processing inputKey", "background: orange", inputKey, input);
+
                 // Skip exposing CRS field in UI; it is injected automatically from data source
                 if (inputKey === "crs") {
                     return;
@@ -235,22 +237,39 @@ export default {
                 if (this.simulation?.inputs?.[inputKey]?.dataSource) {
                     return;
                 }
-                if (this.simulation?.inputs?.[inputKey]?.menu !== "nowhere" //
-                    && !this.simulation?.inputs?.[inputKey]?.editable) {
-                    switch (input.schema?.type) {
-                        case "object":
-                            this.nestedInputs[inputKey] = input;
-                            break;
-                        case "string":
-                        case "number":
-                        case "boolean":
-                        case "array":
-                            // for some reason not nested inputs always have the type "string"
-                            this.flatInputs[inputKey] = input;
-                            break;
-                        default:
-                            console.warn(`Unsupported input type for ${inputKey}: ${input.schema?.type}`);
-                            break;
+
+                // Check if this input should be shown in UI
+                const shouldShowInUI = this.simulation?.inputs?.[inputKey]?.menu !== "nowhere"
+                    && !this.simulation?.inputs?.[inputKey]?.editable
+                    && !this.simulation.inputs?.ignoreProperties?.includes(inputKey);
+
+                if (!shouldShowInUI) {
+                    return;
+                }
+
+                // Handle inputs with properties (potentially nested objects)
+                if (input.schema?.properties) {
+                    // If no type is set but properties exist, treat as object
+                    if (!input.schema.type) {
+                        input.schema.type = "object";
+                    }
+
+                    // Recursively flatten nested properties into flatInputs
+                    this.flattenPropertiesIntoInputs(input.schema.properties, inputKey);
+
+                    // Still keep the parent object in nestedInputs for UI structure
+                    this.nestedInputs[inputKey] = input;
+                }
+                // Handle simple types (including enums)
+                else {
+                    const isObjectType = input.schema?.type === "object";
+                    
+                    if (isObjectType) {
+                        this.nestedInputs[inputKey] = input;
+                    }
+                    else {
+                        // Process input to ensure correct structure (especially for enums)
+                        this.flatInputs[inputKey] = this.processInputProperty(input, inputKey);
                     }
                 }
             });
@@ -328,6 +347,42 @@ export default {
         ]),
 
         /**
+         * Recursively flattens nested properties into flatInputs and nestedInputs.
+         * @param {Object} properties - The properties object to flatten.
+         * @param {String} parentKey - The parent input key.
+         * @returns {void}
+         */
+        flattenPropertiesIntoInputs (properties, parentKey) {
+            Object.entries(properties).forEach(([propKey, property]) => {
+                console.log("%c flattening property", "background: purple", propKey, property);
+
+                // Skip if marked to ignore
+                if (this.ignoreProperties.includes(propKey)) {
+                    return;
+                }
+
+                // If property has nested properties, recurse
+                if (property.schema?.properties || property.properties) {
+                    const nestedProps = property.schema?.properties || property.properties;
+
+                    this.flattenPropertiesIntoInputs(nestedProps, parentKey);
+                }
+                // Otherwise add to flatInputs (will be processed later)
+                else {
+                    // Process the property to ensure correct structure (especially for enums)
+                    const processed = this.processInputProperty(property, parentKey, propKey);
+
+                    // Store with property key (not full path) but keep parent reference
+                    this.flatInputs[propKey] = {
+                        ...processed,
+                        _parentKey: parentKey,
+                        _propertyKey: propKey
+                    };
+                }
+            });
+        },
+
+        /**
          * Back to previous component.
          * @returns {void}
          */
@@ -340,25 +395,50 @@ export default {
         },
 
         /**
+         * Recursively processes nested properties and flattens them into a result object.
+         * @param {Object} properties - The properties object to process.
+         * @param {String} inputKey - The parent input key.
+         * @param {String[]} primaryProperties - Array of primary property keys to exclude.
+         * @returns {Object} Flattened properties with processed values.
+         */
+        processNestedProperties (properties, inputKey, primaryProperties = []) {
+            const result = {};
+
+            Object.entries(properties).forEach(([propertyKey, property]) => {
+                if (primaryProperties.includes(propertyKey) || this.ignoreProperties.includes(propertyKey)) {
+                    return;
+                }
+
+                // If property has nested properties, recursively process them
+                if (property?.schema?.properties || property?.properties) {
+                    const nestedProps = property.schema?.properties || property.properties;
+
+                    Object.assign(result, this.processNestedProperties(nestedProps, inputKey, primaryProperties));
+                }
+                // Otherwise, add as processed property
+                else {
+                    result[propertyKey] = this.processInputProperty(property, inputKey, propertyKey);
+                }
+            });
+
+            return result;
+        },
+
+        /**
          * Gets non-primary properties from an object input.
          * @param {Object} input - The input object.
          * @param {String} inputKey - The input key.
          * @returns {Object} The filtered properties object.
          */
         getNonPrimaryProperties (input, inputKey) {
+            console.log("%c non primary props", "background: green", input, inputKey);
             if (!input?.schema?.properties) {
                 return {};
             }
 
-            const primaryProperties = this.simulation?.inputs?.[inputKey]?.primaryProperties || [],
-                result = {};
+            const primaryProperties = this.simulation?.inputs?.[inputKey]?.primaryProperties || [];
 
-            Object.entries(input.schema.properties).forEach(([propertyKey, property]) => {
-                if (!primaryProperties.includes(propertyKey) && !this.ignoreProperties.includes(propertyKey)) {
-                    result[propertyKey] = this.processInputProperty(property, inputKey, propertyKey);
-                }
-            });
-            return result;
+            return this.processNestedProperties(input.schema.properties, inputKey, primaryProperties);
         },
 
         /**
@@ -368,10 +448,17 @@ export default {
         getNonPrimaryStringInputs () {
             const result = {};
 
-            Object.entries(this.flatInputs).forEach(([inputKey, input]) => {
-                if (this.simulation?.inputs?.[inputKey]?.menu !== "primary") {
-                    result[inputKey] = this.processInputProperty(input, inputKey);
+            Object.entries(this.flatInputs).forEach(([propKey, input]) => {
+                // Use parent key for config lookup, or propKey if no parent (top-level input)
+                const configKey = input._parentKey || propKey;
+
+                // Skip if this input is marked as primary
+                if (this.simulation?.inputs?.[configKey]?.menu === "primary") {
+                    return;
                 }
+
+                // Already processed during flattening, just add to result
+                result[propKey] = input;
             });
             return result;
         },

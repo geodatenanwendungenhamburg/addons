@@ -56,36 +56,42 @@ export default class OgcApiProcess {
         for (const inputKey in description.inputs) {
             const input = description.inputs[inputKey];
 
-            defaultsObject[inputKey] = OgcApiProcess.getDefaultWithEnum(input);
-
+            // Check for array type
             if (input.schema?.type === "array") {
                 defaultsObject[inputKey] = {
                     items: [],
                     type: input.schema?.items?.type || "string"
                 };
             }
-            else if (input.schema?.type === "object") {
+            // Check for object type or if properties exist (indicates object structure)
+            else if (input.schema?.type === "object" || input.schema?.properties) {
                 if (input.schema.default) {
                     defaultsObject[inputKey] = input.schema.default;
                 }
                 else {
-                    defaultsObject[inputKey] ??= {};
+                    defaultsObject[inputKey] = {};
                     for (const propertyKey in input.schema.properties) {
                         const property = input.schema.properties[propertyKey];
 
-                        defaultsObject[inputKey][propertyKey] = OgcApiProcess.getDefaultWithEnum(property);
+                        defaultsObject[inputKey][propertyKey] = OgcApiProcess.getDefaultOrExampleValue(property);
                     }
                 }
+            }
+            // For simple types (string, number, etc.) or when no special structure detected
+            else {
+                defaultsObject[inputKey] = OgcApiProcess.getDefaultOrExampleValue(input);
             }
         }
         return defaultsObject;
     }
     /**
-     * Static method to get the default value from an object with an enum. The enum is necessary to create a dropdown in the UI.
-     * @param {Object} obj - The object containing the default value and enum.
-     * @returns {Object|undefined} An object containing the default value and the enum array, or undefined if no default is found.
+     * Static method to extract the default or example value from a property/input definition.
+     * Handles enums, defaults, and example values from API descriptions.
+     * @param {Object} obj - The property or input object from the API description.
+     * @returns {Object|undefined} The extracted value (with enum metadata if applicable), or undefined if no value found.
      */
-    static getDefaultWithEnum (obj) {
+    static getDefaultOrExampleValue (obj) {
+        // Direct default with enum
         if (Object.hasOwn(obj, "default")) {
             if (Object.hasOwn(obj, "enum") && Array.isArray(obj.enum)) {
                 const enumArr = [...obj.enum],
@@ -101,6 +107,7 @@ export default class OgcApiProcess {
             }
             return obj.default;
         }
+        // Schema-based values
         else if (Object.hasOwn(obj, "schema")) {
             if (Object.hasOwn(obj.schema, "enum") && Array.isArray(obj.schema.enum) && obj.schema.enum.length > 0) {
                 const defaultValue = obj.schema.default ? obj.schema.default : obj.schema.enum[0];
@@ -110,6 +117,13 @@ export default class OgcApiProcess {
             else if (Object.hasOwn(obj.schema, "default")) {
                 return obj.schema.default;
             }
+            else if (Object.hasOwn(obj.schema, "example")) {
+                return obj.schema.example;
+            }
+        }
+        // Fallback to example on top level
+        else if (Object.hasOwn(obj, "example")) {
+            return obj.example;
         }
         return undefined;
     }
