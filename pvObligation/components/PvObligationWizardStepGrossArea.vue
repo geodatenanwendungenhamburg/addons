@@ -4,7 +4,6 @@ import {mapActions, mapGetters, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
-import axios from "axios";
 import ConfirmModalItem from "./shared/ConfirmModalItem.vue";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
@@ -35,7 +34,8 @@ export default {
     computed: {
         ...mapGetters(["configJs"]),
         ...mapGetters("Modules/PvObligation", [
-            "selectedRoofId"
+            "selectedRoofId",
+            "styleJson"
         ])
     },
     watch: {
@@ -72,9 +72,9 @@ export default {
         }
     },
     async mounted () {
-        const styleJson = await axios.get(this.configJs.styleConf);
+        await this.getStyleJson(this.configJs.styleConf);
 
-        this.grossAreaStyle = styleJson.data.find(style => {
+        this.grossAreaStyle = this.styleJson.data.find(style => {
             return style.styleId === "dachflaechen";
         }).rules[0].style;
 
@@ -85,7 +85,8 @@ export default {
             "setSelectedRoofId"
         ]),
         ...mapActions("Modules/PvObligation", [
-            "dissolveRoofFeaturesAndCalculateArea"
+            "dissolveRoofFeaturesAndCalculateArea",
+            "getStyleJson"
         ]),
         ...mapActions("Maps", [
             "addNewLayerIfNotExists",
