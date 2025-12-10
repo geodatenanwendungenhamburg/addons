@@ -426,10 +426,14 @@ const actions = {
      * @returns {void}
      */
     async handleGetFeatureResponse ({dispatch, commit}, {response, year}) {
-        const format = new WFS({
+        const xmlString = response.responseText || response,
+            fixedXml = xmlString.replace(/<wfs:member>/g, "<gml:featureMember>").replace(/<\/wfs:member>/g, "</gml:featureMember>"),
+            parser = new DOMParser(),
+            xml = parser.parseFromString(fixedXml, "text/xml"),
+            format = new WFS({
                 gmlFormat: new GML32()
             }),
-            features = format.readFeatures(response, {
+            features = format.readFeatures(xml, {
                 featureNS: "https://registry.gdi-de.org/id/de.hh.up",
                 featureType: "bodenrichtwerte_flaechendeckend",
                 dataProjection: "EPSG:25832",
@@ -437,8 +441,10 @@ const actions = {
             }),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
 
-        console.log("handleGFI", response);
-        console.log(features);
+        console.log("Features:", features);
+        features.forEach(feature => {
+            console.log("Attributes:", feature.getProperties());
+        });
 
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
@@ -494,6 +500,8 @@ const actions = {
         commit("setSelectedBrwFeature", feature);
         dispatch("sendWpsConvertRequest", state);
 
+        console.log("Richtwert DM:", feature.richtwert_euro);
+
         return feature;
     },
     /**
@@ -521,6 +529,9 @@ const actions = {
         let complexData,
             executeResponse,
             showErrorMessage = false;
+
+        console.log("Execute", response.ExecuteResponse);
+        console.log(response);
 
         if (status === 200) {
             executeResponse = response.ExecuteResponse;
