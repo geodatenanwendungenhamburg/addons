@@ -19,6 +19,7 @@
  * @property {Boolean} isDrawing - flag indicating whether the user is currently drawing on the map
  * @property {String} baseUrl - base URL of the Geoportal used for remote requests (e.g. reverse geocoding)
  * @property {String} geosearchReverseServiceId - id of the reverse geosearch service to get the service url from restConfig
+ * @property {String} styleJson - Json object for project style defined in portalconfigs/resources/style.json
  **/
 
 const state = {
@@ -45,7 +46,8 @@ const state = {
     ],
     baseUrl: "https://geoportal-hamburg.de",
     geosearchReverseServiceId: "5",
-    isDrawing: false
+    isDrawing: false,
+    styleJson: ""
 };
 
 export default state;

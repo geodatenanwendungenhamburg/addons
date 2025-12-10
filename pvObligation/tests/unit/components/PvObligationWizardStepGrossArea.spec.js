@@ -2,38 +2,42 @@ import {createStore} from "vuex";
 import {config, mount, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepGrossArea.vue";
-import axios from "axios";
 import sinon from "sinon";
 
 config.global.mocks.$t = key => key;
-
-sinon.stub(axios, "get").resolves({
-    data: [
-        {
-            styleId: "dachflaechen",
-            rules: [{style: {}}]
-        }
-    ]
-});
 
 describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", () => {
     const store = createStore({
         getters: {
             configJs: () => ({
-                styleConf: "/dummy/url"
+                styleConf: "./resources/style.json"
             })
         },
         modules: {
-            PvObligation: {
+            Modules: {
                 namespaced: true,
-                getters: {
-                    isCreatingReport: () => sinon.stub()
-                },
-                mutations: {
-                    setSelectedRoofId: () => sinon.stub()
-                },
-                actions: {
-                    dissolveRoofFeaturesAndCalculateArea: sinon.stub()
+                modules: {
+                    PvObligation: {
+                        namespaced: true,
+                        getters: {
+                            isCreatingReport: () => sinon.stub(),
+                            styleJson: () => ({
+                                data: [
+                                    {
+                                        styleId: "dachflaechen",
+                                        rules: [{style: { }}]
+                                    }
+                                ]
+                            })
+                        },
+                        mutations: {
+                            setSelectedRoofId: () => sinon.stub()
+                        },
+                        actions: {
+                            dissolveRoofFeaturesAndCalculateArea: sinon.stub().resolves(123),
+                            getStyleJson: sinon.stub().resolves()
+                        }
+                    }
                 }
             },
             Maps: {

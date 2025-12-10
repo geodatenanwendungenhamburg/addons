@@ -12,6 +12,7 @@ import {getFooterSvg} from "../js/getSvg";
 import dayjs from "dayjs";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import calculateRestrictedArea from "../js/calculateRestrictedArea";
+import axios from "axios";
 
 export default {
     /**
@@ -575,6 +576,19 @@ export default {
             restrictedArea: Math.round(restrictedArea * 10) / 10,
             obligatedArea: Math.round((netArea - restrictedArea) * 10 * 0.3) / 10
         };
+    },
+    /**
+     * Loads the style configuration JSON from the provided URL and commits it to the Vuex store.
+     *
+     * @async
+     * @param {Object} Object Vuex context
+     * @param {string} url - URL pointing to the style configuration JSON.
+     * @returns {Promise<void>} Resolves when the style configuration has been fetched and committed.
+     */
+    async getStyleJson ({commit}, url) {
+        const styleConf = await axios.get(url);
+
+        commit("setStyleJson", styleConf);
     },
     /**
      * Calculates the net restricted roof area data.
