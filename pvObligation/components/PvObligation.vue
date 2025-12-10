@@ -166,6 +166,7 @@ export default {
 
             p {
                 background-color: white;
+                white-space: pre-line;
             }
         }
     }
