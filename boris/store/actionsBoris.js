@@ -375,12 +375,10 @@ const actions = {
                     <wfs:Query typeNames="de.hh.up:${typeName}">
                         <fes:Filter>
                             <fes:And>
-
                                 <fes:PropertyIsEqualTo>
                                     <fes:ValueReference>de.hh.up:jahrgang</fes:ValueReference>
                                     <fes:Literal>${featureYear}</fes:Literal>
                                 </fes:PropertyIsEqualTo>
-
                                 <fes:PropertyIsEqualTo>
                                     <fes:ValueReference>de.hh.up:zonen_nr</fes:ValueReference>
                                     <fes:Literal>${zonenNr}</fes:Literal>
@@ -407,7 +405,8 @@ const actions = {
                     xmlDoc = parser.parseFromString(response.data, "application/xml"),
                     members = xmlDoc.getElementsByTagNameNS("https://registry.gdi-de.org/id/de.hh.up", "bodenrichtwerte_flaechendeckend");
 
-                console.log(xmlDoc, members);
+                console.log(response.data);
+                console.log("Members", members);
 
                 dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
             }
@@ -441,11 +440,6 @@ const actions = {
             }),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
 
-        console.log("Features:", features);
-        features.forEach(feature => {
-            console.log("Attributes:", feature.getProperties());
-        });
-
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
     },
@@ -458,8 +452,6 @@ const actions = {
      */
     async combineFeatureWithSelectedDate ({dispatch, getters}, feature) {
         const date = await getters.getDateBySelectedLayerName;
-
-        console.log("Datum", date);
 
         if (feature !== undefined) {
             dispatch("extendFeatureAttributes", {feature, date});
@@ -529,9 +521,6 @@ const actions = {
         let complexData,
             executeResponse,
             showErrorMessage = false;
-
-        console.log("Execute", response.ExecuteResponse);
-        console.log(response);
 
         if (status === 200) {
             executeResponse = response.ExecuteResponse;
