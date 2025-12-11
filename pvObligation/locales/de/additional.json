@@ -24,11 +24,10 @@
                             "tableCellGrossAreaLabel": "Die Bruttodachfläche des ausgewählten Gebäudes beträgt:",
                             "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²).",
                             "confirmModal": {
-                                "header": "Dachfläche wirklich ändern?",
-                                "contentIntro": "Sie haben bereits eine Dachfläche ausgewählt. Wenn Sie die Dachfläche ändern, gehen alle bisher eingegebenen Daten verloren.",
-                                "contentQuestion": "Möchten Sie die Dachfläche wirklich ändern?",
-
-                                "actionButtonConfirmLabel": "Ändern",
+                                "header": "Ausgewählte Dachfläche verlassen?",
+                                "contentIntro": "Sie haben bereits eine Dachfläche ausgewählt. Wenn Sie die Dachfläche verlassen, gehen alle bisher eingegebenen Daten verloren.",
+                                "contentQuestion": "Möchten Sie die Dachfläche wirklich verlassen und eine andere auswählen?",
+                                "actionButtonConfirmLabel": "Verlassen",
                                 "actionButtonCancelLabel": "Abbrechen"
                             }
                         }
