@@ -101,10 +101,17 @@ const state = {
     planningScenarioLabel: "additional:modules.tools.simulationTool.planningScenario",
     planningScenarioLabelPlural: "additional:modules.tools.simulationTool.planningScenarios",
     planningScenarioHighlightFeatureStyle: {
-        fillColor: [0, 0, 0],
+        fillColor: [60, 95, 148, 0.5],
         fillTransparency: 100,
         strokeColor: [60, 95, 148, 1],
-        strokeWidth: 4
+        strokeWidth: 4,
+        pointRadius: 8
+    },
+    planningScenarioHighlightPointStyle: {
+        circleRadius: 8,
+        circleFillColor: [60, 95, 148, 1],
+        circleStrokeColor: [255, 255, 255, 1],
+        circleStrokeWidth: 3
     },
     planningScenarioSelectInteraction: null,
     drawTypeLabels: [
