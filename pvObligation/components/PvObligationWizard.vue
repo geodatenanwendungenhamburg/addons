@@ -27,42 +27,42 @@ export default {
         return {
             wizardSteps: [
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle"),
+                    title: "grossArea",
                     isOpen: true,
                     component: markRaw(PvObligationWizardStepGrossArea),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.netArea.wizardTitle"),
+                    title: "netArea",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepNetArea),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.wizardTitle"),
+                    title: "netRestrictedAreas",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepNetRestrictedAreas),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.personalNotes.wizardTitle"),
+                    title: "personalNotes",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepPersonalNotes),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.buildingDetails.wizardTitle"),
+                    title: "buildingDetails",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepBuildingDetails),
                     componentFormData: null,
                     componentFormDataIsValid: null
                 },
                 {
-                    title: this.$t("additional:modules.pvObligation.wizard.step.generateReport.wizardTitle"),
+                    title: "generateReport",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepGenerateReport),
                     componentFormData: null,
@@ -77,6 +77,16 @@ export default {
         ...mapGetters("Modules/PvObligation", [
             "isDrawing"
         ]),
+        wizardStepTitles () {
+            return {
+                grossArea: this.$t("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle"),
+                netArea: this.$t("additional:modules.pvObligation.wizard.step.netArea.wizardTitle"),
+                netRestrictedAreas: this.$t("additional:modules.pvObligation.wizard.step.netRestrictedAreas.wizardTitle"),
+                personalNotes: this.$t("additional:modules.pvObligation.wizard.step.personalNotes.wizardTitle"),
+                buildingDetails: this.$t("additional:modules.pvObligation.wizard.step.buildingDetails.wizardTitle"),
+                generateReport: this.$t("additional:modules.pvObligation.wizard.step.generateReport.wizardTitle")
+            };
+        },
         wizardStepsFormData () {
             const wizardStepsFormData = {};
 
@@ -259,7 +269,7 @@ export default {
                         :id="`wizard-item-${index}`"
                         :key="index"
                         class="step"
-                        :title="step.title"
+                        :title="wizardStepTitles[step.title]"
                         :is-open="step.isOpen"
                         :icon="step.componentFormDataIsValid === false ? 'bi-exclamation-triangle-fill' : ''"
                         :coloured-header="true"
