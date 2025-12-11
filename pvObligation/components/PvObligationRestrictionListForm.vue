@@ -87,7 +87,7 @@ export default {
 
             this.setIsDrawing(false);
 
-            this.drawState.layer.getSource().getFeatures().forEach(feature => {
+            this.drawState?.layer?.getSource().getFeatures().forEach(feature => {
                 if (feature.get("id") === this.formData.id) {
                     feature.setStyle(new Style({
                         fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
