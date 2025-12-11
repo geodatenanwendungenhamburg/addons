@@ -53,14 +53,14 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
     function createWizardSteps () {
         return [
             {
-                title: "Step 1",
+                title: "grossArea",
                 isOpen: true,
                 isError: false,
                 component: {name: "StepOneComponent"},
                 componentFormData: null
             },
             {
-                title: "Step 2",
+                title: "netArea",
                 isOpen: false,
                 isError: false,
                 component: {name: "StepTwoComponent"},
@@ -80,10 +80,10 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
 
         let accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
 
-        expect(accordionItems[0].attributes().title).equal("Step 1");
+        expect(accordionItems[0].attributes().title).equal("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle");
         expect(accordionItems[0].attributes().isopen).equal("true");
 
-        expect(accordionItems[1].attributes().title).equal("Step 2");
+        expect(accordionItems[1].attributes().title).equal("additional:modules.pvObligation.wizard.step.netArea.wizardTitle");
         expect(accordionItems[1].attributes().isopen).equal("false");
 
         wrapper.vm.openWizardStep({
@@ -98,10 +98,10 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
 
         accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
 
-        expect(accordionItems[0].attributes().title).equal("Step 1");
+        expect(accordionItems[0].attributes().title).equal("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle");
         expect(accordionItems[0].attributes().isopen).equal("false");
 
-        expect(accordionItems[1].attributes().title).equal("Step 2");
+        expect(accordionItems[1].attributes().title).equal("additional:modules.pvObligation.wizard.step.netArea.wizardTitle");
         expect(accordionItems[1].attributes().isopen).equal("true");
     });
 });

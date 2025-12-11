@@ -24,11 +24,11 @@
                             "tableCellGrossAreaLabel": "The gross roof area of the selected building is:",
                             "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²).",
                             "confirmModal": {
-                                "header": "Really change roof area?",
-                                "contentIntro": "You have already selected a roof area. If you change the roof area, all previously entered data will be lost.",
-                                "contentQuestion": "Do you really want to change the roof area?",
-                                "actionButtonConfirmLabel": "change",
-                                "actionButtonCancelLabel": "cancel"
+                                "header": "Leave selected roof area?",
+                                "contentIntro": "You have already selected a roof surface. If you leave the selected roof surface, all previously entered data will be lost.",
+                                "contentQuestion": "Do you really want to leave the roof surface and choose a different one?",
+                                "actionButtonConfirmLabel": "Leave",
+                                "actionButtonCancelLabel": "Cancel"
                             }
                         }
                     },
