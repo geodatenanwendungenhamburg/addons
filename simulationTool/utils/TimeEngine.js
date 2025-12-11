@@ -130,6 +130,14 @@ export default class TimeEngine {
 
         // Calculate delta time
         const deltaTime = timestamp - this.lastFrameTime;
+        
+        // PERFORMANCE: Limit update rate to 30 FPS for smoother rendering
+        // Skip frames if we're running faster than ~33ms per frame
+        if (deltaTime < 33) {
+            this.animationFrameId = requestAnimationFrame((ts) => this.tick(ts));
+            return;
+        }
+        
         this.lastFrameTime = timestamp;
 
         // Update accumulated time with speed multiplier

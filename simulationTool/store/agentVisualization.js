@@ -5,475 +5,516 @@
 
 const state = {
     // Data
-    agentData: null,
-    planningScenarioData: null,
-    timeSteps: [],
-    features: [],
-    
-    // Time control
-    currentTime: null,
-    isPlaying: false,
-    speed: 1.0,
-    loop: false,
-    
-    // Filters
-    filters: {
-        walking: true,
-        bike: true,
-        rentalBike: true,
-        zones: [],
-        agentIds: []
-    },
-    
-    // Visualization settings
-    showTrails: true,
-    trailLength: 5,
-    interpolationMode: "catmullRom", // "linear" or "catmullRom"
-    showHeatmap: false,
-    
-    // Performance
-    fps: 0,
-    agentCount: 0,
-    visibleAgentCount: 0,
-    
-    // UI state
-    selectedAgentId: null,
-    hoveredAgentId: null,
-    timeSeriesMetrics: []
-};
+        agentData: null,
+        planningScenarioData: null,
+        timeSteps: [],
+        features: [],
+        featuresByTime: {}, // Indexed by timestamp for O(1) lookup
+        featuresByAgent: {}, // PERFORMANCE: Indexed by agentId for O(1) lookup
 
-const getters = {
+        // Time control
+        currentTime: null,
+        isPlaying: false,
+        speed: 1.0,
+        loop: false,
+
+        // Filters
+        filters: {
+            walking: true,
+            bike: true,
+            rentalBike: true,
+            zones: [],
+            agentIds: []
+        },
+
+        // Visualization settings
+        showTrails: true,
+        trailLength: 5,
+        interpolationMode: "catmullRom", // "linear" or "catmullRom"
+        showHeatmap: false,
+
+        // Performance
+        fps: 0,
+        agentCount: 0,
+        visibleAgentCount: 0,
+
+        // UI state
+        selectedAgentId: null,
+        hoveredAgentId: null,
+        timeSeriesMetrics: []
+    },
+
+    getters = {
     /**
      * Get filtered features based on current filters
+     * OPTIMIZED: Only returns features for current timestep
      */
-    filteredFeatures: (state) => {
-        if (!state.features || state.features.length === 0) {
-            return [];
-        }
+        filteredFeatures: (state) => {
+            // Get features for current time from index (O(1) lookup!)
+            const featuresForTime = state.featuresByTime[state.currentTime] || [];
 
-        return state.features.filter(feature => {
-            const props = feature.properties;
-
-            // Filter by capability
-            if (props.activeCapability === "walking" && !state.filters.walking) {
-                return false;
+            if (featuresForTime.length === 0) {
+                return [];
             }
 
-            if (props.activeCapability === "bike" && !state.filters.bike) {
-                return false;
-            }
+            return featuresForTime.filter(feature => {
+                const props = feature.properties;
 
-            if (props.activeCapability === "cyclingRentalBike" && !state.filters.rentalBike) {
-                return false;
-            }
+                // Filter by capability
+                if (props.activeCapability === "walking" && !state.filters.walking) {
+                    return false;
+                }
 
-            // Filter by agent ID
-            if (state.filters.agentIds.length > 0 && 
+                if (props.activeCapability === "bike" && !state.filters.bike) {
+                    return false;
+                }
+
+                if (props.activeCapability === "cyclingRentalBike" && !state.filters.rentalBike) {
+                    return false;
+                }
+
+                // Filter by agent ID
+                if (state.filters.agentIds.length > 0 &&
                 !state.filters.agentIds.includes(props.agentId)) {
-                return false;
-            }
+                    return false;
+                }
 
-            return true;
-        });
-    },
+                return true;
+            });
+        },
 
-    /**
+        /**
      * Get current time as formatted string
      */
-    formattedCurrentTime: (state) => {
-        if (!state.currentTime) {
-            return "--:--:--";
-        }
+        formattedCurrentTime: (state) => {
+            if (!state.currentTime) {
+                return "--:--:--";
+            }
 
-        const date = new Date(state.currentTime);
+            const date = new Date(state.currentTime);
 
-        if (isNaN(date.getTime())) {
-            return "--:--:--";
-        }
+            if (isNaN(date.getTime())) {
+                return "--:--:--";
+            }
 
-        return date.toLocaleTimeString("de-DE", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-        });
-    },
+            return date.toLocaleTimeString("de-DE", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+        },
 
-    /**
+        /**
      * Get time range
      */
-    timeRange: (state) => {
-        if (!state.timeSteps || state.timeSteps.length === 0) {
-            return {min: 0, max: 0};
-        }
+        timeRange: (state) => {
+            if (!state.timeSteps || state.timeSteps.length === 0) {
+                return {min: 0, max: 0};
+            }
 
-        return {
-            min: state.timeSteps[0],
-            max: state.timeSteps[state.timeSteps.length - 1]
-        };
-    },
+            return {
+                min: state.timeSteps[0],
+                max: state.timeSteps[state.timeSteps.length - 1]
+            };
+        },
 
-    /**
+        /**
      * Get current timestep index
      */
-    currentTimeStepIndex: (state) => {
-        if (!state.timeSteps || state.timeSteps.length === 0) {
-            return 0;
-        }
+        currentTimeStepIndex: (state) => {
+            if (!state.timeSteps || state.timeSteps.length === 0) {
+                return 0;
+            }
 
-        return state.timeSteps.findIndex(t => t >= state.currentTime);
-    },
+            return state.timeSteps.findIndex(t => t >= state.currentTime);
+        },
 
-    /**
+        /**
      * Check if at end of timeline
      */
-    isAtEnd: (state, getters) => {
-        const range = getters.timeRange;
+        isAtEnd: (state, getters) => {
+            const range = getters.timeRange;
 
-        return state.currentTime >= range.max;
-    },
+            return state.currentTime >= range.max;
+        },
 
-    /**
+        /**
      * Check if at start of timeline
      */
-    isAtStart: (state, getters) => {
-        const range = getters.timeRange;
+        isAtStart: (state, getters) => {
+            const range = getters.timeRange;
 
-        return state.currentTime <= range.min;
-    }
-};
+            return state.currentTime <= range.min;
+        }
+    },
 
-const mutations = {
+    mutations = {
     /**
      * Set agent data
      */
-    setAgentData (state, data) {
-        state.agentData = data;
-    },
+        setAgentData (state, data) {
+            state.agentData = data;
+        },
 
-    /**
+        /**
      * Set planning scenario data
      */
-    setPlanningScenarioData (state, data) {
-        state.planningScenarioData = data;
-    },
+        setPlanningScenarioData (state, data) {
+            state.planningScenarioData = data;
+        },
 
-    /**
+        /**
      * Set timesteps
      */
-    setTimeSteps (state, timeSteps) {
-        state.timeSteps = timeSteps;
-    },
+        setTimeSteps (state, timeSteps) {
+            state.timeSteps = timeSteps;
+        },
 
-    /**
+        /**
      * Set features
      */
-    setFeatures (state, features) {
-        state.features = features;
-    },
+        setFeatures (state, features) {
+            state.features = features;
+        },
 
-    /**
+        /**
+     * Set features indexed by time (PERFORMANCE OPTIMIZATION)
+     */
+        setFeaturesByTime (state, featuresByTime) {
+            state.featuresByTime = featuresByTime;
+        },
+
+        /**
+     * Set features indexed by agentId (PERFORMANCE OPTIMIZATION)
+     */
+        setFeaturesByAgent (state, featuresByAgent) {
+            state.featuresByAgent = featuresByAgent;
+        },
+
+        /**
      * Set current time
      */
-    setCurrentTime (state, time) {
-        state.currentTime = time;
-    },
+        setCurrentTime (state, time) {
+            state.currentTime = time;
+        },
 
-    /**
+        /**
      * Set playing state
      */
-    setPlaying (state, isPlaying) {
-        state.isPlaying = isPlaying;
-    },
+        setPlaying (state, isPlaying) {
+            state.isPlaying = isPlaying;
+        },
 
-    /**
+        /**
      * Set speed
      */
-    setSpeed (state, speed) {
-        state.speed = speed;
-    },
+        setSpeed (state, speed) {
+            state.speed = speed;
+        },
 
-    /**
+        /**
      * Set loop mode
      */
-    setLoop (state, loop) {
-        state.loop = loop;
-    },
+        setLoop (state, loop) {
+            state.loop = loop;
+        },
 
-    /**
+        /**
      * Set filter value
      */
-    setFilter (state, {filterName, value}) {
-        if (state.filters.hasOwnProperty(filterName)) {
-            state.filters[filterName] = value;
-        }
-    },
+        setFilter (state, {filterName, value}) {
+            if (state.filters.hasOwnProperty(filterName)) {
+                state.filters[filterName] = value;
+            }
+        },
 
-    /**
+        /**
      * Toggle filter
      */
-    toggleFilter (state, filterName) {
-        if (typeof state.filters[filterName] === "boolean") {
-            state.filters[filterName] = !state.filters[filterName];
-        }
-    },
+        toggleFilter (state, filterName) {
+            if (typeof state.filters[filterName] === "boolean") {
+                state.filters[filterName] = !state.filters[filterName];
+            }
+        },
 
-    /**
+        /**
      * Set show trails
      */
-    setShowTrails (state, show) {
-        state.showTrails = show;
-    },
+        setShowTrails (state, show) {
+            state.showTrails = show;
+        },
 
-    /**
+        /**
      * Set trail length
      */
-    setTrailLength (state, length) {
-        state.trailLength = length;
-    },
+        setTrailLength (state, length) {
+            state.trailLength = length;
+        },
 
-    /**
+        /**
      * Set interpolation mode
      */
-    setInterpolationMode (state, mode) {
-        state.interpolationMode = mode;
-    },
+        setInterpolationMode (state, mode) {
+            state.interpolationMode = mode;
+        },
 
-    /**
+        /**
      * Set render mode
      */
-    setRenderMode (state, mode) {
-        state.renderMode = mode;
-    },
+        setRenderMode (state, mode) {
+            state.renderMode = mode;
+        },
 
-    /**
+        /**
      * Set show heatmap
      */
-    setShowHeatmap (state, show) {
-        state.showHeatmap = show;
-    },
+        setShowHeatmap (state, show) {
+            state.showHeatmap = show;
+        },
 
-    /**
+        /**
      * Set FPS
      */
-    setFPS (state, fps) {
-        state.fps = fps;
-    },
+        setFPS (state, fps) {
+            state.fps = fps;
+        },
 
-    /**
+        /**
      * Set agent count
      */
-    setAgentCount (state, count) {
-        state.agentCount = count;
-    },
+        setAgentCount (state, count) {
+            state.agentCount = count;
+        },
 
-    /**
+        /**
      * Set visible agent count
      */
-    setVisibleAgentCount (state, count) {
-        state.visibleAgentCount = count;
-    },
+        setVisibleAgentCount (state, count) {
+            state.visibleAgentCount = count;
+        },
 
-    /**
+        /**
      * Set selected agent ID
      */
-    setSelectedAgentId (state, agentId) {
-        state.selectedAgentId = agentId;
-    },
+        setSelectedAgentId (state, agentId) {
+            state.selectedAgentId = agentId;
+        },
 
-    /**
+        /**
      * Set hovered agent ID
      */
-    setHoveredAgentId (state, agentId) {
-        state.hoveredAgentId = agentId;
-    },
+        setHoveredAgentId (state, agentId) {
+            state.hoveredAgentId = agentId;
+        },
 
-    /**
+        /**
      * Set time series metrics
      */
-    setTimeSeriesMetrics (state, metrics) {
-        state.timeSeriesMetrics = metrics;
-    }
-};
+        setTimeSeriesMetrics (state, metrics) {
+            state.timeSeriesMetrics = metrics;
+        }
+    },
 
-const actions = {
+    actions = {
     /**
      * Load agent data from GeoJSON
+     * OPTIMIZED: Groups features by timestamp instead of storing all at once
      */
-    loadAgentData ({commit}, geojson) {
-        commit("setAgentData", geojson);
+        loadAgentData ({commit}, geojson) {
+            commit("setAgentData", geojson);
 
-        // Extract features
-        const features = geojson.features || [];
+            // Extract features and group by time AND agent for efficient lookup
+            const features = geojson.features || [],
+                timeSet = new Set(),
+                featuresByTime = {}, // Index by timestamp
+                featuresByAgent = {}; // PERFORMANCE: Index by agentId
 
-        // Extract unique timesteps and convert to timestamps if needed
-        const timeSet = new Set();
+            features.forEach(feature => {
+                if (feature.properties && feature.properties.time) {
+                    let timestamp = feature.properties.time;
 
-        features.forEach(feature => {
-            if (feature.properties && feature.properties.time) {
-                let timestamp = feature.properties.time;
+                    // Convert ISO string to timestamp if needed
+                    if (typeof timestamp === "string") {
+                        timestamp = new Date(timestamp).getTime();
+                        // Update the feature property to use timestamp
+                        feature.properties.time = timestamp;
+                    }
 
-                // Convert ISO string to timestamp if needed
-                if (typeof timestamp === "string") {
-                    timestamp = new Date(timestamp).getTime();
-                    // Update the feature property to use timestamp
-                    feature.properties.time = timestamp;
+                    timeSet.add(timestamp);
+
+                    // Group features by timestamp
+                    if (!featuresByTime[timestamp]) {
+                        featuresByTime[timestamp] = [];
+                    }
+                    featuresByTime[timestamp].push(feature);
                 }
 
-                timeSet.add(timestamp);
-            }
-
-            // Extract agentId from feature.id if not in properties
-            if (!feature.properties.agentId && feature.id) {
+                // Extract agentId from feature.id if not in properties
+                if (!feature.properties.agentId && feature.id) {
                 // For new green4bikes data: the UUID IS the agentId (same UUID = same agent over time)
                 // For old format: "agent-0-t0" -> agentId = "agent-0"
-                const idParts = feature.id.split("-");
+                    const idParts = feature.id.split("-");
 
-                // Check if it's a UUID (5 parts) or old format (2-3 parts)
-                if (idParts.length === 5) {
+                    // Check if it's a UUID (5 parts) or old format (2-3 parts)
+                    if (idParts.length === 5) {
                     // UUID format: the entire UUID identifies the agent
-                    feature.properties.agentId = feature.id;
-                }
-                else if (idParts.length >= 2) {
+                        feature.properties.agentId = feature.id;
+                    }
+                    else if (idParts.length >= 2) {
                     // Old format
-                    feature.properties.agentId = idParts[0] + "-" + idParts[1];
+                        feature.properties.agentId = idParts[0] + "-" + idParts[1];
+                    }
                 }
+
+                // PERFORMANCE: Group features by agentId for O(1) lookup
+                const agentId = feature.properties.agentId;
+
+                if (agentId) {
+                    if (!featuresByAgent[agentId]) {
+                        featuresByAgent[agentId] = [];
+                    }
+                    featuresByAgent[agentId].push(feature);
+                }
+            });
+
+            // Store grouped features for efficient lookups (PERFORMANCE!)
+            commit("setFeaturesByTime", featuresByTime);
+            commit("setFeaturesByAgent", featuresByAgent);
+            
+            // Keep features array for backwards compatibility
+            commit("setFeatures", features);
+
+            const timeSteps = Array.from(timeSet).sort((a, b) => a - b);
+
+            commit("setTimeSteps", timeSteps);
+
+            // Set initial time
+            if (timeSteps.length > 0) {
+                commit("setCurrentTime", timeSteps[0]);
             }
-        });
 
-        // Commit features AFTER time conversion so they have numeric timestamps
-        commit("setFeatures", features);
+            // Calculate agent count
+            const agentIds = new Set();
 
-        const timeSteps = Array.from(timeSet).sort((a, b) => a - b);
+            features.forEach(feature => {
+                if (feature.properties && feature.properties.agentId) {
+                    agentIds.add(feature.properties.agentId);
+                }
+            });
 
-        commit("setTimeSteps", timeSteps);
+            commit("setAgentCount", agentIds.size);
+        },
 
-        // Set initial time
-        if (timeSteps.length > 0) {
-            commit("setCurrentTime", timeSteps[0]);
-        }
-
-        // Calculate agent count
-        const agentIds = new Set();
-
-        features.forEach(feature => {
-            if (feature.properties && feature.properties.agentId) {
-                agentIds.add(feature.properties.agentId);
-            }
-        });
-
-        commit("setAgentCount", agentIds.size);
-    },
-
-    /**
+        /**
      * Load planning scenario data (scenario area, source, target)
      */
-    loadPlanningScenarioData ({commit}, geojson) {
-        commit("setPlanningScenarioData", geojson);
-    },
+        loadPlanningScenarioData ({commit}, geojson) {
+            commit("setPlanningScenarioData", geojson);
+        },
 
-    /**
+        /**
      * Set current time
      */
-    setCurrentTime ({commit}, time) {
-        commit("setCurrentTime", time);
-    },
+        setCurrentTime ({commit}, time) {
+            commit("setCurrentTime", time);
+        },
 
-    /**
+        /**
      * Set playing state
      */
-    setPlaying ({commit}, isPlaying) {
-        commit("setPlaying", isPlaying);
-    },
+        setPlaying ({commit}, isPlaying) {
+            commit("setPlaying", isPlaying);
+        },
 
-    /**
+        /**
      * Set speed
      */
-    setSpeed ({commit}, speed) {
-        commit("setSpeed", speed);
-    },
+        setSpeed ({commit}, speed) {
+            commit("setSpeed", speed);
+        },
 
-    /**
+        /**
      * Set loop mode
      */
-    setLoop ({commit}, loop) {
-        commit("setLoop", loop);
-    },
+        setLoop ({commit}, loop) {
+            commit("setLoop", loop);
+        },
 
-    /**
+        /**
      * Update filter
      */
-    updateFilter ({commit}, {filterName, value}) {
-        commit("setFilter", {filterName, value});
-    },
+        updateFilter ({commit}, {filterName, value}) {
+            commit("setFilter", {filterName, value});
+        },
 
-    /**
+        /**
      * Toggle filter
      */
-    toggleFilter ({commit}, filterName) {
-        commit("toggleFilter", filterName);
-    },
+        toggleFilter ({commit}, filterName) {
+            commit("toggleFilter", filterName);
+        },
 
-    /**
+        /**
      * Set FPS
      */
-    setFPS ({commit}, fps) {
-        commit("setFPS", fps);
-    },
+        setFPS ({commit}, fps) {
+            commit("setFPS", fps);
+        },
 
-    /**
+        /**
      * Select agent
      */
-    selectAgent ({commit}, agentId) {
-        commit("setSelectedAgentId", agentId);
-    },
+        selectAgent ({commit}, agentId) {
+            commit("setSelectedAgentId", agentId);
+        },
 
-    /**
+        /**
      * Hover agent
      */
-    hoverAgent ({commit}, agentId) {
-        commit("setHoveredAgentId", agentId);
-    },
+        hoverAgent ({commit}, agentId) {
+            commit("setHoveredAgentId", agentId);
+        },
 
-    /**
+        /**
      * Calculate time series metrics
      */
-    calculateTimeSeriesMetrics ({state, commit}) {
-        const metrics = [];
-        const timeSteps = state.timeSteps;
+        calculateTimeSeriesMetrics ({state, commit}) {
+            const metrics = [],
+                timeSteps = state.timeSteps;
 
-        timeSteps.forEach(time => {
-            const featuresAtTime = state.features.filter(
-                f => f.properties.time === time
-            );
+            timeSteps.forEach(time => {
+                const featuresAtTime = state.features.filter(
+                        f => f.properties.time === time
+                    ),
 
-            const walkingCount = featuresAtTime.filter(
-                f => f.properties.activeCapability === "walking"
-            ).length;
+                    walkingCount = featuresAtTime.filter(
+                        f => f.properties.activeCapability === "walking"
+                    ).length,
 
-            const rentalBikeCount = featuresAtTime.filter(
-                f => f.properties.activeCapability === "cyclingRentalBike"
-            ).length;
+                    rentalBikeCount = featuresAtTime.filter(
+                        f => f.properties.activeCapability === "cyclingRentalBike"
+                    ).length,
 
-            const velocities = featuresAtTime
-                .map(f => f.properties.velocity || 0)
-                .filter(v => v > 0);
+                    velocities = featuresAtTime
+                        .map(f => f.properties.velocity || 0)
+                        .filter(v => v > 0),
 
-            const avgVelocity = velocities.length > 0
-                ? velocities.reduce((sum, v) => sum + v, 0) / velocities.length
-                : 0;
+                    avgVelocity = velocities.length > 0
+                        ? velocities.reduce((sum, v) => sum + v, 0) / velocities.length
+                        : 0;
 
-            metrics.push({
-                time,
-                totalCount: featuresAtTime.length,
-                walkingCount,
-                rentalBikeCount,
-                avgVelocity
+                metrics.push({
+                    time,
+                    totalCount: featuresAtTime.length,
+                    walkingCount,
+                    rentalBikeCount,
+                    avgVelocity
+                });
             });
-        });
 
-        commit("setTimeSeriesMetrics", metrics);
-    }
-};
+            commit("setTimeSeriesMetrics", metrics);
+        }
+    };
 
 export default {
     namespaced: true,

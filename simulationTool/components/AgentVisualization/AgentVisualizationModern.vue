@@ -69,9 +69,23 @@
 
             <!-- Main Map Area -->
             <div class="map-area">
+                <!-- Loading overlay -->
+                <div
+                    v-if="isLoading"
+                    class="info-overlay loading-overlay"
+                >
+                    <div class="info-content">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h3>Lade Daten...</h3>
+                        <p>Große Dateien können einen Moment dauern.</p>
+                    </div>
+                </div>
+
                 <!-- Info overlay -->
                 <div
-                    v-if="!dataLoaded"
+                    v-if="!dataLoaded && !isLoading"
                     class="info-overlay"
                 >
                     <div class="info-content">
@@ -125,7 +139,7 @@
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import {GeoJSON} from "ol/format.js";
 import {transform} from "ol/proj";
-import {Heatmap as HeatmapLayer} from "ol/layer";
+import {Heatmap as HeatmapLayer, WebGLPoints as WebGLPointsLayer} from "ol/layer";
 import {Vector as VectorSource} from "ol/source";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
@@ -158,12 +172,18 @@ export default {
     data () {
         return {
             dataLoaded: false,
+            isLoading: false,
             agentLayer: null,
+            trailLayer: null,
             heatmapLayer: null,
             selectInteraction: null,
             selectedAgent: null,
             timeEngine: null,
-            interpolator: null
+            interpolator: null,
+            updateThrottleTimer: null,
+            isUpdating: false,
+            featurePool: new Map(),
+            cachedStyles: new Map()
         };
     },
     computed: {
@@ -227,6 +247,51 @@ export default {
         ...mapMutations("Modules/SimulationTool", ["setMode"]),
 
         /**
+         * PERFORMANCE: Find closest feature to current time using binary search
+         * @param {Array} features - Sorted array of features by time
+         * @param {number} currentTime - Target time
+         * @returns {Object} Closest feature
+         */
+        findClosestFeature (features, currentTime) {
+            if (!features || features.length === 0) {
+                return null;
+            }
+
+            if (features.length === 1) {
+                return features[0];
+            }
+
+            // Binary search for closest time
+            let left = 0,
+                right = features.length - 1,
+                closest = features[0];
+
+            while (left <= right) {
+                const mid = Math.floor((left + right) / 2),
+                    feature = features[mid],
+                    time = feature.properties.time;
+
+                if (time === currentTime) {
+                    return feature;
+                }
+
+                // Update closest if this is closer
+                if (Math.abs(time - currentTime) < Math.abs(closest.properties.time - currentTime)) {
+                    closest = feature;
+                }
+
+                if (time < currentTime) {
+                    left = mid + 1;
+                }
+                else {
+                    right = mid - 1;
+                }
+            }
+
+            return closest;
+        },
+
+        /**
          * Initialize visualization
          */
         initialize () {
@@ -256,24 +321,56 @@ export default {
         },
 
         /**
-         * Initialize the agent layer
+         * Initialize the agent layer with WebGL for better performance
          */
         initializeLayer () {
+            const map = mapCollection.getMap("2D");
+
             if (!layerCollection.getLayerById(AGENT_LAYER_ID)) {
-                const layer = layerFactory.createLayer({
-                    typ: "VECTORBASE",
-                    id: AGENT_LAYER_ID,
-                    name: "Green4Bikes Agents"
+                // Create vector source for features
+                const source = new VectorSource();
+
+                // PERFORMANCE: Use WebGL for GPU-accelerated rendering
+                const webglLayer = new WebGLPointsLayer({
+                    source: source,
+                    style: {
+                        "circle-radius": 7,
+                        "circle-fill-color": [
+                            "case",
+                            ["==", ["get", "activeCapability"], "walking"],
+                            ["color", 66, 135, 245, 0.9],
+                            ["==", ["get", "activeCapability"], "bike"],
+                            ["color", 253, 126, 20, 0.9],
+                            ["==", ["get", "activeCapability"], "cyclingRentalBike"],
+                            ["color", 40, 167, 69, 0.9],
+                            ["color", 100, 100, 100, 0.9]
+                        ],
+                        "circle-stroke-color": ["color", 255, 255, 255, 1],
+                        "circle-stroke-width": 1.5
+                    },
+                    zIndex: 9999999
                 });
 
-                layer.layer.setZIndex(9999999);
-                layer.layer.setVisible(true);
-                layerCollection.addLayer(layer);
-                this.agentLayer = layer;
+                webglLayer.setVisible(true);
+                webglLayer.set("id", AGENT_LAYER_ID);
+                webglLayer.set("name", "Green4Bikes Agents");
+                map.addLayer(webglLayer);
+
+                // Store layer info compatible with existing code
+                this.agentLayer = {
+                    layer: webglLayer,
+                    getLayerSource: () => source,
+                    get: (key) => webglLayer.get(key),
+                    set: (key, value) => webglLayer.set(key, value)
+                };
+
+                // Don't use layerCollection.addLayer for WebGL layers - manage it directly
             }
             else {
                 this.agentLayer = layerCollection.getLayerById(AGENT_LAYER_ID);
-                this.agentLayer.layer.setVisible(true);
+                if (this.agentLayer) {
+                    this.agentLayer.layer.setVisible(true);
+                }
             }
 
             // Setup click interaction
@@ -285,6 +382,31 @@ export default {
 
             this.selectInteraction.on("select", this.onAgentSelect);
             this.addInteraction(this.selectInteraction);
+
+            // Initialize trail layer (Vector layer for LineStrings, since WebGL doesn't support lines)
+            this.initializeTrailLayer();
+        },
+
+        /**
+         * Initialize trail layer for agent paths
+         */
+        initializeTrailLayer () {
+            const map = mapCollection.getMap("2D"),
+                trailSource = new VectorSource();
+
+            this.trailLayer = {
+                layer: layerFactory.createLayer({
+                    typ: "VECTORBASE",
+                    id: AGENT_LAYER_ID + "-trails",
+                    name: "Agent Trails"
+                }).layer,
+                getLayerSource: () => trailSource
+            };
+
+            this.trailLayer.layer.setSource(trailSource);
+            this.trailLayer.layer.setZIndex(9999998);
+            this.trailLayer.layer.setVisible(true);
+            map.addLayer(this.trailLayer.layer);
         },
 
         /**
@@ -320,8 +442,13 @@ export default {
             }
 
             try {
+                this.isLoading = true;
+                console.log(`Loading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+                
                 const text = await file.text();
+                console.log("Parsing JSON...");
                 let geojson = JSON.parse(text);
+                console.log(`Parsed ${geojson.features?.length || 0} features`);
 
                 // Check if this is a simulation export file (complete format)
                 if (geojson.jobs && geojson.simulationId) {
@@ -367,6 +494,9 @@ export default {
             catch (error) {
                 console.error("Error loading file:", error);
                 alert(`Fehler beim Laden der Datei: ${error.message}\n\nBitte stellen Sie sicher, dass es sich um eine gültige GeoJSON-Datei mit Agenten-Daten handelt.`);
+            }
+            finally {
+                this.isLoading = false;
             }
         },
 
@@ -532,12 +662,33 @@ export default {
         },
 
         /**
-         * Update visualization for current time
+         * Update visualization for current time (throttled)
          */
         updateVisualization () {
             if (!this.dataLoaded) {
                 return;
             }
+
+            // Throttle updates to max 30 FPS for smooth slider
+            if (this.updateThrottleTimer) {
+                return; // Skip if update already scheduled
+            }
+
+            this.updateThrottleTimer = setTimeout(() => {
+                this.updateThrottleTimer = null;
+                this.performUpdate();
+            }, 33); // ~30 FPS
+        },
+
+        /**
+         * Perform the actual visualization update
+         */
+        performUpdate () {
+            if (!this.dataLoaded || this.isUpdating) {
+                return;
+            }
+
+            this.isUpdating = true;
 
             const currentTime = this.$store.state.agentVisualization.currentTime,
                 showTrails = this.$store.state.agentVisualization.showTrails,
@@ -553,6 +704,7 @@ export default {
 
             // Skip regular rendering if heatmap is shown
             if (showHeatmap) {
+                this.isUpdating = false;
                 return;
             }
 
@@ -565,29 +717,21 @@ export default {
                 layerSource.clear();
 
                 let visibleCount = 0;
+                const featuresToAdd = []; // PERFORMANCE: Batch add features
 
                 interpolatedPositions.forEach((position, agentId) => {
-                    // Find feature for this agent at or near current time
-                    // Since activeCapability can change, we need the feature closest to current time
-                    const agentFeatures = this.$store.state.agentVisualization.features.filter(
-                        f => f.properties.agentId === agentId
-                    );
+                    // PERFORMANCE: Use indexed lookup instead of filtering all features
+                    const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId];
 
-                    if (agentFeatures.length === 0) {
+                    if (!agentFeatures || agentFeatures.length === 0) {
                         return;
                     }
 
-                    // Find the feature with time closest to (but not after) currentTime
-                    let originalFeature = agentFeatures[0],
-                        minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                    // PERFORMANCE: Binary search instead of linear scan (O(log n) vs O(n))
+                    const originalFeature = this.findClosestFeature(agentFeatures, currentTime);
 
-                    for (const feature of agentFeatures) {
-                        const timeDiff = Math.abs(currentTime - feature.properties.time);
-
-                        if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
-                            minTimeDiff = timeDiff;
-                            originalFeature = feature;
-                        }
+                    if (!originalFeature) {
+                        return;
                     }
 
                     // Apply filters
@@ -626,30 +770,63 @@ export default {
                         routeLength: originalFeature.properties.routeLength
                     });
 
-                    feature.setStyle(this.getAgentStyle(originalFeature.properties));
-                    layerSource.addFeature(feature);
+                    // WebGL handles styling automatically via layer config, no need to set style per feature
+                    featuresToAdd.push(feature);
+                });
 
-                    // Add trail if enabled
-                    if (showTrails) {
+                // PERFORMANCE: Add all features at once instead of one by one
+                if (featuresToAdd.length > 0) {
+                    layerSource.addFeatures(featuresToAdd);
+                }
+
+                // Handle trails in separate vector layer (WebGL doesn't support LineStrings)
+                if (showTrails && this.trailLayer) {
+                    const trailSource = this.trailLayer.getLayerSource(),
+                        trailFeatures = [];
+
+                    trailSource.clear();
+
+                    interpolatedPositions.forEach((position, agentId) => {
+                        const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId],
+                            originalFeature = this.findClosestFeature(agentFeatures, currentTime);
+
+                        if (!originalFeature) {
+                            return;
+                        }
+
+                        const capability = originalFeature.properties.activeCapability;
+
+                        // Apply same filters
+                        if ((capability === "walking" && !filters.walking) ||
+                            (capability === "bike" && !filters.bike) ||
+                            (capability === "cyclingRentalBike" && !filters.rentalBike)) {
+                            return;
+                        }
+
                         const trailCoords = this.interpolator.getTrailPath(agentId, currentTime, trailLength);
 
                         if (trailCoords.length > 1) {
-                            // Transform trail coordinates
-                            const transformedTrailCoords = trailCoords.map(coord => transform(coord, "EPSG:4326", mapProjection)
+                            const transformedTrailCoords = trailCoords.map(coord =>
+                                    transform(coord, "EPSG:4326", mapProjection)
                                 ),
-
                                 trailFeature = new Feature({
                                     geometry: new LineString(transformedTrailCoords)
                                 });
 
                             trailFeature.setStyle(this.getTrailStyle(originalFeature.properties));
-                            layerSource.addFeature(trailFeature);
+                            trailFeatures.push(trailFeature);
                         }
+                    });
+
+                    if (trailFeatures.length > 0) {
+                        trailSource.addFeatures(trailFeatures);
                     }
-                });
+                }
 
                 this.$store.commit("agentVisualization/setVisibleAgentCount", visibleCount);
             }
+
+            this.isUpdating = false;
         },
 
         /**
@@ -667,26 +844,18 @@ export default {
             heatmapSource.clear();
 
             interpolatedPositions.forEach((position, agentId) => {
-                // Find feature for this agent at or near current time
-                const agentFeatures = this.$store.state.agentVisualization.features.filter(
-                    f => f.properties.agentId === agentId
-                );
+                // PERFORMANCE: Use indexed lookup instead of filtering all features
+                const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId];
 
-                if (agentFeatures.length === 0) {
+                if (!agentFeatures || agentFeatures.length === 0) {
                     return;
                 }
 
-                // Find the feature with time closest to (but not after) currentTime
-                let originalFeature = agentFeatures[0],
-                    minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                // PERFORMANCE: Binary search instead of linear scan
+                const originalFeature = this.findClosestFeature(agentFeatures, currentTime);
 
-                for (const feature of agentFeatures) {
-                    const timeDiff = Math.abs(currentTime - feature.properties.time);
-
-                    if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
-                        minTimeDiff = timeDiff;
-                        originalFeature = feature;
-                    }
+                if (!originalFeature) {
+                    return;
                 }
 
                 // Apply filters
@@ -830,6 +999,13 @@ export default {
 
                 map.removeLayer(this.heatmapLayer);
                 this.heatmapLayer = null;
+            }
+
+            if (this.trailLayer) {
+                const map = mapCollection.getMap("2D");
+
+                map.removeLayer(this.trailLayer.layer);
+                this.trailLayer = null;
             }
 
             if (this.selectInteraction) {
