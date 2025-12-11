@@ -70,15 +70,9 @@ export default {
                 return;
             }
 
-            const drawLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
+            mapCollection.getMap("2D").getLayers().getArray().find(layer => {
                 return layer.get("id") === "module/pvObligation/drawLayer";
-            });
-
-            drawLayer.getSource().getFeatures().forEach(feature => {
-                if (this.componentFormData.restrictedListItems.map(item => item.id).includes(feature.get("id"))) {
-                    drawLayer.getSource().removeFeature(feature);
-                }
-            });
+            }).getSource().clear();
 
             this.componentFormData.restrictedListItems.splice(0);
         },
