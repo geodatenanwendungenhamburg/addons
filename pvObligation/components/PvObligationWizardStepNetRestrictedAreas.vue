@@ -23,7 +23,7 @@ export default {
                 restrictedListItems: []
             },
             stepNetAreaDataObligatedArea: 0,
-            stepNetNetAreaWithoutRestrictedArea: 0,
+            stepNetAreaWithoutRestrictedArea: 0,
             restrictedAreaSum: 0,
             netAreaMinusSubstractedArea: 0,
             isNetAreaMinusSubstractedAreaHigher: false
@@ -92,12 +92,18 @@ export default {
 
             // eslint-disable-next-line
             const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
-                layer: outlineLayer,
+                netArea: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea !== null
+                    ? this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea
+                    : await this.dissolveRoofFeaturesAndCalculateArea({
+                        roofId: this.selectedRoofId,
+                        outlineLayer: outlineLayer,
+                        layerName: "PV-geeignete Dachflächen"
+                    }),
                 restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
             });
 
             this.stepNetAreaDataObligatedArea = stepNetAreaData.obligatedArea;
-            this.stepNetNetAreaWithoutRestrictedArea = stepNetAreaData.netAreaWithoutRestrictedArea;
+            this.stepNetAreaWithoutRestrictedArea = stepNetAreaData.netAreaWithoutRestrictedArea;
 
             await this.calculateData();
         },
@@ -109,7 +115,7 @@ export default {
         async calculateData () {
             const stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
                 restrictedAreaItems: this.componentFormData.restrictedListItems,
-                stepNetNetAreaWithoutRestrictedArea: this.stepNetNetAreaWithoutRestrictedArea,
+                stepNetAreaWithoutRestrictedArea: this.stepNetAreaWithoutRestrictedArea,
                 stepNetAreaDataObligatedArea: this.stepNetAreaDataObligatedArea
             });
 
