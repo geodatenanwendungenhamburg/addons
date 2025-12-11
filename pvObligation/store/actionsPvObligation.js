@@ -557,6 +557,7 @@ export default {
      *
      * @param {Object} payload - The payload containing required parameters.
      * @param {Object} payload.layer - The openlayers vector layer containing roof features.
+     * @param {Array<Object>} payload.netArea - Base net area  in m².
      * @param {Array<Object>} payload.restrictedAreaItems - Array of restricted area features.
      * @returns {Object} An object containing:
      *   {number} netArea - The calculated net roof area in m².
@@ -564,12 +565,8 @@ export default {
      *   {number} restrictedArea - The total restricted area in m².
      *   {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
      */
-    async calculateNetAreaAndRestrictedAreas ({state, dispatch}, payload) {
-        const netArea = await dispatch("dissolveRoofFeaturesAndCalculateArea", {
-                roofId: state.selectedRoofId,
-                outlineLayer: payload.layer,
-                layerName: "PV-geeignete Dachflächen"
-            }),
+    calculateNetAreaAndRestrictedAreas (_, payload) {
+        const netArea = payload.netArea,
             restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems);
 
         return {
@@ -584,7 +581,7 @@ export default {
      *
      * @param {Object} payload - The payload containing required parameters.
      * @param {Array<Object>} payload.restrictedAreaItems - Array of restricted area features.
-     * @param {Array<Object>} payload.stepNetNetAreaWithoutRestrictedArea - Net roof area without restricted areas.
+     * @param {Array<Object>} payload.stepNetAreaWithoutRestrictedArea - Net roof area without restricted areas.
      * @param {Array<Object>} payload.stepNetAreaDataObligatedArea - Obligated area from step net area data.
      * @returns {Object} An object containing:
      *  {number} netAreaMinusSubstractedArea - The net roof area minus restricted areas in m².
@@ -592,9 +589,9 @@ export default {
      *  {boolean} isNetAreaMinusSubstractedAreaHigher - Flag indicating if net area minus subtracted area is higher than obligated area.
      *  {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
      */
-    async calculateNetRestrictedAreaAndRestrictedAreas (_, payload) {
+    calculateNetRestrictedAreaAndRestrictedAreas (_, payload) {
         const restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems),
-            netAreaMinusSubstractedArea = Math.round((payload.stepNetNetAreaWithoutRestrictedArea - restrictedArea) * 10) / 10,
+            netAreaMinusSubstractedArea = Math.round((payload.stepNetAreaWithoutRestrictedArea - restrictedArea) * 10) / 10,
             isNetAreaMinusSubstractedAreaHigher = netAreaMinusSubstractedArea > payload.stepNetAreaDataObligatedArea;
 
         return {

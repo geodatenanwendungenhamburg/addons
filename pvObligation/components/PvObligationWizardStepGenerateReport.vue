@@ -1,6 +1,7 @@
 <script>
 import PvObligationWizardStepScriptExtends from "./PvObligationWizardStepScriptExtends.vue";
 import {mapGetters, mapActions} from "vuex";
+import {Style, Stroke, Fill} from "ol/style";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 
 export default {
@@ -12,7 +13,8 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport",
-            "selectedRoofExtent"
+            "selectedRoofExtent",
+            "selectedRoofId"
         ]),
         ...mapGetters("Menu", ["expanded"]),
         /**
@@ -59,7 +61,8 @@ export default {
         ...mapActions("Modules/PvObligation", [
             "exportPDF",
             "calculateNetAreaAndRestrictedAreas",
-            "calculateNetRestrictedAreaAndRestrictedAreas"
+            "calculateNetRestrictedAreaAndRestrictedAreas",
+            "dissolveRoofFeaturesAndCalculateArea"
         ]),
         ...mapActions("Maps", [
             "addNewLayerIfNotExists",
@@ -71,16 +74,25 @@ export default {
                 alwaysOnTop: true
             });
 
-            outlineLayer.setStyle(null);
+            outlineLayer.setStyle(new Style({
+                stroke: new Stroke({color: "rgba(192, 12, 247, 1)", width: 3}),
+                fill: new Fill({color: "rgba(0, 0, 0, 0)"})
+            }));
 
             // eslint-disable-next-line
             const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
-                    layer: outlineLayer,
+                    netArea: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea !== null
+                        ? this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea
+                        : await this.dissolveRoofFeaturesAndCalculateArea({
+                            roofId: this.selectedRoofId,
+                            outlineLayer: outlineLayer,
+                            layerName: "PV-geeignete Dachflächen"
+                        }),
                     restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
                 }),
                 stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
                     restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetRestrictedAreas?.formData?.restrictedListItems ?? [],
-                    stepNetNetAreaWithoutRestrictedArea: stepNetAreaData?.netAreaWithoutRestrictedArea,
+                    stepNetAreaWithoutRestrictedArea: stepNetAreaData?.netAreaWithoutRestrictedArea,
                     stepNetAreaDataObligatedArea: stepNetAreaData?.obligatedArea
                 });
 

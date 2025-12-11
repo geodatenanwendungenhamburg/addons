@@ -30,7 +30,8 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "selectedRoofExtent",
-            "isDrawing"
+            "isDrawing",
+            "selectedRoofId"
         ]),
         ...mapGetters("Menu", [
             "expanded"
@@ -126,7 +127,13 @@ export default {
 
             // eslint-disable-next-line
             const areaData = await this.calculateNetAreaAndRestrictedAreas({
-                layer: outlineLayer,
+                netArea: this.componentFormData.netRoofArea !== null
+                    ? this.componentFormData.netRoofArea
+                    : await this.dissolveRoofFeaturesAndCalculateArea({
+                        roofId: this.selectedRoofId,
+                        outlineLayer: outlineLayer,
+                        layerName: "PV-geeignete Dachflächen"
+                    }),
                 restrictedAreaItems: this.componentFormData.restrictedListItems ?? []
             });
 
