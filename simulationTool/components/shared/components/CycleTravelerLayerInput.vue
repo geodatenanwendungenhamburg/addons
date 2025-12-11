@@ -38,9 +38,13 @@ export default {
         agentCount: {
             type: Number,
             default: 50
+        },
+        spawningInterval: {
+            type: Number,
+            default: 30
         }
     },
-    emits: ["update:value", "update:agentCount"],
+    emits: ["update:value", "update:agentCount", "update:spawningInterval"],
     data () {
         return {
             drawInteraction: null,
@@ -48,7 +52,8 @@ export default {
             targetFeature: null,
             sourceGeometry: null,
             targetGeometry: null,
-            localAgentCount: 50
+            localAgentCount: 50,
+            localSpawningInterval: 30
         };
     },
     computed: {
@@ -73,6 +78,7 @@ export default {
     },
     mounted () {
         this.localAgentCount = this.agentCount || 50;
+        this.localSpawningInterval = this.spawningInterval || 30;
         this.parseExistingValue();
     },
     unmounted () {
@@ -331,7 +337,8 @@ export default {
                         geometry: this.sourceGeometry,
                         properties: {
                             type: "source",
-                            spawningAmount: this.localAgentCount
+                            spawningAmount: this.localAgentCount,
+                            spawningIntervalInMinutes: this.localSpawningInterval
                         }
                     },
                     {
@@ -393,6 +400,20 @@ export default {
                 this.$emit("update:agentCount", value);
                 this.updateValue();
             }
+        },
+
+        /**
+         * Updates the spawning interval and emits the change.
+         * @param {Event} event - Input event
+         */
+        updateSpawningInterval (event) {
+            const value = parseInt(event.target.value, 10);
+
+            if (!isNaN(value) && value > 0) {
+                this.localSpawningInterval = value;
+                this.$emit("update:spawningInterval", value);
+                this.updateValue();
+            }
         }
     }
 };
@@ -421,6 +442,28 @@ export default {
                 max="1000"
                 @input="updateAgentCount"
             >
+        </div>
+
+        <div class="mb-3 p-3 border rounded">
+            <label
+                for="spawningIntervalInput"
+                class="form-label mb-2"
+            >
+                <i class="bi bi-clock-fill" />
+                Spawning Interval (Minuten)
+            </label>
+            <input
+                id="spawningIntervalInput"
+                type="number"
+                class="form-control mb-3"
+                :value="localSpawningInterval"
+                min="1"
+                max="120"
+                @input="updateSpawningInterval"
+            >
+            <small class="text-muted">
+                Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
+            </small>
         </div>
 
         <div class="mb-3 p-3 border rounded">

@@ -13,16 +13,16 @@
                 <div class="legend-item">
                     <span
                         class="legend-color"
-                        style="background: #28a745;"
+                        style="background: #4287f5;"
                     />
                     <span>Zu Fuß</span>
                 </div>
                 <div class="legend-item">
                     <span
                         class="legend-color"
-                        style="background: #fd7e14;"
+                        style="background: #28a745;"
                     />
-                    <span>Fahrrad</span>
+                    <span>Leihrad</span>
                 </div>
             </div>
         </div>
@@ -91,9 +91,9 @@
                     class="data-line line-walking"
                 />
                 <path
-                    v-if="bikeLinePath"
-                    :d="bikeLinePath"
-                    class="data-line line-bike"
+                    v-if="rentalBikeLinePath"
+                    :d="rentalBikeLinePath"
+                    class="data-line line-rental-bike"
                 />
 
                 <!-- Current time indicator -->
@@ -319,10 +319,10 @@ export default {
         },
 
         /**
-         * Generate bike line path
+         * Generate rental bike line path
          */
-        bikeLinePath () {
-            return this.generateLinePath(m => m.bikeCount);
+        rentalBikeLinePath () {
+            return this.generateLinePath(m => m.rentalBikeCount);
         },
 
         /**
@@ -369,11 +369,11 @@ export default {
 
                 points.push({
                     x: x,
-                    y: this.valueToY(metric.bikeCount),
-                    type: "bike",
+                    y: this.valueToY(metric.rentalBikeCount),
+                    type: "rental-bike",
                     time: metric.time,
-                    value: metric.bikeCount,
-                    label: "Fahrrad"
+                    value: metric.rentalBikeCount,
+                    label: "Leihrad"
                 });
             });
 
@@ -513,5 +513,86 @@ export default {
     position: relative;
     height: 250px;
     width: 100%;
+}
+
+.chart-svg {
+    display: block;
+}
+
+.grid-line {
+    stroke: #e9ecef;
+    stroke-width: 1;
+}
+
+.axis-label {
+    font-size: 0.75rem;
+    fill: #6c757d;
+}
+
+.data-line {
+    fill: none;
+    stroke-width: 2;
+}
+
+.line-total {
+    stroke: #0066cc;
+}
+
+.line-walking {
+    stroke: #4287f5;
+}
+
+.line-rental-bike {
+    stroke: #28a745;
+}
+
+.current-time-line {
+    stroke: #dc3545;
+    stroke-width: 2;
+    stroke-dasharray: 4;
+}
+
+.data-points {
+    circle {
+        cursor: pointer;
+        transition: r 0.2s;
+
+        &:hover {
+            r: 5;
+        }
+    }
+
+    .point-total {
+        fill: #0066cc;
+    }
+
+    .point-walking {
+        fill: #4287f5;
+    }
+
+    .point-rental-bike {
+        fill: #28a745;
+    }
+}
+
+.chart-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1000;
+
+    .tooltip-time {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .tooltip-value {
+        color: #e9ecef;
+    }
 }
 </style>

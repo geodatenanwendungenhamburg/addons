@@ -1321,14 +1321,16 @@ export default {
                                 };
                             }
 
-                            // Only keep spawningAmount in properties
+                            // Extract spawningAmount and spawningIntervalInMinutes
                             const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
+                            const spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes || 30;
 
                             requestBody.inputs.cycleTravelerSource = {
                                 type: "Feature",
                                 geometry: sourceGeometry,
                                 properties: {
-                                    spawningAmount: String(spawningAmount)
+                                    spawningAmount: String(spawningAmount),
+                                    spawningIntervalInMinutes: String(spawningIntervalInMinutes)
                                 }
                             };
                         }
@@ -1436,14 +1438,16 @@ export default {
                                     };
                                 }
 
-                                // Only keep spawningAmount in properties
-                                const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
+                                // Extract spawningAmount and spawningIntervalInMinutes
+                                const spawningAmount = sourceFeature.properties?.spawningAmount || 10,
+                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes || 30;
 
                                 requestBody.inputs.cycleTravelerSource = {
                                     type: "Feature",
                                     geometry: sourceGeometry,
                                     properties: {
-                                        spawningAmount: String(spawningAmount)
+                                        spawningAmount: String(spawningAmount),
+                                        spawningIntervalInMinutes: String(spawningIntervalInMinutes)
                                     }
                                 };
                             }

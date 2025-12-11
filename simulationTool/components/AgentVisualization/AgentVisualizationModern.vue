@@ -326,7 +326,7 @@ export default {
                 // Check if this is a simulation export file (complete format)
                 if (geojson.jobs && geojson.simulationId) {
                     console.log("Detected simulation export format, extracting agent data...");
-                    
+
                     // Try to extract agent GeoJSON from jobs
                     let agentData = null;
 
@@ -382,8 +382,8 @@ export default {
                     "../../addons/simulationTool/components/AgentVisualization/green4bikes-results-2025-12-08T08-01-01-224Z.geojson"
                 ];
 
-                let geojson = null;
-                let lastError = null;
+                let geojson = null,
+                    lastError = null;
 
                 for (const path of possiblePaths) {
                     try {
@@ -578,8 +578,8 @@ export default {
                     }
 
                     // Find the feature with time closest to (but not after) currentTime
-                    let originalFeature = agentFeatures[0];
-                    let minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                    let originalFeature = agentFeatures[0],
+                        minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
 
                     for (const feature of agentFeatures) {
                         const timeDiff = Math.abs(currentTime - feature.properties.time);
@@ -609,15 +609,15 @@ export default {
 
                     // Transform coordinates from WGS84 to map projection
                     const transformedCoord = transform(
-                        position.coordinate,
-                        "EPSG:4326",
-                        mapProjection
-                    );
+                            position.coordinate,
+                            "EPSG:4326",
+                            mapProjection
+                        ),
 
-                    // Create feature
-                    const feature = new Feature({
-                        geometry: new Point(transformedCoord)
-                    });
+                        // Create feature
+                        feature = new Feature({
+                            geometry: new Point(transformedCoord)
+                        });
 
                     feature.setProperties({
                         agentId: agentId,
@@ -635,13 +635,12 @@ export default {
 
                         if (trailCoords.length > 1) {
                             // Transform trail coordinates
-                            const transformedTrailCoords = trailCoords.map(coord =>
-                                transform(coord, "EPSG:4326", mapProjection)
-                            );
+                            const transformedTrailCoords = trailCoords.map(coord => transform(coord, "EPSG:4326", mapProjection)
+                                ),
 
-                            const trailFeature = new Feature({
-                                geometry: new LineString(transformedTrailCoords)
-                            });
+                                trailFeature = new Feature({
+                                    geometry: new LineString(transformedTrailCoords)
+                                });
 
                             trailFeature.setStyle(this.getTrailStyle(originalFeature.properties));
                             layerSource.addFeature(trailFeature);
@@ -678,8 +677,8 @@ export default {
                 }
 
                 // Find the feature with time closest to (but not after) currentTime
-                let originalFeature = agentFeatures[0];
-                let minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                let originalFeature = agentFeatures[0],
+                    minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
 
                 for (const feature of agentFeatures) {
                     const timeDiff = Math.abs(currentTime - feature.properties.time);
@@ -707,15 +706,15 @@ export default {
 
                 // Transform coordinates
                 const transformedCoord = transform(
-                    position.coordinate,
-                    "EPSG:4326",
-                    mapProjection
-                );
+                        position.coordinate,
+                        "EPSG:4326",
+                        mapProjection
+                    ),
 
-                // Create feature for heatmap
-                const feature = new Feature({
-                    geometry: new Point(transformedCoord)
-                });
+                    // Create feature for heatmap
+                    feature = new Feature({
+                        geometry: new Point(transformedCoord)
+                    });
 
                 heatmapSource.addFeature(feature);
             });

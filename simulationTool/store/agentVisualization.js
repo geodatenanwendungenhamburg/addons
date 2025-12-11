@@ -450,8 +450,8 @@ const actions = {
                 f => f.properties.activeCapability === "walking"
             ).length;
 
-            const bikeCount = featuresAtTime.filter(
-                f => f.properties.activeCapability === "bike"
+            const rentalBikeCount = featuresAtTime.filter(
+                f => f.properties.activeCapability === "cyclingRentalBike"
             ).length;
 
             const velocities = featuresAtTime
@@ -466,7 +466,7 @@ const actions = {
                 time,
                 totalCount: featuresAtTime.length,
                 walkingCount,
-                bikeCount,
+                rentalBikeCount,
                 avgVelocity
             });
         });
