@@ -3,7 +3,8 @@ import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import {Style, Stroke, Fill, Text as OlText} from "ol/style";
-import {Draw} from "ol/interaction";
+import {Draw, Modify} from "ol/interaction";
+import Collection from "ol/Collection";
 import GeoJSON from "ol/format/GeoJSON";
 import booleanIntersects from "@turf/boolean-intersects";
 import intersect from "@turf/intersect";
@@ -49,7 +50,8 @@ export default {
             drawState: {
                 layer: null,
                 interaction: null
-            }
+            },
+            originalFeatures: []
         };
     },
     computed: {
@@ -84,6 +86,22 @@ export default {
             });
 
             this.setIsDrawing(false);
+
+            this.drawState.layer.getSource().getFeatures().forEach(feature => {
+                if (feature.get("id") === this.formData.id) {
+                    feature.setStyle(new Style({
+                        fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
+                        stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2}),
+                        text: new OlText({
+                            text: this.formData.id,
+                            font: "bold 14px Arial",
+                            fill: new Fill({color: "#222"}),
+                            stroke: new Stroke({color: "#fff", width: 3}),
+                            overflow: true
+                        })
+                    }));
+                }
+            });
         },
         onCancel () {
             this.formData = {...this.formDataItem};
@@ -94,7 +112,18 @@ export default {
                 data: this.formData
             });
 
-            this.removeDrawnFeatures();
+            if (this.formMode === "create") {
+                this.removeDrawnFeatures();
+            }
+            else if (this.formMode === "edit") {
+                // Restore original features
+                this.drawState.layer.getSource().clear();
+
+                this.originalFeatures.forEach(feature => {
+                    this.drawState.layer.getSource().addFeature(feature);
+                });
+            }
+
             this.setIsDrawing(false);
         },
         validate () {
@@ -120,7 +149,20 @@ export default {
                 id: "module/pvObligation/drawLayer"
             });
 
-            this.createDrawInteraction();
+            if (this.formMode === "create") {
+                this.createDrawInteraction();
+            }
+            else if (this.formMode === "edit") {
+                const featureArray = [];
+
+                this.originalFeatures = this.drawState.layer.getSource().getFeatures().forEach(feature => {
+                    featureArray.push(feature.clone());
+                });
+
+                this.originalFeatures = featureArray;
+
+                this.createModifyInteraction();
+            }
         },
         /**
          * Destroys any existing draw interaction and creates a new one based on current active shape.
@@ -144,12 +186,56 @@ export default {
             this.addInteraction(this.drawState.interaction);
         },
         /**
+         * Creates a modification interaction for map features.
+         * @returns {void}
+         */
+        createModifyInteraction () {
+            this.removeDrawInteraction();
+
+            this.drawState.interaction = new Modify({
+                features: new Collection(this.drawState.layer.getSource().getFeatures().filter(feature => {
+                    return feature.get("id") === this.formData.id;
+                }))
+            });
+
+            this.drawState.interaction.on("modifyend", this.handleDrawEnd);
+            this.addInteraction(this.drawState.interaction);
+
+            this.drawState.layer.getSource().getFeatures().forEach(feature => {
+                if (feature.get("id") === this.formData.id) {
+                    feature.setStyle(new Style({
+                        fill: new Fill({color: "rgba(0, 255, 128, 0.3)"}),
+                        stroke: new Stroke({color: "rgba(200, 237, 245, 1)", width: 2}),
+                        text: new OlText({
+                            text: this.formData.id,
+                            font: "bold 14px Arial",
+                            fill: new Fill({color: "#222"}),
+                            stroke: new Stroke({color: "#fff", width: 3}),
+                            overflow: true
+                        })
+                    }));
+                }
+            });
+        },
+        /**
          * Handles the end of a drawing operation: sets properties on the drawn feature
          * @param {Object} event Draw end event object containing the created feature.
          * @param {import('ol/Feature').default} event.feature The drawn feature instance.
          * @returns {void}
          */
         handleDrawEnd (event) {
+            if (event.type === "modifyend") {
+                this.cutDrawnFeatures(event.features.getArray()[0]);
+                this.removeDrawInteraction(this.drawState.interaction);
+
+                setTimeout(() => {
+                    this.drawState.layer.getSource().changed();
+                    this.createModifyInteraction();
+                }, 100);
+
+                return;
+            }
+
             this.cutDrawnFeatures(event.feature);
         },
         /**
@@ -182,10 +268,14 @@ export default {
          * This method processes the drawn features and applies the cut operation,
          * updating the map with the resulting geometries.
          *
-         * @param {Geometry} cutGeometry - The geometry used to cut the drawn features.
+         * @param {Feature} drawFeature - The Feature used to be cut.
          * @returns {void}
          */
         cutDrawnFeatures (drawFeature) {
+            drawFeature.setProperties({
+                marker: "drawnFeature"
+            });
+
             const netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
                     return layer.get("name") === "PV-geeignete Dachflächen";
                 }),
@@ -275,7 +365,7 @@ export default {
                 const source = this.drawState.layer.getSource();
 
                 source.getFeatures().forEach(f => {
-                    if (f && !f.get("id")) {
+                    if (f && !f.get("id") || f.get("marker") === "drawnFeature") {
                         source.removeFeature(f);
                     }
                 });
