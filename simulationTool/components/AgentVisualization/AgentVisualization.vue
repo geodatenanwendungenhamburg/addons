@@ -127,7 +127,8 @@ export default {
             timeEngine: null,
             interpolator: null,
             updateThrottleTimer: null,
-            isUpdating: false
+            isUpdating: false,
+            styleCache: new Map() // PERFORMANCE: Cache styles by capability
         };
     },
     computed: {
@@ -386,6 +387,11 @@ export default {
             }
             catch (error) {
                 console.error("Error loading file:", error);
+                // Show user-friendly error message
+                this.$store.dispatch("Alerting/addSingleAlert", {
+                    category: "error",
+                    content: `Fehler beim Laden der Datei: ${error.message}`
+                }, {root: true});
             }
         },
 
@@ -491,6 +497,20 @@ export default {
 
             // Make layer visible
             planningScenarioLayer.layer.setVisible(true);
+        },
+
+        /**
+         * Switch between vector and WebGL rendering modes
+         * @param {string} mode - "vector" or "webgl"
+         */
+        switchRenderMode (mode) {
+            // Currently only WebGL is implemented
+            // Vector mode would require recreating the layer without WebGL
+            console.warn("Render mode switching not fully implemented. Using WebGL.", mode);
+            // Could be implemented by recreating the layer:
+            // this.cleanup();
+            // this.initializeLayer();
+            // this.updateVisualization();
         },
 
         /**
@@ -691,32 +711,28 @@ export default {
         },
 
         /**
-         * Get style for agent
-         */
-        getAgentStyle (properties) {
-            const color = getCapabilityColor(properties.activeCapability);
-
-            return new Style({
-                image: new Circle({
-                    radius: 6,
-                    fill: new Fill({color: [...color, 0.9]}),
-                    stroke: new Stroke({color: "#fff", width: 1.5})
-                })
-            });
-        },
-
-        /**
-         * Get trail style
+         * Get trail style (cached for performance)
          */
         getTrailStyle (properties) {
-            const color = getCapabilityColor(properties.activeCapability);
+            const capability = properties.activeCapability;
 
-            return new Style({
-                stroke: new Stroke({
-                    color: [...color, 0.4],
-                    width: 2
-                })
-            });
+            // PERFORMANCE: Return cached style if available
+            if (this.styleCache.has(`trail-${capability}`)) {
+                return this.styleCache.get(`trail-${capability}`);
+            }
+
+            // eslint-disable-next-line one-var
+            const color = getCapabilityColor(capability),
+                style = new Style({
+                    stroke: new Stroke({
+                        color: [...color, 0.4],
+                        width: 2
+                    })
+                });
+
+            // Cache for future use
+            this.styleCache.set(`trail-${capability}`, style);
+            return style;
         },
 
         /**
@@ -794,6 +810,11 @@ export default {
                 this.interpolator = new AgentInterpolator();
             }
 
+            // Clear style cache
+            if (this.styleCache) {
+                this.styleCache.clear();
+            }
+
             // Reset Vuex store
             this.$store.commit("agentVisualization/setAgentData", null);
             this.$store.commit("agentVisualization/setTimeSteps", []);
@@ -858,6 +879,11 @@ export default {
             // Clear interpolator
             if (this.interpolator) {
                 this.interpolator = null;
+            }
+
+            // Clear style cache
+            if (this.styleCache) {
+                this.styleCache.clear();
             }
         }
     }
