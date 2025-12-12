@@ -1,3 +1,4 @@
+/* eslint-disable one-var */
 /**
  * TimeEngine - Centralized time control system for agent visualization
  * Manages playback, interpolation timing, and synchronization across all UI components
@@ -161,8 +162,7 @@ export default class TimeEngine {
         }
 
         const startTime = timeSteps[0],
-            endTime = timeSteps[timeSteps.length - 1],
-            totalDuration = endTime - startTime;
+            endTime = timeSteps[timeSteps.length - 1];
 
         // Calculate current time
         let currentTime = startTime + this.accumulatedTime;
