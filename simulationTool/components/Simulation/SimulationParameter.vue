@@ -47,7 +47,8 @@ export default {
             flatInputs: {},
             nestedInputs: {},
             areInputParameterPrepared: false,
-            agentCount: 50
+            agentCount: 50,
+            includeSpawningInterval: false
         };
     },
     computed: {
@@ -1311,42 +1312,34 @@ export default {
                             targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
 
                         if (sourceFeature) {
-                            // Convert Polygon to Point (use centroid)
-                            let sourceGeometry = sourceFeature.geometry;
-
-                            if (sourceGeometry.type === "Polygon") {
-                                sourceGeometry = {
-                                    type: "Point",
-                                    coordinates: this.calculateCentroid(sourceGeometry)
-                                };
-                            }
+                            // Keep original geometry (Polygon or Point)
+                            const sourceGeometry = sourceFeature.geometry;
 
                             // Extract spawningAmount and spawningIntervalInMinutes
                             const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
-                            const spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes || 30;
+                            const spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+
+                            const properties = {
+                                spawningAmount: String(spawningAmount)
+                            };
+
+                            // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
+                            if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
+                                properties.spawningIntervalInMinutes = String(spawningIntervalInMinutes);
+                            }
 
                             requestBody.inputs.cycleTravelerSource = {
                                 type: "Feature",
                                 geometry: sourceGeometry,
-                                properties: {
-                                    spawningAmount: String(spawningAmount),
-                                    spawningIntervalInMinutes: String(spawningIntervalInMinutes)
-                                }
+                                properties: properties
                             };
                         }
 
                         if (targetFeature) {
-                            // Convert Polygon to Point (use centroid) and simplify structure
-                            let targetGeometry = targetFeature.geometry;
+                            // Keep original geometry (Polygon or Point)
+                            const targetGeometry = targetFeature.geometry;
 
-                            if (targetGeometry.type === "Polygon") {
-                                targetGeometry = {
-                                    type: "Point",
-                                    coordinates: this.calculateCentroid(targetGeometry)
-                                };
-                            }
-
-                            // Target is just a Point geometry, no Feature wrapper needed
+                            // Target is just a geometry, no Feature wrapper needed
                             requestBody.inputs.cycleTravelerTarget = targetGeometry;
                         }
 
@@ -1428,42 +1421,34 @@ export default {
                                 targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
 
                             if (sourceFeature) {
-                                // Convert Polygon to Point (use centroid)
-                                let sourceGeometry = sourceFeature.geometry;
-
-                                if (sourceGeometry.type === "Polygon") {
-                                    sourceGeometry = {
-                                        type: "Point",
-                                        coordinates: this.calculateCentroid(sourceGeometry)
-                                    };
-                                }
+                                // Keep original geometry (Polygon or Point)
+                                const sourceGeometry = sourceFeature.geometry;
 
                                 // Extract spawningAmount and spawningIntervalInMinutes
                                 const spawningAmount = sourceFeature.properties?.spawningAmount || 10,
-                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes || 30;
+                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+
+                                const properties = {
+                                    spawningAmount: String(spawningAmount)
+                                };
+
+                                // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
+                                if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
+                                    properties.spawningIntervalInMinutes = String(spawningIntervalInMinutes);
+                                }
 
                                 requestBody.inputs.cycleTravelerSource = {
                                     type: "Feature",
                                     geometry: sourceGeometry,
-                                    properties: {
-                                        spawningAmount: String(spawningAmount),
-                                        spawningIntervalInMinutes: String(spawningIntervalInMinutes)
-                                    }
+                                    properties
                                 };
                             }
 
                             if (targetFeature) {
-                                // Convert Polygon to Point (use centroid) and simplify structure
-                                let targetGeometry = targetFeature.geometry;
+                                // Keep original geometry (Polygon or Point)
+                                const targetGeometry = targetFeature.geometry;
 
-                                if (targetGeometry.type === "Polygon") {
-                                    targetGeometry = {
-                                        type: "Point",
-                                        coordinates: this.calculateCentroid(targetGeometry)
-                                    };
-                                }
-
-                                // Target is just a Point geometry, no Feature wrapper needed
+                                // Target is just a geometry, no Feature wrapper needed
                                 requestBody.inputs.cycleTravelerTarget = targetGeometry;
                             }
 

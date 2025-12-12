@@ -30,6 +30,9 @@ export default {
         ...mapActions("Menu", [
             "resetMenu"
         ]),
+        handleModeChange(newMode) {
+            this.setMode(newMode);
+        },
         closeSimulationTool () {
             this.restoreDefaultLayout();
             if (this.currentComponentName("secondaryMenu") !== "Simulationen") {
@@ -67,81 +70,81 @@ export default {
         <button
             v-if="!hiddenSideMenus.includes('home-panel')"
             class="btn btn-link"
-            :class="{ active: mode === 'home-panel' }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode === 'home-panel' }"
             :title="$t('additional:modules.tools.simulationTool.home')"
-            @click="() => setMode('home-panel')"
+            @click="() => handleModeChange('home-panel')"
         >
             <i class="bi bi-house-fill" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('planningScenario')"
             class="btn btn-link"
-            :class="{ active: mode.includes('planningScenario') }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('planningScenario') }"
             :title="planningScenarioLabel"
-            @click="() => setMode('planningScenario')"
+            @click="() => handleModeChange('planningScenario')"
         >
             <i class="bi bi-bounding-box-circles" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('simulationParameter')"
             class="btn btn-link"
-            :class="{ active: mode.includes('simulationParameter') }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('simulationParameter') }"
             :title="$t('additional:modules.tools.simulationTool.simulationSetParams')"
-            @click="() => setMode('simulationParameter')"
+            @click="() => handleModeChange('simulationParameter')"
         >
             <i class="bi bi-pencil-square" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('simulationList')"
             class="btn btn-link"
-            :class="{ active: mode.includes('simulationList') }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('simulationList') }"
             :title="$t('additional:modules.tools.simulationTool.simulationList')"
-            @click="() => setMode('simulationList')"
+            @click="() => handleModeChange('simulationList')"
         >
             <i class="bi bi-list-check" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('agentVisualization')"
             class="btn btn-link"
-            :class="{ active: mode === 'agentVisualization' }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode === 'agentVisualization' }"
             :title="$t('additional:modules.tools.simulationTool.agentVisualization')"
-            @click="() => setMode('agentVisualization')"
+            @click="() => handleModeChange('agentVisualization')"
         >
             <i class="bi bi-people-fill" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('process')"
             class="btn btn-link"
-            :class="{ active: mode.includes('process') }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('process') }"
             :title="$t('additional:modules.tools.simulationTool.models')"
-            @click="() => setMode('process-list')"
+            @click="() => handleModeChange('process-list')"
         >
             <i class="bi bi-motherboard-fill" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('job')"
             class="btn btn-link"
-            :class="{ active: mode.includes('job')}"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('job')}"
             :title="$t('additional:modules.tools.simulationTool.scenarios')"
-            @click="() => setMode('job-list')"
+            @click="() => handleModeChange('job-list')"
         >
             <i class="bi bi-clipboard-data-fill" />
         </button>
         <button
             v-if="loggedIn && !hiddenSideMenus.includes('ensemble')"
             class="btn btn-link"
-            :class="{ active: mode.includes('ensemble')}"
+            :class="{ active: $store.state.Modules.SimulationTool.mode.includes('ensemble')}"
             :title="$t('additional:modules.tools.simulationTool.ensembles')"
-            @click="() => setMode('ensemble-list')"
+            @click="() => handleModeChange('ensemble-list')"
         >
             <i class="bi bi-boxes" />
         </button>
         <button
             v-if="!hiddenSideMenus.includes('help-panel')"
             class="btn btn-link"
-            :class="{ active: mode === 'help-panel' || mode.includes('tutorial') }"
+            :class="{ active: $store.state.Modules.SimulationTool.mode === 'help-panel' || $store.state.Modules.SimulationTool.mode.includes('tutorial') }"
             :title="$t('additional:modules.tools.simulationTool.help')"
-            @click="() => setMode('help-panel')"
+            @click="() => handleModeChange('help-panel')"
         >
             <i class="bi bi-question-circle-fill" />
         </button>

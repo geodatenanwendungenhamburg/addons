@@ -7,6 +7,7 @@ import Stroke from "ol/style/Stroke";
 import Circle from "ol/style/Circle";
 import GeoJSON from "ol/format/GeoJSON";
 import layerCollection from "../../../../../src/core/layers/js/layerCollection";
+import SwitchInput from "../../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
 
 /**
  * Custom input for Green4Bikes cycleTravelerLayer.
@@ -14,6 +15,9 @@ import layerCollection from "../../../../../src/core/layers/js/layerCollection";
  */
 export default {
     name: "CycleTravelerLayerInput",
+    components: {
+        SwitchInput
+    },
     props: {
         id: {
             type: String,
@@ -53,7 +57,8 @@ export default {
             sourceGeometry: null,
             targetGeometry: null,
             localAgentCount: 50,
-            localSpawningInterval: 30
+            localSpawningInterval: 30,
+            includeSpawningInterval: false
         };
     },
     computed: {
@@ -327,6 +332,17 @@ export default {
                 return;
             }
 
+            // Build source feature properties
+            const sourceProperties = {
+                type: "source",
+                spawningAmount: this.localAgentCount
+            };
+
+            // Only include spawningIntervalInMinutes if checkbox is checked
+            if (this.includeSpawningInterval) {
+                sourceProperties.spawningIntervalInMinutes = this.localSpawningInterval;
+            }
+
             // Store both polygon geometries as a FeatureCollection with metadata
             const featureCollection = {
                 type: "FeatureCollection",
@@ -335,11 +351,7 @@ export default {
                         type: "Feature",
                         id: "cycleTravelerSource",
                         geometry: this.sourceGeometry,
-                        properties: {
-                            type: "source",
-                            spawningAmount: this.localAgentCount,
-                            spawningIntervalInMinutes: this.localSpawningInterval
-                        }
+                        properties: sourceProperties
                     },
                     {
                         type: "Feature",
@@ -414,6 +426,15 @@ export default {
                 this.$emit("update:spawningInterval", value);
                 this.updateValue();
             }
+        },
+
+        /**
+         * Toggles the spawning interval checkbox.
+         * @param {Event} event - Change event
+         */
+        toggleSpawningInterval (event) {
+            this.includeSpawningInterval = event.target.checked;
+            this.updateValue();
         }
     }
 };
@@ -445,25 +466,37 @@ export default {
         </div>
 
         <div class="mb-3 p-3 border rounded">
-            <label
-                for="spawningIntervalInput"
-                class="form-label mb-2"
-            >
-                <i class="bi bi-clock-fill" />
-                Spawning Interval (Minuten)
-            </label>
-            <input
-                id="spawningIntervalInput"
-                type="number"
-                class="form-control mb-3"
-                :value="localSpawningInterval"
-                min="1"
-                max="120"
-                @input="updateSpawningInterval"
-            >
-            <small class="text-muted">
-                Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
-            </small>
+            <div class="form-switch mb-3">
+                <SwitchInput
+                    id="includeSpawningInterval"
+                    :checked="includeSpawningInterval"
+                    label="Spawning Interval aktivieren (optional)"
+                    aria="Spawning Interval aktivieren (optional)"
+                    :interaction="toggleSpawningInterval"
+                />
+            </div>
+
+            <div v-if="includeSpawningInterval">
+                <label
+                    for="spawningIntervalInput"
+                    class="form-label mb-2"
+                >
+                    <i class="bi bi-clock-fill" />
+                    Spawning Interval (Minuten)
+                </label>
+                <input
+                    id="spawningIntervalInput"
+                    type="number"
+                    class="form-control mb-3"
+                    :value="localSpawningInterval"
+                    min="1"
+                    max="120"
+                    @input="updateSpawningInterval"
+                >
+                <small class="text-muted">
+                    Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
+                </small>
+            </div>
         </div>
 
         <div class="mb-3 p-3 border rounded">

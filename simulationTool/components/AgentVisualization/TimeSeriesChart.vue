@@ -6,7 +6,7 @@
                 <div class="legend-item">
                     <span
                         class="legend-color"
-                        style="background: #0066cc;"
+                        style="background: #fcba03;"
                     />
                     <span>Gesamt</span>
                 </div>
@@ -535,7 +535,7 @@ export default {
 }
 
 .line-total {
-    stroke: #0066cc;
+    stroke: #fcba03;
 }
 
 .line-walking {
@@ -563,7 +563,7 @@ export default {
     }
 
     .point-total {
-        fill: #0066cc;
+        fill: #fcba03;
     }
 
     .point-walking {

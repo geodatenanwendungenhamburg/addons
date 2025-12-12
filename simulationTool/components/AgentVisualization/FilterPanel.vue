@@ -22,7 +22,7 @@
                     >
                         <span class="filter-icon walking-icon" />
                         Zu Fuß
-                        <span class="badge bg-primary">{{ walkingCount }}</span>
+                        <span class="badge walking-count">{{ walkingCount }}</span>
                     </label>
                 </div>
                 <div class="form-check">
@@ -86,20 +86,6 @@
                 >
             </div>
 
-            <!-- Interpolation mode -->
-            <div class="setting-control">
-                <label for="interpolation-mode">Interpolation:</label>
-                <select
-                    id="interpolation-mode"
-                    v-model="interpolationMode"
-                    class="form-select form-select-sm"
-                    @change="updateInterpolationMode"
-                >
-                    <option value="linear">Linear</option>
-                    <option value="catmullRom">Catmull-Rom (glatt)</option>
-                </select>
-            </div>
-
             <!-- Heatmap toggle -->
             <div class="form-check form-switch">
                 <input
@@ -151,7 +137,6 @@ export default {
             },
             showTrails: true,
             trailLength: 5,
-            interpolationMode: "catmullRom",
             showHeatmap: false
         };
     },
@@ -298,13 +283,6 @@ export default {
         },
 
         /**
-         * Update interpolation mode
-         */
-        updateInterpolationMode () {
-            this.$store.commit("agentVisualization/setInterpolationMode", this.interpolationMode);
-        },
-
-        /**
          * Update show heatmap
          */
         updateShowHeatmap () {
@@ -388,6 +366,7 @@ export default {
 
     &.walking-icon {
         background: #4287f5; // blue
+        border: 2px solid #2c3e50;
     }
 
     &.rental-bike-icon {
@@ -399,6 +378,11 @@ export default {
 .badge {
     margin-left: auto;
     font-size: 0.75rem;
+}
+
+.walking-count {
+    background-color: #4287f5;
+    color: #ffffff;
 }
 
 .setting-control {
