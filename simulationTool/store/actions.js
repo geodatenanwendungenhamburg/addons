@@ -5,6 +5,7 @@ import layerCollection from "../../../src/core/layers/js/layerCollection";
 import ConvertStyle from "../js/convertStyle";
 import layerFactory from "../../../src/core/layers/js/layerFactory";
 import {infrastructureLayerId} from "../layerIds.js";
+import createInfrastructureStyle from "../js/createInfrastructureStyle";
 
 export default {
     /**
@@ -343,8 +344,12 @@ export default {
             Object.entries(currentPlanningScenario.inputs).forEach(([inputKey, inputValue]) => {
                 if (inputValue?.features && Array.isArray(inputValue.features)) {
                     inputValue.features.forEach(feature => {
-                        const olFeature = geoJsonParser.readFeature(feature);
+                        const olFeature = geoJsonParser.readFeature(feature),
+                            style = createInfrastructureStyle(olFeature);
 
+                        if (style) {
+                            olFeature.setStyle(style);
+                        }
                         layerSourceForObjects.addFeature(olFeature);
                     });
                 }

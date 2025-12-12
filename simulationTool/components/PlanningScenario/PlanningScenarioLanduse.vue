@@ -1,6 +1,7 @@
 <script>
 import ConvertFeature from "../../js/convertFeatures";
 import ConvertStyle from "../../js/convertStyle";
+import createInfrastructureStyle from "../../js/createInfrastructureStyle";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import getBBOXGeometry from "../shared/js/getBBoxGeometry";
 import {GeoJSON} from "ol/format";
@@ -507,6 +508,15 @@ export default {
         parseAndAddFeatures (features) {
             layerCollection.getLayerById(infrastructureLayerId)?.getLayerSource().clear();
             const olFeatures = ConvertFeature.geoJsonToOpenlayers(features);
+
+            // Apply infrastructure style to point features
+            olFeatures.forEach(feature => {
+                const style = createInfrastructureStyle(feature);
+
+                if (style) {
+                    feature.setStyle(style);
+                }
+            });
 
             // DEBUG: Log first feature's properties
             if (olFeatures.length > 0) {
