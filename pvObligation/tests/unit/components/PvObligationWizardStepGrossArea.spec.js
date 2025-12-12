@@ -71,43 +71,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
         expect(wrapper.attributes().id).equals("pvObligationWizardStepGrossArea");
     });
 
-    it("does not render grossRoofArea or too small text when grossRoofArea is null", async () => {
-        const wrapper = shallowMount(Component, {
-            propsData: {
-                wizardStepsFormData: {},
-                wizardStepIsActive: true
-            },
-            global: {
-                plugins: [store]
-            }
-        });
-
-        expect(wrapper.find("p.grossRoofAreaText").exists()).to.be.false;
-        expect(wrapper.find("p.noOblicagionText").exists()).to.be.false;
-    });
-
-    it("renders grossRoofArea text and 'too small' text when grossRoofArea < 50", async () => {
-        const wrapper = shallowMount(Component, {
-            propsData: {
-                wizardStepsFormData: {},
-                wizardStepIsActive: true
-            },
-            global: {
-                plugins: [store]
-            }
-        });
-
-        // Simulate selection result
-        wrapper.vm.componentFormData.grossRoofArea = 49.8;
-        wrapper.vm.displayGrossRoofArea = "49,8";
-
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.find("p.noOblicagionText").exists()).to.be.true;
-        expect(wrapper.find("p.noOblicagionText").text() === "additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText").to.be.true;
-    });
-
-    it("renders only grossRoofArea text when grossRoofArea >= 50", async () => {
+    it("renders only the right label and value for grossRoofArea >= 50 or <= 50", async () => {
         const wrapper = mount(Component, {
             propsData: {
                 wizardStepsFormData: {},
@@ -123,7 +87,15 @@ describe("addons/pvObligation/components/PvObligationWizardStepGrossArea.vue", (
 
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.find("p.noOblicagionText").exists()).to.be.false;
+        expect(wrapper.findAll("table#PvObligationSimpleTable tr")[0].find("td.cellLabel").text() === "additional:modules.pvObligation.wizard.step.grossArea.component.tableCellGrossAreaLabel");
         expect(wrapper.findAll("table#PvObligationSimpleTable tr")[0].find("td.cellValue").text()).to.contain("120 m²");
+
+        wrapper.vm.componentFormData.grossRoofArea = 33;
+        wrapper.vm.displayGrossRoofArea = "33";
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findAll("table#PvObligationSimpleTable tr")[0].find("td.cellLabel").text() === "additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText");
+        expect(wrapper.findAll("table#PvObligationSimpleTable tr")[0].find("td.cellValue").text()).to.contain("33 m²");
     });
 });
