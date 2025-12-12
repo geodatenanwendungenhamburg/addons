@@ -17,9 +17,9 @@
                 "introductionInfoPvObligationLink": "PV-Pflicht in Hamburg - hamburg.de.",
                 "step": {
                     "grossArea": {
-                        "wizardTitle": "Bruttodachfläche",
+                        "wizardTitle": "Gebäude auswählen",
                         "component": {
-                            "introduction": "Klicken Sie in der Karte auf das gewünschte Gebäude, um die Bruttodachfläche zu ermitteln.",
+                            "introduction": "Wählen Sie in diesem Schritt das gewünschte Gebäude durch Klick in die Karte aus. Dadurch wird die Bruttodachfläche ermittelt.",
                             "introductionHint": "Hinweis: Die Dachflächen des ausgewählten Gebäudes wurden automatisiert erfasst.",
                             "tableCellGrossAreaLabel": "Die Bruttodachfläche des ausgewählten Gebäudes beträgt:",
                             "tooSmallAreaText": "Es besteht keine PV-Pflicht (Mindestgröße 50 m²).",
@@ -34,7 +34,7 @@
                         }
                     },
                     "netArea": {
-                        "wizardTitle": "Nettodachfläche",
+                        "wizardTitle": "Nettodachfläche bearbeiten",
                         "component": {
                             "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
                             "missingStepGrossAreaMessage": "Im Anschluss wird Ihnen hier die initiale Nettodachfläche angezeigt, und Sie können gegebenenfalls Flächen einzeichnen, die zusätzlich ausgeschlossen werden sollen.",
@@ -49,7 +49,7 @@
                         }
                     },
                     "netRestrictedAreas": {
-                        "wizardTitle": "Sperrfläche ergänzen",
+                        "wizardTitle": "Sperrflächen ergänzen",
                         "component": {
                             "missingStepGrossAreaError": "Bitte wählen Sie zuerst im Schritt \"Bruttodachfläche\" Ihr Dach aus.",
                             "missingStepGrossAreaMessage": "Im Anschluss können Sie hier gegebenenfalls Flächen einzeichnen, die Sie als Sperrflächen ausweisen wollen.",
@@ -73,7 +73,7 @@
                         }
                     },
                     "personalNotes": {
-                        "wizardTitle": "Eigene Erläuterungen",
+                        "wizardTitle": "Eigene Erläuterungen einfügen",
                         "component": {
                             "introduction": "Sie haben hier die Möglichkeit, eigene Erläuterungen einzufügen.",
                             "form": {
@@ -82,7 +82,7 @@
                         }
                     },
                     "generateReport": {
-                        "wizardTitle": "Report erzeugen",
+                        "wizardTitle": "Report herunterladen",
                         "component": {
                             "introduction": "Sie können sich hier die gemachten Angaben in einem PDF-Bericht herunterladen und für Ihre Unterlagen aufbewahren.",
                             "introductionHint": "Hinweis: Die von Ihnen gemachten Daten werden nur für die Erstellung des PDF-Berichts genutzt. Es werden keine Daten gespeichert oder an die zuständige Behörde übertragen.",
