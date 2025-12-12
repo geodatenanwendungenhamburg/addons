@@ -2,16 +2,19 @@
 import {mapGetters, mapActions} from "vuex";
 import PvObligationWizard from "./PvObligationWizard.vue";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
+import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 
 export default {
     name: "PvObligation",
     components: {
         PvObligationWizard,
-        SpinnerItem
+        SpinnerItem,
+        FlatButton
     },
     data () {
         return {
-            allRoofsLoaded: false
+            allRoofsLoaded: false,
+            is3D: false
         };
     },
     computed: {
@@ -21,11 +24,17 @@ export default {
             "roofLayerId",
             "isDrawing"
         ]),
+        ...mapGetters("Maps", [
+            "mode"
+        ]),
         ...mapGetters([
             "isMobile"
         ]),
         spinnerInfoText () {
-            if (!this.allRoofsLoaded) {
+            if (this.is3D) {
+                return this.$t("additional:modules.pvObligation.notIn3DMode.infoText");
+            }
+            else if (!this.allRoofsLoaded) {
                 return this.$t("additional:modules.pvObligation.roofsAreLoadingSpinner");
             }
             else if (this.isCreatingReport) {
@@ -45,6 +54,27 @@ export default {
     watch: {
         isDrawing (value) {
             document.querySelector("div.controls-element")?.classList.toggle("d-none", value);
+        },
+        mode (newMode) {
+            const newLayerConfigs = [];
+
+            this.is3D = newMode === "3D";
+            this.relevantLayerIds?.forEach(layerId => {
+                newLayerConfigs.push({
+                    id: layerId,
+                    layer: {
+                        id: layerId,
+                        visibility: !this.is3D
+                    }
+                });
+            });
+
+            this.replaceByIdInLayerConfig({layerConfigs: newLayerConfigs}, {root: true});
+
+            if (newMode === "2D") {
+                mapCollection.getMapView("2D").animate({rotation: 0});
+                this.zoomToExtendOfSelectedRoof();
+            }
         }
     },
     async mounted () {
@@ -52,6 +82,8 @@ export default {
     },
     methods: {
         ...mapActions(["replaceByIdInLayerConfig"]),
+        ...mapActions("Maps", ["changeMapMode"]),
+        ...mapActions("Modules/PvObligation", ["zoomToExtendOfSelectedRoof"]),
         async waitForFeaturesToBeLoaded () {
             const promises = [],
                 map = mapCollection.getMap("2D"),
@@ -116,15 +148,24 @@ export default {
         <PvObligationWizard />
 
         <div
-            v-if="isCreatingReport || !allRoofsLoaded"
+            v-if="isCreatingReport || !allRoofsLoaded || is3D"
             class="waitingSpinner"
         >
             <SpinnerItem
+                v-if="!is3D"
                 custom-class="spinner"
                 class="ms-3"
             />
 
             <p> {{ spinnerInfoText }} </p>
+
+            <FlatButton
+                v-if="is3D"
+                :aria-label="$t('additional:modules.pvObligation.notIn3DMode.buttonText')"
+                :text="$t('additional:modules.pvObligation.notIn3DMode.buttonText')"
+                icon="bi-arrow-left-right"
+                @click="changeMapMode('2D')"
+            />
         </div>
     </div>
 
@@ -168,6 +209,7 @@ export default {
             p {
                 background-color: white;
                 white-space: pre-line;
+                padding: 1.5rem;
             }
         }
     }
