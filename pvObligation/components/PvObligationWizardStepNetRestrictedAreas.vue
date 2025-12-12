@@ -22,6 +22,11 @@ export default {
                 restrictedArea: 0,
                 restrictedListItems: []
             },
+            componentFormDataIsDirtyIgnore: [
+                "netRoofArea",
+                "netRoofAreaWithoutExcludes",
+                "restrictedArea"
+            ],
             stepNetAreaDataObligatedArea: 0,
             stepNetAreaWithoutRestrictedArea: 0,
             restrictedAreaSum: 0,

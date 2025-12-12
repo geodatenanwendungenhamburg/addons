@@ -26,7 +26,13 @@ export default {
                 postalCode: null,
                 city: null,
                 houseNumber: null
-            }
+            },
+            componentFormDataIsDirtyIgnore: [
+                "street",
+                "postalCode",
+                "city",
+                "houseNumber"
+            ]
         };
     },
     computed: {
