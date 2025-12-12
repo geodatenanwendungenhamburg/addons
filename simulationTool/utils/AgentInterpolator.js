@@ -1,3 +1,4 @@
+/* eslint-disable one-var */
 /**
  * AgentInterpolator - Smooth position interpolation for agent movement
  * Provides linear and spline interpolation between timesteps
