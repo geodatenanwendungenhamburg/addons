@@ -6,7 +6,9 @@
 
         <!-- Capability Filters -->
         <div class="filter-section">
-            <h5 class="section-title">Fortbewegungsart</h5>
+            <h5 class="section-title">
+                Fortbewegungsart
+            </h5>
             <div class="filter-options">
                 <div class="form-check">
                     <input
@@ -47,8 +49,10 @@
 
         <!-- Visualization Settings -->
         <div class="filter-section">
-            <h5 class="section-title">Visualisierung</h5>
-            
+            <h5 class="section-title">
+                Visualisierung
+            </h5>
+
             <!-- Trail toggle -->
             <div class="form-check form-switch">
                 <input
@@ -106,7 +110,9 @@
 
         <!-- Performance Info -->
         <div class="filter-section">
-            <h5 class="section-title">Performance</h5>
+            <h5 class="section-title">
+                Performance
+            </h5>
             <div class="performance-stats">
                 <div class="stat-item">
                     <span class="stat-label">FPS:</span>
