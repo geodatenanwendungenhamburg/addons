@@ -306,7 +306,8 @@ export default {
     updateFeatures ({getters}) {
         const currentPlanningScenario = getters.planningScenarios.find(scenario => scenario.id === getters.currentPlanningScenarioId),
             geoJsonParser = new GeoJSON(),
-            layerSource = layerCollection.getLayerById("planning-scenario") ? layerCollection.getLayerById("planning-scenario").getLayerSource() : null;
+            layerSource = layerCollection.getLayerById("planning-scenario") ? layerCollection.getLayerById("planning-scenario").getLayerSource() : null,
+            styleConfig = getters.infrastructurePointStyle;
 
         let layerSourceForObjects = null;
 
@@ -345,7 +346,7 @@ export default {
                 if (inputValue?.features && Array.isArray(inputValue.features)) {
                     inputValue.features.forEach(feature => {
                         const olFeature = geoJsonParser.readFeature(feature),
-                            style = createInfrastructureStyle(olFeature);
+                            style = createInfrastructureStyle(olFeature, styleConfig);
 
                         if (style) {
                             olFeature.setStyle(style);

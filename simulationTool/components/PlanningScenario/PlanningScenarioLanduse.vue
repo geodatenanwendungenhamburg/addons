@@ -42,6 +42,7 @@ export default {
             "currentPlanningScenarioId",
             "currentPlanningComponent",
             "dataSources",
+            "infrastructurePointStyle",
             "landuseActiveTab",
             "planningScenarios",
             "planningScenarioLabel",
@@ -511,7 +512,7 @@ export default {
 
             // Apply infrastructure style to point features
             olFeatures.forEach(feature => {
-                const style = createInfrastructureStyle(feature);
+                const style = createInfrastructureStyle(feature, this.infrastructurePointStyle);
 
                 if (style) {
                     feature.setStyle(style);
