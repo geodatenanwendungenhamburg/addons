@@ -607,7 +607,12 @@ export default {
                 layers: (layer) => {
                     return layer.get("id") === this.featureLayerId;
                 },
-                style: ConvertStyle.geoJsonToOpenlayers(this.planningScenarioHighlightFeatureStyle),
+                style: (feature) => {
+                    if (feature.getGeometry()?.getType() === "Point") {
+                        return createInfrastructureStyle(feature, this.infrastructurePointStyle, true);
+                    }
+                    return ConvertStyle.geoJsonToOpenlayers(this.planningScenarioHighlightFeatureStyle);
+                },
                 addCondition: singleClick,
                 hitTolerance: 5
             }));
