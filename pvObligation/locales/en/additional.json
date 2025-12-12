@@ -5,6 +5,10 @@
             "description": "Assists in determining the roof area that must be covered with PV when significant roof renovations are carried out.",
             "roofsAreLoadingSpinner": "Please be patient, the roofs are currently been loaded ...",
             "generateReportSpinner": "The report is currently been generated\nthe map view might change inbetween ...",
+            "notIn3DMode": {
+              "infoText": "The application PV obligation in existing buildings\ncannot be used in 3D mode.\nPlease switch to 2D mode to continue here.",
+              "buttonText": "switch to 2D mode"
+            },
             "wizard": {
                 "buttons": {
                     "back": "previous step",

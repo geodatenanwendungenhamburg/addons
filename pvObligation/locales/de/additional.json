@@ -5,6 +5,10 @@
             "description": "Unterstützt bei der Herleitung der Dachfläche, die mit PV belegt werden muss, wenn wesentliche Umbauten des Daches durchgeführt werden.",
             "roofsAreLoadingSpinner": "Bitte etwas Geduld, die Dachflächen werden gerade geladen ...",
             "generateReportSpinner": "Der Report wird gerade erzeugt\ndie Kartenansicht kann sich währenddessen verändern ...",
+            "notIn3DMode": {
+              "infoText": "Die Anwendung Photovoltaikpflicht im Bestand\nkann nicht im 3D-Modus genutzt werden.\nBitte wechseln Sie in den 2D-Modus,\num hier weiterzumachen.",
+              "buttonText": "in 2D Modus wechseln"
+            },
             "wizard": {
                 "buttons": {
                     "back": "voriger Schritt",

@@ -47,12 +47,7 @@ export default {
         wizardStepIsActive: {
             handler (isNowActive) {
                 if (isNowActive && this.wizardStepsFormData?.PvObligationWizardStepGrossArea?.isValid) {
-                    this.zoomToExtent({
-                        extent: this.selectedRoofExtent,
-                        options: {
-                            padding: this.mapZoomToExtentPadding
-                        }
-                    });
+                    this.zoomToExtendOfSelectedRoof();
                 }
             },
             immediate: true
@@ -63,11 +58,11 @@ export default {
             "exportPDF",
             "calculateNetAreaAndRestrictedAreas",
             "calculateNetRestrictedAreaAndRestrictedAreas",
-            "dissolveRoofFeaturesAndCalculateArea"
+            "dissolveRoofFeaturesAndCalculateArea",
+            "zoomToExtendOfSelectedRoof"
         ]),
         ...mapActions("Maps", [
-            "addNewLayerIfNotExists",
-            "zoomToExtent"
+            "addNewLayerIfNotExists"
         ]),
         async createPDF () {
             const outlineLayer = await this.addNewLayerIfNotExists({

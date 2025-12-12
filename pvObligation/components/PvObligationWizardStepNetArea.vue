@@ -37,33 +37,7 @@ export default {
             "selectedRoofExtent",
             "isDrawing",
             "selectedRoofId"
-        ]),
-        ...mapGetters("Menu", [
-            "expanded"
-        ]),
-        /**
-         * Checks if the menu sides are open or closed and
-         * calculates the padding for the zoomToExtent function, depending on the opening state
-         * @returns {Number[]} Padding values for an extent, fitting inbetween the menu sides.
-         */
-        mapZoomToExtentPadding () {
-            let rightPadding = 20,
-                leftPadding = 20;
-
-            if (this.expanded("secondaryMenu")) {
-                const el = document.getElementById("mp-menu-secondaryMenu");
-
-                rightPadding = el ? el.offsetWidth + 20 : 20;
-            }
-
-            if (this.expanded("mainMenu")) {
-                const el = document.getElementById("mp-menu-mainMenu");
-
-                leftPadding = el ? el.offsetWidth + 20 : 20;
-            }
-
-            return [20, rightPadding, 20, leftPadding];
-        }
+        ])
     },
     watch: {
         /** @override */
@@ -80,12 +54,7 @@ export default {
                         layer.setVisible(true);
                     }
 
-                    this.zoomToExtent({
-                        extent: this.selectedRoofExtent,
-                        options: {
-                            padding: this.mapZoomToExtentPadding
-                        }
-                    });
+                    this.zoomToExtendOfSelectedRoof();
                 }
             },
             immediate: true
@@ -94,11 +63,11 @@ export default {
     methods: {
         ...mapActions("Modules/PvObligation", [
             "dissolveRoofFeaturesAndCalculateArea",
-            "calculateNetAreaAndRestrictedAreas"
+            "calculateNetAreaAndRestrictedAreas",
+            "zoomToExtendOfSelectedRoof"
         ]),
         ...mapActions("Maps", [
-            "addNewLayerIfNotExists",
-            "zoomToExtent"
+            "addNewLayerIfNotExists"
         ]),
         /** @override */
         resetWizardStepData () {

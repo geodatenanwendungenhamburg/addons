@@ -603,41 +603,43 @@ export default {
      */
     async getAddress ({state, rootGetters}) {
         const address = {
-                street: null,
-                city: null,
-                postalCode: null,
-                houseNumber: null
+                street: "",
+                postalCode: "",
+                city: "",
+                houseNumber: ""
             },
             clickCoordinate = rootGetters["Maps/clickCoordinate"],
             projectionCode = rootGetters["Maps/projectionCode"],
-            coordinates = transform(
+            coordinates = clickCoordinate ? transform(
                 [clickCoordinate[0], clickCoordinate[1]],
                 projectionCode,
                 "EPSG:4326"
-            ),
+            ) : null,
             serviceUrl = rootGetters.restServiceById(state.geosearchReverseServiceId).url,
             requestUrl = new URL(serviceUrl, state.baseUrl);
 
-        requestUrl.searchParams.set("lon", String(coordinates[0]));
-        requestUrl.searchParams.set("lat", String(coordinates[1]));
-        requestUrl.searchParams.set("count", "1");
-        requestUrl.searchParams.set("properties", ["haus", "ort", "plz", "strasse"]);
+        if (coordinates) {
+            requestUrl.searchParams.set("lon", String(coordinates[0]));
+            requestUrl.searchParams.set("lat", String(coordinates[1]));
+            requestUrl.searchParams.set("count", "1");
+            requestUrl.searchParams.set("properties", ["haus", "ort", "plz", "strasse"]);
 
-        try {
-            const response = await fetch(requestUrl),
-                data = await response.json();
+            try {
+                const response = await fetch(requestUrl),
+                    data = await response.json();
 
-            if (data) {
-                const properties = data.features[0].properties;
+                if (data) {
+                    const properties = data.features[0].properties;
 
-                address.city = properties.ort;
-                address.postalCode = properties.plz;
-                address.street = properties.strasse;
-                address.houseNumber = properties.haus;
+                    address.city = properties.ort;
+                    address.postalCode = properties.plz;
+                    address.street = properties.strasse;
+                    address.houseNumber = properties.haus;
+                }
             }
-        }
-        catch (error) {
-            console.error("Reverse geocoding error:", error);
+            catch (error) {
+                console.error("Reverse geocoding error:", error);
+            }
         }
 
         return address;
@@ -705,5 +707,39 @@ export default {
                 ? payload.stepNetAreaDataObligatedArea
                 : netAreaMinusSubstractedArea
         };
+    },
+    /**
+     * Checks if the menu sides are open or closed and
+     * calculates the padding for the zoomToExtent function, depending on the opening state
+     * zooms to the extent of the selected roof if there is one selected
+     * @returns {void}
+     */
+    zoomToExtendOfSelectedRoof ({rootGetters, getters, dispatch}) {
+        let rightPadding = 20,
+            leftPadding = 20,
+            mapZoomToExtentPadding = [20, 20, 20, 20];
+
+        if (rootGetters["Menu/expanded"]("secondaryMenu")) {
+            const el = document.getElementById("mp-menu-secondaryMenu");
+
+            rightPadding = el ? el.offsetWidth + 20 : 20;
+        }
+
+        if (rootGetters["Menu/expanded"]("mainMenu")) {
+            const el = document.getElementById("mp-menu-mainMenu");
+
+            leftPadding = el ? el.offsetWidth + 20 : 20;
+        }
+
+        mapZoomToExtentPadding = [20, rightPadding, 20, leftPadding];
+
+        if (getters.selectedRoofId) {
+            dispatch("Maps/zoomToExtent", {
+                extent: getters.selectedRoofExtent,
+                options: {
+                    padding: mapZoomToExtentPadding
+                }
+            }, {root: true});
+        }
     }
 };
