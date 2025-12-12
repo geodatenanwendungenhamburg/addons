@@ -85,8 +85,9 @@
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import {transform} from "ol/proj";
 import {boundingExtent, buffer} from "ol/extent";
-import {Heatmap as HeatmapLayer} from "ol/layer";
+import {Heatmap as HeatmapLayer, WebGLPoints as WebGLPointsLayer} from "ol/layer";
 import {Vector as VectorSource} from "ol/source";
+import {getCapabilityColor, findClosestFeature, passesFilters} from "../../utils/agentVisualizationHelpers";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
 import mapCollection from "../../../../src/core/maps/js/mapCollection";
@@ -119,11 +120,14 @@ export default {
         return {
             dataLoaded: false,
             agentLayer: null,
+            trailLayer: null,
             heatmapLayer: null,
             selectInteraction: null,
             selectedAgent: null,
             timeEngine: null,
-            interpolator: null
+            interpolator: null,
+            updateThrottleTimer: null,
+            isUpdating: false
         };
     },
     computed: {
@@ -216,24 +220,57 @@ export default {
         },
 
         /**
-         * Initialize the agent layer
+         * Initialize the agent layer with WebGL for better performance
          */
         initializeLayer () {
-            if (!layerCollection.getLayerById(AGENT_LAYER_ID)) {
-                const layer = layerFactory.createLayer({
-                    typ: "VECTORBASE",
-                    id: AGENT_LAYER_ID,
-                    name: "Green4Bikes Agents"
-                });
+            const map = mapCollection.getMap("2D");
 
-                layer.layer.setZIndex(100);
-                layer.layer.setVisible(true);
-                layerCollection.addLayer(layer);
-                this.agentLayer = layer;
+            if (!layerCollection.getLayerById(AGENT_LAYER_ID)) {
+                // Create vector source for features
+                const source = new VectorSource(),
+                    // PERFORMANCE: Use WebGL for GPU-accelerated rendering
+                    walkingColor = getCapabilityColor("walking"),
+                    bikeColor = getCapabilityColor("bike"),
+                    rentalBikeColor = getCapabilityColor("cyclingRentalBike"),
+                    defaultColor = getCapabilityColor("default"),
+                    webglLayer = new WebGLPointsLayer({
+                        source: source,
+                        style: {
+                            "circle-radius": 7,
+                            "circle-fill-color": [
+                                "case",
+                                ["==", ["get", "activeCapability"], "walking"],
+                                ["color", ...walkingColor, 0.9],
+                                ["==", ["get", "activeCapability"], "bike"],
+                                ["color", ...bikeColor, 0.9],
+                                ["==", ["get", "activeCapability"], "cyclingRentalBike"],
+                                ["color", ...rentalBikeColor, 0.9],
+                                ["color", ...defaultColor, 0.9]
+                            ],
+                            "circle-stroke-color": ["color", 255, 255, 255, 1],
+                            "circle-stroke-width": 1.5
+                        },
+                        zIndex: 9999999
+                    });
+
+                webglLayer.setVisible(true);
+                webglLayer.set("id", AGENT_LAYER_ID);
+                webglLayer.set("name", "Green4Bikes Agents");
+                map.addLayer(webglLayer);
+
+                // Store layer info compatible with existing code
+                this.agentLayer = {
+                    layer: webglLayer,
+                    getLayerSource: () => source,
+                    get: (key) => webglLayer.get(key),
+                    set: (key, value) => webglLayer.set(key, value)
+                };
             }
             else {
                 this.agentLayer = layerCollection.getLayerById(AGENT_LAYER_ID);
-                this.agentLayer.layer.setVisible(true);
+                if (this.agentLayer) {
+                    this.agentLayer.layer.setVisible(true);
+                }
             }
 
             // Setup click interaction
@@ -245,6 +282,31 @@ export default {
 
             this.selectInteraction.on("select", this.onAgentSelect);
             this.addInteraction(this.selectInteraction);
+
+            // Initialize trail layer (Vector layer for LineStrings, since WebGL doesn't support lines)
+            this.initializeTrailLayer();
+        },
+
+        /**
+         * Initialize trail layer for agent paths
+         */
+        initializeTrailLayer () {
+            const map = mapCollection.getMap("2D"),
+                trailSource = new VectorSource();
+
+            this.trailLayer = {
+                layer: layerFactory.createLayer({
+                    typ: "VECTORBASE",
+                    id: AGENT_LAYER_ID + "-trails",
+                    name: "Agent Trails"
+                }).layer,
+                getLayerSource: () => trailSource
+            };
+
+            this.trailLayer.layer.setSource(trailSource);
+            this.trailLayer.layer.setZIndex(9999998);
+            this.trailLayer.layer.setVisible(true);
+            map.addLayer(this.trailLayer.layer);
         },
 
         /**
@@ -285,8 +347,6 @@ export default {
 
                 // Check if this is a simulation export file (complete format)
                 if (geojson.jobs && geojson.simulationId) {
-                    console.log("Detected simulation export format, extracting agent data...");
-
                     // Try to extract agent GeoJSON from jobs
                     let agentData = null;
 
@@ -363,25 +423,26 @@ export default {
             try {
                 const map = mapCollection.getMap("2D"),
                     view = map.getView(),
-                    mapProjection = view.getProjection().getCode();
+                    mapProjection = view.getProjection().getCode(),
 
-                // Collect all coordinates from features
-                const coordinates = features
-                    .filter(f => f.geometry && f.geometry.coordinates)
-                    .map(f => {
+                    // Collect all coordinates from features
+                    coordinates = features
+                        .filter(f => f.geometry && f.geometry.coordinates)
+                        .map(f => {
                         // Transform from EPSG:4326 to map projection
-                        return transform(
-                            f.geometry.coordinates,
-                            "EPSG:4326",
-                            mapProjection
-                        );
-                    });
+                            return transform(
+                                f.geometry.coordinates,
+                                "EPSG:4326",
+                                mapProjection
+                            );
+                        });
 
                 if (coordinates.length === 0) {
                     return;
                 }
 
                 // Calculate bounding extent
+                // eslint-disable-next-line one-var
                 const extent = boundingExtent(coordinates),
                     bufferedExtent = buffer(extent, (extent[2] - extent[0]) * 1);
 
@@ -408,6 +469,7 @@ export default {
                 return;
             }
 
+            // eslint-disable-next-line one-var
             const layerSource = planningScenarioLayer.getLayerSource(),
                 GeoJSON = require("ol/format/GeoJSON").default,
                 geoJsonFormat = new GeoJSON();
@@ -432,12 +494,33 @@ export default {
         },
 
         /**
-         * Update visualization for current time
+         * Update visualization for current time (throttled)
          */
         updateVisualization () {
             if (!this.dataLoaded) {
                 return;
             }
+
+            // Throttle updates to max 30 FPS for smooth slider
+            if (this.updateThrottleTimer) {
+                return; // Skip if update already scheduled
+            }
+
+            this.updateThrottleTimer = setTimeout(() => {
+                this.updateThrottleTimer = null;
+                this.performUpdate();
+            }, 33); // ~30 FPS
+        },
+
+        /**
+         * Perform the actual visualization update
+         */
+        performUpdate () {
+            if (!this.dataLoaded || this.isUpdating) {
+                return;
+            }
+
+            this.isUpdating = true;
 
             const currentTime = this.$store.state.agentVisualization.currentTime,
                 showTrails = this.$store.state.agentVisualization.showTrails,
@@ -453,6 +536,7 @@ export default {
 
             // Skip regular rendering if heatmap is shown
             if (showHeatmap) {
+                this.isUpdating = false;
                 return;
             }
 
@@ -460,64 +544,42 @@ export default {
                 // Vector rendering
                 const layerSource = this.agentLayer.getLayerSource(),
                     interpolatedPositions = this.interpolator.getAllInterpolatedPositions(currentTime),
-                    mapProjection = mapCollection.getMap("2D").getView().getProjection().getCode();
-
-                layerSource.clear();
+                    featuresToAdd = []; // PERFORMANCE: Batch add features
 
                 let visibleCount = 0;
 
-                interpolatedPositions.forEach((position, agentId) => {
-                    // Find feature for this agent at or near current time
-                    // Since activeCapability can change, we need the feature closest to current time
-                    const agentFeatures = this.$store.state.agentVisualization.features.filter(
-                        f => f.properties.agentId === agentId
-                    );
+                layerSource.clear();
 
-                    if (agentFeatures.length === 0) {
+                interpolatedPositions.forEach((position, agentId) => {
+                    // PERFORMANCE: Use indexed lookup instead of filtering all features
+                    const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId];
+
+                    if (!agentFeatures || agentFeatures.length === 0) {
                         return;
                     }
 
-                    // Find the feature with time closest to (but not after) currentTime
-                    let originalFeature = agentFeatures[0],
-                        minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                    // PERFORMANCE: Binary search instead of linear scan (O(log n) vs O(n))
+                    // eslint-disable-next-line one-var
+                    const originalFeature = findClosestFeature(agentFeatures, currentTime);
 
-                    for (const feature of agentFeatures) {
-                        const timeDiff = Math.abs(currentTime - feature.properties.time);
-
-                        if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
-                            minTimeDiff = timeDiff;
-                            originalFeature = feature;
-                        }
+                    if (!originalFeature) {
+                        return;
                     }
 
                     // Apply filters
+                    // eslint-disable-next-line one-var
                     const capability = originalFeature.properties.activeCapability;
 
-                    if (capability === "walking" && !filters.walking) {
-                        return;
-                    }
-
-                    if (capability === "bike" && !filters.bike) {
-                        return;
-                    }
-
-                    if (capability === "cyclingRentalBike" && !filters.rentalBike) {
+                    if (!passesFilters(capability, filters)) {
                         return;
                     }
 
                     visibleCount++;
 
                     // Transform coordinates from WGS84 to map projection
-                    const transformedCoord = transform(
-                            position.coordinate,
-                            "EPSG:4326",
-                            mapProjection
-                        ),
-
-                        // Create feature
-                        feature = new Feature({
-                            geometry: new Point(transformedCoord)
-                        });
+                    // eslint-disable-next-line one-var
+                    const transformedCoord = transform(position.coordinate, "EPSG:4326", mapProjection),
+                        feature = new Feature({geometry: new Point(transformedCoord)});
 
                     feature.setProperties({
                         agentId: agentId,
@@ -526,30 +588,59 @@ export default {
                         routeLength: originalFeature.properties.routeLength
                     });
 
-                    feature.setStyle(this.getAgentStyle(originalFeature.properties));
-                    layerSource.addFeature(feature);
+                    // WebGL handles styling automatically via layer config, no need to set style per feature
+                    featuresToAdd.push(feature);
+                });
 
-                    // Add trail if enabled
-                    if (showTrails) {
+                // PERFORMANCE: Add all features at once instead of one by one
+                if (featuresToAdd.length > 0) {
+                    layerSource.addFeatures(featuresToAdd);
+                }
+
+                // Handle trails in separate vector layer (WebGL doesn't support LineStrings)
+                if (showTrails && this.trailLayer) {
+                    const trailSource = this.trailLayer.getLayerSource(),
+                        trailFeatures = [];
+
+                    trailSource.clear();
+
+                    interpolatedPositions.forEach((position, agentId) => {
+                        const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId],
+                            originalFeature = findClosestFeature(agentFeatures, currentTime);
+
+                        if (!originalFeature) {
+                            return;
+                        }
+
+                        // eslint-disable-next-line one-var
+                        const capability = originalFeature.properties.activeCapability;
+
+                        // Apply same filters
+                        if (!passesFilters(capability, filters)) {
+                            return;
+                        }
+
+                        // eslint-disable-next-line one-var
                         const trailCoords = this.interpolator.getTrailPath(agentId, currentTime, trailLength);
 
                         if (trailCoords.length > 1) {
-                            // Transform trail coordinates
-                            const transformedTrailCoords = trailCoords.map(coord => transform(coord, "EPSG:4326", mapProjection)
-                                ),
-
-                                trailFeature = new Feature({
-                                    geometry: new LineString(transformedTrailCoords)
-                                });
+                            const transformedTrailCoords = trailCoords.map(coord => transform(coord, "EPSG:4326", mapProjection)),
+                                trailFeature = new Feature({geometry: new LineString(transformedTrailCoords)});
 
                             trailFeature.setStyle(this.getTrailStyle(originalFeature.properties));
-                            layerSource.addFeature(trailFeature);
+                            trailFeatures.push(trailFeature);
                         }
+                    });
+
+                    if (trailFeatures.length > 0) {
+                        trailSource.addFeatures(trailFeatures);
                     }
-                });
+                }
 
                 this.$store.commit("agentVisualization/setVisibleAgentCount", visibleCount);
             }
+
+            this.isUpdating = false;
         },
 
         /**
@@ -567,54 +658,33 @@ export default {
             heatmapSource.clear();
 
             interpolatedPositions.forEach((position, agentId) => {
-                // Find feature for this agent at or near current time
-                const agentFeatures = this.$store.state.agentVisualization.features.filter(
-                    f => f.properties.agentId === agentId
-                );
+                // PERFORMANCE: Use indexed lookup instead of filtering all features
+                const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId];
 
-                if (agentFeatures.length === 0) {
+                if (!agentFeatures || agentFeatures.length === 0) {
                     return;
                 }
 
-                // Find the feature with time closest to (but not after) currentTime
-                let originalFeature = agentFeatures[0],
-                    minTimeDiff = Math.abs(currentTime - agentFeatures[0].properties.time);
+                // PERFORMANCE: Binary search instead of linear scan
+                // eslint-disable-next-line one-var
+                const originalFeature = findClosestFeature(agentFeatures, currentTime);
 
-                for (const feature of agentFeatures) {
-                    const timeDiff = Math.abs(currentTime - feature.properties.time);
-
-                    if (timeDiff < minTimeDiff && feature.properties.time <= currentTime) {
-                        minTimeDiff = timeDiff;
-                        originalFeature = feature;
-                    }
+                if (!originalFeature) {
+                    return;
                 }
 
                 // Apply filters
+                // eslint-disable-next-line one-var
                 const capability = originalFeature.properties.activeCapability;
 
-                if (capability === "walking" && !filters.walking) {
-                    return;
-                }
-
-                if (capability === "bike" && !filters.bike) {
-                    return;
-                }
-
-                if (capability === "cyclingRentalBike" && !filters.rentalBike) {
+                if (!passesFilters(capability, filters)) {
                     return;
                 }
 
                 // Transform coordinates
-                const transformedCoord = transform(
-                        position.coordinate,
-                        "EPSG:4326",
-                        mapProjection
-                    ),
-
-                    // Create feature for heatmap
-                    feature = new Feature({
-                        geometry: new Point(transformedCoord)
-                    });
+                // eslint-disable-next-line one-var
+                const transformedCoord = transform(position.coordinate, "EPSG:4326", mapProjection),
+                    feature = new Feature({geometry: new Point(transformedCoord)});
 
                 heatmapSource.addFeature(feature);
             });
@@ -624,17 +694,7 @@ export default {
          * Get style for agent
          */
         getAgentStyle (properties) {
-            let color = [100, 100, 100]; // default gray
-
-            if (properties.activeCapability === "walking") {
-                color = [66, 135, 245]; // blue
-            }
-            else if (properties.activeCapability === "bike") {
-                color = [253, 126, 20]; // orange
-            }
-            else if (properties.activeCapability === "cyclingRentalBike") {
-                color = [40, 167, 69]; // green
-            }
+            const color = getCapabilityColor(properties.activeCapability);
 
             return new Style({
                 image: new Circle({
@@ -649,17 +709,7 @@ export default {
          * Get trail style
          */
         getTrailStyle (properties) {
-            let color = [100, 100, 100]; // default gray
-
-            if (properties.activeCapability === "walking") {
-                color = [66, 135, 245]; // blue
-            }
-            else if (properties.activeCapability === "bike") {
-                color = [253, 126, 20]; // orange
-            }
-            else if (properties.activeCapability === "cyclingRentalBike") {
-                color = [40, 167, 69]; // green
-            }
+            const color = getCapabilityColor(properties.activeCapability);
 
             return new Style({
                 stroke: new Stroke({
@@ -777,6 +827,14 @@ export default {
 
                 map.removeLayer(this.heatmapLayer);
                 this.heatmapLayer = null;
+            }
+
+            // Remove trail layer
+            if (this.trailLayer) {
+                const map = mapCollection.getMap("2D");
+
+                map.removeLayer(this.trailLayer.layer);
+                this.trailLayer = null;
             }
 
             // Remove select interaction
