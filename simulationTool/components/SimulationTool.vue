@@ -1,7 +1,7 @@
 <script>
 import actions from "../store/actions";
 import getters from "../store/getters";
-import AgentVisualization from "./AgentVisualization/AgentVisualizationModern.vue";
+import AgentVisualization from "./AgentVisualization/AgentVisualization.vue";
 import HelpPanel from "./HelpSection/HelpPanel.vue";
 import HomePanel from "./HomePanel.vue";
 import {mapGetters, mapActions, mapMutations} from "vuex";
@@ -132,44 +132,44 @@ export default {
     <div id="tool-simulationTool">
         <div class="content">
             <HomePanel
-                v-if="mode === 'home-panel'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'home-panel'"
                 @selected="selectProcess"
             />
             <AgentVisualization
-                v-if="mode === 'agentVisualization'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'agentVisualization'"
             />
             <PlanningScenario
-                v-if="mode === 'planningScenario'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'planningScenario'"
             />
             <SimulationList
-                v-if="mode === 'simulationList'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'simulationList'"
             />
             <SimulationParameter
-                v-if="mode === 'simulationParameter'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'simulationParameter'"
             />
             <simulationResults
-                v-if="mode === 'simulationResults'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'simulationResults'"
             />
             <ProcessList
-                v-if="mode === 'process-list'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'process-list'"
                 @selected="selectProcess"
             />
             <ProcessDetails
-                v-if="mode === 'process-details'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'process-details'"
                 @selected="selectProcess"
             />
             <HelpPanel
-                v-if="mode === 'help-panel'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'help-panel'"
             />
             <JobList
-                v-if="mode === 'job-list'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'job-list'"
                 :jobs="jobs"
             />
             <JobExecution
-                v-if="mode === 'job-execution'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'job-execution'"
             />
             <JobDetails
-                v-if="mode === 'job-details'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'job-details'"
             />
             <!--<EnsembleList
                 v-if="mode === 'ensemble-list'"
@@ -182,7 +182,7 @@ export default {
                 v-if="mode === 'ensemble-details'"
             /> -->
             <TutorialPanel
-                v-if="mode === 'tutorial-panel'"
+                v-if="$store.state.Modules.SimulationTool.mode === 'tutorial-panel'"
             />
         </div>
         <SideMenu />

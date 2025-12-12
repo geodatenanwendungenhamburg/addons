@@ -10,7 +10,7 @@
  * @param {number} t - Interpolation factor (0-1)
  * @returns {number} Interpolated value
  */
-export function lerp(a, b, t) {
+export function lerp (a, b, t) {
     return a + (b - a) * t;
 }
 
@@ -21,7 +21,7 @@ export function lerp(a, b, t) {
  * @param {number} t - Interpolation factor (0-1)
  * @returns {Array<number>} Interpolated coordinate
  */
-export function lerpCoordinate(coord1, coord2, t) {
+export function lerpCoordinate (coord1, coord2, t) {
     return [
         lerp(coord1[0], coord2[0], t),
         lerp(coord1[1], coord2[1], t)
@@ -37,9 +37,9 @@ export function lerpCoordinate(coord1, coord2, t) {
  * @param {number} t - Interpolation factor (0-1)
  * @returns {number} Interpolated value
  */
-export function catmullRom(p0, p1, p2, p3, t) {
-    const t2 = t * t;
-    const t3 = t2 * t;
+export function catmullRom (p0, p1, p2, p3, t) {
+    const t2 = t * t,
+        t3 = t2 * t;
 
     return 0.5 * (
         (2 * p1) +
@@ -58,15 +58,21 @@ export function catmullRom(p0, p1, p2, p3, t) {
  * @param {number} t - Interpolation factor (0-1)
  * @returns {Array<number>} Interpolated coordinate
  */
-export function catmullRomCoordinate(c0, c1, c2, c3, t) {
+export function catmullRomCoordinate (c0, c1, c2, c3, t) {
     return [
         catmullRom(c0[0], c1[0], c2[0], c3[0], t),
         catmullRom(c0[1], c1[1], c2[1], c3[1], t)
     ];
 }
 
+/**
+ *
+ */
 export default class AgentInterpolator {
-    constructor() {
+    /**
+     *
+     */
+    constructor () {
         this.agentPositions = new Map(); // agentId -> array of {time, coordinate}
         this.interpolationMode = "catmullRom"; // "linear" or "catmullRom"
     }
@@ -75,7 +81,7 @@ export default class AgentInterpolator {
      * Set interpolation mode
      * @param {string} mode - "linear" or "catmullRom"
      */
-    setMode(mode) {
+    setMode (mode) {
         if (mode === "linear" || mode === "catmullRom") {
             this.interpolationMode = mode;
         }
@@ -85,13 +91,13 @@ export default class AgentInterpolator {
      * Load agent trajectory data
      * @param {Array} features - GeoJSON features with agent positions
      */
-    loadTrajectories(features) {
+    loadTrajectories (features) {
         this.agentPositions.clear();
 
         features.forEach(feature => {
-            const agentId = feature.properties.agentId;
-            const time = feature.properties.time;
-            const coordinate = feature.geometry.coordinates;
+            const agentId = feature.properties.agentId,
+                time = feature.properties.time,
+                coordinate = feature.geometry.coordinates;
 
             if (!this.agentPositions.has(agentId)) {
                 this.agentPositions.set(agentId, []);
@@ -115,15 +121,16 @@ export default class AgentInterpolator {
      * @param {number} currentTime - Current simulation time
      * @returns {Object|null} Interpolated feature or null
      */
-    getInterpolatedPosition(agentId, currentTime) {
+    getInterpolatedPosition (agentId, currentTime) {
         const positions = this.agentPositions.get(agentId);
+
         if (!positions || positions.length === 0) {
             return null;
         }
 
         // Find surrounding timesteps
-        let beforeIndex = -1;
-        let afterIndex = -1;
+        let beforeIndex = -1,
+            afterIndex = -1;
 
         for (let i = 0; i < positions.length; i++) {
             if (positions[i].time <= currentTime) {
@@ -147,17 +154,17 @@ export default class AgentInterpolator {
         }
 
         // Interpolate
-        const pos1 = positions[beforeIndex];
-        const pos2 = positions[afterIndex];
-        const timeDelta = pos2.time - pos1.time;
-        const t = timeDelta > 0 ? (currentTime - pos1.time) / timeDelta : 0;
+        const pos1 = positions[beforeIndex],
+            pos2 = positions[afterIndex],
+            timeDelta = pos2.time - pos1.time,
+            t = timeDelta > 0 ? (currentTime - pos1.time) / timeDelta : 0;
 
         let interpolatedCoord;
 
         if (this.interpolationMode === "catmullRom" && positions.length >= 4) {
             // Get control points for Catmull-Rom
-            const pos0 = positions[Math.max(0, beforeIndex - 1)];
-            const pos3 = positions[Math.min(positions.length - 1, afterIndex + 1)];
+            const pos0 = positions[Math.max(0, beforeIndex - 1)],
+                pos3 = positions[Math.min(positions.length - 1, afterIndex + 1)];
 
             interpolatedCoord = catmullRomCoordinate(
                 pos0.coordinate,
@@ -166,7 +173,8 @@ export default class AgentInterpolator {
                 pos3.coordinate,
                 t
             );
-        } else {
+        }
+        else {
             // Linear interpolation
             interpolatedCoord = lerpCoordinate(pos1.coordinate, pos2.coordinate, t);
         }
@@ -175,7 +183,7 @@ export default class AgentInterpolator {
             time: currentTime,
             coordinate: interpolatedCoord,
             // Interpolate velocity if available
-            velocity: pos1.velocity && pos2.velocity 
+            velocity: pos1.velocity && pos2.velocity
                 ? lerp(pos1.velocity, pos2.velocity, t)
                 : pos1.velocity
         };
@@ -186,11 +194,12 @@ export default class AgentInterpolator {
      * @param {number} currentTime - Current simulation time
      * @returns {Map} Map of agentId -> interpolated position
      */
-    getAllInterpolatedPositions(currentTime) {
+    getAllInterpolatedPositions (currentTime) {
         const result = new Map();
 
         this.agentPositions.forEach((positions, agentId) => {
             const interpolated = this.getInterpolatedPosition(agentId, currentTime);
+
             if (interpolated) {
                 result.set(agentId, interpolated);
             }
@@ -206,15 +215,16 @@ export default class AgentInterpolator {
      * @param {number} trailLength - Number of previous positions to include
      * @returns {Array<Array<number>>} Array of coordinates for trail
      */
-    getTrailPath(agentId, currentTime, trailLength = 5) {
+    getTrailPath (agentId, currentTime, trailLength = 5) {
         const positions = this.agentPositions.get(agentId);
+
         if (!positions || positions.length === 0) {
             return [];
         }
 
-        const trail = [];
-        const currentPos = this.getInterpolatedPosition(agentId, currentTime);
-        
+        const trail = [],
+            currentPos = this.getInterpolatedPosition(agentId, currentTime);
+
         if (currentPos) {
             trail.push(currentPos.coordinate);
         }
@@ -232,7 +242,7 @@ export default class AgentInterpolator {
     /**
      * Clear all trajectory data
      */
-    clear() {
+    clear () {
         this.agentPositions.clear();
     }
 
@@ -240,7 +250,7 @@ export default class AgentInterpolator {
      * Get number of agents
      * @returns {number} Number of agents with trajectories
      */
-    getAgentCount() {
+    getAgentCount () {
         return this.agentPositions.size;
     }
 
@@ -248,9 +258,9 @@ export default class AgentInterpolator {
      * Get time range
      * @returns {Object} {minTime, maxTime}
      */
-    getTimeRange() {
-        let minTime = Infinity;
-        let maxTime = -Infinity;
+    getTimeRange () {
+        let minTime = Infinity,
+            maxTime = -Infinity;
 
         this.agentPositions.forEach(positions => {
             if (positions.length > 0) {

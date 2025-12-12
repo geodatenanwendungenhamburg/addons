@@ -65,7 +65,7 @@ export default class TimeEngine {
 
     /**
      * Set playback speed
-     * @param {number} speed - Multiplier (0.1x to 10x)
+     * @param {number} speed - Multiplier (0.1x to 500x)
      */
     setSpeed (speed) {
         this.speed = Math.max(0.1, Math.min(10, speed));
