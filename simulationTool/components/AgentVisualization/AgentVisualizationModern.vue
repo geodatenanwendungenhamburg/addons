@@ -158,6 +158,7 @@ import TimeSeriesChart from "./TimeSeriesChart.vue";
 import FilterPanel from "./FilterPanel.vue";
 import TimeEngine from "../../utils/TimeEngine";
 import AgentInterpolator from "../../utils/AgentInterpolator";
+import {getCapabilityColor, findClosestFeature, passesFilters} from "../../utils/agentVisualizationHelpers";
 
 const AGENT_LAYER_ID = "green4bikes-agents";
 
@@ -247,51 +248,6 @@ export default {
         ...mapMutations("Modules/SimulationTool", ["setMode"]),
 
         /**
-         * PERFORMANCE: Find closest feature to current time using binary search
-         * @param {Array} features - Sorted array of features by time
-         * @param {number} currentTime - Target time
-         * @returns {Object} Closest feature
-         */
-        findClosestFeature (features, currentTime) {
-            if (!features || features.length === 0) {
-                return null;
-            }
-
-            if (features.length === 1) {
-                return features[0];
-            }
-
-            // Binary search for closest time
-            let left = 0,
-                right = features.length - 1,
-                closest = features[0];
-
-            while (left <= right) {
-                const mid = Math.floor((left + right) / 2),
-                    feature = features[mid],
-                    time = feature.properties.time;
-
-                if (time === currentTime) {
-                    return feature;
-                }
-
-                // Update closest if this is closer
-                if (Math.abs(time - currentTime) < Math.abs(closest.properties.time - currentTime)) {
-                    closest = feature;
-                }
-
-                if (time < currentTime) {
-                    left = mid + 1;
-                }
-                else {
-                    right = mid - 1;
-                }
-            }
-
-            return closest;
-        },
-
-        /**
          * Initialize visualization
          */
         initialize () {
@@ -327,29 +283,32 @@ export default {
             const map = mapCollection.getMap("2D");
 
             if (!layerCollection.getLayerById(AGENT_LAYER_ID)) {
-                // Create vector source for features
-                const source = new VectorSource();
-
-                // PERFORMANCE: Use WebGL for GPU-accelerated rendering
-                const webglLayer = new WebGLPointsLayer({
-                    source: source,
-                    style: {
-                        "circle-radius": 7,
-                        "circle-fill-color": [
-                            "case",
-                            ["==", ["get", "activeCapability"], "walking"],
-                            ["color", 66, 135, 245, 0.9],
-                            ["==", ["get", "activeCapability"], "bike"],
-                            ["color", 253, 126, 20, 0.9],
-                            ["==", ["get", "activeCapability"], "cyclingRentalBike"],
-                            ["color", 40, 167, 69, 0.9],
-                            ["color", 100, 100, 100, 0.9]
-                        ],
-                        "circle-stroke-color": ["color", 255, 255, 255, 1],
-                        "circle-stroke-width": 1.5
-                    },
-                    zIndex: 9999999
-                });
+                // Create vector source for features and get colors
+                const source = new VectorSource(),
+                    // PERFORMANCE: Use WebGL for GPU-accelerated rendering
+                    walkingColor = getCapabilityColor("walking"),
+                    bikeColor = getCapabilityColor("bike"),
+                    rentalBikeColor = getCapabilityColor("cyclingRentalBike"),
+                    defaultColor = getCapabilityColor("default"),
+                    webglLayer = new WebGLPointsLayer({
+                        source: source,
+                        style: {
+                            "circle-radius": 7,
+                            "circle-fill-color": [
+                                "case",
+                                ["==", ["get", "activeCapability"], "walking"],
+                                ["color", ...walkingColor, 0.9],
+                                ["==", ["get", "activeCapability"], "bike"],
+                                ["color", ...bikeColor, 0.9],
+                                ["==", ["get", "activeCapability"], "cyclingRentalBike"],
+                                ["color", ...rentalBikeColor, 0.9],
+                                ["color", ...defaultColor, 0.9]
+                            ],
+                            "circle-stroke-color": ["color", 255, 255, 255, 1],
+                            "circle-stroke-width": 1.5
+                        },
+                        zIndex: 9999999
+                    });
 
                 webglLayer.setVisible(true);
                 webglLayer.set("id", AGENT_LAYER_ID);
@@ -443,16 +402,12 @@ export default {
 
             try {
                 this.isLoading = true;
-                console.log(`Loading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-                
+
                 const text = await file.text();
-                console.log("Parsing JSON...");
                 let geojson = JSON.parse(text);
-                console.log(`Parsed ${geojson.features?.length || 0} features`);
 
                 // Check if this is a simulation export file (complete format)
                 if (geojson.jobs && geojson.simulationId) {
-                    console.log("Detected simulation export format, extracting agent data...");
 
                     // Try to extract agent GeoJSON from jobs
                     let agentData = null;
@@ -493,7 +448,7 @@ export default {
             }
             catch (error) {
                 console.error("Error loading file:", error);
-                alert(`Fehler beim Laden der Datei: ${error.message}\n\nBitte stellen Sie sicher, dass es sich um eine gültige GeoJSON-Datei mit Agenten-Daten handelt.`);
+                console.error(`Fehler beim Laden der Datei: ${error.message}. Bitte stellen Sie sicher, dass es sich um eine gültige GeoJSON-Datei mit Agenten-Daten handelt.`);
             }
             finally {
                 this.isLoading = false;
@@ -532,7 +487,7 @@ export default {
 
                 if (!geojson) {
                     console.error("Could not load green4bikes results data from any path:", lastError);
-                    alert("Fehler beim Laden der Green4Bikes-Ergebnisdaten. Bitte laden Sie die Datei manuell hoch.");
+                    console.error("Fehler beim Laden der Green4Bikes-Ergebnisdaten. Bitte laden Sie die Datei manuell hoch.");
                     return;
                 }
 
@@ -540,7 +495,6 @@ export default {
             }
             catch (error) {
                 console.error("Error loading sample data:", error);
-                alert("Fehler beim Laden der Beispieldaten.");
             }
         },
 
@@ -639,8 +593,8 @@ export default {
             }
 
             const layerSource = planningScenarioLayer.getLayerSource(),
-                GeoJSON = require("ol/format/GeoJSON").default,
-                geoJsonFormat = new GeoJSON();
+                GeoJSONFormat = require("ol/format/GeoJSON").default,
+                geoJsonFormat = new GeoJSONFormat();
 
             // Clear existing features
             layerSource.clear();
@@ -712,12 +666,11 @@ export default {
                 // Vector rendering
                 const layerSource = this.agentLayer.getLayerSource(),
                     interpolatedPositions = this.interpolator.getAllInterpolatedPositions(currentTime),
-                    mapProjection = mapCollection.getMap("2D").getView().getProjection().getCode();
-
-                layerSource.clear();
+                    featuresToAdd = []; // PERFORMANCE: Batch add features
 
                 let visibleCount = 0;
-                const featuresToAdd = []; // PERFORMANCE: Batch add features
+
+                layerSource.clear();
 
                 interpolatedPositions.forEach((position, agentId) => {
                     // PERFORMANCE: Use indexed lookup instead of filtering all features
@@ -728,7 +681,7 @@ export default {
                     }
 
                     // PERFORMANCE: Binary search instead of linear scan (O(log n) vs O(n))
-                    const originalFeature = this.findClosestFeature(agentFeatures, currentTime);
+                    const originalFeature = findClosestFeature(agentFeatures, currentTime);
 
                     if (!originalFeature) {
                         return;
@@ -737,31 +690,16 @@ export default {
                     // Apply filters
                     const capability = originalFeature.properties.activeCapability;
 
-                    if (capability === "walking" && !filters.walking) {
-                        return;
-                    }
-
-                    if (capability === "bike" && !filters.bike) {
-                        return;
-                    }
-
-                    if (capability === "cyclingRentalBike" && !filters.rentalBike) {
+                    if (!passesFilters(capability, filters)) {
                         return;
                     }
 
                     visibleCount++;
 
                     // Transform coordinates from WGS84 to map projection
-                    const transformedCoord = transform(
-                            position.coordinate,
-                            "EPSG:4326",
-                            mapProjection
-                        ),
-
+                    const transformedCoord = transform(position.coordinate, "EPSG:4326", mapProjection),
                         // Create feature
-                        feature = new Feature({
-                            geometry: new Point(transformedCoord)
-                        });
+                        feature = new Feature({geometry: new Point(transformedCoord)});
 
                     feature.setProperties({
                         agentId: agentId,
@@ -788,7 +726,7 @@ export default {
 
                     interpolatedPositions.forEach((position, agentId) => {
                         const agentFeatures = this.$store.state.agentVisualization.featuresByAgent[agentId],
-                            originalFeature = this.findClosestFeature(agentFeatures, currentTime);
+                            originalFeature = findClosestFeature(agentFeatures, currentTime);
 
                         if (!originalFeature) {
                             return;
@@ -797,21 +735,15 @@ export default {
                         const capability = originalFeature.properties.activeCapability;
 
                         // Apply same filters
-                        if ((capability === "walking" && !filters.walking) ||
-                            (capability === "bike" && !filters.bike) ||
-                            (capability === "cyclingRentalBike" && !filters.rentalBike)) {
+                        if (!passesFilters(capability, filters)) {
                             return;
                         }
 
                         const trailCoords = this.interpolator.getTrailPath(agentId, currentTime, trailLength);
 
                         if (trailCoords.length > 1) {
-                            const transformedTrailCoords = trailCoords.map(coord =>
-                                    transform(coord, "EPSG:4326", mapProjection)
-                                ),
-                                trailFeature = new Feature({
-                                    geometry: new LineString(transformedTrailCoords)
-                                });
+                            const transformedTrailCoords = trailCoords.map(coord => transform(coord, "EPSG:4326", mapProjection)),
+                                trailFeature = new Feature({geometry: new LineString(transformedTrailCoords)});
 
                             trailFeature.setStyle(this.getTrailStyle(originalFeature.properties));
                             trailFeatures.push(trailFeature);
@@ -852,7 +784,7 @@ export default {
                 }
 
                 // PERFORMANCE: Binary search instead of linear scan
-                const originalFeature = this.findClosestFeature(agentFeatures, currentTime);
+                const originalFeature = findClosestFeature(agentFeatures, currentTime);
 
                 if (!originalFeature) {
                     return;
@@ -861,29 +793,14 @@ export default {
                 // Apply filters
                 const capability = originalFeature.properties.activeCapability;
 
-                if (capability === "walking" && !filters.walking) {
-                    return;
-                }
-
-                if (capability === "bike" && !filters.bike) {
-                    return;
-                }
-
-                if (capability === "cyclingRentalBike" && !filters.rentalBike) {
+                if (!passesFilters(capability, filters)) {
                     return;
                 }
 
                 // Transform coordinates
-                const transformedCoord = transform(
-                        position.coordinate,
-                        "EPSG:4326",
-                        mapProjection
-                    ),
-
+                const transformedCoord = transform(position.coordinate, "EPSG:4326", mapProjection),
                     // Create feature for heatmap
-                    feature = new Feature({
-                        geometry: new Point(transformedCoord)
-                    });
+                    feature = new Feature({geometry: new Point(transformedCoord)});
 
                 heatmapSource.addFeature(feature);
             });
@@ -893,17 +810,7 @@ export default {
          * Get style for agent
          */
         getAgentStyle (properties) {
-            let color = [100, 100, 100]; // default gray
-
-            if (properties.activeCapability === "walking") {
-                color = [66, 135, 245]; // blue
-            }
-            else if (properties.activeCapability === "bike") {
-                color = [253, 126, 20]; // orange
-            }
-            else if (properties.activeCapability === "cyclingRentalBike") {
-                color = [40, 167, 69]; // green
-            }
+            const color = getCapabilityColor(properties.activeCapability);
 
             return new Style({
                 image: new Circle({
@@ -918,17 +825,7 @@ export default {
          * Get trail style
          */
         getTrailStyle (properties) {
-            let color = [100, 100, 100]; // default gray
-
-            if (properties.activeCapability === "walking") {
-                color = [66, 135, 245]; // blue
-            }
-            else if (properties.activeCapability === "bike") {
-                color = [253, 126, 20]; // orange
-            }
-            else if (properties.activeCapability === "cyclingRentalBike") {
-                color = [40, 167, 69]; // green
-            }
+            const color = getCapabilityColor(properties.activeCapability);
 
             return new Style({
                 stroke: new Stroke({
