@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /**
  * Vuex module for Agent Visualization
  * Manages state for time control, filters, and agent data
@@ -223,7 +224,7 @@ const state = {
      * Set filter value
      */
         setFilter (state, {filterName, value}) {
-            if (state.filters.hasOwnProperty(filterName)) {
+            if (Object.prototype.hasOwnProperty.call(state.filters, filterName)) {
                 state.filters[filterName] = value;
             }
         },
@@ -328,6 +329,8 @@ const state = {
                 timeSet = new Set(),
                 featuresByTime = {}, // Index by timestamp
                 featuresByAgent = {}; // PERFORMANCE: Index by agentId
+            let timeSteps = [],
+                agentIds = new Set();
 
             features.forEach(feature => {
                 if (feature.properties && feature.properties.time) {
@@ -380,11 +383,13 @@ const state = {
             // Store grouped features for efficient lookups (PERFORMANCE!)
             commit("setFeaturesByTime", featuresByTime);
             commit("setFeaturesByAgent", featuresByAgent);
-            
+
             // Keep features array for backwards compatibility
             commit("setFeatures", features);
 
-            const timeSteps = Array.from(timeSet).sort((a, b) => a - b);
+            // Calculate time steps and agent count
+            timeSteps = Array.from(timeSet).sort((a, b) => a - b);
+            agentIds = new Set();
 
             commit("setTimeSteps", timeSteps);
 
@@ -393,9 +398,7 @@ const state = {
                 commit("setCurrentTime", timeSteps[0]);
             }
 
-            // Calculate agent count
-            const agentIds = new Set();
-
+            // Collect unique agent IDs
             features.forEach(feature => {
                 if (feature.properties && feature.properties.agentId) {
                     agentIds.add(feature.properties.agentId);
