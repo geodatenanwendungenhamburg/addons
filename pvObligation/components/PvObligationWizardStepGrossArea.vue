@@ -28,7 +28,10 @@ export default {
             displayGrossRoofArea: 0,
             grossAreaStyle: {},
             showConfirmModal: false,
-            pendingRoofId: null
+            pendingRoofId: null,
+            componentFormDataIsDirtyIgnore: [
+                "grossRoofArea"
+            ]
         };
     },
     computed: {
@@ -121,8 +124,8 @@ export default {
                 const selectedFeature = e.selected[0],
                     roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
 
-                // Show confirm modal if another roof is selected
-                if (this.selectedRoofId && this.selectedRoofId !== roofId) {
+                // Show confirm modal if another roof is selected and form is not changed(dirty)
+                if (this.selectedRoofId && this.selectedRoofId !== roofId && this.isWizardFormDirty) {
                     this.pendingRoofId = roofId;
                     this.showConfirmModal = true;
 

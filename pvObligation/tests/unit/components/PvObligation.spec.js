@@ -2,11 +2,15 @@ import {createStore} from "vuex";
 import {config, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import Component from "../../../components/PvObligation.vue";
+import sinon from "sinon";
 
 config.global.mocks.$t = key => key;
 
 describe("addons/pvObligation/components/PvObligation.vue", () => {
     const store = createStore({
+        actions: {
+            replaceByIdInLayerConfig: sinon.stub()
+        },
         modules: {
             namespaced: true,
             Modules: {

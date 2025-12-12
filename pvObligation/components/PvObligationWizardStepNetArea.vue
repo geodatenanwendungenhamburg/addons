@@ -23,6 +23,10 @@ export default {
                 netRoofAreaWithoutExcludes: null,
                 restrictedListItems: []
             },
+            componentFormDataIsDirtyIgnore: [
+                "netRoofArea",
+                "netRoofAreaWithoutExcludes"
+            ],
             excludedArea: 0,
             obligatedArea: null
         };
@@ -139,7 +143,7 @@ export default {
             this.componentFormData.restrictedListItems = listItems;
 
             this.excludedArea = calculateRestrictedArea(this.componentFormData.restrictedListItems);
-            this.componentFormData.netRoofAreaWithoutExcludes = this.componentFormData.netRoofArea - this.excludedArea;
+            this.componentFormData.netRoofAreaWithoutExcludes = this.excludedArea !== 0 ? this.componentFormData.netRoofArea - this.excludedArea : null;
             this.obligatedArea = this.componentFormData.netRoofAreaWithoutExcludes * 0.3;
         },
         formatNumberForArea (value) {

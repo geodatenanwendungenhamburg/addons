@@ -34,13 +34,24 @@ export default {
             componentFormData: {},
             // Form error fields, should match keys in componentFormData for consistency
             componentFormErrors: {},
-            wizardStepVisited: null
+            wizardStepVisited: null,
+            componentFormDataIsDirtyIgnore: [],
+            initialComponentFormData: null
         };
     },
     computed: {
         allWizardStepsValid () {
             return Object.keys(this.wizardStepsFormData)
                 .every(stepComponentName => this.wizardStepsFormData[stepComponentName].isValid);
+        },
+        isWizardFormDirty () {
+            for (const stepName of Object.keys(this.wizardStepsFormData)) {
+                if (this.wizardStepsFormData[stepName].isDirty) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     },
     watch: {
@@ -49,6 +60,9 @@ export default {
             handler (isNowActive, wasActiveBefore) {},
             immediate: true
         }
+    },
+    mounted () {
+        this.setInitialEmptyComponentFormData();
     },
     methods: {
         /**
@@ -86,6 +100,41 @@ export default {
          */
         resetWizardData () {
             this.$emit("resetWizardData");
+        },
+        /**
+         * Stores a deep-cloned snapshot of the current `componentFormData` as the
+         * initial form state. This snapshot is used later to compare whether the
+         * form data has changed (dirty check).
+         *
+         * @returns {void}
+         */
+        setInitialEmptyComponentFormData () {
+            this.initialComponentFormData = JSON.parse(JSON.stringify(this.componentFormData));
+        },
+        /**
+         * Compares the current `componentFormData` with the previously stored
+         * `initialComponentFormData` and determines whether any field
+         * has changed.Fields listed in `componentFormDataIsDirtyIgnore` are skipped.
+         *
+         * @returns {boolean} `true` when at least one field value
+         * has changed compared to the initial snapshot, otherwise `false`.
+         */
+        checkComponentFormDataIsDirty () {
+            if (!this.initialComponentFormData) {
+                return false;
+            }
+
+            for (const fieldKey in this.componentFormData) {
+                if (this.componentFormDataIsDirtyIgnore.includes(fieldKey)) {
+                    continue;
+                }
+
+                if (JSON.stringify(this.initialComponentFormData[fieldKey]) !== JSON.stringify(this.componentFormData[fieldKey])) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 };
