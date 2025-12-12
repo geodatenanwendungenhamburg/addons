@@ -180,21 +180,16 @@ export default {
         </p>
 
         <PvObligationSimpleTable
-            v-if="componentFormData.grossRoofArea !== null && componentFormData.grossRoofArea >= 50"
+            v-if="componentFormData.grossRoofArea !== null"
             :rows="[
                 {
-                    label: $t('additional:modules.pvObligation.wizard.step.grossArea.component.tableCellGrossAreaLabel'),
+                    label: componentFormData.grossRoofArea <= 50
+                        ? $t('additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText')
+                        : $t('additional:modules.pvObligation.wizard.step.grossArea.component.tableCellGrossAreaLabel'),
                     value: `${displayGrossRoofArea} m²`
                 }
             ]"
         />
-
-        <p
-            v-else-if="componentFormData.grossRoofArea !== null"
-            class="noOblicagionText"
-        >
-            {{ $t("additional:modules.pvObligation.wizard.step.grossArea.component.tooSmallAreaText") }}
-        </p>
 
         <ConfirmModalItem
             modal-inner-wrapper-style="max-width: 25rem"
@@ -227,13 +222,5 @@ export default {
             justify-content: center;
             font-size: 1.25rem;
         }
-
-        p.noOblicagionText {
-            font-size: 1.125rem;
-            border: solid 0.0625rem $light_grey;
-            padding: 1rem;
-            margin-top: 1.5rem;
-        }
     }
 </style>
-
