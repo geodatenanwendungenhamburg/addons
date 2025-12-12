@@ -3,7 +3,6 @@ import {expect} from "chai";
 import Component from "../../../components/PvObligationWizardStepNetArea.vue";
 import sinon from "sinon";
 import {createStore} from "vuex";
-import {createEmpty as createEmptyExtent} from "ol/extent";
 
 describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () => {
     let wrapper,
@@ -17,16 +16,7 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                     actions: {
                         addNewLayerIfNotExists: sinon.stub(),
                         addInteraction: sinon.stub(),
-                        removeInteraction: sinon.stub(),
-                        zoomToExtent: sinon.stub()
-                    }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        expanded: () => (side) => {
-                            return side === "secondaryMenu";
-                        }
+                        removeInteraction: sinon.stub()
                     }
                 },
                 Modules: {
@@ -36,16 +26,15 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                             namespaced: true,
                             state: {
                                 selectedRoofId: 1,
-                                selectedRoofExtent: createEmptyExtent(),
                                 isDrawing: false
                             },
                             getters: {
                                 selectedRoofId: (state) => state.selectedRoofId,
-                                selectedRoofExtent: (state) => state.selectedRoofExtent,
                                 isDrawing: (state) => state.isDrawing
                             },
                             actions: {
-                                dissolveRoofFeaturesAndCalculateArea: sinon.stub().resolves(100)
+                                dissolveRoofFeaturesAndCalculateArea: sinon.stub().resolves(100),
+                                zoomToExtendOfSelectedRoof: sinon.stub()
                             },
                             mutations: {
                                 setIsDrawing: (state, payload) => {
@@ -141,10 +130,5 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
         expect(tables.length).to.equal(2);
         expect(tables[0].find("td.cellValue").text() === "123,5 m²").to.be.true;
         expect(tables[1].find("td.cellValue").text() === "37 m²").to.be.true;
-    });
-
-    it("mapZoomToExtentPadding has the correct structure", () => {
-        expect(wrapper.vm.mapZoomToExtentPadding).to.be.an("array");
-        expect(wrapper.vm.mapZoomToExtentPadding.length).to.equal(4);
     });
 });

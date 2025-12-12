@@ -1,8 +1,8 @@
 import {createStore} from "vuex";
 import {config, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
-import Component from "../../../components/PvObligation.vue";
 import sinon from "sinon";
+import Component from "../../../components/PvObligation.vue";
 
 config.global.mocks.$t = key => key;
 
@@ -13,6 +13,14 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
         },
         modules: {
             namespaced: true,
+            Maps: {
+                namespaced: true,
+                getters: {
+                    mode () {
+                        return "2D";
+                    }
+                }
+            },
             Modules: {
                 namespaced: true,
                 modules: {
@@ -37,6 +45,9 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
                             setIsCreatingReport () {
                                 return false;
                             }
+                        },
+                        actions: {
+                            zoomToExtendOfSelectedRoof: sinon.stub()
                         }
                     }
                 }
@@ -69,5 +80,15 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
 
         expect(wrapper.find("div.waitingSpinner").exists()).to.be.true;
         expect(wrapper.vm.spinnerInfoText).to.equal("additional:modules.pvObligation.roofsAreLoadingSpinner");
+    });
+
+    it("overlay for 'not working in 3D' is shown", async () => {
+        const wrapper = shallowMount(Component, {global: {plugins: [store]}});
+
+        wrapper.vm.is3D = true;
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find("div.waitingSpinner").exists()).to.be.true;
+        expect(wrapper.vm.spinnerInfoText).to.equal("additional:modules.pvObligation.notIn3DMode.infoText");
     });
 });

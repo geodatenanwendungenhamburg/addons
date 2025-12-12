@@ -67,8 +67,7 @@ export default {
             "calculateNetRestrictedAreaAndRestrictedAreas"
         ]),
         ...mapActions("Maps", [
-            "addNewLayerIfNotExists",
-            "zoomToExtent"
+            "addNewLayerIfNotExists"
         ]),
         /** @override */
         resetWizardStepData () {
