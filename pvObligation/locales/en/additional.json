@@ -17,9 +17,9 @@
                 "introductionInfoPvObligationLink": "PV obligation in Hamburg - hamburg.de.",
                 "step": {
                     "grossArea": {
-                        "wizardTitle": "Gross roof area",
+                        "wizardTitle": "Choose Building",
                         "component": {
-                            "introduction": "Click on the desired building in the map to determine the gross roof area.",
+                            "introduction": "In this step, select the desired building by clicking on it on the map. This will determine the gross roof area.",
                             "introductionHint": "Note: The roof areas of the selected building have been recorded automatically.",
                             "tableCellGrossAreaLabel": "The gross roof area of the selected building is:",
                             "tooSmallAreaText": "There is no PV obligation (minimum size 50 m²).",
@@ -33,7 +33,7 @@
                         }
                     },
                     "netArea": {
-                        "wizardTitle": "Net roof area",
+                        "wizardTitle": "Edit Net roof area",
                         "component": {
                             "missingStepGrossAreaError": "Please first select your roof in the step \"Gross roof area\".",
                             "missingStepGrossAreaMessage": "Afterwards, the initial net roof area will be displayed here, and you can, if necessary, draw areas that should additionally be excluded.",
@@ -72,7 +72,7 @@
                         }
                     },
                     "personalNotes": {
-                        "wizardTitle": "Personal notes",
+                        "wizardTitle": "Add Personal notes",
                         "component": {
                             "introduction": "You have the option to add your own explanations here.",
                             "form": {
@@ -81,7 +81,7 @@
                         }
                     },
                     "generateReport": {
-                        "wizardTitle": "Generate report",
+                        "wizardTitle": "Download report",
                         "component": {
                             "introduction": "Below you can generate a PDF report containing the information you provided. You can keep this as proof for your records.",
 
