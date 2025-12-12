@@ -31,42 +31,48 @@ export default {
                     isOpen: true,
                     component: markRaw(PvObligationWizardStepGrossArea),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 },
                 {
                     title: "netArea",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepNetArea),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 },
                 {
                     title: "netRestrictedAreas",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepNetRestrictedAreas),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 },
                 {
                     title: "personalNotes",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepPersonalNotes),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 },
                 {
                     title: "buildingDetails",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepBuildingDetails),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 },
                 {
                     title: "generateReport",
                     isOpen: false,
                     component: markRaw(PvObligationWizardStepGenerateReport),
                     componentFormData: null,
-                    componentFormDataIsValid: null
+                    componentFormDataIsValid: null,
+                    componentFormDataIsDirty: null
                 }
             ],
             showNextWizardStepButton: true,
@@ -93,11 +99,22 @@ export default {
             this.wizardSteps.forEach((step) => {
                 wizardStepsFormData[step.component.name] = {
                     isValid: step.componentFormDataIsValid,
+                    isDirty: step.componentFormDataIsDirty,
                     formData: step.componentFormData
                 };
             });
 
             return wizardStepsFormData;
+        }
+    },
+    watch: {
+        wizardStepsFormData: {
+            handler (newValue) {
+                if (newValue) {
+                    this.wizardStepIsDirty();
+                }
+            },
+            deep: true
         }
     },
     mounted () {
@@ -189,6 +206,17 @@ export default {
             currentStep.componentFormDataIsValid = stepIsValid;
 
             return stepIsValid;
+        },
+        wizardStepIsDirty () {
+            this.wizardSteps.forEach(step => {
+                const refArr = this.$refs[`ref${step.component.name}`],
+                    instance = Array.isArray(refArr) ? refArr[0] : refArr,
+                    stepIsDirty = typeof instance?.checkComponentFormDataIsDirty === "function"
+                        ? instance.checkComponentFormDataIsDirty()
+                        : false;
+
+                step.componentFormDataIsDirty = stepIsDirty;
+            });
         },
         handleWizardStepError (data) {
             const index = this.wizardSteps.findIndex(step => step.component.name === data.componentName);
