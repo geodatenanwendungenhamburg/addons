@@ -29,6 +29,7 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
+            "pvAreaLayerId",
             "selectedRoofExtent",
             "isDrawing",
             "selectedRoofId"
@@ -126,7 +127,7 @@ export default {
                     : await this.dissolveRoofFeaturesAndCalculateArea({
                         roofId: this.selectedRoofId,
                         outlineLayer: outlineLayer,
-                        layerName: "PV-geeignete Dachflächen"
+                        layerId: this.pvAreaLayerId
                     }),
                 restrictedAreaItems: this.componentFormData.restrictedListItems ?? []
             });

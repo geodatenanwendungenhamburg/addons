@@ -34,6 +34,7 @@ export default {
     computed: {
         ...mapGetters(["configJs"]),
         ...mapGetters("Modules/PvObligation", [
+            "roofLayerId",
             "selectedRoofId",
             "styleJson"
         ])
@@ -103,7 +104,7 @@ export default {
                         fill: new Fill({color: fillColor})
                     }),
                     filter: (feature, layer) => {
-                        return layer && layer.get("name") === "Dachflächen";
+                        return layer && layer.get("id") === this.roofLayerId;
                     }
                 }),
                 outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
@@ -159,7 +160,7 @@ export default {
             const area = await this.dissolveRoofFeaturesAndCalculateArea({
                 roofId: roofId,
                 outlineLayer: outlineLayer,
-                layerName: "Dachflächen"
+                layerId: this.roofLayerId
             });
 
             this.componentFormData.grossRoofArea = Math.round(area * 10) / 10;

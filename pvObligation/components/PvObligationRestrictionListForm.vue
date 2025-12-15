@@ -56,7 +56,8 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/PvObligation", [
-            "selectedRoofId"
+            "selectedRoofId",
+            "pvAreaLayerId"
         ])
     },
     mounted () {
@@ -246,6 +247,7 @@ export default {
             if (this.drawState.interaction) {
                 this.removeInteraction(this.drawState.interaction);
                 this.drawState.interaction.un("drawend", this.handleDrawEnd);
+                this.drawState.interaction.un("modifyend", this.handleDrawEnd);
             }
         },
         /**
@@ -277,7 +279,7 @@ export default {
             });
 
             const netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
-                    return layer.get("name") === "PV-geeignete Dachflächen";
+                    return layer.get("id") === this.pvAreaLayerId;
                 }),
                 netAreaFeatures = netAreaLayer.getSource().getFeatures().filter(feature => {
                     return feature.get("gebaeude_id") === this.selectedRoofId;
@@ -360,22 +362,23 @@ export default {
                 console.error("Error during intersection calculation:", error);
             }
 
+            await new Promise(resolve => {
             // Remove the original drawn feature from the layer
-            setTimeout(() => {
-                const source = this.drawState.layer.getSource();
+                setTimeout(() => {
+                    const source = this.drawState.layer.getSource();
 
-                source.getFeatures().forEach(f => {
-                    if (f && !f.get("id") || f.get("marker") === "drawnFeature") {
-                        source.removeFeature(f);
-                    }
-                });
-            }, 0);
+                    source.getFeatures().forEach(f => {
+                        if (f && !f.get("id") || f.get("marker") === "drawnFeature") {
+                            source.removeFeature(f);
+                        }
+                    });
 
-            if (intersectionFeature) {
-                return intersectionFeature;
-            }
+                    resolve();
+                }, 0);
 
-            return null;
+            });
+
+            return intersectionFeature || null;
         },
         /**
          * Removes or cuts overlapping features from a given set of features.
@@ -451,7 +454,7 @@ export default {
          * @returns {void}
          */
         addFeatureWithProperties (feature, featureGeoJson) {
-            const area2D = feature.getGeometry().getArea();
+            const {area2D, area3D} = this.calculateAreas(feature, featureGeoJson.properties.dachneig);
 
             if (area2D < 0.1) {
                 return;
@@ -474,11 +477,57 @@ export default {
                 type: "polygon",
                 id: this.formData.id,
                 area2D: area2D,
-                area3D: area2D / Math.cos((featureGeoJson.properties.dachneig * Math.PI) / 180)
+                area3D: area3D,
+                roofSlope: featureGeoJson.properties.dachneig
             });
 
             this.drawState.layer.getSource().addFeature(feature);
-            this.formData.features.push(feature);
+
+            // the areas of the modified features need to be recalculated
+            if (this.formMode === "edit") {
+                this.formData.features = [];
+                this.drawState.layer.getSource().getFeatures().forEach(f => {
+                    if (f.get("id") === this.formData.id) {
+                        const areas = this.calculateAreas(f, f.get("roofSlope"));
+
+                        f.setProperties({
+                            type: "polygon",
+                            id: this.formData.id,
+                            area2D: areas.area2D,
+                            area3D: areas.area3D
+                        });
+
+                        this.formData.features.push(f);
+                    }
+
+                });
+            }
+            else {
+                this.formData.features.push(feature);
+            }
+        },
+        /**
+         * Calculates the areas of multiple geometric shapes based on the provided parameters.
+         *
+         * @param {Feature} feature - Feature for which the areas should be calculated.
+         * @param {Float} roofSlope- Roof slope in degrees.
+         * @returns {Object} An object containing the calculated 2D and 3D areas for the feature.
+         */
+        calculateAreas (feature, roofSlope) {
+            if (!feature || !feature.getGeometry() || roofSlope === null || roofSlope === undefined) {
+                return {
+                    area2D: 0,
+                    area3D: 0
+                };
+            }
+
+            const area2D = feature.getGeometry().getArea(),
+                area3D = area2D / Math.cos((roofSlope * Math.PI) / 180);
+
+            return {
+                area2D,
+                area3D
+            };
         },
         /**
          * Checks if the given geoJson contains a valid polygon.

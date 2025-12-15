@@ -17,7 +17,8 @@ export default {
     computed: {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport",
-            "relevantLayerIds",
+            "pvAreaLayerId",
+            "roofLayerId",
             "isDrawing"
         ]),
         ...mapGetters([
@@ -56,7 +57,7 @@ export default {
                 map = mapCollection.getMap("2D"),
                 layers = map?.getLayers()?.getArray();
 
-            this.relevantLayerIds?.forEach(layerId => {
+            [this.roofLayerId, this.pvAreaLayerId].forEach(layerId => {
                 promises.push(
                     new Promise(resolve => {
                         const layer = layers?.find(l => l.get("id") === layerId) ?? undefined;
