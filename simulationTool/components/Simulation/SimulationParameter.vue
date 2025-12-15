@@ -1,3 +1,4 @@
+<!-- eslint-disable max-depth -->
 <!-- eslint-disable one-var -->
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
