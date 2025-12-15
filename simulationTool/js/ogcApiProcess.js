@@ -170,26 +170,38 @@ export default class OgcApiProcess {
     /**
      * Fetches the result of a job with the given job ID.
      * @param {string} jobID - The ID of the job.
+     * @param {String} accessToken - The access token for authentication.
+     * @param {Function} [onLargeResponse=null] - Optional callback when response > 10MB.
      * @returns {Promise<Object>} The job results object.
      */
-    async getJobResults (jobID, accessToken) {
+    async getJobResults (jobID, accessToken, onLargeResponse = null) {
         const url = new URL(`jobs/${jobID}/results`, this.baseUrl),
             response = await axios.get(url, {headers: {
                 Authorization: `Bearer ${accessToken}`
             }});
+
+        // Check response size
+        const responseSize = JSON.stringify(response.data).length,
+            responseSizeMB = responseSize / (1024 * 1024);
+
+        if (responseSizeMB > 10 && typeof onLargeResponse === "function") {
+            onLargeResponse(responseSizeMB);
+        }
 
         return response.data;
     }
 
     /**
      * Polls the job status and retrieves the results.
+     * @param {String} accessToken - The access token for authentication.
      * @param {string} jobID - The ID of the job.
      * @param {number} [pollingInterval=1000] - The interval in milliseconds to poll for job status.
      * @param {function} [onProgressUpdate=null] - Optional callback function to handle progress updates.
+     * @param {Function} [onLargeResponse=null] - Optional callback when response > 10MB.
      * @returns {Promise<Object>} The job results object.
      * @throws {Error} If an error occurs during execution or if the job fails.
     */
-    async pollJobStatusAndGetResults (accessToken, jobID, pollingInterval = 1000, onProgressUpdate = null) {
+    async pollJobStatusAndGetResults (accessToken, jobID, pollingInterval = 1000, onProgressUpdate = null, onLargeResponse = null) {
         try {
             let jobStatus = await this.getJobStatus(jobID, accessToken);
 
@@ -205,7 +217,7 @@ export default class OgcApiProcess {
                 console.warn(`Job failed with status: ${jobStatus?.status}`);
             }
 
-            return await this.getJobResults(jobID, accessToken);
+            return await this.getJobResults(jobID, accessToken, onLargeResponse);
         }
         catch (error) {
             console.warn("Error polling job status and getting results:", error);
@@ -220,10 +232,11 @@ export default class OgcApiProcess {
      * @param {Object} requestBody - The request body for the process execution.
      * @param {number} [pollingInterval=1000] - The interval in milliseconds to poll for job status.
      * @param {function} [onProgressUpdate=null] - Optional callback function to handle progress updates.
+     * @param {Function} [onLargeResponse=null] - Optional callback when response > 10MB.
      * @returns {Promise<Object>} The job results object.
      * @throws {Error} If an error occurs during execution or if the job fails.
      */
-    async executeAndGetResults (requestBody, pollingInterval = 1000, onProgressUpdate = null) {
+    async executeAndGetResults (requestBody, pollingInterval = 1000, onProgressUpdate = null, onLargeResponse = null) {
         try {
             const executeResponse = await this.execute(requestBody),
                 jobID = executeResponse?.jobID;
@@ -232,7 +245,7 @@ export default class OgcApiProcess {
                 console.warn("No job ID returned from the execute request.");
             }
 
-            return await this.pollJobStatusAndGetResults(jobID, pollingInterval, onProgressUpdate);
+            return await this.pollJobStatusAndGetResults(jobID, pollingInterval, onProgressUpdate, onLargeResponse);
         }
         catch (error) {
             console.warn("Error executing process and getting job result:", error);

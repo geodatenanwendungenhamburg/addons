@@ -1,3 +1,4 @@
+<!-- eslint-disable one-var -->
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import CycleTravelerLayerInput from "../shared/components/CycleTravelerLayerInput.vue";
@@ -345,7 +346,7 @@ export default {
                 layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
             }
         }
-        
+
         if (typeof layerCollection.getLayerById(infrastructureLayerId) !== "undefined") {
             layerCollection.getLayerById(infrastructureLayerId).getLayerSource().clear();
         }
@@ -1278,7 +1279,13 @@ export default {
                     this.accessToken,
                     jobIDs[index],
                     this.simulation.processes[index].pollingInterval,
-                    jobStatus => this.onProgressUpdate(jobStatus, job)
+                    jobStatus => this.onProgressUpdate(jobStatus, job),
+                    (sizeMB) => {
+                        this.addSingleAlert({
+                            content: `Die Simulationsergebnisse sind sehr groß (${sizeMB.toFixed(2)} MB). Die Datei wird aus diesem Grund als Download bereit gestellt und kann über die Oberfläche manuell geladen werden. Das Laden und Anzeigen kann dauern.`,
+                            category: "info"
+                        });
+                    }
                 );
                 this.jobStatusChanged();
 
@@ -1313,15 +1320,15 @@ export default {
 
                         if (sourceFeature) {
                             // Keep original geometry (Polygon or Point)
-                            const sourceGeometry = sourceFeature.geometry;
+                            const sourceGeometry = sourceFeature.geometry,
 
-                            // Extract spawningAmount and spawningIntervalInMinutes
-                            const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
-                            const spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+                                // Extract spawningAmount and spawningIntervalInMinutes
+                                spawningAmount = sourceFeature.properties?.spawningAmount || 10,
+                                spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
 
-                            const properties = {
-                                spawningAmount: String(spawningAmount)
-                            };
+                                properties = {
+                                    spawningAmount: String(spawningAmount)
+                                };
 
                             // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
                             if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
@@ -1422,15 +1429,15 @@ export default {
 
                             if (sourceFeature) {
                                 // Keep original geometry (Polygon or Point)
-                                const sourceGeometry = sourceFeature.geometry;
+                                const sourceGeometry = sourceFeature.geometry,
 
-                                // Extract spawningAmount and spawningIntervalInMinutes
-                                const spawningAmount = sourceFeature.properties?.spawningAmount || 10,
-                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+                                    // Extract spawningAmount and spawningIntervalInMinutes
+                                    spawningAmount = sourceFeature.properties?.spawningAmount || 10,
+                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
 
-                                const properties = {
-                                    spawningAmount: String(spawningAmount)
-                                };
+                                    properties = {
+                                        spawningAmount: String(spawningAmount)
+                                    };
 
                                 // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
                                 if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
