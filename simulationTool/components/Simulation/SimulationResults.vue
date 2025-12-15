@@ -394,6 +394,72 @@ export default {
         },
 
         /**
+         * Switch to AgentVisualization and load agent data
+         */
+        switchToAgentVisualization () {
+            const agentData = this.extractAgentGeoJSON();
+            if (!agentData) {
+                console.warn("No agent data available");
+                return;
+            }
+
+            // Register agentVisualization module if not exists
+            if (!this.$store.hasModule(["agentVisualization"])) {
+                const agentVisualizationModule = require("../../store/agentVisualization").default;
+
+                this.$store.registerModule("agentVisualization", agentVisualizationModule);
+            }
+
+            // Collect planning scenario geometries
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
+                planningScenarioData = this.collectPlanningScenarioGeometries(planningScenarioLayer);
+
+            // Load data into AgentVisualization store
+            this.$store.dispatch("agentVisualization/loadAgentData", agentData);
+
+            // Calculate time series metrics
+            this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+
+            // Load planning scenario geometries
+            if (planningScenarioData) {
+                this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
+            }
+
+            // Set flag to indicate automatic load
+            this.$store.commit("agentVisualization/setAutoLoadTriggered", true);
+
+            // Switch to AgentVisualization mode
+            this.setMode("agentVisualization");
+        },
+
+        /**
+         * Collects geometries from planning scenario layer
+         * @param {Object} layer - The planning scenario layer
+         * @returns {Object|null} GeoJSON FeatureCollection or null
+         */
+        collectPlanningScenarioGeometries (layer) {
+            if (!layer) {
+                return null;
+            }
+
+            const layerSource = layer.getLayerSource(),
+                features = layerSource.getFeatures();
+
+            if (!features || features.length === 0) {
+                return null;
+            }
+
+            const GeoJSON = require("ol/format/GeoJSON").default,
+                geoJsonFormat = new GeoJSON(),
+                geojson = geoJsonFormat.writeFeaturesObject(features, {
+                    dataProjection: "EPSG:4326",
+                    featureProjection: "EPSG:25832"
+                });
+
+            return geojson;
+        },
+
+        /**
          * Extracts agent GeoJSON data from job results.
          * @returns {Object|null} GeoJSON FeatureCollection or null if not found
          */
@@ -1052,6 +1118,15 @@ export default {
                         @click="() => setMode('simulationParameter')"
                     />
                     <div v-if="worstJobStatusTag === 'successful'">
+                        <FlatButton
+                            v-if="extractAgentGeoJSON() && simulationIdForResults && simulationIdForResults.includes('green4Bikes')"
+                            id="show-agent-visualization"
+                            class="me-2"
+                            :icon="'bi bi-play-circle'"
+                            :aria-label="'Agent Visualization anzeigen'"
+                            :text="'Simulation anzeigen'"
+                            @click="switchToAgentVisualization"
+                        />
                         <FlatButton
                             id="download-results-complete"
                             class="me-2"

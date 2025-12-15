@@ -137,6 +137,13 @@ export default {
         ])
     },
     watch: {
+        "$store.state.agentVisualization.agentData" (newData) {
+            // Auto-load data when it's set programmatically (not via file upload)
+            if (newData && this.$store.state.agentVisualization.autoLoadTriggered) {
+                this.$store.commit("agentVisualization/setAutoLoadTriggered", false);
+                this.processAutoLoadedData(newData);
+            }
+        },
         "$store.state.agentVisualization.currentTime" () {
             this.updateVisualization();
         },
@@ -183,6 +190,13 @@ export default {
     },
     mounted () {
         this.initialize();
+
+        // Check if data was auto-loaded before mounting
+        const agentData = this.$store.state.agentVisualization.agentData;
+        if (agentData && this.$store.state.agentVisualization.autoLoadTriggered) {
+            this.$store.commit("agentVisualization/setAutoLoadTriggered", false);
+            this.processAutoLoadedData(agentData);
+        }
     },
     beforeUnmount () {
         this.cleanup();
@@ -396,7 +410,7 @@ export default {
         },
 
         /**
-         * Load agent data
+         * Load agent data (called from file upload)
          */
         loadAgentData (geojson) {
             // Load into Vuex store
@@ -407,6 +421,27 @@ export default {
 
             // Calculate time series metrics
             this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+
+            this.dataLoaded = true;
+
+            // Zoom to agent data extent
+            this.zoomToAgentData(geojson.features);
+
+            // Update visualization
+            this.updateVisualization();
+        },
+
+        /**
+         * Process auto-loaded data (called when data is loaded programmatically)
+         */
+        processAutoLoadedData (geojson) {
+            if (!geojson || !geojson.features) {
+                console.warn("Invalid auto-loaded data");
+                return;
+            }
+
+            // Load into interpolator
+            this.interpolator.loadTrajectories(geojson.features);
 
             this.dataLoaded = true;
 

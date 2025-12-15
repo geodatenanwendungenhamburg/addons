@@ -1276,12 +1276,16 @@ export default {
                 job.requestBody = JSON.parse(JSON.stringify(requestBodiesToSend[index]));
                 job.jobStatus = {status: initialStatuses[index]};
                 job.resultStyle = this.simulation.processes[index].resultStyle;
+                
+                let isLargeResponse = false;
+                
                 job.jobResults = await this.processHandlers[index].pollJobStatusAndGetResults(
                     this.accessToken,
                     jobIDs[index],
                     this.simulation.processes[index].pollingInterval,
                     jobStatus => this.onProgressUpdate(jobStatus, job),
                     (sizeMB) => {
+                        isLargeResponse = true;
                         this.addSingleAlert({
                             content: `Die Simulationsergebnisse sind sehr groß (${sizeMB.toFixed(2)} MB). Die Datei wird aus diesem Grund als Download bereit gestellt und kann über die Oberfläche manuell geladen werden. Das Laden und Anzeigen kann dauern.`,
                             category: "info"
@@ -1290,8 +1294,8 @@ export default {
                 );
                 this.jobStatusChanged();
 
-                // Auto-switch to AgentVisualization for Green4Bikes
-                if (isGreen4Bikes && job.jobResults) {
+                // Auto-switch to AgentVisualization for Green4Bikes (only if response is small enough)
+                if (isGreen4Bikes && job.jobResults && !isLargeResponse) {
                     this.switchToAgentVisualization(job.jobResults);
                 }
             });
@@ -1504,7 +1508,7 @@ export default {
         },
 
         /**
-         * Switches to AgentVisualization mode and loads the results.
+         * Switches to AgentVisualization mode and loads the results automatically.
          * @param {Object} jobResults - The job results from Green4Bikes simulation
          * @returns {void}
          */
@@ -1536,16 +1540,33 @@ export default {
                 }
 
                 if (geojsonData) {
+                    // Validate GeoJSON format
+                    if (!geojsonData.features || !Array.isArray(geojsonData.features)) {
+                        console.warn("No features in GeoJSON data");
+                        return;
+                    }
+
+                    if (geojsonData.features.length === 0) {
+                        console.warn("GeoJSON data contains no features");
+                        return;
+                    }
+
                     // Collect planning scenario geometries (scenario area, source, target)
                     const planningScenarioData = this.collectPlanningScenarioGeometries();
 
-                    // Load data into AgentVisualization store
+                    // Load data into AgentVisualization store (will be picked up by the component)
                     this.$store.dispatch("agentVisualization/loadAgentData", geojsonData);
+
+                    // Calculate time series metrics
+                    this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
 
                     // Load planning scenario geometries
                     if (planningScenarioData) {
                         this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
                     }
+
+                    // Set flag to indicate automatic load
+                    this.$store.commit("agentVisualization/setAutoLoadTriggered", true);
 
                     // Switch to AgentVisualization mode
                     this.setMode("agentVisualization");

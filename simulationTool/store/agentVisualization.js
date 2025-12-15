@@ -42,7 +42,8 @@ const state = {
         // UI state
         selectedAgentId: null,
         hoveredAgentId: null,
-        timeSeriesMetrics: []
+        timeSeriesMetrics: [],
+        autoLoadTriggered: false
     },
 
     getters = {
@@ -313,6 +314,10 @@ const state = {
      */
         setTimeSeriesMetrics (state, metrics) {
             state.timeSeriesMetrics = metrics;
+        },
+
+        setAutoLoadTriggered (state, value) {
+            state.autoLoadTriggered = value;
         }
     },
 
