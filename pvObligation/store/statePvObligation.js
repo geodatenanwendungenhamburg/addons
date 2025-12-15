@@ -12,6 +12,8 @@
  * @property {Boolean} deactivateGFI - flag if tool should deactivate gfi (config-param)
  * @property {Boolean} standAlonePortal - flag if tool is used in a standalone portal, then titles are removed via CSS (config-param)
  * @property {Boolean} hasMouseMapInteractions - flag if tool has mouse interactions on the map (config-param)
+ * @property {String} roofLayerId - ID of the roof layer
+ * @property {String} pvAreaLayerId - ID of the net area layer
  * @property {Boolean} isCreatingReport - flag if the report is currently been generated
  * @property {String} selectedRoofId - ID of the selected roof
  * @property {Number[]} selectedRoofExtent - Geometric extent of the selected roof [minx, miny, maxx, maxy]
@@ -37,13 +39,11 @@ const state = {
     hasMouseMapInteractions: true,
 
     // PvObligation addon state
+    roofLayerId: "34755",
+    pvAreaLayerId: "34753",
     isCreatingReport: false,
     selectedRoofId: null,
     selectedRoofExtent: [],
-    relevantLayerIds: [
-        "34755", // dachflaechen
-        "34753" // dachflaechen_pv
-    ],
     baseUrl: "https://geoportal-hamburg.de",
     geosearchReverseServiceId: "5",
     isDrawing: false,
