@@ -1,3 +1,4 @@
+<!-- eslint-disable one-var -->
 <script>
 import AccordionItem from "../../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import SwitchInput from "../../../../src/shared/modules/checkboxes/components/SwitchInput.vue";
@@ -261,6 +262,7 @@ export default {
         ...mapActions("Modules/SimulationTool", ["updateFeatures", "zoomToFeature"]),
         ...mapActions("Maps", ["addInteraction", "removeInteraction"]),
         ...mapActions("Menu", ["changeCurrentComponent", "toggleMenu"]),
+        ...mapActions("Alerting", ["addSingleAlert"]),
         ...mapMutations("Modules/SimulationTool", [
             "setMode"
         ]),
@@ -336,8 +338,8 @@ export default {
             }
 
             let data, fileName, fileType;
-            const baseName = this.currentSimulation.name.replace(/[^a-z0-9]/gi, '_');
-            const dateStr = new Date().toISOString().split('T')[0];
+            const baseName = this.currentSimulation.name.replace(/[^a-z0-9]/gi, "_"),
+                dateStr = new Date().toISOString().split("T")[0];
 
             if (format === "geojson") {
                 // Download agent data as GeoJSON for AgentVisualization
@@ -345,7 +347,10 @@ export default {
 
                 if (!agentData || !agentData.features || agentData.features.length === 0) {
                     console.warn("No agent data available for download");
-                    alert("Keine Agenten-Daten zum Herunterladen verfügbar.");
+                    this.addSingleAlert({
+                        content: "Keine Agenten-Daten zum Herunterladen verfügbar.",
+                        category: "warning"
+                    });
                     return;
                 }
 
@@ -380,8 +385,8 @@ export default {
                 fileType = "application/json";
             }
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: fileType});
-            const succeed = downloadBlobPerNavigator(blob, fileName);
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: fileType}),
+                succeed = downloadBlobPerNavigator(blob, fileName);
 
             if (!succeed) {
                 downloadBlobPerHTML5(blob, fileName);
@@ -399,18 +404,18 @@ export default {
                     const agents = job.jobResults.agents;
 
                     // Validate that it's a valid FeatureCollection with data
-                    if (agents.type === "FeatureCollection" && 
-                        agents.features && 
-                        Array.isArray(agents.features) && 
+                    if (agents.type === "FeatureCollection" &&
+                        agents.features &&
+                        Array.isArray(agents.features) &&
                         agents.features.length > 0) {
                         return agents;
                     }
                 }
                 // Check if jobResults itself is a FeatureCollection with data
-                if (job.jobResults && 
-                    job.jobResults.type === "FeatureCollection" && 
-                    job.jobResults.features && 
-                    Array.isArray(job.jobResults.features) && 
+                if (job.jobResults &&
+                    job.jobResults.type === "FeatureCollection" &&
+                    job.jobResults.features &&
+                    Array.isArray(job.jobResults.features) &&
                     job.jobResults.features.length > 0) {
                     return job.jobResults;
                 }
