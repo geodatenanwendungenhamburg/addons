@@ -14,7 +14,8 @@ export default {
         ...mapGetters("Modules/PvObligation", [
             "isCreatingReport",
             "selectedRoofExtent",
-            "selectedRoofId"
+            "selectedRoofId",
+            "pvAreaLayerId"
         ]),
         ...mapGetters("Menu", ["expanded"]),
         /**
@@ -86,7 +87,7 @@ export default {
                         : await this.dissolveRoofFeaturesAndCalculateArea({
                             roofId: this.selectedRoofId,
                             outlineLayer: outlineLayer,
-                            layerName: "PV-geeignete Dachflächen"
+                            layerID: this.pvAreaLayerId
                         }),
                     restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
                 }),

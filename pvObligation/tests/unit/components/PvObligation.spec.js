@@ -21,8 +21,11 @@ describe("addons/pvObligation/components/PvObligation.vue", () => {
                             isCreatingReport () {
                                 return false;
                             },
-                            relevantLayerIds () {
-                                return [];
+                            roofLayerId () {
+                                return "34755";
+                            },
+                            pvAreaLayerId () {
+                                return "34753";
                             },
                             isDrawing: state => state.isDrawing
                         },

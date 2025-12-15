@@ -441,13 +441,13 @@ export default {
      * @param {Object} payload - The payload containing required parameters.
      * @param {string|number} payload.roofId - The ID of the roof to dissolve features for.
      * @param {ol.layer.Vector} payload.outlineLayer - The OpenLayers vector layer to add dissolved features to.
-     * @param {string} payload.layerName - The name of the source layer containing roof features.
+     * @param {string} payload.layerId - The Id of the source layer containing roof features.
      * @returns {number} The total calculated roof area (sum of "dachfl_3d" property).
      */
     dissolveRoofFeaturesAndCalculateArea ({commit}, payload) {
-        const {roofId, outlineLayer, layerName} = payload,
+        const {roofId, outlineLayer, layerId} = payload,
             geojsonFeatures = [], // turf requires array of geojson features
-            sourceLayer = mapCollection.getMap("2D") ? mapCollection.getMap("2D").getLayers().getArray().find(layer => layer.get("name") === layerName) : undefined,
+            sourceLayer = mapCollection.getMap("2D") ? mapCollection.getMap("2D").getLayers().getArray().find(layer => layer.get("id") === layerId) : undefined,
             source = sourceLayer ? sourceLayer.getSource() : null,
             allFeatures = source ? source.getFeatures() : [],
             sameRoofFeatures = allFeatures.filter(feature => roofId && feature.get("gebaeude_id") === roofId),
