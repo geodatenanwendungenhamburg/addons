@@ -447,59 +447,6 @@ export default {
         </div>
 
         <div class="mb-3 p-3 border rounded">
-            <label
-                for="agentCountInput"
-                class="form-label mb-2"
-            >
-                <i class="bi bi-people-fill" />
-                Anzahl der Agenten
-            </label>
-            <input
-                id="agentCountInput"
-                type="number"
-                class="form-control mb-3"
-                :value="localAgentCount"
-                min="1"
-                max="1000"
-                @input="updateAgentCount"
-            >
-        </div>
-
-        <div class="mb-3 p-3 border rounded">
-            <div class="form-switch mb-3">
-                <SwitchInput
-                    id="includeSpawningInterval"
-                    :checked="includeSpawningInterval"
-                    label="Spawning Interval aktivieren (optional)"
-                    aria="Spawning Interval aktivieren (optional)"
-                    :interaction="toggleSpawningInterval"
-                />
-            </div>
-
-            <div v-if="includeSpawningInterval">
-                <label
-                    for="spawningIntervalInput"
-                    class="form-label mb-2"
-                >
-                    <i class="bi bi-clock-fill" />
-                    Spawning Interval (Minuten)
-                </label>
-                <input
-                    id="spawningIntervalInput"
-                    type="number"
-                    class="form-control mb-3"
-                    :value="localSpawningInterval"
-                    min="1"
-                    max="120"
-                    @input="updateSpawningInterval"
-                >
-                <small class="text-muted">
-                    Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
-                </small>
-            </div>
-        </div>
-
-        <div class="mb-3 p-3 border rounded">
             <h6 class="mb-2">
                 <i
                     class="bi bi-square-fill"
@@ -586,6 +533,59 @@ export default {
                 <span v-else>
                     Kein Zielbereich gezeichnet
                 </span>
+            </div>
+        </div>
+
+        <div class="mb-3 p-3 border rounded">
+            <label
+                for="agentCountInput"
+                class="form-label mb-2"
+            >
+                <i class="bi bi-people-fill" />
+                Anzahl der Agenten
+            </label>
+            <input
+                id="agentCountInput"
+                type="number"
+                class="form-control mb-3"
+                :value="localAgentCount"
+                min="1"
+                max="1000"
+                @input="updateAgentCount"
+            >
+        </div>
+
+        <div class="mb-3 p-3 border rounded">
+            <div class="form-switch mb-3">
+                <SwitchInput
+                    id="includeSpawningInterval"
+                    :checked="includeSpawningInterval"
+                    label="Spawning Interval aktivieren (optional)"
+                    aria="Spawning Interval aktivieren (optional)"
+                    :interaction="toggleSpawningInterval"
+                />
+            </div>
+
+            <div v-if="includeSpawningInterval">
+                <label
+                    for="spawningIntervalInput"
+                    class="form-label mb-2"
+                >
+                    <i class="bi bi-clock-fill" />
+                    Spawning Interval (Minuten)
+                </label>
+                <input
+                    id="spawningIntervalInput"
+                    type="number"
+                    class="form-control mb-3"
+                    :value="localSpawningInterval"
+                    min="1"
+                    max="120"
+                    @input="updateSpawningInterval"
+                >
+                <small class="text-muted">
+                    Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
+                </small>
             </div>
         </div>
     </div>

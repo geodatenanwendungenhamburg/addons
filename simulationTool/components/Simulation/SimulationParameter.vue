@@ -345,7 +345,7 @@ export default {
                 layerCollection.getLayerById("planning-scenario").getLayerSource().clear();
             }
         }
-        
+
         if (typeof layerCollection.getLayerById(infrastructureLayerId) !== "undefined") {
             layerCollection.getLayerById(infrastructureLayerId).getLayerSource().clear();
         }
@@ -1313,15 +1313,15 @@ export default {
 
                         if (sourceFeature) {
                             // Keep original geometry (Polygon or Point)
-                            const sourceGeometry = sourceFeature.geometry;
+                            const sourceGeometry = sourceFeature.geometry,
 
-                            // Extract spawningAmount and spawningIntervalInMinutes
-                            const spawningAmount = sourceFeature.properties?.spawningAmount || 10;
-                            const spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+                                // Extract spawningAmount and spawningIntervalInMinutes
+                                spawningAmount = sourceFeature.properties?.spawningAmount || 10,
+                                spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
 
-                            const properties = {
-                                spawningAmount: String(spawningAmount)
-                            };
+                                properties = {
+                                    spawningAmount: String(spawningAmount)
+                                };
 
                             // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
                             if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
@@ -1422,15 +1422,15 @@ export default {
 
                             if (sourceFeature) {
                                 // Keep original geometry (Polygon or Point)
-                                const sourceGeometry = sourceFeature.geometry;
+                                const sourceGeometry = sourceFeature.geometry,
 
-                                // Extract spawningAmount and spawningIntervalInMinutes
-                                const spawningAmount = sourceFeature.properties?.spawningAmount || 10,
-                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes;
+                                    // Extract spawningAmount and spawningIntervalInMinutes
+                                    spawningAmount = sourceFeature.properties?.spawningAmount || 10,
+                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
 
-                                const properties = {
-                                    spawningAmount: String(spawningAmount)
-                                };
+                                    properties = {
+                                        spawningAmount: String(spawningAmount)
+                                    };
 
                                 // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
                                 if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
@@ -1773,6 +1773,19 @@ export default {
                             </div>
                         </div>
 
+                        <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
+                        <CycleTravelerLayerInput
+                            v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
+                            id="cycleTravelerLayer"
+                            :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
+                            :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
+                            :start-point="getRequestBodyInputByKey('startPoint', null, null)"
+                            :end-point="getRequestBodyInputByKey('endPoint', null, null)"
+                            :agent-count="agentCount"
+                            @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
+                            @update:agentCount="agentCount = $event"
+                        />
+
                         <!-- Green4Bikes: Custom datetime inputs for simulation time range -->
                         <template v-if="currentSimulationId && currentSimulationId.includes('green4Bikes')">
                             <DynamicInputByType
@@ -1792,19 +1805,6 @@ export default {
                                 @update:value="setRequestBodyInput('endPoint', '', $event)"
                             />
                         </template>
-
-                        <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
-                        <CycleTravelerLayerInput
-                            v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
-                            id="cycleTravelerLayer"
-                            :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
-                            :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
-                            :start-point="getRequestBodyInputByKey('startPoint', null, null)"
-                            :end-point="getRequestBodyInputByKey('endPoint', null, null)"
-                            :agent-count="agentCount"
-                            @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
-                            @update:agentCount="agentCount = $event"
-                        />
 
                         <!-- Green4Bikes: Bike Stations Input -->
                         <DynamicInputByType
