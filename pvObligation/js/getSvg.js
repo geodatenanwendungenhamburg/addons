@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-
 /**
  * Returns the svg for footer
  * @param {number} currentPage - The number of current page
@@ -8,7 +6,13 @@ import dayjs from "dayjs";
  * @param {string} createdWith - The tool that generated this PDF
  * @returns {Object} svg as Object
  */
-function getFooterSvg (currentPage, pageCount, author, createdWith) {
+function getFooterSvg (
+    currentPage,
+    pageCount,
+    author = "",
+    createdWith = "",
+    centerText = ""
+) {
     return {
         svg: `
             <svg
@@ -110,7 +114,7 @@ function getFooterSvg (currentPage, pageCount, author, createdWith) {
                             id="tspan3"
                             style="font-size:2.11667px;stroke-width:0.264583"
                             x="82.322624"
-                            y="10.982323">${getCreationDate()}</tspan>
+                            y="10.982323">${getCenterText(centerText)}</tspan>
                         <tspan
                             sodipodi:role="line"
                             style="font-size:1.85208px;stroke-width:0.264583"
@@ -138,11 +142,11 @@ function getAuthor (author) {
 }
 
 /**
- * Returns date as string in DD.MM.YYYY format.
+ * Returns a text in the center of the SVG
  * @returns {string} date as string.
  */
-function getCreationDate () {
-    return i18next.t("additional:modules.pvObligation.report.creationDate") + " " + dayjs(new Date()).format("DD.MM.YYYY");
+function getCenterText (centerText) {
+    return centerText;
 }
 
 /**

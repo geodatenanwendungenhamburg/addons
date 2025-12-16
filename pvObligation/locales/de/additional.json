@@ -126,26 +126,31 @@
                 }
             },
             "report": {
-              "headerText": "PV-Pflicht-Report",
-              "title":  "PV-Pflicht-Report",
+              "title":  "PV-Pflicht",
+              "description": "Berechnung der PV-Fläche für bestehende Gebäude bei wesentlichen Umbauten des Daches im Rahmen der Photovoltaikpflicht nach §16 HmbKliSchG.",
               "buildingData": {
                 "title": "Angaben zum Gebäude",
                 "owner": "Eigentümer:In",
                 "address": "Adresse"
               },
               "areas": {
+                "title": "Übersicht",
                 "gros": "Bruttodachfläche des Gebäudes",
                 "net": "Nettodachfläche des Gebäudes",
                 "pvObligation": "Verpflichtend zu belegende Fläche",
-                "netReduce": "Diese Flächen reduzieren die Nettodachfläche",
-                "noNetReduce": "Es wurden keine Flächen eingetragen, die die Nettodachfläche reduzieren.",
-                "restrictedAreas": "Diese Flächen werden als Sperrflächen ausgewiesen",
-                "noRestrictedAreas": "Es wurden keine Flächen eingetragen, die nicht mit PV belegt werden können.",
+                "netReduce": "Diese Flächen reduzieren die Nettodachfläche (zusätzlich zu den automatisch erfassten Dachflächen, welche nach Norden weisen)",
+                "noNetReduce": "- Es wurden keine Flächen eingetragen -",
+                "restrictedAreas": "Diese Flächen werden als Sperrflächen ausgewiesen, auf denen nach HmbKliSchG und PVUmsVO keine Photovoltaik verpflichtend errichtet werden muss.",
+                "noRestrictedAreas": "- Es wurden keine Flächen eingetragen -",
                 "areaListNr": "Flächennr.",
-                "areaListDescr": "Erläuterung"
+                "areaListDescr": "Erläuterung",
+                "areaListSquareMeters": "Fläche",
+                "areaListSquareMetersUnit": "m²"
               },
-              "furtherInformation": "Weitere Informationen",
+              "furtherInformation": "Eigene Erläuterungen",
               "noFurtherInformation": "- keine Angaben -",
+              "createdAtTitle": "Dieser PDF-Report wurde erstellt am",
+              "legalObligation": "Bitte bewahren Sie diesen Report, zusätzlich zu ggf. weiteren Nachweisen zur Umsetzung der PV-Pflicht auf. Weitere Informationen zur PV-Pflicht im Hamburgischen Klimaschutzgesetz finden Sie über:",
               "scale": "Maßstab",
               "createdWith": "Erstellt mit dem PV-Pflicht-Tool der BUKEA Hamburg",
               "fileNamePrefix": "PV-Pflicht-Report-",
