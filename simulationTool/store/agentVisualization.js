@@ -12,6 +12,7 @@ const state = {
         features: [],
         featuresByTime: {}, // Indexed by timestamp for O(1) lookup
         featuresByAgent: {}, // PERFORMANCE: Indexed by agentId for O(1) lookup
+        isLoading: false,
 
         // Time control
         currentTime: null,
@@ -318,6 +319,13 @@ const state = {
 
         setAutoLoadTriggered (state, value) {
             state.autoLoadTriggered = value;
+        },
+
+        /**
+     * Set loading state
+     */
+        setIsLoading (state, isLoading) {
+            state.isLoading = isLoading;
         }
     },
 

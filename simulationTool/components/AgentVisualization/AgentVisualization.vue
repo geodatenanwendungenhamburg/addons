@@ -4,6 +4,18 @@
             title="Green4Bikes - Agent Visualization"
         />
 
+        <div
+            v-if="isLoading"
+            class="loading-overlay"
+        >
+            <div class="loading-content">
+                <SpinnerItem custom-class="loading-spinner" />
+                <p class="loading-text">
+                    Lade Simulationsdaten...
+                </p>
+            </div>
+        </div>
+
         <div class="visualization-layout">
             <!-- Left Sidebar - Controls -->
             <div class="sidebar-left">
@@ -103,6 +115,7 @@ import SectionHeader from "../SectionHeader.vue";
 import AdvancedTimeSlider from "./AdvancedTimeSlider.vue";
 import TimeSeriesChart from "./TimeSeriesChart.vue";
 import FilterPanel from "./FilterPanel.vue";
+import SpinnerItem from "../../../../src/shared/modules/spinner/components/SpinnerItem.vue";
 import TimeEngine from "../../utils/TimeEngine";
 import AgentInterpolator from "../../utils/AgentInterpolator";
 
@@ -114,7 +127,8 @@ export default {
         SectionHeader,
         AdvancedTimeSlider,
         TimeSeriesChart,
-        FilterPanel
+        FilterPanel,
+        SpinnerItem
     },
     data () {
         return {
@@ -134,7 +148,10 @@ export default {
     computed: {
         ...mapGetters("Modules/SimulationTool", [
             "mode"
-        ])
+        ]),
+        isLoading () {
+            return this.$store.state.agentVisualization?.isLoading || false;
+        }
     },
     watch: {
         "$store.state.agentVisualization.agentData" (newData) {
@@ -188,14 +205,14 @@ export default {
             deep: true
         }
     },
-    mounted () {
+    async mounted () {
         this.initialize();
 
         // Check if data was auto-loaded before mounting
         const agentData = this.$store.state.agentVisualization.agentData;
         if (agentData && this.$store.state.agentVisualization.autoLoadTriggered) {
             this.$store.commit("agentVisualization/setAutoLoadTriggered", false);
-            this.processAutoLoadedData(agentData);
+            await this.processAutoLoadedData(agentData);
         }
     },
     beforeUnmount () {
@@ -397,7 +414,7 @@ export default {
                     throw new Error("Die GeoJSON-Datei enthält keine Daten (leere Features-Array).");
                 }
 
-                this.loadAgentData(geojson);
+                await this.loadAgentData(geojson);
             }
             catch (error) {
                 console.error("Error loading file:", error);
@@ -406,21 +423,29 @@ export default {
                     category: "error",
                     content: `Fehler beim Laden der Datei: ${error.message}`
                 }, {root: true});
+                // Reset loading state on error
+                this.$store.commit("agentVisualization/setIsLoading", false);
             }
         },
 
         /**
          * Load agent data (called from file upload)
          */
-        loadAgentData (geojson) {
-            // Load into Vuex store
-            this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+        async loadAgentData (geojson) {
+            // Set loading state
+            this.$store.commit("agentVisualization/setIsLoading", true);
+
+            // Use setTimeout to allow UI to update with spinner
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Load into Vuex store (this is the heavy operation)
+            await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+
+            // Calculate time series metrics
+            await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
 
             // Load into interpolator
             this.interpolator.loadTrajectories(geojson.features);
-
-            // Calculate time series metrics
-            this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
 
             this.dataLoaded = true;
 
@@ -429,16 +454,32 @@ export default {
 
             // Update visualization
             this.updateVisualization();
+
+            // Set loading state to false
+            this.$store.commit("agentVisualization/setIsLoading", false);
         },
 
         /**
          * Process auto-loaded data (called when data is loaded programmatically)
          */
-        processAutoLoadedData (geojson) {
+        async processAutoLoadedData (geojson) {
+            // Set loading state
+            this.$store.commit("agentVisualization/setIsLoading", true);
+            
             if (!geojson || !geojson.features) {
                 console.warn("Invalid auto-loaded data");
+                this.$store.commit("agentVisualization/setIsLoading", false);
                 return;
             }
+
+            // Use setTimeout to allow UI to update with spinner
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Load data into Vuex store (this is the heavy operation)
+            await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+
+            // Calculate time series metrics
+            await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
 
             // Load into interpolator
             this.interpolator.loadTrajectories(geojson.features);
@@ -450,6 +491,9 @@ export default {
 
             // Update visualization
             this.updateVisualization();
+
+            // Set loading state to false
+            this.$store.commit("agentVisualization/setIsLoading", false);
         },
 
         /**
@@ -1085,6 +1129,39 @@ export default {
             }
         }
     }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.loading-spinner {
+    width: 3rem !important;
+    height: 3rem !important;
+    border-width: 4px !important;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0;
 }
 
 @media (max-width: 992px) {
