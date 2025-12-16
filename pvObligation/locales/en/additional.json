@@ -12,7 +12,7 @@
                 },
                 "introduction": "This application is intended to assist in calculating the roof area that must be covered with photovoltaics (PV) when \"major roof renovations\" are carried out. The PDF report that you can create at the end is for your personal records and also serves as proof in the event of a random check by the responsible authority.",
                 "introductionInfoPvApp": "However, please read the information about this application at the following link:",
-                "introductionInfoPvAppLink": "LINK to INFO page",
+                "introductionInfoPvAppLink": "Notes on using the tool - hamburg.de",
                 "introductionInfoPvObligation": "General information on the PV obligation can be found here:",
                 "introductionInfoPvObligationLink": "PV obligation in Hamburg - hamburg.de.",
                 "step": {

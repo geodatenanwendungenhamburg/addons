@@ -272,7 +272,7 @@ export default {
                         {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvApp") }}
 
                         <a
-                            href="https://www.hamburg.de/politik-und-verwaltung/behoerden/bukea/themen/energie/erneuerbare-energien/photovoltaik/pv-pflicht-in-hamburg"
+                            href="https://preview.hamburg.de/hamburg-de/politik-und-verwaltung/behoerden/bukea/themen/energie/erneuerbare-energien/photovoltaik/pv-pflicht-in-hamburg/hinweise-zur-nutzung-des-tools-1128256?view=fragmentPreview"
                             target="_blank"
                         >
                             {{ $t("additional:modules.pvObligation.wizard.introductionInfoPvAppLink") }}
