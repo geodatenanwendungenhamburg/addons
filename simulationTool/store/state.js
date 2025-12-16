@@ -150,7 +150,8 @@ const state = {
     },
     simulationIdForResults: "",
     simulations: [],
-    userDetailsCache: {}
+    userDetailsCache: {},
+    hasLargeResponse: false
 };
 
 export default state;

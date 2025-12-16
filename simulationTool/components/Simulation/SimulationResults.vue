@@ -47,6 +47,7 @@ export default {
     },
     computed: {
         ...mapGetters("Modules/SimulationTool", [
+            "hasLargeResponse",
             "onJobStatusChange",
             "planningScenarios",
             "simulations",
@@ -1119,7 +1120,7 @@ export default {
                     />
                     <div v-if="worstJobStatusTag === 'successful'">
                         <FlatButton
-                            v-if="extractAgentGeoJSON() && simulationIdForResults && simulationIdForResults.includes('green4Bikes')"
+                            v-if="!hasLargeResponse && extractAgentGeoJSON() && simulationIdForResults && simulationIdForResults.includes('green4Bikes')"
                             id="show-agent-visualization"
                             class="me-2"
                             :icon="'bi bi-play-circle'"

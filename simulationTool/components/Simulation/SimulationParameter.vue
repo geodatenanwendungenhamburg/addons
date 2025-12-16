@@ -363,6 +363,7 @@ export default {
         ...mapMutations("Modules/SimulationTool", [
             "setCurrentPlanningComponent",
             "setCurrentPlanningScenarioId",
+            "setHasLargeResponse",
             "setMode",
             "setSimulationIdForResults"
         ]),
@@ -1278,6 +1279,7 @@ export default {
                 job.resultStyle = this.simulation.processes[index].resultStyle;
                 
                 let isLargeResponse = false;
+                this.setHasLargeResponse(false);
                 
                 job.jobResults = await this.processHandlers[index].pollJobStatusAndGetResults(
                     this.accessToken,
@@ -1286,6 +1288,7 @@ export default {
                     jobStatus => this.onProgressUpdate(jobStatus, job),
                     (sizeMB) => {
                         isLargeResponse = true;
+                        this.setHasLargeResponse(true);
                         this.addSingleAlert({
                             content: `Die Simulationsergebnisse sind sehr groß (${sizeMB.toFixed(2)} MB). Die Datei wird aus diesem Grund als Download bereit gestellt und kann über die Oberfläche manuell geladen werden. Das Laden und Anzeigen kann dauern.`,
                             category: "info"
