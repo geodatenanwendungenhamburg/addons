@@ -9,6 +9,7 @@ import {createEmpty as createEmptyExtent, extend} from "ol/extent";
 import pdfMake from "pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import {getFooterSvg} from "../js/getSvg";
+import {getSvgHeader} from "../js/getSvgHeader";
 import dayjs from "dayjs";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import calculateRestrictedArea from "../js/calculateRestrictedArea";
@@ -49,7 +50,7 @@ export default {
                 content: [],
                 pageOrientation: "portrait",
                 pageSize: "A4",
-                pageMargins: [40, 60, 40, 60],
+                pageMargins: [40, 80, 40, 60],
                 borderColor: ["#cdcdcd", "#cdcdcd", "#cdcdcd", "#cdcdcd"]
             },
             mapContent = await dispatch("addMap", false),
@@ -63,49 +64,74 @@ export default {
                     ? maxContentWidth
                     : maxHeight * aspectRatio
             ),
-            exportDate = dayjs(new Date()).format("DD-MM-YYYY");
+            exportDateFile = dayjs(new Date()).format("DD-MM-YYYY"),
+            exportDate = dayjs(new Date()).format("DD.MM.YYYY"),
+            urlInfo = "http://www.hamburg.de/go/photovoltaik";
 
         // Header
+        // Info: In order to avoid overlap with content, adjust pageMargins.
         // /////////////////////
-        docDefinition.header = {
-            text: i18next.t("additional:modules.pvObligation.report.headerText"),
-            alignment: "right",
-            fontSize: 11,
-            margin: [0, 20, 40, 40],
-            color: "#646464"
-        };
+        docDefinition.header = () => getSvgHeader();
 
-        // Titel and data for the building
-        // /////////////////////
-        docDefinition.content.push({
-            text: i18next.t("additional:modules.pvObligation.report.title"),
-            style: "header",
-            bold: true,
-            fontSize: 14,
-            margin: [0, 14]
-        },
-        {
-            text: i18next.t("additional:modules.pvObligation.report.buildingData.title"),
-            bold: true,
-            fontSize: 12,
-            margin: [0, 20, 0, 10]
-        },
-        {
-            layout: "noBorders",
-            table: {
-                body: [
-                    [i18next.t("additional:modules.pvObligation.report.buildingData.owner"), formData.personalData.propertyOwnerFullName],
-                    [i18next.t("additional:modules.pvObligation.report.buildingData.address"), formData.personalData.street + " " + formData.personalData.houseNumber],
-                    ["", formData.personalData.postalCode + " " + formData.personalData.city]
-                ]
-            }
-        });
-
-        // Areas (brutto, netto, obligation)
-        // /////////////////////
         docDefinition.content.push(
             {
-                layout: "lightHorizontalLines",
+                text: i18next.t("additional:modules.pvObligation.report.title"),
+                style: "header",
+                bold: true,
+                fontSize: 16,
+                margin: [0, 0, 0, 20]
+            },
+            {
+                text: i18next.t("additional:modules.pvObligation.report.description"),
+                fontSize: 12,
+                margin: [0, 0, 0, 40]
+            },
+            {
+                text: i18next.t("additional:modules.pvObligation.report.buildingData.title"),
+                style: "header",
+                bold: true,
+                fontSize: 14,
+                margin: [0, 0, 0, 20]
+            },
+            {
+                table: {
+                    body: [
+                        [
+                            i18next.t("additional:modules.pvObligation.report.buildingData.owner"),
+                            {
+                                text: formData.personalData.propertyOwnerFullName,
+                                bold: true
+                            }
+                        ],
+                        [
+                            i18next.t("additional:modules.pvObligation.report.buildingData.address"),
+                            formData.personalData.street + " " + formData.personalData.houseNumber
+                        ],
+                        [
+                            "",
+                            formData.personalData.postalCode + " " + formData.personalData.city
+                        ]
+                    ]
+                },
+                layout: {
+                    hLineWidth: () => 0,
+                    vLineWidth: () => 0,
+                    hLineColor: () => false,
+                    paddingLeft: () => 0,
+                    paddingRight: () => 10,
+                    paddingTop: () => 0,
+                    paddingBottom: (index, node) => index === node.table.body.length ? 0 : 10
+                },
+                margin: [0, 0, 0, 20]
+            },
+            {
+                text: i18next.t("additional:modules.pvObligation.report.areas.title"),
+                style: "header",
+                bold: true,
+                fontSize: 14,
+                margin: [0, 0, 0, 10]
+            },
+            {
                 table: {
                     widths: ["*", "auto"],
                     body: [
@@ -136,7 +162,16 @@ export default {
                         ]
                     ]
                 },
-                margin: [0, 20, 0, 10]
+                layout: {
+                    hLineWidth: (index, node) => index === 0 || index === 1 || index === node.table.body.length ? 0 : 0.5,
+                    vLineWidth: () => 0,
+                    hLineColor: () => "#AAAAAA",
+                    paddingLeft: () => 0,
+                    paddingRight: () => 10,
+                    paddingTop: (index) => index === 0 || index === 1 ? 0 : 10,
+                    paddingBottom: (index, node) => index === node.table.body.length ? 0 : 10
+                },
+                margin: [0, 0, 0, 40]
             }
         );
 
@@ -160,24 +195,55 @@ export default {
         // /////////////////////
         docDefinition.content.push({
             text: i18next.t("additional:modules.pvObligation.report.furtherInformation"),
+            style: "header",
             bold: true,
-            fontSize: 12,
-            margin: [0, 20, 0, 10]
+            fontSize: 14,
+            margin: [0, 0, 0, 20]
         });
 
         if (formData.additionalInformation.length > 0) {
             docDefinition.content.push({
                 text: formData.additionalInformation,
-                margin: [0, 0, 0, 10]
+                margin: [0, 0, 0, 40]
             });
         }
         else {
             docDefinition.content.push({
                 text: i18next.t("additional:modules.pvObligation.report.noFurtherInformation"),
                 italics: true,
-                margin: [0, 0, 0, 10]
+                margin: [0, 0, 0, 40]
             });
         }
+
+        // Created at
+        // /////////////////////
+        docDefinition.content.push(
+            {
+                text: i18next.t("additional:modules.pvObligation.report.createdAtTitle"),
+                style: "header",
+                bold: true,
+                fontSize: 14,
+                margin: [0, 0, 0, 20]
+            },
+            {
+                text: exportDate,
+                fontSize: 12,
+                margin: [0, 0, 0, 40]
+            },
+            {
+                text: [
+                    i18next.t("additional:modules.pvObligation.report.legalObligation") + " ",
+                    {
+                        text: urlInfo,
+                        link: urlInfo,
+                        color: "blue",
+                        decoration: "underline"
+                    }
+                ],
+                fontSize: 12,
+                margin: [0, 0, 0, 40]
+            }
+        );
 
         // Map
         // /////////////////////
@@ -200,12 +266,12 @@ export default {
         // Footer
         // /////////////////////
         docDefinition.footer = (currentPage, pageCount) => {
-            return getFooterSvg(currentPage, pageCount, formData.author, i18next.t("additional:modules.pvObligation.report.createdWith"));
+            return getFooterSvg(currentPage, pageCount, "", "", urlInfo);
         };
 
         // Here we call the pdfMake function to render pdf from the docDefinition
         try {
-            const fileName = `${i18next.t("additional:modules.pvObligation.report.fileNamePrefix")}${exportDate}.pdf`;
+            const fileName = `${i18next.t("additional:modules.pvObligation.report.fileNamePrefix")}${exportDateFile}.pdf`;
 
             await new Promise((resolve, reject) => {
                 try {
@@ -296,33 +362,56 @@ export default {
     async addDrawnAreaTable (_, payload) {
         const content = [];
 
+        content.push({
+            text: payload.title,
+            style: "header",
+            bold: true,
+            fontSize: 14,
+            margin: [0, 0, 0, 20]
+        });
+
         if (payload.drawnAreaData.length > 0) {
-            content.push({
-                text: payload.title,
-                bold: true,
-                fontSize: 12,
-                margin: [0, 20, 0, 10]
-            });
 
             const restrictedAreas = [
                 [
                     i18next.t("additional:modules.pvObligation.report.areas.areaListNr"),
-                    i18next.t("additional:modules.pvObligation.report.areas.areaListDescr")
+                    i18next.t("additional:modules.pvObligation.report.areas.areaListDescr"),
+                    i18next.t("additional:modules.pvObligation.report.areas.areaListSquareMeters")
                 ]
             ];
 
             payload.drawnAreaData.forEach((area) => {
-                restrictedAreas.push([area.id, area.description]);
+                restrictedAreas.push(
+                    [
+                        area.id,
+                        area.description,
+                        {
+                            text: thousandsSeparator(Math.round(area.features.reduce((sum, feature) => {
+                                return sum + feature.values_.area3D;
+                            }, 0) * 10) / 10) + " " + i18next.t("additional:modules.pvObligation.report.areas.areaListSquareMetersUnit"),
+                            noWrap: true
+                        }
+                    ]
+                );
             });
 
             content.push({
-                layout: "lightHorizontalLines",
                 table: {
                     // headers are automatically repeated if the table spans over multiple pages
                     // you can declare how many rows should be treated as headers
                     headerRows: 1,
-                    widths: [100, "auto"],
+                    widths: ["auto", "*", "auto"],
                     body: restrictedAreas
+                },
+                margin: [0, 0, 0, 40],
+                layout: {
+                    hLineWidth: (index, node) => index === 0 || index === node.table.body.length ? 0 : 0.5,
+                    vLineWidth: () => 0,
+                    hLineColor: () => "#AAAAAA",
+                    paddingLeft: () => 0,
+                    paddingRight: () => 10,
+                    paddingTop: (row) => row === 0 ? 0 : 10,
+                    paddingBottom: (index, node) => index === node.table.body.length ? 0 : 10
                 }
             });
         }
@@ -330,7 +419,7 @@ export default {
             content.push({
                 text: payload.noAreasTitle,
                 italics: true,
-                margin: [0, 0, 0, 10]
+                margin: [0, 0, 0, 40]
             });
         }
 
