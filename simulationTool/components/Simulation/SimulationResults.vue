@@ -411,25 +411,17 @@ export default {
                 this.$store.registerModule("agentVisualization", agentVisualizationModule);
             }
 
-            // Set loading state
-            this.$store.commit("agentVisualization/setIsLoading", true);
-
             // Collect planning scenario geometries
             const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
                 planningScenarioData = this.collectPlanningScenarioGeometries(planningScenarioLayer);
 
-            // Load data into AgentVisualization store
-            this.$store.dispatch("agentVisualization/loadAgentData", agentData);
-
-            // Calculate time series metrics
-            this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
-
-            // Load planning scenario geometries
+            // Store data for AgentVisualization to pick up (consistent with auto-load flow)
+            this.$store.commit("agentVisualization/setAgentData", agentData);
             if (planningScenarioData) {
-                this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
+                this.$store.commit("agentVisualization/setPlanningScenarioData", planningScenarioData);
             }
 
-            // Set flag to indicate automatic load
+            // Set flag to indicate automatic load (AgentVisualization will process it)
             this.$store.commit("agentVisualization/setAutoLoadTriggered", true);
 
             // Switch to AgentVisualization mode

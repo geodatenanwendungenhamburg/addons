@@ -437,87 +437,100 @@ export default {
         },
 
         /**
+         * Helper to update loading progress
+         * @param {Number} progress - Progress percentage (0-100)
+         * @param {String} step - Step description text
+         * @param {Number} delay - Optional delay in ms before continuing
+         */
+        async updateLoadingProgress (progress, step, delay = 10) {
+            this.$store.commit("agentVisualization/setLoadingProgress", progress);
+            this.$store.commit("agentVisualization/setLoadingStep", step);
+            if (delay > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        },
+
+        /**
          * Load agent data (called from file upload)
          */
         async loadAgentData (geojson) {
-            // Set loading state
-            this.$store.commit("agentVisualization/setIsLoading", true);
-            this.$store.commit("agentVisualization/setLoadingProgress", 0);
-            this.$store.commit("agentVisualization/setLoadingStep", "Lade Agentendaten...");
+            try {
+                // Set loading state
+                this.$store.commit("agentVisualization/setIsLoading", true);
+                await this.updateLoadingProgress(0, "Lade Agentendaten...", 50);
 
-            // Use setTimeout to allow UI to update with spinner
-            await new Promise(resolve => setTimeout(resolve, 50));
+                // Step 1: Load into Vuex store (this is the heavy operation)
+                await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+                await this.updateLoadingProgress(33, "Berechne Zeitreihen...");
 
-            // Step 1: Load into Vuex store (this is the heavy operation)
-            await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
-            this.$store.commit("agentVisualization/setLoadingProgress", 33);
-            this.$store.commit("agentVisualization/setLoadingStep", "Berechne Zeitreihen...");
-            await new Promise(resolve => setTimeout(resolve, 10));
+                // Step 2: Calculate time series metrics
+                await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+                await this.updateLoadingProgress(66, "Initialisiere Visualisierung...");
 
-            // Step 2: Calculate time series metrics
-            await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
-            this.$store.commit("agentVisualization/setLoadingProgress", 66);
-            this.$store.commit("agentVisualization/setLoadingStep", "Initialisiere Visualisierung...");
-            await new Promise(resolve => setTimeout(resolve, 10));
+                // Step 3: Load into interpolator
+                this.interpolator.loadTrajectories(geojson.features);
+                this.dataLoaded = true;
 
-            // Step 3: Load into interpolator
-            this.interpolator.loadTrajectories(geojson.features);
-            this.dataLoaded = true;
-
-            // Step 4: Zoom and update
-            this.zoomToAgentData(geojson.features);
-            this.updateVisualization();
-            this.$store.commit("agentVisualization/setLoadingProgress", 100);
-            this.$store.commit("agentVisualization/setLoadingStep", "Fertig!");
-            await new Promise(resolve => setTimeout(resolve, 200));
-
-            // Set loading state to false
-            this.$store.commit("agentVisualization/setIsLoading", false);
+                // Step 4: Zoom and update
+                this.zoomToAgentData(geojson.features);
+                this.updateVisualization();
+                await this.updateLoadingProgress(100, "Fertig!", 200);
+            }
+            catch (error) {
+                console.error("Error loading agent data:", error);
+                this.$store.dispatch("Alerting/addSingleAlert", {
+                    category: "error",
+                    content: `Fehler beim Laden der Agentendaten: ${error.message}`
+                }, {root: true});
+            }
+            finally {
+                // Always reset loading state
+                this.$store.commit("agentVisualization/setIsLoading", false);
+            }
         },
 
         /**
          * Process auto-loaded data (called when data is loaded programmatically)
          */
         async processAutoLoadedData (geojson) {
-            // Set loading state
-            this.$store.commit("agentVisualization/setIsLoading", true);
-            this.$store.commit("agentVisualization/setLoadingProgress", 0);
-            this.$store.commit("agentVisualization/setLoadingStep", "Lade Agentendaten...");
-
             if (!geojson || !geojson.features) {
                 console.warn("Invalid auto-loaded data");
-                this.$store.commit("agentVisualization/setIsLoading", false);
                 return;
             }
 
-            // Use setTimeout to allow UI to update with spinner
-            await new Promise(resolve => setTimeout(resolve, 50));
+            try {
+                // Set loading state
+                this.$store.commit("agentVisualization/setIsLoading", true);
+                await this.updateLoadingProgress(0, "Lade Agentendaten...", 50);
 
-            // Step 1: Load data into Vuex store (this is the heavy operation)
-            await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
-            this.$store.commit("agentVisualization/setLoadingProgress", 33);
-            this.$store.commit("agentVisualization/setLoadingStep", "Berechne Zeitreihen...");
-            await new Promise(resolve => setTimeout(resolve, 10));
+                // Step 1: Load data into Vuex store (this is the heavy operation)
+                await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+                await this.updateLoadingProgress(33, "Berechne Zeitreihen...");
 
-            // Step 2: Calculate time series metrics
-            await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
-            this.$store.commit("agentVisualization/setLoadingProgress", 66);
-            this.$store.commit("agentVisualization/setLoadingStep", "Initialisiere Visualisierung...");
-            await new Promise(resolve => setTimeout(resolve, 10));
+                // Step 2: Calculate time series metrics
+                await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+                await this.updateLoadingProgress(66, "Initialisiere Visualisierung...");
 
-            // Step 3: Load into interpolator
-            this.interpolator.loadTrajectories(geojson.features);
-            this.dataLoaded = true;
+                // Step 3: Load into interpolator
+                this.interpolator.loadTrajectories(geojson.features);
+                this.dataLoaded = true;
 
-            // Step 4: Zoom and update
-            this.zoomToAgentData(geojson.features);
-            this.updateVisualization();
-            this.$store.commit("agentVisualization/setLoadingProgress", 100);
-            this.$store.commit("agentVisualization/setLoadingStep", "Fertig!");
-            await new Promise(resolve => setTimeout(resolve, 200));
-
-            // Set loading state to false
-            this.$store.commit("agentVisualization/setIsLoading", false);
+                // Step 4: Zoom and update
+                this.zoomToAgentData(geojson.features);
+                this.updateVisualization();
+                await this.updateLoadingProgress(100, "Fertig!", 200);
+            }
+            catch (error) {
+                console.error("Error processing auto-loaded data:", error);
+                this.$store.dispatch("Alerting/addSingleAlert", {
+                    category: "error",
+                    content: `Fehler beim Verarbeiten der Simulationsdaten: ${error.message}`
+                }, {root: true});
+            }
+            finally {
+                // Always reset loading state
+                this.$store.commit("agentVisualization/setIsLoading", false);
+            }
         },
 
         /**
