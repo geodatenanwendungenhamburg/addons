@@ -1287,11 +1287,11 @@ export default {
                     jobIDs[index],
                     this.simulation.processes[index].pollingInterval,
                     jobStatus => this.onProgressUpdate(jobStatus, job),
-                    (sizeMB) => {
+                    () => {
                         isLargeResponse = true;
                         this.setHasLargeResponse(true);
                         this.addSingleAlert({
-                            content: `Die Simulationsergebnisse sind sehr groß (${sizeMB.toFixed(2)} MB). Die Datei wird aus diesem Grund als Download bereit gestellt und kann über die Oberfläche manuell geladen werden. Das Laden und Anzeigen kann dauern.`,
+                            content: "Die Simulationsergebnisse sind größer als 10 MB. Die Datei wird aus diesem Grund als Download bereit gestellt und kann über die Oberfläche manuell geladen werden. Das Laden und Anzeigen kann dauern.",
                             category: "info"
                         });
                     }
