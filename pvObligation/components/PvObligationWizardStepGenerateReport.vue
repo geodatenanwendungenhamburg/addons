@@ -82,7 +82,7 @@ export default {
                         : await this.dissolveRoofFeaturesAndCalculateArea({
                             roofId: this.selectedRoofId,
                             outlineLayer: outlineLayer,
-                            layerID: this.pvAreaLayerId
+                            layerId: this.pvAreaLayerId
                         }),
                     restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
                 }),

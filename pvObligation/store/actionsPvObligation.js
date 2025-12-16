@@ -12,7 +12,6 @@ import {getFooterSvg} from "../js/getSvg";
 import {getSvgHeader} from "../js/getSvgHeader";
 import dayjs from "dayjs";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
-import calculateRestrictedArea from "../js/calculateRestrictedArea";
 import axios from "axios";
 
 export default {
@@ -657,9 +656,11 @@ export default {
      *   {number} restrictedArea - The total restricted area in m².
      *   {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
      */
-    calculateNetAreaAndRestrictedAreas (_, payload) {
+    async calculateNetAreaAndRestrictedAreas ({dispatch}, payload) {
         const netArea = payload.netArea,
-            restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems);
+            restrictedArea = await dispatch("calculateRestrictedArea", {
+                restrictedAreaItems: payload.restrictedAreaItems
+            });
 
         return {
             netArea: Math.round(netArea * 10) / 10,
@@ -694,8 +695,10 @@ export default {
      *  {boolean} isNetAreaMinusSubstractedAreaHigher - Flag indicating if net area minus subtracted area is higher than obligated area.
      *  {number} obligatedArea - The obligated area (30% of net area without restricted areas) in m².
      */
-    calculateNetRestrictedAreaAndRestrictedAreas (_, payload) {
-        const restrictedArea = calculateRestrictedArea(payload.restrictedAreaItems),
+    async calculateNetRestrictedAreaAndRestrictedAreas ({dispatch}, payload) {
+        const restrictedArea = await dispatch("calculateRestrictedArea", {
+                restrictedAreaItems: payload.restrictedAreaItems
+            }),
             netAreaMinusSubstractedArea = Math.round((payload.stepNetAreaWithoutRestrictedArea - restrictedArea) * 10) / 10,
             isNetAreaMinusSubstractedAreaHigher = netAreaMinusSubstractedArea > payload.stepNetAreaDataObligatedArea;
 
@@ -707,6 +710,22 @@ export default {
                 ? payload.stepNetAreaDataObligatedArea
                 : netAreaMinusSubstractedArea
         };
+    },
+    /**
+     * Calculates the sum of area3D of all features in restrictedAreaItems
+     *
+     * @param {Object} payload - The payload containing required parameters.
+     * @param {Array<Object>} payload.restrictedAreaItems - Array of restricted area features.
+     * @returns {number} sum of area3D of all features in restrictedAreaItems
+     */
+    calculateRestrictedArea (_, payload) {
+        const restrictedAreaSum = payload.restrictedAreaItems?.reduce((total, item) => {
+            return total + item.features.reduce((sum, feature) => {
+                return sum + feature.values_.area3D;
+            }, 0);
+        }, 0);
+
+        return Math.round(restrictedAreaSum * 10) / 10;
     },
     /**
      * Checks if the menu sides are open or closed and
