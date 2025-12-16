@@ -168,13 +168,6 @@ export default {
         }
     },
     watch: {
-        "$store.state.agentVisualization.agentData" (newData) {
-            // Auto-load data when it's set programmatically (not via file upload)
-            if (newData && this.$store.state.agentVisualization.autoLoadTriggered) {
-                this.$store.commit("agentVisualization/setAutoLoadTriggered", false);
-                this.processAutoLoadedData(newData);
-            }
-        },
         "$store.state.agentVisualization.currentTime" () {
             this.updateVisualization();
         },
