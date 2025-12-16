@@ -5,6 +5,7 @@ import layerCollection from "../../../src/core/layers/js/layerCollection";
 import ConvertStyle from "../js/convertStyle";
 import layerFactory from "../../../src/core/layers/js/layerFactory";
 import {infrastructureLayerId} from "../layerIds.js";
+import createInfrastructureStyle from "../js/createInfrastructureStyle";
 
 export default {
     /**
@@ -305,7 +306,8 @@ export default {
     updateFeatures ({getters}) {
         const currentPlanningScenario = getters.planningScenarios.find(scenario => scenario.id === getters.currentPlanningScenarioId),
             geoJsonParser = new GeoJSON(),
-            layerSource = layerCollection.getLayerById("planning-scenario") ? layerCollection.getLayerById("planning-scenario").getLayerSource() : null;
+            layerSource = layerCollection.getLayerById("planning-scenario") ? layerCollection.getLayerById("planning-scenario").getLayerSource() : null,
+            styleConfig = getters.infrastructurePointStyle;
 
         let layerSourceForObjects = null;
 
@@ -343,8 +345,12 @@ export default {
             Object.entries(currentPlanningScenario.inputs).forEach(([inputKey, inputValue]) => {
                 if (inputValue?.features && Array.isArray(inputValue.features)) {
                     inputValue.features.forEach(feature => {
-                        const olFeature = geoJsonParser.readFeature(feature);
+                        const olFeature = geoJsonParser.readFeature(feature),
+                            style = createInfrastructureStyle(olFeature, styleConfig);
 
+                        if (style) {
+                            olFeature.setStyle(style);
+                        }
                         layerSourceForObjects.addFeature(olFeature);
                     });
                 }
