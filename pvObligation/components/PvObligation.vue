@@ -77,13 +77,39 @@ export default {
             }
         }
     },
+    /**
+     * KeepAlive: This addon uses the Masterportal module caching feature,
+     * see docs/Dev/vueComponents/ModuleCaching.md
+     * The mounted hook is only called once, when the component is created the first time.
+     * The activated and deactivated hooks are called, when the component is
+     * shown or closed via "menu" link.
+     */
     async mounted () {
         await this.waitForFeaturesToBeLoaded();
+    },
+    activated () {
+        this.handleComponentKeepAliveVisibility(true);
+    },
+    deactivated () {
+        this.handleComponentKeepAliveVisibility(false);
     },
     methods: {
         ...mapActions(["replaceByIdInLayerConfig"]),
         ...mapActions("Maps", ["changeMapMode"]),
         ...mapActions("Modules/PvObligation", ["zoomToExtendOfSelectedRoof"]),
+        handleComponentKeepAliveVisibility (componentVisible) {
+            const layers = [
+                "module/pvObligation/drawLayer",
+                "Module/pvObligation/layer/roofArea",
+                "Module/pvObligation/layer/roofArea_pv_suitable"
+            ];
+
+            mapCollection.getMap("2D")?.getLayers()?.getArray().forEach(layer => {
+                if (layers.includes(layer.get("id"))) {
+                    layer.setVisible(componentVisible);
+                }
+            });
+        },
         async waitForFeaturesToBeLoaded () {
             const promises = [],
                 map = mapCollection.getMap("2D"),
