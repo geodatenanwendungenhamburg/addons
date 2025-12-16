@@ -88,6 +88,7 @@ import {boundingExtent, buffer} from "ol/extent";
 import {Heatmap as HeatmapLayer, WebGLPoints as WebGLPointsLayer} from "ol/layer";
 import {Vector as VectorSource} from "ol/source";
 import {getCapabilityColor, findClosestFeature, passesFilters} from "../../utils/agentVisualizationHelpers";
+import {infrastructureLayerId} from "../../layerIds.js";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
 import mapCollection from "../../../../src/core/maps/js/mapCollection";
@@ -99,12 +100,14 @@ import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import {LineString, Point} from "ol/geom";
 import {Feature} from "ol";
+import GeoJSON from "ol/format/GeoJSON";
 import SectionHeader from "../SectionHeader.vue";
 import AdvancedTimeSlider from "./AdvancedTimeSlider.vue";
 import TimeSeriesChart from "./TimeSeriesChart.vue";
 import FilterPanel from "./FilterPanel.vue";
 import TimeEngine from "../../utils/TimeEngine";
 import AgentInterpolator from "../../utils/AgentInterpolator";
+import ConvertStyle from "../../js/convertStyle";
 
 const AGENT_LAYER_ID = "green4bikes-agents";
 
@@ -251,6 +254,11 @@ export default {
                             "circle-stroke-color": ["color", 255, 255, 255, 1],
                             "circle-stroke-width": 1.5
                         },
+                        // Set Z-Index to ensure proper layering:
+                        // 9999999: Agent WebGL Layer (highest - animated agents)
+                        // 9999998: Agent Trail Layer (trails/paths)
+                        // 9999997: Infrastructure Layer (buildings, roads, stations)
+                        // 9999996: Planning Scenario Layer (scenario area, start/end points)
                         zIndex: 9999999
                     });
 
@@ -305,6 +313,11 @@ export default {
             };
 
             this.trailLayer.layer.setSource(trailSource);
+            // Set Z-Index to ensure proper layering:
+            // 9999999: Agent WebGL Layer (highest - animated agents)
+            // 9999998: Agent Trail Layer (trails/paths)
+            // 9999997: Infrastructure Layer (buildings, roads, stations)
+            // 9999996: Planning Scenario Layer (scenario area, start/end points)
             this.trailLayer.layer.setZIndex(9999998);
             this.trailLayer.layer.setVisible(true);
             map.addLayer(this.trailLayer.layer);
@@ -383,16 +396,102 @@ export default {
                     throw new Error("Die GeoJSON-Datei enthält keine Daten (leere Features-Array).");
                 }
 
+                // Check for embedded scenario metadata
+                const metadata = geojson.metadata;
+
+                if (metadata && metadata.planningScenarioId) {
+
+                    // Try to find scenario in store
+                    const scenarioFromStore = this.$store.state?.Modules?.SimulationTool?.planningScenarios?.find(
+                        s => s.id === metadata.planningScenarioId
+                    );
+
+                    if (scenarioFromStore) {
+                        // Set as current scenario and load layers
+                        this.$store.commit("Modules/SimulationTool/setCurrentPlanningScenarioId", metadata.planningScenarioId);
+                        this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+
+                        // Get scenario geometries for visualization
+                        const scenarioGeoJSON = this.buildScenarioGeoJSONFromStore(scenarioFromStore);
+
+                        if (scenarioGeoJSON) {
+                            this.$store.dispatch("agentVisualization/loadPlanningScenarioData", scenarioGeoJSON);
+                        }
+                    }
+                    else if (metadata.planningScenario) {
+                        // Use embedded scenario data
+                        const embeddedScenario = metadata.planningScenario,
+
+                            // Add scenario to store
+                            currentScenarios = this.$store.state?.Modules?.SimulationTool?.planningScenarios || [];
+
+                        this.$store.commit("Modules/SimulationTool/setPlanningScenarios", [
+                            ...currentScenarios,
+                            embeddedScenario
+                        ]);
+                        this.$store.commit("Modules/SimulationTool/setCurrentPlanningScenarioId", embeddedScenario.id);
+
+                        // Trigger layer update
+                        this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+
+                        // Get scenario geometries for visualization
+                        const scenarioGeoJSON = this.buildScenarioGeoJSONFromStore(embeddedScenario);
+
+                        if (scenarioGeoJSON) {
+                            this.$store.dispatch("agentVisualization/loadPlanningScenarioData", scenarioGeoJSON);
+                        }
+                    }
+                    else {
+                        console.warn("[AgentVisualization] Scenario ID in metadata but no scenario data available");
+                    }
+                }
+
                 this.loadAgentData(geojson);
             }
             catch (error) {
-                console.error("Error loading file:", error);
+                console.error("[AgentVisualization] Error loading file:", error);
                 // Show user-friendly error message
                 this.$store.dispatch("Alerting/addSingleAlert", {
                     category: "error",
                     content: `Fehler beim Laden der Datei: ${error.message}`
                 }, {root: true});
             }
+        },
+
+        /**
+         * Build scenario GeoJSON from store data
+         * @param {Object} scenario - Planning scenario from store
+         * @returns {Object|null} GeoJSON FeatureCollection or null
+         */
+        buildScenarioGeoJSONFromStore (scenario) {
+            if (!scenario) {
+                return null;
+            }
+
+            const features = [];
+
+            // Add scenario area features
+            if (scenario.scenarioFeature && scenario.scenarioFeature.features) {
+                features.push(...scenario.scenarioFeature.features);
+            }
+
+            // Add infrastructure and cycleTravelerLayer features
+            if (scenario.inputs) {
+                Object.values(scenario.inputs).forEach((inputValue) => {
+                    if (inputValue && inputValue.features && Array.isArray(inputValue.features)) {
+                        features.push(...inputValue.features);
+                    }
+                });
+            }
+
+            if (features.length === 0) {
+                return null;
+            }
+
+            return {
+                type: "FeatureCollection",
+                features: features
+            };
         },
 
         /**
@@ -465,38 +564,127 @@ export default {
 
         /**
          * Render planning scenario data (scenario area, source, target)
-         * @param {Object} geojson - GeoJSON FeatureCollection
+         * Also renders infrastructure and cycleTravelerLayer from store
+         * @param {Object} geojson - GeoJSON FeatureCollection (optional, uses store if not provided)
          */
         renderPlanningScenarioData (geojson) {
-            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario");
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
+                infrastructureLayer = layerCollection.getLayerById(infrastructureLayerId),
+                geoJsonFormat = new GeoJSON(),
+                // Get current scenario from store if geojson not provided
+                currentScenario = this.$store.state?.Modules?.SimulationTool?.planningScenarios?.find(
+                    scenario => scenario.id === this.$store.state?.Modules?.SimulationTool?.currentPlanningScenarioId
+                );
 
-            if (!planningScenarioLayer) {
+            // === Render Planning Scenario Area (bbox/polygon) ===
+            if (planningScenarioLayer) {
+                const layerSource = planningScenarioLayer.getLayerSource(),
+
+                    // Check if features are already loaded for this scenario (don't clear/reload if they're already there)
+                    existingFeatures = layerSource.getFeatures(),
+                    scenarioAlreadyLoaded = existingFeatures.length > 0 &&
+                                             currentScenario &&
+                                             existingFeatures.some(f => f.get("scenarioId") === currentScenario.id);
+
+                if (scenarioAlreadyLoaded) {
+                    planningScenarioLayer.layer.setVisible(true);
+                }
+                else if (geojson || (currentScenario && currentScenario.scenarioFeature)) {
+                    // Only clear if we're loading a different scenario
+                    layerSource.clear();
+
+                    // Add features from provided geojson or from store
+                    const featuresToRender = geojson || (currentScenario ? currentScenario.scenarioFeature : null);
+
+                    if (featuresToRender && featuresToRender.features) {
+                        featuresToRender.features.forEach(feat => {
+                            const olFeature = geoJsonFormat.readFeature(feat, {
+                                dataProjection: feat.crs || "EPSG:4326",
+                                featureProjection: "EPSG:25832"
+                            });
+
+                            // Apply style if available
+                            if (feat.style) {
+                                olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(feat.style));
+                            }
+
+                            // Mark with scenario ID for persistence
+                            if (currentScenario) {
+                                olFeature.set("scenarioId", currentScenario.id);
+                            }
+
+                            layerSource.addFeature(olFeature);
+                        });
+                    }
+
+                    // Make layer visible
+                    planningScenarioLayer.layer.setVisible(true);
+                }
+            }
+            else {
                 console.warn("Planning scenario layer not found");
-                return;
             }
 
-            // eslint-disable-next-line one-var
-            const layerSource = planningScenarioLayer.getLayerSource(),
-                GeoJSON = require("ol/format/GeoJSON").default,
-                geoJsonFormat = new GeoJSON();
+            // === Render Infrastructure (buildings, roads, stations) ===
+            if (infrastructureLayer && currentScenario && currentScenario.inputs) {
+                const infraLayerSource = infrastructureLayer.getLayerSource();
 
-            // Clear existing features
-            layerSource.clear();
+                // Don't clear - layer should already have features from SimulationParameter
+                // But ensure they're visible if they were added
+                infrastructureLayer.layer.setVisible(true);
 
-            // Add features from planning scenario data
-            if (geojson && geojson.features) {
-                const features = geoJsonFormat.readFeatures(geojson, {
-                    dataProjection: "EPSG:4326",
-                    featureProjection: "EPSG:25832"
-                });
+                // If infrastructure layer is empty, add features from store
+                if (infraLayerSource.getFeatures().length === 0) {
+                    Object.entries(currentScenario.inputs).forEach(([inputKey, inputValue]) => {
+                        // Skip cycleTravelerLayer, it's handled separately below
+                        if (inputKey === "cycleTravelerLayer") {
+                            return;
+                        }
 
-                features.forEach(feature => {
-                    layerSource.addFeature(feature);
-                });
+                        if (inputValue?.features && Array.isArray(inputValue.features)) {
+                            inputValue.features.forEach(feature => {
+                                const olFeature = geoJsonFormat.readFeature(feature, {
+                                    dataProjection: feature.crs || "EPSG:4326",
+                                    featureProjection: "EPSG:25832"
+                                });
+
+                                infraLayerSource.addFeature(olFeature);
+                            });
+                        }
+                    });
+                }
             }
 
-            // Make layer visible
-            planningScenarioLayer.layer.setVisible(true);
+            // === Render cycleTravelerLayer (Start/End points/polygons) ===
+            if (currentScenario && currentScenario.inputs && currentScenario.inputs.cycleTravelerLayer) {
+                const cycleTravelerData = currentScenario.inputs.cycleTravelerLayer;
+
+                // Add to planning-scenario layer (for visibility with scenario area)
+                if (planningScenarioLayer && cycleTravelerData.features) {
+                    const layerSource = planningScenarioLayer.getLayerSource();
+
+                    cycleTravelerData.features.forEach(feature => {
+                        const olFeature = geoJsonFormat.readFeature(feature, {
+                                dataProjection: feature.crs || "EPSG:4326",
+                                featureProjection: "EPSG:25832"
+                            }),
+                            // Check if feature already exists (by ID) to avoid duplicates
+                            existingFeature = layerSource.getFeatureById(feature.id);
+
+                        // Apply style if available
+                        if (feature.style) {
+                            olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(feature.style));
+                        }
+
+                        if (!existingFeature) {
+                            if (feature.id) {
+                                olFeature.setId(feature.id);
+                            }
+                            layerSource.addFeature(olFeature);
+                        }
+                    });
+                }
+            }
         },
 
         /**
@@ -804,6 +992,20 @@ export default {
                 map.removeLayer(this.heatmapLayer);
                 this.heatmapLayer = null;
             }
+
+            // Clear planning scenario and infrastructure layers
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
+                infrastructureLayer = layerCollection.getLayerById(infrastructureLayerId);
+
+            if (planningScenarioLayer) {
+                planningScenarioLayer.getLayerSource().clear();
+            }
+            if (infrastructureLayer) {
+                infrastructureLayer.getLayerSource().clear();
+            }
+
+            // Clear planning scenario data from store to prevent re-rendering
+            this.$store.commit("agentVisualization/setPlanningScenarioData", null);
 
             // Clear interpolator
             if (this.interpolator) {

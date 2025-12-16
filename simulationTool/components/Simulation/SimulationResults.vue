@@ -336,8 +336,8 @@ export default {
             }
 
             let data, fileName, fileType;
-            const baseName = this.currentSimulation.name.replace(/[^a-z0-9]/gi, '_');
-            const dateStr = new Date().toISOString().split('T')[0];
+            const baseName = this.currentSimulation.name.replace(/[^a-z0-9]/gi, "_"),
+                dateStr = new Date().toISOString().split("T")[0];
 
             if (format === "geojson") {
                 // Download agent data as GeoJSON for AgentVisualization
@@ -380,8 +380,8 @@ export default {
                 fileType = "application/json";
             }
 
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: fileType});
-            const succeed = downloadBlobPerNavigator(blob, fileName);
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: fileType}),
+                succeed = downloadBlobPerNavigator(blob, fileName);
 
             if (!succeed) {
                 downloadBlobPerHTML5(blob, fileName);
@@ -390,32 +390,68 @@ export default {
 
         /**
          * Extracts agent GeoJSON data from job results.
+         * Embeds planningScenarioId and scenario data in metadata for later loading.
          * @returns {Object|null} GeoJSON FeatureCollection or null if not found
          */
         extractAgentGeoJSON () {
+            let agentGeoJSON = null;
+
             for (const job of Object.values(this.jobs)) {
                 // Check for agents in jobResults
                 if (job.jobResults && job.jobResults.agents) {
                     const agents = job.jobResults.agents;
 
                     // Validate that it's a valid FeatureCollection with data
-                    if (agents.type === "FeatureCollection" && 
-                        agents.features && 
-                        Array.isArray(agents.features) && 
+                    if (agents.type === "FeatureCollection" &&
+                        agents.features &&
+                        Array.isArray(agents.features) &&
                         agents.features.length > 0) {
-                        return agents;
+                        agentGeoJSON = agents;
+                        break;
                     }
                 }
                 // Check if jobResults itself is a FeatureCollection with data
-                if (job.jobResults && 
-                    job.jobResults.type === "FeatureCollection" && 
-                    job.jobResults.features && 
-                    Array.isArray(job.jobResults.features) && 
+                if (job.jobResults &&
+                    job.jobResults.type === "FeatureCollection" &&
+                    job.jobResults.features &&
+                    Array.isArray(job.jobResults.features) &&
                     job.jobResults.features.length > 0) {
-                    return job.jobResults;
+                    agentGeoJSON = job.jobResults;
+                    break;
                 }
             }
-            return null;
+
+            if (!agentGeoJSON) {
+                console.warn("[SimulationResults] No agent GeoJSON found in job results");
+                return null;
+            }
+
+            // Embed scenario metadata for later reconstruction
+            const scenarioId = this.$store.state?.Modules?.SimulationTool?.currentPlanningScenarioId,
+                scenario = this.currentPlanningScenario;
+
+            // Add metadata to GeoJSON
+            if (!agentGeoJSON.metadata) {
+                agentGeoJSON.metadata = {};
+            }
+
+            agentGeoJSON.metadata.planningScenarioId = scenarioId;
+            agentGeoJSON.metadata.planningScenarioName = scenario?.name;
+            agentGeoJSON.metadata.simulationId = this.simulationIdForResults;
+            agentGeoJSON.metadata.timestamp = new Date().toISOString();
+
+            // Embed full scenario data if available
+            if (scenario) {
+                agentGeoJSON.metadata.planningScenario = {
+                    id: scenario.id,
+                    name: scenario.name,
+                    dataSourceId: scenario.dataSourceId,
+                    scenarioFeature: scenario.scenarioFeature,
+                    inputs: scenario.inputs
+                };
+            }
+
+            return agentGeoJSON;
         },
 
         /**
