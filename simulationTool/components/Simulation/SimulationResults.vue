@@ -1106,13 +1106,15 @@ export default {
                 <div
                     class="d-flex justify-content-between button"
                 >
-                    <FlatButton
-                        id="back"
-                        :icon="'bi bi-gear'"
-                        :aria-label="$t('additional:modules.tools.simulationTool.showProperties')"
-                        :text="$t('additional:modules.tools.simulationTool.showProperties')"
-                        @click="() => setMode('simulationParameter')"
-                    />
+                    <div>
+                        <FlatButton
+                            id="back"
+                            :icon="'bi bi-gear'"
+                            :aria-label="$t('additional:modules.tools.simulationTool.showProperties')"
+                            :text="$t('additional:modules.tools.simulationTool.showProperties')"
+                            @click="() => setMode('simulationParameter')"
+                        />
+                    </div>
                     <div v-if="worstJobStatusTag === 'successful'">
                         <FlatButton
                             v-if="!hasLargeResponse && extractAgentGeoJSON() && simulationIdForResults && simulationIdForResults.includes('green4Bikes')"
