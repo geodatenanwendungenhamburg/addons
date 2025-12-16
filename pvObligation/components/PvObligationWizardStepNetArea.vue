@@ -6,7 +6,6 @@ import {Style, Stroke, Fill} from "ol/style";
 import PvObligationRestrictionList from "./PvObligationRestrictionList.vue";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
-import calculateRestrictedArea from "../js/calculateRestrictedArea";
 
 export default {
     name: "PvObligationWizardStepNetArea",
@@ -64,7 +63,8 @@ export default {
         ...mapActions("Modules/PvObligation", [
             "dissolveRoofFeaturesAndCalculateArea",
             "calculateNetAreaAndRestrictedAreas",
-            "zoomToExtendOfSelectedRoof"
+            "zoomToExtendOfSelectedRoof",
+            "calculateRestrictedArea"
         ]),
         ...mapActions("Maps", [
             "addNewLayerIfNotExists"
@@ -108,10 +108,12 @@ export default {
             this.componentFormData.netRoofArea = areaData.netArea;
             this.obligatedArea = areaData.obligatedArea;
         },
-        onListItems (listItems) {
+        async onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
 
-            this.excludedArea = calculateRestrictedArea(this.componentFormData.restrictedListItems);
+            this.excludedArea = await this.calculateRestrictedArea({
+                restrictedAreaItems: this.componentFormData.restrictedListItems
+            });
             this.componentFormData.netRoofAreaWithoutExcludes = this.excludedArea !== 0 ? this.componentFormData.netRoofArea - this.excludedArea : null;
             this.obligatedArea = this.componentFormData.netRoofAreaWithoutExcludes * 0.3;
         },
