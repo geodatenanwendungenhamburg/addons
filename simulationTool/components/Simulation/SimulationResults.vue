@@ -399,34 +399,35 @@ export default {
          */
         switchToAgentVisualization () {
             const agentData = this.extractAgentGeoJSON();
+
             if (!agentData) {
                 console.warn("No agent data available");
                 return;
             }
-                // Register agentVisualization module if not exists
-                if (!this.$store.hasModule(["agentVisualization"])) {
-                    const agentVisualizationModule = require("../../store/agentVisualization").default;
+            // Register agentVisualization module if not exists
+            if (!this.$store.hasModule(["agentVisualization"])) {
+                const agentVisualizationModule = require("../../store/agentVisualization").default;
 
-                    this.$store.registerModule("agentVisualization", agentVisualizationModule);
-                }
+                this.$store.registerModule("agentVisualization", agentVisualizationModule);
+            }
 
-                // Set loading state
-                this.$store.commit("agentVisualization/setIsLoading", true);
+            // Set loading state
+            this.$store.commit("agentVisualization/setIsLoading", true);
 
-                // Collect planning scenario geometries
-                const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
-                    planningScenarioData = this.collectPlanningScenarioGeometries(planningScenarioLayer);
+            // Collect planning scenario geometries
+            const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
+                planningScenarioData = this.collectPlanningScenarioGeometries(planningScenarioLayer);
 
-                // Load data into AgentVisualization store
-                this.$store.dispatch("agentVisualization/loadAgentData", agentData);
+            // Load data into AgentVisualization store
+            this.$store.dispatch("agentVisualization/loadAgentData", agentData);
 
-                // Calculate time series metrics
-                this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+            // Calculate time series metrics
+            this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
 
-                // Load planning scenario geometries
-                if (planningScenarioData) {
-                    this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
-                }
+            // Load planning scenario geometries
+            if (planningScenarioData) {
+                this.$store.dispatch("agentVisualization/loadPlanningScenarioData", planningScenarioData);
+            }
 
             // Set flag to indicate automatic load
             this.$store.commit("agentVisualization/setAutoLoadTriggered", true);

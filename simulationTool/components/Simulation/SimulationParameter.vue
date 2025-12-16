@@ -1277,10 +1277,11 @@ export default {
                 job.requestBody = JSON.parse(JSON.stringify(requestBodiesToSend[index]));
                 job.jobStatus = {status: initialStatuses[index]};
                 job.resultStyle = this.simulation.processes[index].resultStyle;
-                
+
                 let isLargeResponse = false;
+
                 this.setHasLargeResponse(false);
-                
+
                 job.jobResults = await this.processHandlers[index].pollJobStatusAndGetResults(
                     this.accessToken,
                     jobIDs[index],

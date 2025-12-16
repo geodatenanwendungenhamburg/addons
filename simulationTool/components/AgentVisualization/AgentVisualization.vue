@@ -14,7 +14,7 @@
                         {{ loadingStep }}
                     </p>
                     <div class="progress-bar">
-                        <div 
+                        <div
                             class="progress-bar-fill"
                             :style="{ width: loadingProgress + '%' }"
                         />
@@ -125,7 +125,6 @@ import SectionHeader from "../SectionHeader.vue";
 import AdvancedTimeSlider from "./AdvancedTimeSlider.vue";
 import TimeSeriesChart from "./TimeSeriesChart.vue";
 import FilterPanel from "./FilterPanel.vue";
-import SpinnerItem from "../../../../src/shared/modules/spinner/components/SpinnerItem.vue";
 import TimeEngine from "../../utils/TimeEngine";
 import AgentInterpolator from "../../utils/AgentInterpolator";
 
@@ -137,8 +136,7 @@ export default {
         SectionHeader,
         AdvancedTimeSlider,
         TimeSeriesChart,
-        FilterPanel,
-        SpinnerItem
+        FilterPanel
     },
     data () {
         return {
@@ -226,6 +224,7 @@ export default {
 
         // Check if data was auto-loaded before mounting
         const agentData = this.$store.state.agentVisualization.agentData;
+
         if (agentData && this.$store.state.agentVisualization.autoLoadTriggered) {
             this.$store.commit("agentVisualization/setAutoLoadTriggered", false);
             await this.processAutoLoadedData(agentData);
@@ -491,7 +490,7 @@ export default {
             this.$store.commit("agentVisualization/setIsLoading", true);
             this.$store.commit("agentVisualization/setLoadingProgress", 0);
             this.$store.commit("agentVisualization/setLoadingStep", "Lade Agentendaten...");
-            
+
             if (!geojson || !geojson.features) {
                 console.warn("Invalid auto-loaded data");
                 this.$store.commit("agentVisualization/setIsLoading", false);
