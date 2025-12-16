@@ -12,7 +12,7 @@
                 },
                 "introduction": "Diese Anwendung soll zur Unterstützung bei der Berechnung der Dachfläche dienen, die mit Photovoltaik (PV) belegt werden muss, wenn \"wesentliche Umbauten des Daches\" durchgeführt werden. Der PDF-Bericht, den Sie am Ende erstellen können, ist für Ihre persönlichen Unterlagen bestimmt und dient auch als Nachweismöglichkeit für den Fall einer Stichprobe durch die zuständige Behörde.",
                 "introductionInfoPvApp": "Lesen Sie jedoch bitte die Informationen zu dieser Anwendung unter folgendem Link:",
-                "introductionInfoPvAppLink": "LINK zur INFO-Seite",
+                "introductionInfoPvAppLink": "Hinweise zur Nutzung des Tools - hamburg.de",
                 "introductionInfoPvObligation": "Informationen zur PV-Pflicht allgemein finden Sie hier:",
                 "introductionInfoPvObligationLink": "PV-Pflicht in Hamburg - hamburg.de.",
                 "step": {
