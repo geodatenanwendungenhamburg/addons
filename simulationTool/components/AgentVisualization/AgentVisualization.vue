@@ -9,10 +9,20 @@
             class="loading-overlay"
         >
             <div class="loading-content">
-                <SpinnerItem custom-class="loading-spinner" />
-                <p class="loading-text">
-                    Lade Simulationsdaten...
-                </p>
+                <div class="progress-container">
+                    <p class="loading-text">
+                        {{ loadingStep }}
+                    </p>
+                    <div class="progress-bar">
+                        <div 
+                            class="progress-bar-fill"
+                            :style="{ width: loadingProgress + '%' }"
+                        />
+                    </div>
+                    <p class="progress-percentage">
+                        {{ loadingProgress }}%
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -151,6 +161,12 @@ export default {
         ]),
         isLoading () {
             return this.$store.state.agentVisualization?.isLoading || false;
+        },
+        loadingProgress () {
+            return this.$store.state.agentVisualization?.loadingProgress || 0;
+        },
+        loadingStep () {
+            return this.$store.state.agentVisualization?.loadingStep || "";
         }
     },
     watch: {
@@ -434,26 +450,34 @@ export default {
         async loadAgentData (geojson) {
             // Set loading state
             this.$store.commit("agentVisualization/setIsLoading", true);
+            this.$store.commit("agentVisualization/setLoadingProgress", 0);
+            this.$store.commit("agentVisualization/setLoadingStep", "Lade Agentendaten...");
 
             // Use setTimeout to allow UI to update with spinner
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Load into Vuex store (this is the heavy operation)
+            // Step 1: Load into Vuex store (this is the heavy operation)
             await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+            this.$store.commit("agentVisualization/setLoadingProgress", 33);
+            this.$store.commit("agentVisualization/setLoadingStep", "Berechne Zeitreihen...");
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-            // Calculate time series metrics
+            // Step 2: Calculate time series metrics
             await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+            this.$store.commit("agentVisualization/setLoadingProgress", 66);
+            this.$store.commit("agentVisualization/setLoadingStep", "Initialisiere Visualisierung...");
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-            // Load into interpolator
+            // Step 3: Load into interpolator
             this.interpolator.loadTrajectories(geojson.features);
-
             this.dataLoaded = true;
 
-            // Zoom to agent data extent
+            // Step 4: Zoom and update
             this.zoomToAgentData(geojson.features);
-
-            // Update visualization
             this.updateVisualization();
+            this.$store.commit("agentVisualization/setLoadingProgress", 100);
+            this.$store.commit("agentVisualization/setLoadingStep", "Fertig!");
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // Set loading state to false
             this.$store.commit("agentVisualization/setIsLoading", false);
@@ -465,6 +489,8 @@ export default {
         async processAutoLoadedData (geojson) {
             // Set loading state
             this.$store.commit("agentVisualization/setIsLoading", true);
+            this.$store.commit("agentVisualization/setLoadingProgress", 0);
+            this.$store.commit("agentVisualization/setLoadingStep", "Lade Agentendaten...");
             
             if (!geojson || !geojson.features) {
                 console.warn("Invalid auto-loaded data");
@@ -475,22 +501,28 @@ export default {
             // Use setTimeout to allow UI to update with spinner
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Load data into Vuex store (this is the heavy operation)
+            // Step 1: Load data into Vuex store (this is the heavy operation)
             await this.$store.dispatch("agentVisualization/loadAgentData", geojson);
+            this.$store.commit("agentVisualization/setLoadingProgress", 33);
+            this.$store.commit("agentVisualization/setLoadingStep", "Berechne Zeitreihen...");
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-            // Calculate time series metrics
+            // Step 2: Calculate time series metrics
             await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
+            this.$store.commit("agentVisualization/setLoadingProgress", 66);
+            this.$store.commit("agentVisualization/setLoadingStep", "Initialisiere Visualisierung...");
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-            // Load into interpolator
+            // Step 3: Load into interpolator
             this.interpolator.loadTrajectories(geojson.features);
-
             this.dataLoaded = true;
 
-            // Zoom to agent data extent
+            // Step 4: Zoom and update
             this.zoomToAgentData(geojson.features);
-
-            // Update visualization
             this.updateVisualization();
+            this.$store.commit("agentVisualization/setLoadingProgress", 100);
+            this.$store.commit("agentVisualization/setLoadingStep", "Fertig!");
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // Set loading state to false
             this.$store.commit("agentVisualization/setIsLoading", false);
@@ -1153,19 +1185,40 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
 }
 
-.loading-spinner {
-    width: 3rem !important;
-    height: 3rem !important;
-    border-width: 4px !important;
+.progress-container {
+    width: 300px;
 }
 
 .loading-text {
     font-size: 1.1rem;
     color: #333;
-    margin: 0;
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background-color: #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0d6efd 0%, #0a58ca 100%);
+    transition: width 0.3s ease;
+    border-radius: 12px;
+}
+
+.progress-percentage {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0.5rem 0 0 0;
 }
 
 @media (max-width: 992px) {

@@ -13,6 +13,8 @@ const state = {
         featuresByTime: {}, // Indexed by timestamp for O(1) lookup
         featuresByAgent: {}, // PERFORMANCE: Indexed by agentId for O(1) lookup
         isLoading: false,
+        loadingProgress: 0,
+        loadingStep: "",
 
         // Time control
         currentTime: null,
@@ -326,6 +328,20 @@ const state = {
      */
         setIsLoading (state, isLoading) {
             state.isLoading = isLoading;
+        },
+
+        /**
+     * Set loading progress
+     */
+        setLoadingProgress (state, progress) {
+            state.loadingProgress = progress;
+        },
+
+        /**
+     * Set loading step text
+     */
+        setLoadingStep (state, step) {
+            state.loadingStep = step;
         }
     },
 
