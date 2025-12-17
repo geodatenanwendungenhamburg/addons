@@ -1,3 +1,4 @@
+/* eslint-disable one-var */
 import {GeoJSON} from "ol/format.js";
 import isObject from "../../../src/shared/js/utils/isObject";
 import {extractEventCoordinates} from "../../../src/shared/js/utils/extractEventCoordinates";
@@ -312,6 +313,7 @@ export default {
 
         // Ensure planning-scenario layer exists
         let planningScenarioLayer = layerCollection.getLayerById("planning-scenario");
+
         if (!planningScenarioLayer) {
             const layer = layerFactory.createLayer({
                 typ: "VECTORBASE",
@@ -354,14 +356,14 @@ export default {
 
             layerCollection.addLayer(layer);
         }
-        const layerSourceForObjects = layerCollection.getLayerById(infrastructureLayerId).getLayerSource();
+        const layerSourceForObjects = layerCollection.getLayerById(infrastructureLayerId).getLayerSource(),
 
-        // Only clear if we don't have the correct scenario already loaded
-        // Check if features are from the current scenario by comparing feature count and scenario ID
-        const existingFeatures = layerSource.getFeatures();
-        const needsUpdate = existingFeatures.length === 0 || 
-                           !existingFeatures.some(f => f.get('scenarioId') === currentPlanningScenario?.id);
-        
+            // Only clear if we don't have the correct scenario already loaded
+            // Check if features are from the current scenario by comparing feature count and scenario ID
+            existingFeatures = layerSource.getFeatures(),
+            needsUpdate = existingFeatures.length === 0 ||
+                           !existingFeatures.some(f => f.get("scenarioId") === currentPlanningScenario?.id);
+
         if (needsUpdate) {
             layerSource.clear();
             layerSourceForObjects.clear(true);
@@ -380,22 +382,23 @@ export default {
                 try {
                     // Parse feature with correct coordinate system
                     const olFeature = geoJsonParser.readFeature(feat, {
-                        dataProjection: 'EPSG:25832',
-                        featureProjection: 'EPSG:25832'
+                        dataProjection: "EPSG:25832",
+                        featureProjection: "EPSG:25832"
                     });
 
                     if (feat.style) {
                         const olStyle = ConvertStyle.geoJsonToOpenlayers(feat.style);
+
                         olFeature.setStyle(olStyle);
                     }
-                    
+
                     // Mark feature with scenario ID for caching/persistence
-                    olFeature.set('scenarioId', currentPlanningScenario.id);
-                    
+                    olFeature.set("scenarioId", currentPlanningScenario.id);
+
                     layerSource.addFeature(olFeature);
                 }
                 catch (error) {
-                    console.error('Error processing scenarioFeature:', error);
+                    console.error("Error processing scenarioFeature:", error);
                 }
             });
         }
@@ -405,7 +408,7 @@ export default {
             Object.entries(currentPlanningScenario.inputs).forEach(([inputKey, inputValue]) => {
                 // Special handling for cycleTravelerLayer - it's a FeatureCollection with features that have nested structures
                 if (inputKey === "cycleTravelerLayer" && inputValue?.type === "FeatureCollection" && inputValue?.features) {
-                    inputValue.features.forEach((feature, index) => {
+                    inputValue.features.forEach((feature) => {
                         try {
                             // cycleTravelerLayer features should have direct geometry (Point/Polygon), not FeatureCollection
                             if (feature.geometry && feature.geometry.type === "FeatureCollection") {
@@ -415,43 +418,43 @@ export default {
                                         try {
                                             // Parse feature - cycleTravelerLayer uses WGS84 (Lon/Lat)
                                             const olFeature = geoJsonParser.readFeature(innerFeature, {
-                                                dataProjection: 'EPSG:4326',
-                                                featureProjection: 'EPSG:25832'
+                                                dataProjection: "EPSG:4326",
+                                                featureProjection: "EPSG:25832"
                                             });
-                                            
+
                                             if (innerFeature.style) {
                                                 olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(innerFeature.style));
                                             }
-                                            
+
                                             if (innerFeature.id) {
                                                 olFeature.setId(innerFeature.id);
                                             }
-                                            
+
                                             layerSource.addFeature(olFeature);
                                         }
                                         catch (innerError) {
-                                            console.error('Error processing nested feature:', innerError);
+                                            console.error("Error processing nested feature:", innerError);
                                         }
                                     });
                                 }
                                 return;
                             }
-                            
+
                             // Normal processing for features with direct geometry
                             // Parse feature - cycleTravelerLayer uses WGS84 (Lon/Lat), needs transformation to map projection
                             const olFeature = geoJsonParser.readFeature(feature, {
-                                dataProjection: 'EPSG:4326',
-                                featureProjection: 'EPSG:25832'
+                                dataProjection: "EPSG:4326",
+                                featureProjection: "EPSG:25832"
                             });
-                            
+
                             // Apply style - create OpenLayers style manually for both Polygon and Point
                             if (feature.style) {
                                 // Create style manually to handle both polygon and point styles
-                                const Fill = require("ol/style/Fill").default;
-                                const Stroke = require("ol/style/Stroke").default;
-                                const Style = require("ol/style/Style").default;
-                                const Circle = require("ol/style/Circle").default;
-                                
+                                const Fill = require("ol/style/Fill").default,
+                                    Stroke = require("ol/style/Stroke").default,
+                                    Style = require("ol/style/Style").default,
+                                    Circle = require("ol/style/Circle").default;
+
                                 let olStyle;
 
                                 // Check if this is a point style with circle
@@ -473,36 +476,36 @@ export default {
                                     // Polygon style
                                     olStyle = new Style({
                                         fill: feature.style.fill ? new Fill({
-                                            color: feature.style.fill.color || 'rgba(255, 165, 0, 0.3)'
+                                            color: feature.style.fill.color || "rgba(255, 165, 0, 0.3)"
                                         }) : null,
                                         stroke: feature.style.stroke ? new Stroke({
-                                            color: feature.style.stroke.color || 'rgba(255, 140, 0, 0.8)',
+                                            color: feature.style.stroke.color || "rgba(255, 140, 0, 0.8)",
                                             width: feature.style.stroke.width || 2
                                         }) : null
                                     });
                                 }
-                                
+
                                 olFeature.setStyle(olStyle);
                             }
-                            
+
                             if (feature.id) {
                                 olFeature.setId(feature.id);
                             }
-                            
+
                             // Mark feature with scenario ID for caching/persistence
-                            olFeature.set('scenarioId', currentPlanningScenario.id);
-                            
+                            olFeature.set("scenarioId", currentPlanningScenario.id);
+
                             layerSource.addFeature(olFeature);
                         }
                         catch (error) {
-                            console.error('Error reading cycleTravelerLayer feature:', error);
+                            console.error("Error reading cycleTravelerLayer feature:", error);
                         }
                     });
                     return; // Skip normal processing for cycleTravelerLayer
                 }
 
                 if (inputValue?.features && Array.isArray(inputValue.features)) {
-                    inputValue.features.forEach((feature, index) => {
+                    inputValue.features.forEach((feature) => {
                         try {
                             // Check if geometry is a FeatureCollection (invalid structure)
                             if (feature.geometry && feature.geometry.type === "FeatureCollection") {
@@ -516,10 +519,10 @@ export default {
 
                             // Parse feature with correct coordinate system
                             const olFeature = geoJsonParser.readFeature(feature, {
-                                dataProjection: 'EPSG:25832',
-                                featureProjection: 'EPSG:25832'
-                            })
-                            style = createInfrastructureStyle(olFeature, styleConfig);
+                                    dataProjection: "EPSG:25832",
+                                    featureProjection: "EPSG:25832"
+                                }),
+                                style = createInfrastructureStyle(olFeature, styleConfig);
 
                             // Apply style if present (especially for cycleTravelerLayer)
                             if (style) {
@@ -532,7 +535,7 @@ export default {
                             }
 
                             // Mark feature with scenario ID for caching/persistence
-                            olFeature.set('scenarioId', currentPlanningScenario.id);
+                            olFeature.set("scenarioId", currentPlanningScenario.id);
 
                             // Add cycleTravelerLayer features to planning-scenario layer (for better visibility)
                             if (inputKey === "cycleTravelerLayer" && layerSource) {
@@ -543,7 +546,7 @@ export default {
                             }
                         }
                         catch (error) {
-                            console.error('Error reading feature:', error);
+                            console.error("Error reading feature:", error);
                         }
                     });
                 }
@@ -557,7 +560,7 @@ export default {
         // Auto-zoom to features after loading
         if (layerSource && layerSource.getFeatures().length > 0) {
             const extent = layerSource.getExtent();
-            
+
             if (map) {
                 map.getView().fit(extent, {
                     padding: [100, 100, 100, 100],
