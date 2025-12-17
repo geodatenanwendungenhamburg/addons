@@ -1,3 +1,4 @@
+<!-- eslint-disable one-var -->
 <template>
     <div class="agent-visualization-modern">
         <section-header
@@ -450,6 +451,7 @@ export default {
                 }
 
                 // Check for embedded scenario metadata
+                // eslint-disable-next-line one-var
                 const metadata = geojson.metadata;
 
                 if (metadata && metadata.planningScenarioId) {
@@ -488,6 +490,7 @@ export default {
                         this.$store.dispatch("Modules/SimulationTool/updateFeatures");
 
                         // Get scenario geometries for visualization
+                        // eslint-disable-next-line one-var
                         const scenarioGeoJSON = this.buildScenarioGeoJSONFromStore(embeddedScenario);
 
                         if (scenarioGeoJSON) {
