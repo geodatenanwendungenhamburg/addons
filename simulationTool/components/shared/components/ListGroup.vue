@@ -173,7 +173,25 @@ export default {
          * @returns {String} The icon class.
          */
         getIcon (feature) {
-            if (feature && (feature.getStyle() === null || feature.getStyle()?.getStroke() !== null)) {
+            if (!feature) {
+                return "bi-eye-slash";
+            }
+
+            const style = feature.getStyle();
+
+            // No style = uses layer default = visible
+            if (style === null) {
+                return "bi-eye";
+            }
+
+            // Check if it's an array of styles (e.g., background + icon)
+            if (Array.isArray(style)) {
+                // Feature is visible if it has any style
+                return style.length > 0 ? "bi-eye" : "bi-eye-slash";
+            }
+
+            // Check for stroke (line/polygon features) or image (point/icon features)
+            if (style.getStroke?.() !== null || style.getImage?.() !== null) {
                 return "bi-eye";
             }
 
@@ -386,7 +404,9 @@ export default {
          * @returns {void}
          */
         toggleStyle (feature) {
-            if (feature.getStyle()?.getStroke() !== null) {
+            const style = feature.getStyle();
+
+            if (style && (style.getStroke?.() !== null || style.getImage?.() !== null)) {
                 feature.setStyle(new Style());
             }
             else {

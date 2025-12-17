@@ -5,6 +5,7 @@ import layerCollection from "../../../src/core/layers/js/layerCollection";
 import ConvertStyle from "../js/convertStyle";
 import layerFactory from "../../../src/core/layers/js/layerFactory";
 import {infrastructureLayerId} from "../layerIds.js";
+import createInfrastructureStyle from "../js/createInfrastructureStyle";
 import mapCollection from "../../../src/core/maps/js/mapCollection";
 
 export default {
@@ -306,6 +307,7 @@ export default {
     updateFeatures ({getters}) {
         const currentPlanningScenario = getters.planningScenarios.find(scenario => scenario.id === getters.currentPlanningScenarioId),
             geoJsonParser = new GeoJSON(),
+            styleConfig = getters.infrastructurePointStyle,
             map = mapCollection.getMap("2D");
 
         // Ensure planning-scenario layer exists
@@ -516,11 +518,12 @@ export default {
                             const olFeature = geoJsonParser.readFeature(feature, {
                                 dataProjection: 'EPSG:25832',
                                 featureProjection: 'EPSG:25832'
-                            });
+                            })
+                            style = createInfrastructureStyle(olFeature, styleConfig);
 
                             // Apply style if present (especially for cycleTravelerLayer)
-                            if (feature.style) {
-                                olFeature.setStyle(ConvertStyle.geoJsonToOpenlayers(feature.style));
+                            if (style) {
+                                olFeature.setStyle(style);
                             }
 
                             // Set feature ID for later lookup/duplicate prevention
