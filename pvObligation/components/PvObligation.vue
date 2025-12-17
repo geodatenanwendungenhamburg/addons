@@ -59,7 +59,7 @@ export default {
             const newLayerConfigs = [];
 
             this.is3D = newMode === "3D";
-            this.relevantLayerIds?.forEach(layerId => {
+            [this.roofLayerId, this.pvAreaLayerId].forEach(layerId => {
                 newLayerConfigs.push({
                     id: layerId,
                     layer: {
