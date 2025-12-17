@@ -171,7 +171,7 @@ export default {
         v-if="!isMobileDevice"
         id="pvObligation"
     >
-        <PvObligationWizard />
+        <PvObligationWizard :disable-accordion="isDrawing" />
 
         <div
             v-if="isCreatingReport || !allRoofsLoaded || is3D"

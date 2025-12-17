@@ -1,45 +1,15 @@
 import {nextTick} from "vue";
 import {config, shallowMount} from "@vue/test-utils";
-import {createStore} from "vuex";
 import {expect} from "chai";
 import Component from "../../../components/PvObligationWizard.vue";
 
 config.global.mocks.$t = key => key;
 
 describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
-    let store,
-        wrapper;
+    let wrapper;
 
     beforeEach(() => {
-        store = createStore({
-            modules: {
-                Modules: {
-                    namespaced: true,
-                    modules: {
-                        PvObligation: {
-                            namespaced: true,
-                            state: () => ({
-                                isDrawing: false
-                            }),
-                            getters: {
-                                isDrawing: state => state.isDrawing
-                            },
-                            mutations: {
-                                setIsDrawing (state, payload) {
-                                    state.isDrawing = payload;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        wrapper = shallowMount(Component, {
-            global: {
-                plugins: [store]
-            }
-        });
+        wrapper = shallowMount(Component);
     });
 
     afterEach(() => {
@@ -103,5 +73,16 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
 
         expect(accordionItems[1].attributes().title).equal("additional:modules.pvObligation.wizard.step.netArea.wizardTitle");
         expect(accordionItems[1].attributes().isopen).equal("true");
+    });
+
+    it("disables accordion items and footer buttons when disableAccordion is true", async () => {
+        wrapper.vm.wizardSteps = createWizardSteps();
+        await nextTick();
+        await wrapper.setProps({disableAccordion: true});
+
+        const accordionItems = wrapper.findAll("div.wizard div.wizardContent div.steps accordion-item-stub");
+
+        expect(accordionItems[1].attributes().class).to.contain("disabledAccordionItem");
+        expect(wrapper.vm.disableFooterButtons).to.be.true;
     });
 });

@@ -1,6 +1,5 @@
 <script>
 import {markRaw} from "vue";
-import {mapGetters} from "vuex";
 import AccordionItem from "@shared/modules/accordion/components/AccordionItem.vue";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import PvObligationWizardStepGrossArea from "./PvObligationWizardStepGrossArea.vue";
@@ -22,6 +21,13 @@ export default {
         PvObligationWizardStepPersonalNotes,
         PvObligationWizardStepGenerateReport
 
+    },
+    props: {
+        disableAccordion: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     },
     data () {
         return {
@@ -80,9 +86,6 @@ export default {
         };
     },
     computed: {
-        ...mapGetters("Modules/PvObligation", [
-            "isDrawing"
-        ]),
         wizardStepTitles () {
             return {
                 grossArea: this.$t("additional:modules.pvObligation.wizard.step.grossArea.wizardTitle"),
@@ -105,6 +108,14 @@ export default {
             });
 
             return wizardStepsFormData;
+        },
+        /**
+         * Determines whether the wizard footer buttons should be disabled.
+         *
+         * @returns {boolean} True if any disabling condition is met, false otherwise.
+         */
+        disableFooterButtons () {
+            return this.disableAccordion;
         }
     },
     watch: {
@@ -146,7 +157,7 @@ export default {
             }
         },
         nextWizardStep () {
-            if (this.wizardStepIsValid() && !this.isDrawing) {
+            if (this.wizardStepIsValid() && !this.disableFooterButtons) {
                 for (let i = 0; i < this.wizardSteps.length; i++) {
                     if (this.wizardSteps[i].isOpen === true) {
                         this.wizardSteps[i].isOpen = false;
@@ -164,7 +175,7 @@ export default {
             }
         },
         previousWizardStep () {
-            if (this.wizardStepIsValid() && !this.isDrawing) {
+            if (this.wizardStepIsValid() && !this.disableFooterButtons) {
                 for (let i = 0; i < this.wizardSteps.length; i++) {
                     if (this.wizardSteps[i].isOpen === true) {
                         this.wizardSteps[i].isOpen = false;
@@ -244,12 +255,12 @@ export default {
 
             accordionItems.forEach(accordionItem => {
                 accordionItem.addEventListener("show.bs.collapse", event => {
-                    if (this.isDrawing) {
+                    if (this.disableAccordion) {
                         event.preventDefault();
                     }
                 });
                 accordionItem.addEventListener("hide.bs.collapse", event => {
-                    if (this.isDrawing) {
+                    if (this.disableAccordion) {
                         event.preventDefault();
                     }
                 });
@@ -303,7 +314,7 @@ export default {
                         :coloured-header="true"
                         :class="[
                             step.componentFormDataIsValid === false ? 'error' : '',
-                            isDrawing && !step.isOpen ? 'disabledAccordionItem' : ''
+                            disableAccordion && !step.isOpen ? 'disabledAccordionItem' : ''
                         ]"
                         @click="openWizardStep($event, index)"
                     >
@@ -328,7 +339,7 @@ export default {
                     :text="$t('additional:modules.pvObligation.wizard.buttons.back')"
                     icon="bi-backspace"
                     :secondary="true"
-                    :disabled="isDrawing"
+                    :disabled="disableFooterButtons"
                     @click="previousWizardStep()"
                 />
 
@@ -339,7 +350,7 @@ export default {
                     :text="$t('additional:modules.pvObligation.wizard.buttons.next')"
                     icon="bi-backspace-reverse"
                     :secondary="true"
-                    :disabled="isDrawing"
+                    :disabled="disableFooterButtons"
                     @click="nextWizardStep()"
                 />
             </div>
