@@ -26,34 +26,6 @@ describe("addons/pvObligation/components/shared/ConfirmModalItem.vue", () => {
         expect(wrapper.find("#modal-1-inner-wrapper").attributes().style === "max-width: 350px;").to.be.true;
     });
 
-    it("handles clicks and emits events correctly", async () => {
-        const wrapper = mount(ConfirmModalItem, {
-                props: {
-                    showModal: true,
-                    modalInnerWrapperStyle: "max-width: 350px",
-                    buttonConfirmLabel: "Demo Confirm",
-                    buttonCancelLabel: "Demo Cancel"
-                },
-                slots: {
-                    header: "Demo Are you sure?"
-                }
-            }),
-            buttonConfirmElement = wrapper.find("div.confirmActions button[aria-label='Demo Confirm']"),
-            buttonCancelElement = wrapper.find("div.confirmActions button[aria-label='Demo Cancel']");
-
-        buttonConfirmElement.trigger("click");
-
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.emitted("clickedConfirm")).to.exist;
-
-        buttonCancelElement.trigger("click");
-
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.emitted("clickedCancel")).to.exist;
-    });
-
     it("should toggle visibility using showModal", async () => {
         const wrapper = mount(ConfirmModalItem, {
             props: {

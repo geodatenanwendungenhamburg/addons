@@ -125,11 +125,15 @@ export default {
                     roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
 
                 // Show confirm modal if another roof is selected and form is not changed(dirty)
-                if (this.selectedRoofId && this.selectedRoofId !== roofId && this.isWizardFormDirty) {
-                    this.pendingRoofId = roofId;
-                    this.showConfirmModal = true;
+                if (this.selectedRoofId && this.selectedRoofId !== roofId) {
+                    if (this.isWizardFormDirty) {
+                        this.pendingRoofId = roofId;
+                        this.showConfirmModal = true;
 
-                    return;
+                        return;
+                    }
+
+                    this.resetWizardData();
                 }
 
                 this.setAndDisolveRoofId(roofId, outlineLayer);
