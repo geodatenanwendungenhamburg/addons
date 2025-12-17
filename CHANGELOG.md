@@ -8,14 +8,24 @@
 
 ### Added
 - PopulationRequest: Added support for OGC API Processes.
+- gfiThemes: The GFI theme `combinedGfi` has been extended with more powerful configuration values to use OGC API processes with dynamic data. Please refer to the provided `README.md` file.
 
 ### Changed
+- Changed Node.js support: Versions from Node.js **22.19.0** up to Node.js **22.21.0** (LTS) are now supported
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- SimulationTool: Corrected path to logo.
+
+---
+
+## 2025-12-03 v3.17.0
+
+### Added
+- PopulationRequest: Added support for OGC API Processes.
 
 ---
 
@@ -23,9 +33,9 @@
 
 ### Fixed
 - Compatibility fixes after the Masterportal core upgrade to **Vue 3.5** (esm-bundler / stricter template checks). No functional changes intended.
-- trafficCount: `TrafficCountDatePickerCalendar.vue`
-- fileImport : `FileImport.vue`
-- valuationPrint: `ValuationPrint.vue`
+    - trafficCount: `TrafficCountDatePickerCalendar.vue`
+    - fileImport : `FileImport.vue`
+    - valuationPrint: `ValuationPrint.vue`
 - gfiTheme/Verkehrsstärken: Fixed download link.
 ---
 

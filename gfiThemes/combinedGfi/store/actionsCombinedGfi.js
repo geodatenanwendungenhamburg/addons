@@ -12,7 +12,8 @@ import {
     getBufferValue,
     getCrsUrl,
     extractFeaturesFromOafJson,
-    normalizeAttributes
+    normalizeAttributes,
+    getAllRequestLayers
 } from "../utils/gfiUtils";
 import GeoJSONReader from "jsts/org/locationtech/jts/io/GeoJSONReader.js";
 import {BufferOp} from "jsts/org/locationtech/jts/operation/buffer";
@@ -26,6 +27,7 @@ import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
 import {addExtentCoordinates, processPointResults} from "../utils/geometryUtils";
 import mapCollection from "@core/maps/js/mapCollection";
+import {loadModule} from "../utils/loadModule";
 
 const actions = {
     /**
@@ -55,6 +57,12 @@ const actions = {
         commit("setShowBuffer", themeParams.showBuffer || false);
         if (themeParams.bufferDistances) {
             commit("setBufferDistances", themeParams.bufferDistances);
+        }
+        if (themeParams.bufferAttributes) {
+            commit("setBufferAttributes", themeParams.bufferAttributes);
+        }
+        if (themeParams.bufferHint) {
+            commit("setBufferHint", themeParams.bufferHint);
         }
         commit("setFeature", feature);
 
@@ -239,48 +247,63 @@ const actions = {
      * Fetches additional requests and commits the aggregated results.
      *
      * @param {Object} context - The Vuex action context.
-     * @param {Function} context.commit - The Vuex commit function.
-     * @param {Object} context.state - The Vuex state object.
      * @param {string} [trigger="init"] - The trigger that initiated this request.
      * @returns {Promise<void>}
      */
-    async fetchAdditionalRequests ({commit, dispatch, state}, trigger = "init") {
-        const additionalResults = await Promise.all(state.additionalRequests
-            .filter(request => !request.triggerRequestOn || request.triggerRequestOn === trigger)
-            .map(async request => {
-                if (request.type === "ogcApiProcesses") {
-                    try {
-                        const inputs = {
-                                ...request.inputs,
-                                area: state.bufferedFeature ?
-                                    new GeoJSON().writeGeometry(state.bufferedFeature.getGeometry()) :
-                                    null
-                            },
-                            result = await OGCAPIProcesses.executeProcess(request.url, request.processId, inputs);
+    async fetchAdditionalRequests (context, trigger = "init") {
+        const {commit, dispatch, state, rootGetters} = context,
+            additionalResults = await Promise.all(state.additionalRequests
+                .filter(request => !request.triggerRequestOn || request.triggerRequestOn === trigger)
+                .map(async request => {
+                    if (request.type === "ogcApiProcesses") {
+                        try {
+                            const inputs = {
+                                    ...request.staticInputs ?? {},
+                                    ...(request.dynamicInputs?.getters ?? []).reduce((accumulator, current) => {
+                                        accumulator[current.key] = rootGetters[current.path];
+                                        return accumulator;
+                                    }, {}),
+                                    ...await (request.dynamicInputs?.parsers ?? []).reduce(async (accumulator, current) => {
+                                        const resolvedAccumulator = await accumulator;
 
-                        return {
-                            url: request.url,
-                            text: result.outputs.result.value,
-                            infoText: request.infoText || ""
-                        };
+                                        resolvedAccumulator[current.key] = (await loadModule(current.path))(context);
+                                        return resolvedAccumulator;
+                                    }, Promise.resolve({}))
+                                },
+                                executeResponse = await OGCAPIProcesses.executeProcess(request.url, request.processId, inputs),
+                                jobID = executeResponse.jobID,
+                                jobResults = await OGCAPIProcesses.pollJobResults(request.url, jobID, {
+                                    timeout: request.timeout,
+                                    stallFor: request.stallFor
+                                });
+
+                            return {
+                                url: request.url,
+                                text: JSON.stringify(
+                                    request.resultText
+                                        ? request.resultText.reduce((stepper, key) => stepper[key], jobResults)
+                                        : jobResults.outputs, null, 2
+                                ),
+                                infoText: request.infoText || ""
+                            };
+                        }
+                        catch (error) {
+                            console.error("Error executing OGC API Process:", error);
+
+                            dispatch("Alerting/addSingleAlert", {
+                                category: "error",
+                                content: i18next.t("additional:modules.combinedGfi.errors.ogcApiProcessError")
+                            }, {root: true});
+
+                            return {
+                                url: request.url,
+                                text: i18next.t("additional:modules.combinedGfi.errors.ogcApiProcessError"),
+                                infoText: request.infoText || ""
+                            };
+                        }
                     }
-                    catch (error) {
-                        console.error("Error executing OGC API Process:", error);
-
-                        dispatch("Alerting/addSingleAlert", {
-                            category: "error",
-                            content: i18next.t("additional:modules.combinedGfi.errors.ogcApiProcessError")
-                        }, {root: true});
-
-                        return {
-                            url: request.url,
-                            text: i18next.t("additional:modules.combinedGfi.errors.ogcApiProcessError"),
-                            infoText: request.infoText || ""
-                        };
-                    }
-                }
-                throw new Error(i18next.t("additional:modules.combinedGfi.errors.unsupportedRequestType") + `: "${request.type}"`);
-            }));
+                    throw new Error(i18next.t("additional:modules.combinedGfi.errors.unsupportedRequestType") + `: "${request.type}"`);
+                }));
 
         commit("setAdditionalRequestResults", additionalResults);
     },
@@ -772,9 +795,10 @@ const actions = {
      * @param {Object} bufferedResults - The results object to populate.
      * @returns {Promise<void>} A promise that resolves when the layer is processed.
      */
-    async processLayerForBufferedQuery ({dispatch}, {layerConfig, geometry, bufferedResults}) {
+    async processLayerForBufferedQuery ({getters, dispatch}, {layerConfig, geometry, bufferedResults}) {
         const layer = rawLayerList.getLayerWhere({id: layerConfig.id}),
-            resolution = mapCollection.getMapView("2D").getResolution();
+            resolution = mapCollection.getMapView("2D").getResolution(),
+            attributes = getters.bufferAttributes?.[layerConfig.id] || layerConfig.gfiAttributes || [];
 
         if (!layer) {
             console.error(`Layer with ID ${layerConfig.id} not found`);
@@ -785,7 +809,7 @@ const actions = {
             const results = await dispatch("fetchWfsData", {
                 layer,
                 geometry,
-                attributes: layerConfig.gfiAttributes || []
+                attributes
             });
 
             if (results && results.length > 0) {
@@ -796,7 +820,7 @@ const actions = {
             const results = await dispatch("fetchOafData", {
                 layer,
                 geometry,
-                attributes: layerConfig.gfiAttributes || []
+                attributes
             });
 
             if (results && results.length > 0) {
@@ -820,7 +844,7 @@ const actions = {
                     layer,
                     coordinate,
                     resolution,
-                    attributes: layerConfig.gfiAttributes || []
+                    attributes
                 });
 
                 processPointResults(pointResults, allResults);
@@ -849,9 +873,10 @@ const actions = {
 
         try {
             const bufferedResults = {},
-                geometry = state.bufferedFeature.getGeometry();
+                geometry = state.bufferedFeature.getGeometry(),
+                layersToRequest = getAllRequestLayers(state.layersToRequest, state.bufferAttributes);
 
-            for (const layerConfig of state.layersToRequest) {
+            for (const layerConfig of layersToRequest) {
                 try {
                     await dispatch("processLayerForBufferedQuery", {
                         layerConfig,

@@ -325,6 +325,7 @@ export default {
         /**
          * Updates the value prop with current geometries.
          * Creates a GeoJSON FeatureCollection with source and target polygon features.
+         * Also saves to store for persistence across tabs.
          */
         updateValue () {
             if (!this.sourceGeometry || !this.targetGeometry) {
@@ -338,12 +339,72 @@ export default {
                 spawningAmount: this.localAgentCount
             };
 
+            // Define styles based on geometry type
+            let sourceStyle, targetStyle;
+
+            if (this.sourceGeometry.type === "Point") {
+                sourceStyle = {
+                    type: "point",
+                    circle: {
+                        radius: 8,
+                        fill: {
+                            color: "rgba(255, 140, 0, 0.8)"
+                        },
+                        stroke: {
+                            color: "#fff",
+                            width: 2
+                        }
+                    }
+                };
+            }
+            else {
+                sourceStyle = {
+                    type: "polygon",
+                    fill: {
+                        color: "rgba(255, 165, 0, 0.3)"
+                    },
+                    stroke: {
+                        color: "rgba(255, 140, 0, 0.8)",
+                        width: 2
+                    }
+                };
+            }
+
+            if (this.targetGeometry.type === "Point") {
+                targetStyle = {
+                    type: "point",
+                    circle: {
+                        radius: 8,
+                        fill: {
+                            color: "rgba(138, 43, 226, 0.8)"
+                        },
+                        stroke: {
+                            color: "#fff",
+                            width: 2
+                        }
+                    }
+                };
+            }
+            else {
+                targetStyle = {
+                    type: "polygon",
+                    fill: {
+                        color: "rgba(147, 112, 219, 0.3)"
+                    },
+                    stroke: {
+                        color: "rgba(138, 43, 226, 0.8)",
+                        width: 2
+                    }
+                };
+            }
+
             // Only include spawningIntervalInMinutes if checkbox is checked
             if (this.includeSpawningInterval) {
                 sourceProperties.spawningIntervalInMinutes = this.localSpawningInterval;
             }
 
             // Store both polygon geometries as a FeatureCollection with metadata
+            // eslint-disable-next-line one-var
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [
@@ -351,7 +412,8 @@ export default {
                         type: "Feature",
                         id: "cycleTravelerSource",
                         geometry: this.sourceGeometry,
-                        properties: sourceProperties
+                        properties: sourceProperties,
+                        style: sourceStyle
                     },
                     {
                         type: "Feature",
@@ -359,12 +421,44 @@ export default {
                         geometry: this.targetGeometry,
                         properties: {
                             type: "target"
-                        }
+                        },
+                        style: targetStyle
                     }
                 ]
             };
 
             this.$emit("update:value", JSON.stringify(featureCollection));
+
+            // Save to store for persistence across tabs
+            this.saveCycleTravelerLayerToStore(featureCollection);
+        },
+
+        /**
+         * Save cycleTravelerLayer to currentPlanningScenario.inputs in store
+         * @param {Object} featureCollection - GeoJSON FeatureCollection
+         */
+        saveCycleTravelerLayerToStore (featureCollection) {
+            const currentPlanningScenarioId = this.$store?.state?.Modules?.SimulationTool?.currentPlanningScenarioId,
+                // Get current scenario
+                currentScenario = currentPlanningScenarioId ? this.$store.state?.Modules?.SimulationTool?.planningScenarios?.find(
+                    scenario => scenario.id === currentPlanningScenarioId
+                ) : null;
+
+            if (!currentPlanningScenarioId || !currentScenario) {
+                return;
+            }
+
+            // Update scenario inputs with cycleTravelerLayer
+            if (!currentScenario.inputs) {
+                currentScenario.inputs = {};
+            }
+
+            currentScenario.inputs.cycleTravelerLayer = featureCollection;
+
+            // Trigger update in store
+            this.$store.commit("Modules/SimulationTool/setPlanningScenarios", [
+                ...this.$store.state.Modules.SimulationTool.planningScenarios
+            ]);
         },
 
         /**

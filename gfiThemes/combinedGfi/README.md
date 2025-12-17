@@ -33,6 +33,10 @@ Here's a complete example using the recommended nested format:
     "params": {
       "showBuffer": true,
       "bufferDistances": [100, 500, 1000],
+      "bufferAttributes": {
+        "naturschutzgebiete": "showAll"
+      },
+      "bufferHint": "Beispieltext",
       "export": {
         "fileName": "Naturschutzgebiete",
         "shownFormatList": ["PDF", "DOC", "JSON"]
@@ -57,15 +61,7 @@ Here's a complete example using the recommended nested format:
           }
         }
       ],
-      "additionalRequests": [
-        {
-          "url": "https://api.example.com/additional-data",
-          "method": "GET",
-          "params": {
-            "format": "json"
-          }
-        }
-      ]
+      "additionalRequests": []
     }
   }
 }
@@ -131,13 +127,19 @@ The addon supports spatial buffering to expand the query area:
 
 - `showBuffer`: Boolean to enable/disable the buffer option in the UI.
 - `bufferDistances`: An array of buffer distances (in meters) to choose from.
+- `bufferAttributes`: Mapping of layer ids to gfiAttributes. Optional and to be used in case buffered requests are to have diverging attributes from normal requests, or are to be fetched additionally to the usual layers.
+- `bufferHint`: Hint text shown below the buffer buttons.
 
 Example:
 
 ```json
 {
   "showBuffer": true,
-  "bufferDistances": [100, 500, 1000]
+  "bufferDistances": [100, 500, 1000],
+  "bufferAttributes": {
+    "1234": "showAll"
+  },
+  "bufferHint": "Beispieltext",
 }
 ```
 
@@ -145,7 +147,22 @@ Example:
 
 You can configure additional requests to be made alongside the layer queries:
 
-- `additionalRequests`: An array of additional request configurations.
+- `additionalRequests`: An array of additional request configurations:
+
+| Parameter | Typ | Beschreibung |
+|-----------|-----|--------------|
+| `url` | string | Service URL. |
+| `infoText` | string? | If given, this text is additionally shown beneath the service return value. |
+| `triggerRequestOn` | enum["init", "queryBuffer"] | The additional request will either fire on every request or only on queryBuffer requests, where an additional area around the target can be defined. |
+| `type` | enum["ogcApiProcesses"] | Service type. Currently, only "ogcApiProcesses" are supported. |
+| `resultText` | string[]? | If defined, it is assumed that the service return value is json, and that it can be stepped into. For each string in this array, the return object will be stepped into, and the final step should return a displayable string. If not defined in `type` `"ogcApiProcesses"`, it defaults to `["outputs"]`. |
+| `processId` | string? | If `type` is `ogcApiProcesses`, this will be used as process id. |
+| `staticInputs` | object | If `type` is `ogcApiProcesses`, this will be spread into the request's `inputs` initially. |
+| `dynamicInputs` | object | If `type` is `ogcApiProcesses`, this will be used to spread dynamic data into the request's `inputs` initially. |
+| `dynamicInputs.getters` | {path: string, key: string}[]? | An optional array of getters. If given, the getter at `path` (as seen from root) will be used as input with name `key`. |
+| `dynamicInputs.parsers` | {path: string, key: string}[]? | An optional array of parsers that can be provided via configuration. If given, the javascript file at `path` must direct to a `.js` that has the parser as `module.exports`. The method will be called with the `context` action and may therefore be written like a payloadless action. The response will be used as input with name `key`. |
+| `timeout` | number? | If `type` is `ogcApiProcesses`, this many miliseconds will be waited until the service is considered timeouted. |
+| `stallFor` | number? | If `type` is `ogcApiProcesses`, this many miliseconds will be waited before a new request. |
 
 Example:
 
@@ -153,11 +170,21 @@ Example:
 {
   "additionalRequests": [
     {
-      "url": "https://example.com/api/data",
-      "method": "GET",
-      "params": {
-        "format": "json"
-      }
+      "url": "https://gwbfp-text-generation.dsc.dataport.de",
+      "infoText": "Die Textgenerierung wird mithilfe von KI erstellt und dient zur schnellen Informationsgewinnung. Bitte prüfen Sie alle automatisch generierten Inhalte sorgfältig, bevor Sie diese weiterverwenden.",
+      "resultText": ["outputs", "text"],
+      "type": "ogcApiProcesses",
+      "processId": "gewerbeflaechenportal.generate_description",
+      "triggerRequestOn": "queryBuffer",
+      "staticInputs": {
+        "kiss me baby": "one more time"
+      },
+      "dynamicInputs": {
+        "getters": [{"path": "Modules/CombinedGfi/jsonData", "key": "getter"}],
+        "parsers": [{"path": "./resources/inputsFormatter.js", "key": "parser"}]
+      },
+      "timeout": 20000,
+      "stallFor": 2000
     }
   ]
 }
@@ -572,6 +599,10 @@ Das Addon wird über die `config.json` konfiguriert. Hier ein Beispiel für die 
       "printServerUrl": "https://gisdemo2.dp.dsecurecloud.de/mapfish/print/report/buildreport.pdf",
       "showBuffer": true,
       "bufferDistances": [100, 500, 1000],
+      "bufferAttributes": {
+        "6076": "showAll"
+      },
+      "bufferHint": "Beispieltext",
       "layersToRequest": [
         {
           "id": "6076",
@@ -601,6 +632,8 @@ Das Addon wird über die `config.json` konfiguriert. Hier ein Beispiel für die 
 | `printServerUrl` | String | URL des Print-Servers |
 | `showBuffer` | Boolean | Aktiviert/Deaktiviert die Puffer-Funktion |
 | `bufferDistances` | Array | Liste der verfügbaren Puffer-Distanzen in Metern |
+| `bufferAttributes` | Object | Mapping von Layer-IDs zu gfiAttributes, die für Buffer-Requests zu nutzen sind. Kann auch für zusätzliche Abfragen, die nur im Buffer-Kontext gebraucht werden, genutzt werden. |
+| `bufferHint` | String? | Optionaler Hinweistext, der unter den Buffer-Elementen angezeigt wird. |
 | `layersToRequest` | Array | Liste der Layer, die abgefragt werden sollen |
 
 ### Layer-Konfiguration

@@ -142,11 +142,6 @@ export default class OgcApiProcess {
             return response.data;
         }
         catch (error) {
-            console.error("=== OGC API Process Execute FAILED ===");
-            console.error("Status:", error.response?.status);
-            console.error("Status Text:", error.response?.statusText);
-            console.error("Error Data:", error.response?.data);
-            console.error("Full Error:", error);
             throw error;
         }
     }

@@ -438,9 +438,11 @@ const state = {
         },
 
         /**
-     * Load planning scenario data (scenario area, source, target)
+     * Load planning scenario data (scenario area, source, target, infrastructure)
+     * This data is used to display the scenario context alongside agent visualization
      */
         loadPlanningScenarioData ({commit}, geojson) {
+
             commit("setPlanningScenarioData", geojson);
         },
 

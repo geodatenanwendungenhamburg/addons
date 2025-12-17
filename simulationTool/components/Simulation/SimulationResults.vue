@@ -22,6 +22,7 @@ import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import Text from "ol/style/Text";
 import {infrastructureLayerId} from "../../layerIds.js";
+import {convertToAgentTrajectoryCollection, getStatistics} from "../../utils/agentTrajectoryParser.js";
 
 export default {
     name: "SimulationResults",
@@ -330,7 +331,7 @@ export default {
 
         /**
          * Downloads the simulation results as JSON file.
-         * @param {String} format - The format to download: "complete" or "geojson"
+         * @param {String} format - The format to download: "complete", "geojson", or "compact"
          * @returns {void}
          */
         downloadResults (format = "complete") {
@@ -358,6 +359,34 @@ export default {
                 data = agentData;
                 fileName = `agents_${baseName}_${dateStr}.geojson`;
                 fileType = "application/geo+json";
+            }
+            else if (format === "compact") {
+                // Download agent data in compact AgentTrajectoryCollection format
+                const agentData = this.extractAgentGeoJSON();
+
+                if (!agentData || !agentData.features || agentData.features.length === 0) {
+                    console.warn("No agent data available for download");
+                    alert("Keine Agenten-Daten zum Herunterladen verfügbar.");
+                    return;
+                }
+
+                try {
+                    // Convert to compact format
+                    data = convertToAgentTrajectoryCollection(agentData);
+
+                    // Log statistics for debugging
+                    const stats = getStatistics(data);
+
+                    console.log("[SimulationResults] Compact format statistics:", stats);
+
+                    fileName = `agents_compact_${baseName}_${dateStr}.json`;
+                    fileType = "application/json";
+                }
+                catch (error) {
+                    console.error("[SimulationResults] Error converting to compact format:", error);
+                    alert("Fehler beim Konvertieren in das kompakte Format: " + error.message);
+                    return;
+                }
             }
             else {
                 // Download complete simulation results
@@ -457,9 +486,12 @@ export default {
 
         /**
          * Extracts agent GeoJSON data from job results.
+         * Embeds planningScenarioId and scenario data in metadata for later loading.
          * @returns {Object|null} GeoJSON FeatureCollection or null if not found
          */
         extractAgentGeoJSON () {
+            let agentGeoJSON = null;
+
             for (const job of Object.values(this.jobs)) {
                 // Check for agents in jobResults
                 if (job.jobResults && job.jobResults.agents) {
@@ -470,7 +502,8 @@ export default {
                         agents.features &&
                         Array.isArray(agents.features) &&
                         agents.features.length > 0) {
-                        return agents;
+                        agentGeoJSON = agents;
+                        break;
                     }
                 }
                 // Check if jobResults itself is a FeatureCollection with data
@@ -479,10 +512,42 @@ export default {
                     job.jobResults.features &&
                     Array.isArray(job.jobResults.features) &&
                     job.jobResults.features.length > 0) {
-                    return job.jobResults;
+                    agentGeoJSON = job.jobResults;
+                    break;
                 }
             }
-            return null;
+
+            if (!agentGeoJSON) {
+                console.warn("[SimulationResults] No agent GeoJSON found in job results");
+                return null;
+            }
+
+            // Embed scenario metadata for later reconstruction
+            const scenarioId = this.$store.state?.Modules?.SimulationTool?.currentPlanningScenarioId,
+                scenario = this.currentPlanningScenario;
+
+            // Add metadata to GeoJSON
+            if (!agentGeoJSON.metadata) {
+                agentGeoJSON.metadata = {};
+            }
+
+            agentGeoJSON.metadata.planningScenarioId = scenarioId;
+            agentGeoJSON.metadata.planningScenarioName = scenario?.name;
+            agentGeoJSON.metadata.simulationId = this.simulationIdForResults;
+            agentGeoJSON.metadata.timestamp = new Date().toISOString();
+
+            // Embed full scenario data if available
+            if (scenario) {
+                agentGeoJSON.metadata.planningScenario = {
+                    id: scenario.id,
+                    name: scenario.name,
+                    dataSourceId: scenario.dataSourceId,
+                    scenarioFeature: scenario.scenarioFeature,
+                    inputs: scenario.inputs
+                };
+            }
+
+            return agentGeoJSON;
         },
 
         /**
@@ -1136,10 +1201,19 @@ export default {
                         <FlatButton
                             v-if="extractAgentGeoJSON()"
                             id="download-results-geojson"
+                            class="me-2"
                             :icon="'bi bi-geo-alt'"
                             :aria-label="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
                             :text="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
                             @click="() => downloadResults('geojson')"
+                        />
+                        <FlatButton
+                            v-if="extractAgentGeoJSON()"
+                            id="download-results-compact"
+                            :icon="'bi bi-file-earmark-zip'"
+                            :aria-label="$t('additional:modules.tools.simulationTool.downloadCompact')"
+                            :text="$t('additional:modules.tools.simulationTool.downloadCompact')"
+                            @click="() => downloadResults('compact')"
                         />
                     </div>
                     <!-- If print module is available, show print button -->
