@@ -71,13 +71,9 @@ export default {
         ]),
         /** @override */
         resetWizardStepData () {
-            if (!this.componentFormData.restrictedListItems.length) {
-                return;
-            }
-
             mapCollection.getMap("2D").getLayers().getArray().find(layer => {
                 return layer.get("id") === "module/pvObligation/drawLayer";
-            }).getSource().clear();
+            })?.getSource()?.clear();
 
             this.componentFormData.restrictedListItems.splice(0);
         },
