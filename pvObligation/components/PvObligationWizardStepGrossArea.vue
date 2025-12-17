@@ -4,13 +4,13 @@ import {mapActions, mapGetters, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
-import ConfirmModalItem from "./shared/ConfirmModalItem.vue";
+import ConfirmModal from "@shared/modules/modals/components/ConfirmModal.vue";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
 export default {
     name: "PvObligationWizardStepGrossArea",
     components: {
-        ConfirmModalItem,
+        ConfirmModal,
         PvObligationSimpleTable
     },
     extends: PvObligationWizardStepScriptExtends,
@@ -199,12 +199,12 @@ export default {
             ]"
         />
 
-        <ConfirmModalItem
-            modal-inner-wrapper-style="max-width: 25rem"
+        <ConfirmModal
             :show-modal="showConfirmModal"
             :modal-title="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.header')"
             :button-confirm-label="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.actionButtonConfirmLabel')"
             :button-cancel-label="$t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.actionButtonCancelLabel')"
+            modal-class="confirmModalMaxWidth"
             @clicked-confirm="handleClickedActionButtonConfirm()"
             @clicked-cancel="handleClickedActionButtonCancel()"
         >
@@ -215,12 +215,16 @@ export default {
             <p>
                 {{ $t('additional:modules.pvObligation.wizard.step.grossArea.component.confirmModal.contentQuestion') }}
             </p>
-        </ConfirmModalItem>
+        </ConfirmModal>
     </div>
 </template>
 
 <style lang="scss" scoped>
     @import "~variables";
+
+    :deep(.confirmModalMaxWidth) {
+        width: 25rem;
+    }
 
     #pvObligationWizardStepGrossArea {
         margin-top: 0.5rem;
