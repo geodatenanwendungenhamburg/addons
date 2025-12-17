@@ -28,7 +28,7 @@
                             for="agent-data-file"
                             class="file-label"
                         >
-                            GeoJSON Datei auswählen
+                            GeoJSON oder Kompakt-Format Datei auswählen
                         </label>
                     </div>
                 </div>
@@ -88,6 +88,7 @@ import {boundingExtent, buffer} from "ol/extent";
 import {Heatmap as HeatmapLayer, WebGLPoints as WebGLPointsLayer} from "ol/layer";
 import {Vector as VectorSource} from "ol/source";
 import {getCapabilityColor, findClosestFeature, passesFilters} from "../../utils/agentVisualizationHelpers";
+import {convertToGeoJSON} from "../../utils/agentTrajectoryParser.js";
 import {infrastructureLayerId} from "../../layerIds.js";
 import layerCollection from "../../../../src/core/layers/js/layerCollection";
 import layerFactory from "../../../../src/core/layers/js/layerFactory";
@@ -359,8 +360,21 @@ export default {
                 const text = await file.text();
                 let geojson = JSON.parse(text);
 
+                // Check if this is a compact AgentTrajectoryCollection format
+                if (geojson.type === "AgentTrajectoryCollection") {
+                    try {
+                        const originalAgentCount = Object.keys(geojson.agents || {}).length;
+
+                        geojson = convertToGeoJSON(geojson);
+
+                        console.warn(`[AgentVisualization] Kompaktes Format erkannt und konvertiert: ${originalAgentCount} Agenten, ${geojson.features?.length || 0} Features`);
+                    }
+                    catch (error) {
+                        throw new Error(`Fehler beim Konvertieren des kompakten Formats: ${error.message}`);
+                    }
+                }
                 // Check if this is a simulation export file (complete format)
-                if (geojson.jobs && geojson.simulationId) {
+                else if (geojson.jobs && geojson.simulationId) {
                     // Try to extract agent GeoJSON from jobs
                     let agentData = null;
 

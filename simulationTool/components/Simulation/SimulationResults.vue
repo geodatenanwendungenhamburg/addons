@@ -21,6 +21,7 @@ import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import Text from "ol/style/Text";
 import {infrastructureLayerId} from "../../layerIds.js";
+import {convertToAgentTrajectoryCollection, getStatistics} from "../../utils/agentTrajectoryParser.js";
 
 export default {
     name: "SimulationResults",
@@ -327,7 +328,7 @@ export default {
 
         /**
          * Downloads the simulation results as JSON file.
-         * @param {String} format - The format to download: "complete" or "geojson"
+         * @param {String} format - The format to download: "complete", "geojson", or "compact"
          * @returns {void}
          */
         downloadResults (format = "complete") {
@@ -352,6 +353,34 @@ export default {
                 data = agentData;
                 fileName = `agents_${baseName}_${dateStr}.geojson`;
                 fileType = "application/geo+json";
+            }
+            else if (format === "compact") {
+                // Download agent data in compact AgentTrajectoryCollection format
+                const agentData = this.extractAgentGeoJSON();
+
+                if (!agentData || !agentData.features || agentData.features.length === 0) {
+                    console.warn("No agent data available for download");
+                    alert("Keine Agenten-Daten zum Herunterladen verfügbar.");
+                    return;
+                }
+
+                try {
+                    // Convert to compact format
+                    data = convertToAgentTrajectoryCollection(agentData);
+
+                    // Log statistics for debugging
+                    const stats = getStatistics(data);
+
+                    console.log("[SimulationResults] Compact format statistics:", stats);
+
+                    fileName = `agents_compact_${baseName}_${dateStr}.json`;
+                    fileType = "application/json";
+                }
+                catch (error) {
+                    console.error("[SimulationResults] Error converting to compact format:", error);
+                    alert("Fehler beim Konvertieren in das kompakte Format: " + error.message);
+                    return;
+                }
             }
             else {
                 // Download complete simulation results
@@ -1094,10 +1123,19 @@ export default {
                         <FlatButton
                             v-if="extractAgentGeoJSON()"
                             id="download-results-geojson"
+                            class="me-2"
                             :icon="'bi bi-geo-alt'"
                             :aria-label="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
                             :text="$t('additional:modules.tools.simulationTool.downloadGeoJSON')"
                             @click="() => downloadResults('geojson')"
+                        />
+                        <FlatButton
+                            v-if="extractAgentGeoJSON()"
+                            id="download-results-compact"
+                            :icon="'bi bi-file-earmark-zip'"
+                            :aria-label="$t('additional:modules.tools.simulationTool.downloadCompact')"
+                            :text="$t('additional:modules.tools.simulationTool.downloadCompact')"
+                            @click="() => downloadResults('compact')"
                         />
                     </div>
                     <!-- If print module is available, show print button -->

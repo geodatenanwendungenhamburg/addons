@@ -199,6 +199,7 @@
           "downloadResults": "Ergebnisse herunterladen",
           "downloadComplete": "Vollständig",
           "downloadGeoJSON": "GeoJSON",
+          "downloadCompact": "Kompakt",
           "agentCount": "Anzahl der Agenten",
           "simulate": "Simulieren",
           "simulateEnsemble": "Ensemble simulieren",
