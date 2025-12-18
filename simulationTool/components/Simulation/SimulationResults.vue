@@ -440,14 +440,15 @@ export default {
                 this.$store.registerModule("agentVisualization", agentVisualizationModule);
             }
 
-            // Collect planning scenario geometries
+            // Collect all scenario-related geometries (planning-scenario + infrastructure layers)
             const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
-                planningScenarioData = this.collectPlanningScenarioGeometries(planningScenarioLayer);
+                infrastructureLayer = layerCollection.getLayerById(infrastructureLayerId),
+                combinedGeometries = this.collectAllScenarioGeometries(planningScenarioLayer, infrastructureLayer);
 
             // Store data for AgentVisualization to pick up (consistent with auto-load flow)
             this.$store.commit("agentVisualization/setAgentData", agentData);
-            if (planningScenarioData) {
-                this.$store.commit("agentVisualization/setPlanningScenarioData", planningScenarioData);
+            if (combinedGeometries) {
+                this.$store.commit("agentVisualization/setPlanningScenarioData", combinedGeometries);
             }
 
             // Set flag to indicate automatic load (AgentVisualization will process it)
@@ -480,6 +481,84 @@ export default {
                     dataProjection: "EPSG:4326",
                     featureProjection: "EPSG:25832"
                 });
+
+            return geojson;
+        },
+
+        /**
+         * Collects geometries from both planning scenario and infrastructure layers
+         * @param {Object} planningScenarioLayer - The planning scenario layer
+         * @param {Object} infrastructureLayer - The infrastructure layer (bike stations, etc.)
+         * @returns {Object|null} Combined GeoJSON FeatureCollection or null
+         */
+        collectAllScenarioGeometries (planningScenarioLayer, infrastructureLayer) {
+            const GeoJSON = require("ol/format/GeoJSON").default,
+                geoJsonFormat = new GeoJSON(),
+                allFeatures = [];
+
+            // Collect features from planning scenario layer
+            if (planningScenarioLayer) {
+                const layerSource = planningScenarioLayer.getLayerSource(),
+                    features = layerSource.getFeatures();
+
+                if (features && features.length > 0) {
+                    allFeatures.push(...features);
+                }
+            }
+
+            // Collect features from infrastructure layer (bike stations, etc.)
+            if (infrastructureLayer) {
+                const layerSource = infrastructureLayer.getLayerSource(),
+                    features = layerSource.getFeatures();
+
+                if (features && features.length > 0) {
+                    allFeatures.push(...features);
+                }
+            }
+
+            if (allFeatures.length === 0) {
+                return null;
+            }
+
+            // Convert all features to GeoJSON
+            const geojson = geoJsonFormat.writeFeaturesObject(allFeatures, {
+                dataProjection: "EPSG:4326",
+                featureProjection: "EPSG:25832"
+            });
+
+            // Preserve styles by converting OpenLayers styles to GeoJSON style properties
+            if (geojson.features) {
+                geojson.features.forEach((geoJsonFeature, index) => {
+                    const olFeature = allFeatures[index],
+                        olStyle = olFeature.getStyle();
+
+                    // If feature has a style, convert it to GeoJSON style format
+                    if (olStyle) {
+                        // Handle both single style and array of styles
+                        const styleToConvert = Array.isArray(olStyle) ? olStyle[0] : olStyle;
+
+                        if (styleToConvert && typeof styleToConvert === "function") {
+                            // Style is a function, evaluate it
+                            const evaluatedStyle = styleToConvert(olFeature);
+
+                            if (evaluatedStyle) {
+                                geoJsonFeature.style = ConvertStyle.openlayersToGeoJson(
+                                    Array.isArray(evaluatedStyle) ? evaluatedStyle[0] : evaluatedStyle
+                                );
+                            }
+                        }
+                        else if (styleToConvert) {
+                            // Style is already an object
+                            geoJsonFeature.style = ConvertStyle.openlayersToGeoJson(styleToConvert);
+                        }
+                    }
+
+                    // Preserve feature ID
+                    if (olFeature.getId()) {
+                        geoJsonFeature.id = olFeature.getId();
+                    }
+                });
+            }
 
             return geojson;
         },

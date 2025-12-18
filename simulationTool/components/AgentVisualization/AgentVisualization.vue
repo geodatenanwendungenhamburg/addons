@@ -132,6 +132,7 @@ import FilterPanel from "./FilterPanel.vue";
 import TimeEngine from "../../utils/TimeEngine";
 import AgentInterpolator from "../../utils/AgentInterpolator";
 import ConvertStyle from "../../js/convertStyle";
+import createInfrastructureStyle from "../../js/createInfrastructureStyle";
 
 const AGENT_LAYER_ID = "green4bikes-agents";
 
@@ -262,6 +263,59 @@ export default {
             if (planningScenarioData) {
                 this.renderPlanningScenarioData(planningScenarioData);
             }
+
+            // CRITICAL: Re-apply infrastructure styles after initialization
+            // This ensures bike station icons are displayed correctly when loading directly from SimulationResults
+            // Use setTimeout to ensure this happens AFTER all rendering is complete
+            setTimeout(() => {
+                this.reapplyInfrastructureStyles();
+            }, 100);
+        },
+
+        /**
+         * Re-applies infrastructure styles to all point features
+         * This is needed when features are loaded from existing layers where icon styles may be lost
+         */
+        reapplyInfrastructureStyles () {
+            const infrastructureLayer = layerCollection.getLayerById(infrastructureLayerId),
+                styleConfig = this.$store.state?.Modules?.SimulationTool?.infrastructurePointStyle;
+
+            if (!infrastructureLayer || !styleConfig) {
+                console.warn("[AgentVisualization] Cannot reapply styles - layer or config missing", {
+                    hasLayer: !!infrastructureLayer,
+                    hasConfig: !!styleConfig
+                });
+                return;
+            }
+
+            const layerSource = infrastructureLayer.getLayerSource(),
+                features = layerSource.getFeatures(),
+                pointFeatures = features.filter(f => f.getGeometry()?.getType() === "Point");
+
+            console.log("[AgentVisualization] Reapplying infrastructure styles", {
+                totalFeatures: features.length,
+                pointFeatures: pointFeatures.length,
+                styleConfigType: styleConfig?.type,
+                styleConfigIconSrc: styleConfig?.icon?.src,
+                fullStyleConfig: JSON.parse(JSON.stringify(styleConfig))
+            });
+
+            pointFeatures.forEach(feature => {
+                // Remove old style properties that might interfere
+                feature.unset("styleId", true);
+                feature.unset("style", true);
+
+                const style = createInfrastructureStyle(feature, styleConfig);
+
+                if (style) {
+                    feature.setStyle(style);
+                    console.log("[AgentVisualization] Applied style to feature", {
+                        featureId: feature.getId(),
+                        geometryType: feature.getGeometry()?.getType(),
+                        styleType: Array.isArray(style) ? "array" : "single"
+                    });
+                }
+            });
         },
 
         /**
@@ -627,11 +681,25 @@ export default {
                 await this.$store.dispatch("agentVisualization/calculateTimeSeriesMetrics");
                 await this.updateLoadingProgress(66, "Initialisiere Visualisierung...");
 
-                // Step 3: Load into interpolator
+                // Step 3: CRITICAL - Call updateFeatures to reload infrastructure from store
+                // This is the same approach as when uploading a compact file with embedded scenario metadata
+                // It ensures features are loaded fresh from the scenario store with proper icon styles applied at creation time
+                // Without this call, the infrastructure features come from the GeoJSON conversion which loses Icon styles
+                console.warn("[AgentVisualization] Calling updateFeatures to reload infrastructure with correct styles");
+                await this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+
+                // Step 4: Render planning scenario data if available (bbox, start/end areas)
+                const planningScenarioData = this.$store.state.agentVisualization.planningScenarioData;
+
+                if (planningScenarioData) {
+                    this.renderPlanningScenarioData(planningScenarioData);
+                }
+
+                // Step 5: Load into interpolator
                 this.interpolator.loadTrajectories(geojson.features);
                 this.dataLoaded = true;
 
-                // Step 4: Zoom and update
+                // Step 6: Zoom and update
                 this.zoomToAgentData(geojson.features);
                 this.updateVisualization();
                 await this.updateLoadingProgress(100, "Fertig!", 200);
@@ -760,10 +828,10 @@ export default {
 
             // === Render Infrastructure (buildings, roads, stations) ===
             if (infrastructureLayer && currentScenario && currentScenario.inputs) {
-                const infraLayerSource = infrastructureLayer.getLayerSource();
+                const infraLayerSource = infrastructureLayer.getLayerSource(),
+                    styleConfig = this.$store.state?.Modules?.SimulationTool?.infrastructurePointStyle;
 
-                // Don't clear - layer should already have features from SimulationParameter
-                // But ensure they're visible if they were added
+                // Ensure layer is visible
                 infrastructureLayer.layer.setVisible(true);
 
                 // If infrastructure layer is empty, add features from store
@@ -781,10 +849,52 @@ export default {
                                     featureProjection: "EPSG:25832"
                                 });
 
+                                // Remove old style properties that might interfere
+                                olFeature.unset("styleId", true);
+                                olFeature.unset("style", true);
+
+                                // Apply infrastructure style (for stations/points)
+                                const style = createInfrastructureStyle(olFeature, styleConfig);
+
+                                if (style) {
+                                    olFeature.setStyle(style);
+                                }
+
                                 infraLayerSource.addFeature(olFeature);
                             });
                         }
                     });
+                }
+                else {
+                    // Layer has features, but ensure they have correct styling (icons might be lost)
+                    // Re-apply infrastructure styles to all point features
+                    console.log("[AgentVisualization] Re-styling existing infrastructure features in else block", {
+                        featureCount: infraLayerSource.getFeatures().length
+                    });
+                    
+                    infraLayerSource.getFeatures().forEach(feature => {
+                        if (feature.getGeometry()?.getType() === "Point") {
+                            // CRITICAL: Remove old style properties that prevent icon display
+                            feature.unset("styleId", true);
+                            feature.unset("style", true);
+
+                            const style = createInfrastructureStyle(feature, styleConfig);
+
+                            if (style) {
+                                feature.setStyle(style);
+                                console.log("[AgentVisualization] Applied style in else block", {
+                                    featureId: feature.getId(),
+                                    hasStyle: !!style
+                                });
+                            }
+                            
+                            // Force OpenLayers to re-render this feature
+                            feature.changed();
+                        }
+                    });
+                    
+                    // Force layer refresh
+                    infrastructureLayer.layer.changed();
                 }
             }
 
@@ -817,6 +927,24 @@ export default {
                         }
                     });
                 }
+            }
+
+            // === ALWAYS re-apply infrastructure styles to ensure icons are visible ===
+            // This is needed because when features are collected from existing layers,
+            // the icon styles may be lost during GeoJSON conversion
+            if (infrastructureLayer) {
+                const infraLayerSource = infrastructureLayer.getLayerSource(),
+                    styleConfig = this.$store.state?.Modules?.SimulationTool?.infrastructurePointStyle;
+
+                infraLayerSource.getFeatures().forEach(feature => {
+                    if (feature.getGeometry()?.getType() === "Point") {
+                        const style = createInfrastructureStyle(feature, styleConfig);
+
+                        if (style) {
+                            feature.setStyle(style);
+                        }
+                    }
+                });
             }
         },
 
