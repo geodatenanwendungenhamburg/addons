@@ -11,7 +11,7 @@ export default {
         // ProcessList
     },
     computed: {
-        ...mapGetters("Modules/Login", ["username", "loggedIn"]),
+        ...mapGetters("Modules/Login", ["screenName", "loggedIn"]),
         ...mapGetters("Modules/SimulationTool", [
             "hiddenSideMenus"
         ])
@@ -41,11 +41,11 @@ export default {
             alt=""
         >
         <div
-            v-if="username"
+            v-if="screenName"
             class="welcome-user p-2"
         >
             <span>{{ $t("additional:modules.tools.simulationTool.welcome") }}</span>
-            <span v-if="loggedIn">, {{ username }}</span>
+            <span v-if="loggedIn">, {{ screenName }}</span>
         </div>
         <span v-else>
             <span class="welcome-user">{{ $t("additional:modules.tools.simulationTool.notLoggedIn") }}</span>
