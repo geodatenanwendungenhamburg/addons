@@ -4,7 +4,7 @@ import {mapActions, mapGetters, mapMutations} from "vuex";
 import Select from "ol/interaction/Select";
 import {Style, Stroke, Fill} from "ol/style";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator";
-import ConfirmModal from "@shared/modules/modals/components/ConfirmModal.vue";
+import ConfirmModal from "./shared/ConfirmModal.vue";
 import PvObligationSimpleTable from "./PvObligationSimpleTable.vue";
 
 export default {
