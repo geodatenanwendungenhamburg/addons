@@ -1,6 +1,7 @@
 
 import GeoJSON from "ol/format/GeoJSON";
 import dissolve from "@turf/dissolve";
+import buffer from "@turf/buffer";
 import {featureCollection} from "@turf/helpers";
 import {transform} from "ol/proj";
 import {createEmpty as createEmptyExtent, extend} from "ol/extent";
@@ -532,7 +533,7 @@ export default {
      * @param {string} payload.layerId - The Id of the source layer containing roof features.
      * @returns {number} The total calculated roof area (sum of "dachfl_3d" property).
      */
-    dissolveRoofFeaturesAndCalculateArea ({commit}, payload) {
+    async dissolveRoofFeaturesAndCalculateArea ({commit, dispatch, rootGetters}, payload) {
         const {roofId, outlineLayer, layerId} = payload,
             geojsonFeatures = [], // turf requires array of geojson features
             sourceLayer = mapCollection.getMap("2D") ? mapCollection.getMap("2D").getLayers().getArray().find(layer => layer.get("id") === layerId) : undefined,
@@ -569,15 +570,45 @@ export default {
         olSource.clear();
 
         if (geojsonFeatures.length > 0) {
-            const features = featureCollection(geojsonFeatures),
-                dissolvedFeatureGeoJson = dissolve(features),
-                bbox = createEmptyExtent();
+            const geojsonFeatures4326 = await Promise.all(
+                geojsonFeatures.map(feature => dispatch("projectGeoJsonCoords", {
+                    geojson: feature,
+                    fromCrs: rootGetters["Maps/projectionCode"],
+                    toCrs: "EPSG:4326"
+                }))
+            );
 
-            dissolvedFeatureGeoJson.features.forEach(feature => {
-                const dissolvedFeature = format.readFeature(feature);
+            const bufferedFeatures4326 = await new Promise((resolve, reject) => {
+                dispatch("bufferGeoJsonFeatures", geojsonFeatures4326).then(resolve).catch(reject);
+            });
+
+            let dissolvedFeatureGeoJson = null;
+
+            try {
+                dissolvedFeatureGeoJson = dissolve(bufferedFeatures4326);
+
+            }
+            catch (error) {
+                console.error("Error during dissolve operation:", error);
+                dissolvedFeatureGeoJson = dissolve(featureCollection(geojsonFeatures4326));
+            }
+
+            const bbox = createEmptyExtent();
+
+            // Project back to the map's projection and add to OL
+            dissolvedFeatureGeoJson.features.forEach(async feature => {
+                const projectedFeature = await new Promise((resolve, reject) => {
+                    dispatch("projectGeoJsonCoords", {
+                        geojson: feature,
+                        fromCrs: "EPSG:4326",
+                        toCrs: rootGetters["Maps/projectionCode"]
+                    }).then(resolve).catch(reject);
+                });
+
+
+                const dissolvedFeature = format.readFeature(projectedFeature);
 
                 olSource.addFeature(dissolvedFeature);
-
                 extend(bbox, dissolvedFeature.getGeometry().getExtent());
             });
 
@@ -760,5 +791,54 @@ export default {
                 }
             }, {root: true});
         }
+    },
+    /**
+     * Projects the coordinates of a GeoJSON geometry or feature from one projection to another.
+     * @param {Object} _ - Vuex context (unused).
+     * @param {Object} payload - { geojson, fromCrs, toCrs }
+     * @returns {Object} The projected GeoJSON object.
+     */
+    async projectGeoJsonCoords (_, {geojson, fromCrs, toCrs}) {
+
+        // eslint-disable-next-line
+        function projectCoords (coords) {
+            if (typeof coords[0] === "number") {
+                return transform(coords, fromCrs, toCrs);
+            }
+            return coords.map(projectCoords);
+        }
+        const clone = JSON.parse(JSON.stringify(geojson));
+
+        if (clone.geometry && clone.geometry.coordinates) {
+            clone.geometry.coordinates = projectCoords(clone.geometry.coordinates);
+        }
+        else if (clone.coordinates) {
+            clone.coordinates = projectCoords(clone.coordinates);
+        }
+        return clone;
+    },
+    /**
+     * Buffers an array of GeoJSON features in EPSG:4326 and returns a Turf.js feature collection of the buffered polygons.
+     *
+     * @param {Object} _ - Vuex context (unused).
+     * @param {Array<Object>} geojsonFeatures4326 - Array of GeoJSON features in EPSG:4326 projection.
+     * @returns {Object} A Turf.js FeatureCollection containing the buffered features.
+     */
+    bufferGeoJsonFeatures (_, geojsonFeatures4326) {
+        // Buffer in EPSG:4326
+        const bufferedFeatures4326 = geojsonFeatures4326.map(feature => {
+            const buff = buffer(feature, 0.005, {units: "meters"});
+
+            return buff;
+        }).filter(feature => {
+
+            return feature &&
+                feature.geometry &&
+                (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon");
+        });
+
+        const features = featureCollection(bufferedFeatures4326);
+
+        return features;
     }
 };

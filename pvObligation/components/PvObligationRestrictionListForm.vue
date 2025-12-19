@@ -91,8 +91,8 @@ export default {
             this.drawState?.layer?.getSource().getFeatures().forEach(feature => {
                 if (feature.get("id") === this.formData.id) {
                     feature.setStyle(new Style({
-                        fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
-                        stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2}),
+                        fill: new Fill({color: "rgba(226, 34, 37, 0.2)"}),
+                        stroke: new Stroke({color: "rgba(226, 34, 37, 1)", width: 2}),
                         text: new OlText({
                             text: this.formData.id,
                             font: "bold 14px Arial",
@@ -178,8 +178,8 @@ export default {
                 type: "Polygon",
                 stopClick: true,
                 style: new Style({
-                    fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
-                    stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2})
+                    fill: new Fill({color: "rgba(226, 34, 37, 0.2)"}),
+                    stroke: new Stroke({color: "rgba(226, 34, 37, 1)", width: 2})
                 })
             });
 
@@ -205,7 +205,7 @@ export default {
             this.drawState.layer.getSource().getFeatures().forEach(feature => {
                 if (feature.get("id") === this.formData.id) {
                     feature.setStyle(new Style({
-                        fill: new Fill({color: "rgba(0, 255, 128, 0.3)"}),
+                        fill: new Fill({color: "rgba(0, 255, 128, 0.2)"}),
                         stroke: new Stroke({color: "rgba(200, 237, 245, 1)", width: 2}),
                         text: new OlText({
                             text: this.formData.id,
@@ -462,8 +462,8 @@ export default {
 
             // Add a text label style
             feature.setStyle(new Style({
-                fill: new Fill({color: "rgba(37, 34, 226, 0.3)"}),
-                stroke: new Stroke({color: "rgba(9, 237, 245, 1)", width: 2}),
+                fill: new Fill({color: "rgba(226, 34, 37, 0.2)"}),
+                stroke: new Stroke({color: "rgba(226, 34, 37, 1)", width: 2}),
                 text: new OlText({
                     text: this.formData.id,
                     font: "bold 14px Arial",
