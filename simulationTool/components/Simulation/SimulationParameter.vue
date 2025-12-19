@@ -280,7 +280,7 @@ export default {
                             this.flatInputs[inputKey] = input;
                             break;
                         default:
-                            console.warn(`Unsupported input type for ${inputKey}: ${input.schema?.type}`);
+                            console.warn(`[SimulationParameter] Unsupported input type for ${inputKey}: ${input.schema?.type}`);
                             break;
                     }
                 }
@@ -364,6 +364,36 @@ export default {
             "setMode",
             "setSimulationIdForResults"
         ]),
+
+        /**
+         * Recursively extracts a Polygon geometry from potentially nested FeatureCollections.
+         * Stops when finding the first Polygon geometry.
+         * @param {Object} geometry - The geometry object to extract from
+         * @returns {Object|null} The Polygon geometry or null if not found
+         */
+        extractPolygonGeometry (geometry) {
+            if (!geometry) {
+                return null;
+            }
+
+            // If it's a Polygon, return it
+            if (geometry.type === "Polygon") {
+                return geometry;
+            }
+
+            // If it's a FeatureCollection, search through features
+            if (geometry.type === "FeatureCollection" && Array.isArray(geometry.features)) {
+                for (const feature of geometry.features) {
+                    const extracted = this.extractPolygonGeometry(feature.geometry);
+
+                    if (extracted && extracted.type === "Polygon") {
+                        return extracted;
+                    }
+                }
+            }
+
+            return null;
+        },
 
         /**
          * Back to previous component.
@@ -1226,7 +1256,8 @@ export default {
 
             this.removeEmptyCollections(this.requestBodies);
 
-            const requestBodiesDeepCopy = JSON.parse(JSON.stringify(this.requestBodies));
+            const requestBodiesDeepCopy = JSON.parse(JSON.stringify(this.requestBodies)),
+                isGreen4Bikes = this.currentSimulationId && this.currentSimulationId.includes("green4Bikes");
             let requestBodiesToSend = null,
                 scenario = null,
                 executeResponses = null,
@@ -1239,13 +1270,14 @@ export default {
             requestBodiesToSend = this.replaceArrayOrEnumValueObjects(requestBodiesDeepCopy);
 
             // Process Green4Bikes specific inputs on the copy that will be sent
-            if (this.currentSimulationId && this.currentSimulationId.includes("green4Bikes")) {
-                requestBodiesToSend.forEach(requestBody => {
+            if (isGreen4Bikes) {
+                requestBodiesToSend.forEach((requestBody) => {
                     this.processGreen4BikesRequestBody(requestBody);
                 });
             }
 
             scenario = this.planningScenarios.find(scnrio => scnrio.id === this.currentPlanningScenarioId); // Cannot use computed property here, which may change during async call.
+
             executeResponses = await Promise.all(
                 this.processHandlers.map((handler, index) => handler.execute(requestBodiesToSend[index], this.accessToken))
             );
@@ -1258,7 +1290,7 @@ export default {
             };
 
             if (jobIDs.some(ID => !ID)) {
-                console.warn("Not all job IDs returned from process execution.");
+                console.warn("[SimulationParameter] Not all job IDs returned from process execution.");
                 return;
             }
 
@@ -1267,8 +1299,6 @@ export default {
             this.openSimulation(newSimulationId);
 
             newSimulation.jobs = Object.fromEntries(jobIDs.map(ID => [ID, {}]));
-
-            const isGreen4Bikes = this.currentSimulationId && this.currentSimulationId.includes("green4Bikes");
 
             Object.values(newSimulation.jobs).forEach(async (job, index) => {
                 job.requestBody = JSON.parse(JSON.stringify(requestBodiesToSend[index]));
@@ -1290,82 +1320,167 @@ export default {
         },
 
         /**
-         * Processes Green4Bikes specific inputs for a single request body.
-         * Transforms cycleTravelerLayer, rentalStations and removes unwanted parameters.
-         * @param {Object} requestBody - The request body to process.
+         * Applies source feature data to cycleTravelerSource in request body.
+         * Handles nested FeatureCollection structure from CycleTravelerLayerInput.
+         * @param {Object} sourceFeature - The source feature from cycleTravelerLayer FeatureCollection
+         * @param {Object} requestBody - The request body to update
+         * @returns {void}
+         */
+        applyGreen4BikesSourceFeature (sourceFeature, requestBody) {
+            if (!sourceFeature || !sourceFeature.geometry) {
+                console.warn("[SimulationParameter] sourceFeature invalid or missing geometry:", sourceFeature);
+                return;
+            }
+
+            // Recursively extract the Polygon geometry from potentially nested FeatureCollections
+            const sourceGeometry = this.extractPolygonGeometry(sourceFeature.geometry),
+                properties = {};
+
+            if (!sourceGeometry || sourceGeometry.type !== "Polygon") {
+                console.warn("[SimulationParameter] Could not extract Polygon geometry from sourceFeature");
+                return;
+            }
+
+            // Start with outer feature properties
+            if (sourceFeature.properties) {
+                Object.assign(properties, sourceFeature.properties);
+            }
+
+            // Clean up: remove "type" property (it's metadata, not part of the API spec)
+            delete properties.type;
+
+            // Ensure spawningAmount is a number
+            if (properties.spawningAmount !== undefined) {
+                properties.spawningAmount = parseInt(properties.spawningAmount, 10) || 10;
+            }
+            else {
+                properties.spawningAmount = 10;
+            }
+
+            // spawningIntervalInMinutes should be converted to number if present
+            if (properties.spawningIntervalInMinutes !== undefined && properties.spawningIntervalInMinutes !== null) {
+                properties.spawningIntervalInMinutes = parseInt(properties.spawningIntervalInMinutes, 10);
+            }
+
+            requestBody.inputs.cycleTravelerSource = {
+                type: "Feature",
+                geometry: sourceGeometry,
+                properties: properties
+            };
+        },
+
+        /**
+         * Applies target feature data to cycleTravelerTarget in request body.
+         * Handles nested FeatureCollection structure from CycleTravelerLayerInput.
+         * @param {Object} targetFeature - The target feature from cycleTravelerLayer FeatureCollection
+         * @param {Object} requestBody - The request body to update
+         * @returns {void}
+         */
+        applyGreen4BikesTargetFeature (targetFeature, requestBody) {
+            if (!targetFeature || !targetFeature.geometry) {
+                console.warn("[SimulationParameter] targetFeature invalid or missing geometry:", targetFeature);
+                return;
+            }
+
+            // Recursively extract the Polygon geometry from potentially nested FeatureCollections
+            const targetGeometry = this.extractPolygonGeometry(targetFeature.geometry);
+
+            if (!targetGeometry || targetGeometry.type !== "Polygon") {
+                console.warn("[SimulationParameter] Could not extract Polygon geometry from targetFeature");
+                return;
+            }
+
+            // API expects only the geometry for cycleTravelerTarget, not a Feature wrapper
+            requestBody.inputs.cycleTravelerTarget = targetGeometry;
+        },
+
+        /**
+         * Processes the request body for Green4Bikes specific requirements.
+         * Extracts source and target from cycleTravelerLayer FeatureCollection,
+         * removes unsupported parameters, and cleans up empty optional parameters.
+         * @param {Object} requestBody - The request body to process
          * @returns {void}
          */
         processGreen4BikesRequestBody (requestBody) {
             if (!requestBody?.inputs) {
+                console.warn("[SimulationParameter] Request body has no inputs");
                 return;
             }
 
-            const cycleTravelerLayerStr = requestBody.inputs.cycleTravelerLayer;
+            console.log("[SimulationParameter] cycleTravelerLayer exists:", Boolean(requestBody.inputs.cycleTravelerLayer));
+            console.log("[SimulationParameter] Request body inputs before Green4Bikes processing:", Object.keys(requestBody.inputs));
 
-            if (cycleTravelerLayerStr && typeof cycleTravelerLayerStr === "string") {
-                try {
-                    const featureCollection = JSON.parse(cycleTravelerLayerStr);
+            const cycleTravelerLayerData = requestBody.inputs.cycleTravelerLayer;
 
-                    if (featureCollection?.features?.length >= 2) {
-                        // Extract source and target features
-                        const sourceFeature = featureCollection.features.find(f => f.id === "cycleTravelerSource" || f.properties?.type === "source"),
-                            targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
+            // Handle both Object and String formats (after replaceArrayOrEnumValueObjects, it comes as Object)
+            let featureCollection = null;
 
-                        if (sourceFeature) {
-                            // Keep original geometry (Polygon or Point)
-                            const sourceGeometry = sourceFeature.geometry,
-
-                                // Extract spawningAmount and spawningIntervalInMinutes
-                                spawningAmount = sourceFeature.properties?.spawningAmount || 10,
-                                spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
-
-                                properties = {
-                                    spawningAmount: String(spawningAmount)
-                                };
-
-                            // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
-                            if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
-                                properties.spawningIntervalInMinutes = String(spawningIntervalInMinutes);
-                            }
-
-                            requestBody.inputs.cycleTravelerSource = {
-                                type: "Feature",
-                                geometry: sourceGeometry,
-                                properties: properties
-                            };
-                        }
-
-                        if (targetFeature) {
-                            // Keep original geometry (Polygon or Point)
-                            const targetGeometry = targetFeature.geometry;
-
-                            // Target is just a geometry, no Feature wrapper needed
-                            requestBody.inputs.cycleTravelerTarget = targetGeometry;
-                        }
-
-                        // Remove the temporary cycleTravelerLayer
-                        delete requestBody.inputs.cycleTravelerLayer;
+            if (cycleTravelerLayerData) {
+                if (typeof cycleTravelerLayerData === "string") {
+                    try {
+                        featureCollection = JSON.parse(cycleTravelerLayerData);
+                    }
+                    catch (error) {
+                        console.error("[SimulationParameter] Error parsing cycleTravelerLayer string:", error);
+                        return;
                     }
                 }
-                catch (error) {
-                    console.warn("Error processing cycleTravelerLayer:", error);
+                else if (typeof cycleTravelerLayerData === "object" && cycleTravelerLayerData.type === "FeatureCollection") {
+                    featureCollection = cycleTravelerLayerData;
                 }
             }
 
-            // Process rentalStations if present (renamed from bikeStations)
-            // Remove unsupported parameters for Green4Bikes API
-            // crs and stations are NOT supported by the API (will cause 400 error)
-            // Remove empty or unwanted optional parameters
-            const rentalStationsStr = requestBody.inputs.rentalStations,
-                parametersToRemove = ["crs", "stations"],
-                parametersToClean = ["rentalBicycle", "roadNetwork"];
+            if (!featureCollection) {
+                console.warn("[SimulationParameter] cycleTravelerLayer is not a FeatureCollection or is missing");
+                return;
+            }
+
+            console.log("[SimulationParameter] cycleTravelerLayer features count:", featureCollection.features?.length || 0);
+
+            if (featureCollection?.features?.length >= 2) {
+                // Extract source and target features from the FeatureCollection
+                // The cycleTravelerLayer FeatureCollection should have exactly 2 features: source and target
+                const sourceFeature = featureCollection.features.find(f => f.id === "cycleTravelerSource" || f.properties?.type === "source"),
+                    targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
+
+                console.log("[SimulationParameter] sourceFeature found:", Boolean(sourceFeature));
+                console.log("[SimulationParameter] targetFeature found:", Boolean(targetFeature));
+
+                if (sourceFeature) {
+                    this.applyGreen4BikesSourceFeature(sourceFeature, requestBody);
+                }
+                else {
+                    console.warn("[SimulationParameter] Source feature not found in cycleTravelerLayer");
+                }
+
+                if (targetFeature) {
+                    this.applyGreen4BikesTargetFeature(targetFeature, requestBody);
+                }
+                else {
+                    console.warn("[SimulationParameter] Target feature not found in cycleTravelerLayer");
+                }
+
+                // Remove the temporary cycleTravelerLayer after extraction
+                delete requestBody.inputs.cycleTravelerLayer;
+            }
+            else {
+                console.warn("[SimulationParameter] cycleTravelerLayer invalid or insufficient features (need at least 2):", {
+                    type: featureCollection?.type,
+                    featureCount: featureCollection?.features?.length
+                });
+            }
+
+            console.log("[SimulationParameter] request body inputs before cleanup:", Object.keys(requestBody.inputs));
+
+            // Process rentalStations if present
+            const rentalStationsStr = requestBody.inputs.rentalStations;
 
             if (rentalStationsStr && typeof rentalStationsStr === "string") {
                 try {
                     requestBody.inputs.rentalStations = JSON.parse(rentalStationsStr);
                 }
                 catch (error) {
-                    console.warn("Error parsing rentalStations:", error);
+                    console.warn("[SimulationParameter] Error parsing rentalStations:", error);
                     delete requestBody.inputs.rentalStations;
                 }
             }
@@ -1374,14 +1489,20 @@ export default {
                 delete requestBody.inputs.rentalStations;
             }
 
+
+            // Remove unsupported parameters for Green4Bikes API
+            const parametersToRemove = ["crs", "stations"];
+
             parametersToRemove.forEach(key => {
                 delete requestBody.inputs[key];
             });
 
+            // Remove empty optional parameters
+            const parametersToClean = ["rentalBicycle", "roadNetwork"];
+
             parametersToClean.forEach(key => {
                 const value = requestBody.inputs[key];
 
-                // Remove if: null, undefined, empty object, or empty array
                 if (value === null ||
                     value === undefined ||
                     (typeof value === "object" && Object.keys(value).length === 0) ||
@@ -1397,102 +1518,8 @@ export default {
             if (!requestBody.inputs.endPoint || requestBody.inputs.endPoint === "") {
                 delete requestBody.inputs.endPoint;
             }
-        },
 
-        /**
-         * Processes Green4Bikes specific inputs to transform cycleTravelerLayer into separate source/target.
-         * @returns {void}
-         */
-        processGreen4BikesInputs () {
-            this.requestBodies.forEach(requestBody => {
-                if (!requestBody?.inputs) {
-                    return;
-                }
-
-                const cycleTravelerLayerStr = requestBody.inputs.cycleTravelerLayer;
-
-                if (cycleTravelerLayerStr && typeof cycleTravelerLayerStr === "string") {
-                    try {
-                        const featureCollection = JSON.parse(cycleTravelerLayerStr);
-
-                        if (featureCollection?.features?.length >= 2) {
-                            // Extract source and target features
-                            const sourceFeature = featureCollection.features.find(f => f.id === "cycleTravelerSource" || f.properties?.type === "source"),
-                                targetFeature = featureCollection.features.find(f => f.id === "cycleTravelerTarget" || f.properties?.type === "target");
-
-                            if (sourceFeature) {
-                                // Keep original geometry (Polygon or Point)
-                                const sourceGeometry = sourceFeature.geometry,
-
-                                    // Extract spawningAmount and spawningIntervalInMinutes
-                                    spawningAmount = sourceFeature.properties?.spawningAmount || 10,
-                                    spawningIntervalInMinutes = sourceFeature.properties?.spawningIntervalInMinutes,
-
-                                    properties = {
-                                        spawningAmount: String(spawningAmount)
-                                    };
-
-                                // Only include spawningIntervalInMinutes if it was set (checkbox was checked)
-                                if (spawningIntervalInMinutes !== undefined && spawningIntervalInMinutes !== null) {
-                                    properties.spawningIntervalInMinutes = String(spawningIntervalInMinutes);
-                                }
-
-                                requestBody.inputs.cycleTravelerSource = {
-                                    type: "Feature",
-                                    geometry: sourceGeometry,
-                                    properties
-                                };
-                            }
-
-                            if (targetFeature) {
-                                // Keep original geometry (Polygon or Point)
-                                const targetGeometry = targetFeature.geometry;
-
-                                // Target is just a geometry, no Feature wrapper needed
-                                requestBody.inputs.cycleTravelerTarget = targetGeometry;
-                            }
-
-                            // Remove the temporary cycleTravelerLayer
-                            delete requestBody.inputs.cycleTravelerLayer;
-                        }
-                    }
-                    catch (error) {
-                        console.warn("Error processing cycleTravelerLayer:", error);
-                    }
-                }
-
-                // Process rentalStations if present (renamed from bikeStations)
-                const rentalStationsStr = requestBody.inputs.rentalStations;
-
-                if (rentalStationsStr && typeof rentalStationsStr === "string") {
-                    try {
-                        requestBody.inputs.rentalStations = JSON.parse(rentalStationsStr);
-                    }
-                    catch (error) {
-                        console.warn("Error parsing rentalStations:", error);
-                        delete requestBody.inputs.rentalStations;
-                    }
-                }
-                else if (!rentalStationsStr || rentalStationsStr === "null") {
-                    // Remove if null or empty
-                    delete requestBody.inputs.rentalStations;
-                }
-
-                // Remove empty or unwanted parameters
-                const parametersToClean = ["rentalBicycle", "roadNetwork", "crs", "stations"];
-
-                parametersToClean.forEach(key => {
-                    const value = requestBody.inputs[key];
-
-                    // Remove if: null, undefined, empty object, or empty array
-                    if (value === null ||
-                        value === undefined ||
-                        (typeof value === "object" && Object.keys(value).length === 0) ||
-                        (Array.isArray(value) && value.length === 0)) {
-                        delete requestBody.inputs[key];
-                    }
-                });
-            });
+            console.log("[SimulationParameter] Final request body inputs:", Object.keys(requestBody.inputs));
         },
 
         /**
@@ -1543,11 +1570,11 @@ export default {
                     this.setMode("agentVisualization");
                 }
                 else {
-                    console.warn("No GeoJSON data found in job results");
+                    console.warn("[SimulationParameter] No GeoJSON data found in job results");
                 }
             }
             catch (error) {
-                console.warn("Error switching to AgentVisualization:", error);
+                console.warn("[SimulationParameter] Error switching to AgentVisualization:", error);
             }
         },
 
@@ -1594,7 +1621,7 @@ export default {
          */
         setRequestBodyInput (inputKey, propertyKey, val, type) {
             if (typeof inputKey !== "string" || typeof propertyKey !== "string") {
-                console.warn(`Invalid parameters: inputKey=${inputKey}, propertyKey=${propertyKey}`);
+                console.warn(`[SimulationParameter] Invalid parameters: inputKey=${inputKey}, propertyKey=${propertyKey}`);
                 return;
             }
 
