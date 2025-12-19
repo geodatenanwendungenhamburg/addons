@@ -127,7 +127,7 @@ export default {
             this.setSimulationIdForResults(null);
             this.setCurrentPlanningScenarioId(null);
             this.expandedSimulationId = null;
-            this.updateFeatures();
+            this.updateFeatures({loadCycleTravelerLayer: true});
             this.scrollIntoView(simulationId);
         },
 

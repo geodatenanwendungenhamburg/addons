@@ -22,7 +22,7 @@ import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import Text from "ol/style/Text";
 import {infrastructureLayerId} from "../../layerIds.js";
-import {convertToAgentTrajectoryCollection, getStatistics} from "../../utils/agentTrajectoryParser.js";
+import {convertToAgentTrajectoryCollection} from "../../utils/agentTrajectoryParser.js";
 
 export default {
     name: "SimulationResults",
@@ -245,7 +245,7 @@ export default {
     },
     mounted () {
         if (typeof this.currentPlanningScenario !== "undefined" && this.currentPlanningScenario?.scenarioFeature) {
-            this.updateFeatures();
+            this.updateFeatures({loadCycleTravelerLayer: true});
             this.zoomToFeature();
         }
     },
@@ -373,11 +373,6 @@ export default {
                 try {
                     // Convert to compact format
                     data = convertToAgentTrajectoryCollection(agentData);
-
-                    // Log statistics for debugging
-                    const stats = getStatistics(data);
-
-                    console.log("[SimulationResults] Compact format statistics:", stats);
 
                     fileName = `agents_compact_${baseName}_${dateStr}.json`;
                     fileType = "application/json";

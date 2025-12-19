@@ -506,7 +506,7 @@ export default {
                     if (scenarioFromStore) {
                         // Set as current scenario and load layers
                         this.$store.commit("Modules/SimulationTool/setCurrentPlanningScenarioId", metadata.planningScenarioId);
-                        this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+                        this.$store.dispatch("Modules/SimulationTool/updateFeatures", {loadCycleTravelerLayer: true});
 
                         // Get scenario geometries for visualization
                         const scenarioGeoJSON = this.buildScenarioGeoJSONFromStore(scenarioFromStore);
@@ -529,7 +529,7 @@ export default {
                         this.$store.commit("Modules/SimulationTool/setCurrentPlanningScenarioId", embeddedScenario.id);
 
                         // Trigger layer update
-                        this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+                        this.$store.dispatch("Modules/SimulationTool/updateFeatures", {loadCycleTravelerLayer: true});
 
                         // Get scenario geometries for visualization
                         // eslint-disable-next-line one-var
@@ -674,7 +674,7 @@ export default {
                 // It ensures features are loaded fresh from the scenario store with proper icon styles applied at creation time
                 // Without this call, the infrastructure features come from the GeoJSON conversion which loses Icon styles
                 console.warn("[AgentVisualization] Calling updateFeatures to reload infrastructure with correct styles");
-                await this.$store.dispatch("Modules/SimulationTool/updateFeatures");
+                await this.$store.dispatch("Modules/SimulationTool/updateFeatures", {loadCycleTravelerLayer: true});
 
                 // Step 4: Render planning scenario data if available (bbox, start/end areas)
                 const planningScenarioData = this.$store.state.agentVisualization.planningScenarioData;

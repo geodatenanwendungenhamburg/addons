@@ -305,7 +305,7 @@ export default {
      * @param {Object} param.getters the getters.
      * @returns {void}
      */
-    updateFeatures ({getters}) {
+    updateFeatures ({getters}, payload = null) {
         const currentPlanningScenario = getters.planningScenarios.find(scenario => scenario.id === getters.currentPlanningScenarioId),
             geoJsonParser = new GeoJSON(),
             styleConfig = getters.infrastructurePointStyle,
@@ -407,7 +407,7 @@ export default {
         if (currentPlanningScenario.inputs && isObject(currentPlanningScenario.inputs)) {
             Object.entries(currentPlanningScenario.inputs).forEach(([inputKey, inputValue]) => {
                 // Special handling for cycleTravelerLayer - it's a FeatureCollection with features that have nested structures
-                if (inputKey === "cycleTravelerLayer" && inputValue?.type === "FeatureCollection" && inputValue?.features) {
+                if (payload?.loadCycleTravelerLayer && inputKey === "cycleTravelerLayer" && inputValue?.type === "FeatureCollection" && inputValue?.features) {
                     inputValue.features.forEach((feature) => {
                         try {
                             // cycleTravelerLayer features should have direct geometry (Point/Polygon), not FeatureCollection
@@ -558,7 +558,7 @@ export default {
         }
 
         // Auto-zoom to features after loading
-        if (layerSource && layerSource.getFeatures().length > 0) {
+        if (payload?.loadCycleTravelerLayer && layerSource && layerSource.getFeatures().length > 0) {
             const extent = layerSource.getExtent();
 
             if (map) {

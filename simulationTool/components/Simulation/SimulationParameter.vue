@@ -248,7 +248,7 @@ export default {
          * Render current scenario feature and shows it.
          */
         currentPlanningScenario () {
-            this.updateFeatures();
+            this.updateFeatures({loadCycleTravelerLayer: true});
             this.zoomToFeature();
         },
 
