@@ -282,23 +282,16 @@ export default {
 
             if (!infrastructureLayer || !styleConfig) {
                 console.warn("[AgentVisualization] Cannot reapply styles - layer or config missing", {
-                    hasLayer: !!infrastructureLayer,
-                    hasConfig: !!styleConfig
+                    hasLayer: Boolean(infrastructureLayer),
+                    hasConfig: Boolean(styleConfig)
                 });
                 return;
             }
 
+            // eslint-disable-next-line one-var
             const layerSource = infrastructureLayer.getLayerSource(),
                 features = layerSource.getFeatures(),
                 pointFeatures = features.filter(f => f.getGeometry()?.getType() === "Point");
-
-            console.log("[AgentVisualization] Reapplying infrastructure styles", {
-                totalFeatures: features.length,
-                pointFeatures: pointFeatures.length,
-                styleConfigType: styleConfig?.type,
-                styleConfigIconSrc: styleConfig?.icon?.src,
-                fullStyleConfig: JSON.parse(JSON.stringify(styleConfig))
-            });
 
             pointFeatures.forEach(feature => {
                 // Remove old style properties that might interfere
@@ -309,11 +302,6 @@ export default {
 
                 if (style) {
                     feature.setStyle(style);
-                    console.log("[AgentVisualization] Applied style to feature", {
-                        featureId: feature.getId(),
-                        geometryType: feature.getGeometry()?.getType(),
-                        styleType: Array.isArray(style) ? "array" : "single"
-                    });
                 }
             });
         },
@@ -854,6 +842,7 @@ export default {
                                 olFeature.unset("style", true);
 
                                 // Apply infrastructure style (for stations/points)
+                                // eslint-disable-next-line one-var
                                 const style = createInfrastructureStyle(olFeature, styleConfig);
 
                                 if (style) {
@@ -866,12 +855,6 @@ export default {
                     });
                 }
                 else {
-                    // Layer has features, but ensure they have correct styling (icons might be lost)
-                    // Re-apply infrastructure styles to all point features
-                    console.log("[AgentVisualization] Re-styling existing infrastructure features in else block", {
-                        featureCount: infraLayerSource.getFeatures().length
-                    });
-                    
                     infraLayerSource.getFeatures().forEach(feature => {
                         if (feature.getGeometry()?.getType() === "Point") {
                             // CRITICAL: Remove old style properties that prevent icon display
@@ -882,17 +865,13 @@ export default {
 
                             if (style) {
                                 feature.setStyle(style);
-                                console.log("[AgentVisualization] Applied style in else block", {
-                                    featureId: feature.getId(),
-                                    hasStyle: !!style
-                                });
                             }
-                            
+
                             // Force OpenLayers to re-render this feature
                             feature.changed();
                         }
                     });
-                    
+
                     // Force layer refresh
                     infrastructureLayer.layer.changed();
                 }
@@ -913,6 +892,10 @@ export default {
                             }),
                             // Check if feature already exists (by ID) to avoid duplicates
                             existingFeature = layerSource.getFeatureById(feature.id);
+
+                        if (currentScenario) {
+                            olFeature.set("scenarioId", currentScenario.id);
+                        }
 
                         // Apply style if available
                         if (feature.style) {
@@ -1255,6 +1238,7 @@ export default {
             }
 
             // Clear planning scenario and infrastructure layers
+            // eslint-disable-next-line one-var
             const planningScenarioLayer = layerCollection.getLayerById("planning-scenario"),
                 infrastructureLayer = layerCollection.getLayerById(infrastructureLayerId);
 
