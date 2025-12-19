@@ -102,21 +102,18 @@ export default {
             }
 
             try {
-                // Parse CSV format: "source_geojson;target_geojson"
-                const parts = this.value.split(";");
+                const parsedJSON = JSON.parse(this.value)?.features;
 
-                if (parts.length >= 1 && parts[0]) {
-                    const sourceGeoJson = JSON.parse(parts[0]);
-
-                    this.sourceGeometry = sourceGeoJson;
-                    this.renderGeometry(sourceGeoJson, "source");
-                }
-                if (parts.length >= 2 && parts[1]) {
-                    const targetGeoJson = JSON.parse(parts[1]);
-
-                    this.targetGeometry = targetGeoJson;
-                    this.renderGeometry(targetGeoJson, "target");
-                }
+                parsedJSON.forEach(feature => {
+                    if (feature.id === "cycleTravelerSource") {
+                        this.sourceGeometry = feature.geometry;
+                        this.renderGeometry(feature.geometry, "source");
+                    }
+                    else if (feature.id === "cycleTravelerTarget") {
+                        this.targetGeometry = feature.geometry;
+                        this.renderGeometry(feature.geometry, "target");
+                    }
+                });
             }
             catch (error) {
                 console.warn("Error parsing cycleTravelerLayer value:", error);
@@ -541,59 +538,6 @@ export default {
         </div>
 
         <div class="mb-3 p-3 border rounded">
-            <label
-                for="agentCountInput"
-                class="form-label mb-2"
-            >
-                <i class="bi bi-people-fill" />
-                Anzahl der Agenten
-            </label>
-            <input
-                id="agentCountInput"
-                type="number"
-                class="form-control mb-3"
-                :value="localAgentCount"
-                min="1"
-                max="1000"
-                @input="updateAgentCount"
-            >
-        </div>
-
-        <div class="mb-3 p-3 border rounded">
-            <div class="form-switch mb-3">
-                <SwitchInput
-                    id="includeSpawningInterval"
-                    :checked="includeSpawningInterval"
-                    label="Spawning Interval aktivieren (optional)"
-                    aria="Spawning Interval aktivieren (optional)"
-                    :interaction="toggleSpawningInterval"
-                />
-            </div>
-
-            <div v-if="includeSpawningInterval">
-                <label
-                    for="spawningIntervalInput"
-                    class="form-label mb-2"
-                >
-                    <i class="bi bi-clock-fill" />
-                    Spawning Interval (Minuten)
-                </label>
-                <input
-                    id="spawningIntervalInput"
-                    type="number"
-                    class="form-control mb-3"
-                    :value="localSpawningInterval"
-                    min="1"
-                    max="120"
-                    @input="updateSpawningInterval"
-                >
-                <small class="text-muted">
-                    Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
-                </small>
-            </div>
-        </div>
-
-        <div class="mb-3 p-3 border rounded">
             <h6 class="mb-2">
                 <i
                     class="bi bi-square-fill"
@@ -680,6 +624,59 @@ export default {
                 <span v-else>
                     Kein Zielbereich gezeichnet
                 </span>
+            </div>
+        </div>
+
+        <div class="mb-3 p-3 border rounded">
+            <label
+                for="agentCountInput"
+                class="form-label mb-2"
+            >
+                <i class="bi bi-people-fill" />
+                Anzahl der Agenten
+            </label>
+            <input
+                id="agentCountInput"
+                type="number"
+                class="form-control mb-3"
+                :value="localAgentCount"
+                min="1"
+                max="1000"
+                @input="updateAgentCount"
+            >
+        </div>
+
+        <div class="mb-3 p-3 border rounded">
+            <div class="form-switch mb-3">
+                <SwitchInput
+                    id="includeSpawningInterval"
+                    :checked="includeSpawningInterval"
+                    label="Spawning Interval aktivieren (optional)"
+                    aria="Spawning Interval aktivieren (optional)"
+                    :interaction="toggleSpawningInterval"
+                />
+            </div>
+
+            <div v-if="includeSpawningInterval">
+                <label
+                    for="spawningIntervalInput"
+                    class="form-label mb-2"
+                >
+                    <i class="bi bi-clock-fill" />
+                    Spawning Interval (Minuten)
+                </label>
+                <input
+                    id="spawningIntervalInput"
+                    type="number"
+                    class="form-control mb-3"
+                    :value="localSpawningInterval"
+                    min="1"
+                    max="120"
+                    @input="updateSpawningInterval"
+                >
+                <small class="text-muted">
+                    Alle {{ localSpawningInterval }} Minuten werden neue Agenten generiert
+                </small>
             </div>
         </div>
     </div>

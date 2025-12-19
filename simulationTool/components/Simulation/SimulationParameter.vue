@@ -1806,6 +1806,20 @@ export default {
                             </div>
                         </div>
 
+
+                        <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
+                        <CycleTravelerLayerInput
+                            v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
+                            id="cycleTravelerLayer"
+                            :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
+                            :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
+                            :start-point="getRequestBodyInputByKey('startPoint', null, null)"
+                            :end-point="getRequestBodyInputByKey('endPoint', null, null)"
+                            :agent-count="agentCount"
+                            @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
+                            @update:agentCount="agentCount = $event"
+                        />
+
                         <!-- Green4Bikes: Custom datetime inputs for simulation time range -->
                         <template v-if="currentSimulationId && currentSimulationId.includes('green4Bikes')">
                             <DynamicInputByType
@@ -1825,19 +1839,6 @@ export default {
                                 @update:value="setRequestBodyInput('endPoint', '', $event)"
                             />
                         </template>
-
-                        <!-- Green4Bikes: Custom CycleTravelerLayer Input -->
-                        <CycleTravelerLayerInput
-                            v-if="currentSimulationId && currentSimulationId.includes('green4Bikes') && combinedInputs.cycleTravelerLayer"
-                            id="cycleTravelerLayer"
-                            :label="getMappedProperty('cycleTravelerLayer', simulation?.inputs?.cycleTravelerLayer?.propertiesMapping)"
-                            :value="getRequestBodyInputByKey('cycleTravelerLayer', '', null)"
-                            :start-point="getRequestBodyInputByKey('startPoint', null, null)"
-                            :end-point="getRequestBodyInputByKey('endPoint', null, null)"
-                            :agent-count="agentCount"
-                            @update:value="setRequestBodyInput('cycleTravelerLayer', '', $event)"
-                            @update:agentCount="agentCount = $event"
-                        />
 
                         <!-- Green4Bikes: Bike Stations Input -->
                         <DynamicInputByType
