@@ -87,7 +87,7 @@ export default {
          */
         triggerClickOnFileInput (e) {
             if (e.which === 32 || e.which === 13) {
-                this.$refs["upload-input-file"].click();
+                this.$refs.fileUpload.triggerFileInputClick();
             }
         }
     }
@@ -118,6 +118,7 @@ export default {
     />
     <FileUpload
         :id="'planningScenarioUpload'"
+        ref="fileUpload"
         :keydown="(e) => triggerClickOnFileInput(e)"
         :change="(e) => onInputChange(e)"
         :drop="(e) => onDrop(e)"
