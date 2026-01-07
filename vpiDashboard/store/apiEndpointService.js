@@ -21,7 +21,7 @@ const apiEndpointService = {
                     geoid: locationId,
                     f: "json",
                     limit: 10000,
-                    skipGeometry: true};
+                    "exclude-properties": "geom"};
 
             if (date !== null) {
                 query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
@@ -51,7 +51,7 @@ const apiEndpointService = {
                     f: "json",
                     limit: 10000,
                     offset: 0,
-                    skipGeometry: true
+                    "exclude-properties": "geom"
                 };
 
             if (date !== null) {
@@ -97,7 +97,7 @@ const apiEndpointService = {
         locationIds.forEach(locationId => {
             const
                 url = `${Config.OGCAPI.host}${Config.OGCAPI.basepath}/tgl_besucher_nach_geschl/items`,
-                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, skipGeometry: true};
+                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, "exclude-properties": "geom"};
 
             if (date !== null) {
                 query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
@@ -121,7 +121,7 @@ const apiEndpointService = {
         locationIds.forEach(locationId => {
             const
                 url = `${Config.OGCAPI.host}${Config.OGCAPI.basepath}/tgl_besucher_nach_alter/items`,
-                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, skipGeometry: true};
+                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, "exclude-properties": "geom"};
 
             if (date !== null) {
                 query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
@@ -145,7 +145,7 @@ const apiEndpointService = {
         locationIds.forEach(locationId => {
             const
                 url = `${Config.OGCAPI.host}${Config.OGCAPI.basepath}/tgl_besucher_nach_landkr/items`,
-                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, skipGeometry: true};
+                query = {geoid: locationId, f: "json", limit: 10000, offset: 0, "exclude-properties": "geom"};
 
             if (date !== null) {
                 query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
@@ -166,7 +166,7 @@ const apiEndpointService = {
     async receiveOriginsPostalCode (locationId, date = null, dateTo = null) {
         const
             url = `${Config.OGCAPI.host}${Config.OGCAPI.basepath}/tgl_besucher_nach_plz/items`,
-            query = {geoid: locationId, f: "json", limit: 10000, offset: 0, skipGeometry: true};
+            query = {geoid: locationId, f: "json", limit: 10000, offset: 0, "exclude-properties": "geom"};
 
         if (date !== null) {
             query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
@@ -184,7 +184,7 @@ const apiEndpointService = {
     async receiveOriginsInternational (locationId, date = null, dateTo = null) {
         const
             url = `${Config.OGCAPI.host}${Config.OGCAPI.basepath}/tgl_besucher_international/items`,
-            query = {geoid: locationId, f: "json", limit: 10000, offset: 0, skipGeometry: true};
+            query = {geoid: locationId, f: "json", limit: 10000, offset: 0, "exclude-properties": "geom"};
 
         if (date !== null) {
             query.datetime = `${date}T00:00:00Z/${dateTo ? dateTo : date}T23:59:59Z`;
