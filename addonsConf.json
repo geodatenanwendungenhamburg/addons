@@ -181,5 +181,9 @@
   "cosiFileImport": {
     "path": "cosi/cosiFileImport",
     "type": "tool"
+  },
+  "cosiPrintLayoutSelection": {
+    "path": "cosi/cosiPrintLayoutSelection",
+    "type": "vueComponent"
   }
 }
