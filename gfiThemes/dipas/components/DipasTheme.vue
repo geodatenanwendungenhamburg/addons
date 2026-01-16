@@ -147,7 +147,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    ;
 
     .dipas-gfi-content {
         margin: 12px;
