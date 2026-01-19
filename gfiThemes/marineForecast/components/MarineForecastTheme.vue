@@ -38,9 +38,15 @@ export default {
 
                 if (htmlProperties.length > 0) {
                     // Handle marine forecast data: combine all HTML table properties into one view
+                    const params = this.feature.getTheme?.()?.params || {},
+                        // Get configurable property names with fallback defaults
+                        stationNameProperty = params.stationNameProperty || "stationbf",
+                        stationPositionProperty = params.stationPositionProperty || "position",
+                        propertyMappings = params.propertyMappings || this.getDefaultPropertyMappings();
+
                     let combinedHtml = "";
-                    const stationName = props.stationbf || props.name || "Marine Station",
-                        position = props.position || "";
+                    const stationName = props[stationNameProperty] || props.name || "Marine Station",
+                        position = props[stationPositionProperty] || "";
 
                     // Add station header
                     combinedHtml += `<h3 style="display:inline;font-family:calibri;font-size:1.35em;">${stationName}</h3>`;
@@ -52,27 +58,20 @@ export default {
                     // Add each HTML property with appropriate headers
                     Object.entries(props).forEach(([key, value]) => {
                         if (typeof value === "string" && value.includes("<table") && value.includes("class=\"featureInfo\"")) {
-                            // Add section headers based on property names
+                            // Get section title from configuration or use default
                             let sectionTitle = "";
 
-                            switch (key) {
-                                case "windvorhersage":
-                                    sectionTitle = `DWD Windvorhersagen ${props.stand_wind || ""}`;
-                                    break;
-                                case "temp_vs":
-                                    sectionTitle = `Wasseroberflächentemperaturvorhersage ${props.wtemp_stand || ""}`;
-                                    break;
-                                case "ws_vorhersage":
-                                    sectionTitle = `Wasserstandsvorhersage ${props.stand || ""}`;
-                                    break;
-                                case "mondereignisse":
-                                    sectionTitle = "Mondereignisse";
-                                    break;
-                                case "sonnenereignisse":
-                                    sectionTitle = "Sonnenereignisse";
-                                    break;
-                                default:
-                                    sectionTitle = key.replace(/_/g, " ");
+                            if (propertyMappings[key]) {
+                                const mapping = propertyMappings[key],
+                                    title = mapping.title || key,
+                                    timestampProperty = mapping.timestampProperty,
+                                    timestamp = timestampProperty ? props[timestampProperty] || "" : "";
+
+                                sectionTitle = timestamp ? `${title} ${timestamp}` : title;
+                            }
+                            else {
+                                // Fallback to default formatting
+                                sectionTitle = key.replace(/_/g, " ");
                             }
 
                             if (sectionTitle) {
@@ -117,6 +116,32 @@ export default {
     },
     methods: {
         ...mapMutations("Menu", ["setCurrentMenuWidth"]),
+        /**
+         * Returns default property mappings for backward compatibility
+         * @returns {Object} Default property mappings
+         */
+        getDefaultPropertyMappings () {
+            return {
+                "windvorhersage": {
+                    "title": "DWD Windvorhersagen",
+                    "timestampProperty": "stand_wind"
+                },
+                "temp_vs": {
+                    "title": "Wasseroberflächentemperaturvorhersage",
+                    "timestampProperty": "wtemp_stand"
+                },
+                "ws_vorhersage": {
+                    "title": "Wasserstandsvorhersage",
+                    "timestampProperty": "stand"
+                },
+                "mondereignisse": {
+                    "title": "Mondereignisse"
+                },
+                "sonnenereignisse": {
+                    "title": "Sonnenereignisse"
+                }
+            };
+        },
         injectHtmlContent () {
             const iframe = this.$el.querySelector(".marine-iframe"),
                 content = this.mimeType === "text/html" ? this.feature.getDocument() : this.htmlContent;
