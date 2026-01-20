@@ -87,11 +87,17 @@ describe("addons/lzsResearchClient/tests/unit/components/tabs/TabSearch.spec.js"
                             state: () => ({}),
                             getters: {
                                 dataClassList: () => mockDataClassList,
+                                archiveList: () => mockDataClassList.map(a => ({id: a.id, name: a.name})),
+                                yearsList: () => [2020],
                                 placeholderDataClassList: () => mockPlaceholdersJson
                             },
                             actions: {
                                 fetchDataClassList: () => Promise.resolve(),
-                                fetchPlaceholders: () => Promise.resolve()
+                                fetchPlaceholders: () => Promise.resolve(),
+                                fetchYears: () => Promise.resolve()
+                            },
+                            mutations: {
+                                setYearsList: () => Promise.resolve()
                             }
                         }
                     }
@@ -228,5 +234,35 @@ describe("addons/lzsResearchClient/tests/unit/components/tabs/TabSearch.spec.js"
         await wrapper.vm.$nextTick();
 
         expect(wrapper.vm.selectedArchiv).to.equal("AFIS-Einzelnachweise");
+    });
+
+    it("toggles archive checkbox updates selectedArchivIds", async () => {
+        const items = wrapper.findAll("#searchOptionsList li"),
+            archiveId = "DKL_3DSTADT_LOD2";
+
+        await items[1].trigger("click");
+        await wrapper.vm.$nextTick();
+        await wrapper.vm.onSelectedArchivIdsChange(archiveId, {target: {checked: true}});
+
+        expect(wrapper.vm.selectedArchivIds).to.include(archiveId);
+
+        await wrapper.vm.onSelectedArchivIdsChange(archiveId, {target: {checked: false}});
+
+        expect(wrapper.vm.selectedArchivIds).to.not.include(archiveId);
+    });
+
+    it("toggles year checkbox updates selectedYears", async () => {
+        const items = wrapper.findAll("#searchOptionsList li"),
+            year = 2020;
+
+        await items[1].trigger("click");
+        await wrapper.vm.$nextTick();
+        await wrapper.vm.onSelectedYearsChange(year, {target: {checked: true}});
+
+        expect(wrapper.vm.selectedYears).to.include(year);
+
+        await wrapper.vm.onSelectedYearsChange(year, {target: {checked: false}});
+
+        expect(wrapper.vm.selectedYears).to.not.include(year);
     });
 });

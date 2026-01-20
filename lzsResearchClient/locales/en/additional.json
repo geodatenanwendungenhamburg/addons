@@ -19,10 +19,12 @@
                     "searchWithAttributeHeading": "Search Data by Attributes",
                     "searchWithGeometryHeading": "Search Data by Geometry",
                     "selectArchivLabel": "Archive",
+                    "selectYearsLabel": "Years",
                     "jahrgang": "Year",
                     "kachelnummer": "Tile Number",
                     "maxValueCount": "Max. Results",
-                    "patternError": "Please enter a numeric value with \"{ digitNumber }\" digit."
+                    "patternError": "Please enter a numeric value with \"{ digitNumber }\" digit.",
+                    "noCommonYearErrorMessage": "No common years could be found for the selected archives."
                 },
                 "tabResult": {
                     "label": "Results"

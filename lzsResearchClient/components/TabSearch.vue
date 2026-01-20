@@ -4,7 +4,7 @@ import InputText from "@shared/modules/inputs/components/InputText.vue";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 
-import {mapGetters, mapActions} from "vuex";
+import {mapGetters, mapActions, mapMutations} from "vuex";
 
 export default {
     name: "TabSearch",
@@ -23,16 +23,26 @@ export default {
             searchWithAttributeFormData: {},
             archives: {},
             showSpinner: false,
-            isAttributeSearchFormValid: true
+            isAttributeSearchFormValid: true,
+            selectedArchivIds: [],
+            selectedYears: [],
+            showNoCommonYearError: false
         };
     },
     computed: {
         ...mapGetters("Modules/LzsResearchClient", [
             "dataClassList",
-            "placeholderDataClassList"
+            "placeholderDataClassList",
+            "yearsList",
+            "archiveList"
         ])
     },
     watch: {
+        yearsList (newValue) {
+            if (newValue) {
+                this.showNoCommonYearError = this.selectedArchivIds.length > 0 && this.yearsList?.length === 0;
+            }
+        },
         selectedArchiv (newValue) {
             if (newValue) {
                 this.validateSearchWithAttributeForm();
@@ -49,7 +59,11 @@ export default {
         ...mapActions("Modules/LzsResearchClient", [
             "fetchDataClassList",
             "searchByAttribute",
-            "fetchPlaceholders"
+            "fetchPlaceholders",
+            "fetchYears"
+        ]),
+        ...mapMutations("Modules/LzsResearchClient", [
+            "setYearsList"
         ]),
         /**
          * Update the active content section to the given `contentId`.
@@ -169,6 +183,40 @@ export default {
         resetForm () {
             this.initializeSearchForm();
             this.validateSearchWithAttributeForm();
+        },
+        async onSelectedArchivIdsChange (archiveId, event) {
+            const checked = event.target.checked;
+
+            if (checked) {
+                if (!this.selectedArchivIds.includes(archiveId)) {
+                    this.selectedArchivIds = [...this.selectedArchivIds, archiveId];
+                }
+            }
+            else {
+                this.selectedArchivIds = this.selectedArchivIds.filter(id => id !== archiveId);
+            }
+
+            if (this.selectedArchivIds.length > 0) {
+                await this.fetchYears(this.selectedArchivIds);
+
+                this.selectedYears = this.selectedYears.filter(y => this.yearsList.includes(y));
+            }
+            else {
+                this.setYearsList([]);
+                this.selectedYears = [];
+            }
+        },
+        onSelectedYearsChange (year, event) {
+            const checked = event.target.checked;
+
+            if (checked) {
+                if (!this.selectedYears.includes(year)) {
+                    this.selectedYears = [...this.selectedYears, year];
+                }
+            }
+            else {
+                this.selectedYears = this.selectedYears.filter(y => y !== year);
+            }
         }
     }
 };
@@ -270,10 +318,70 @@ export default {
                         id="searchFormWithGeometry"
                         class="searchFormWithGeometry"
                     >
-                        Search with geometry
-                        <hr>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores, quo, blanditiis ducimus ipsam optio voluptates mollitia odit tempora provident perspiciatis modi commodi fugiat numquam accusantium rem facere? Saepe, a accusamus.
-                        <hr>
+                        <div class="archiveSelection">
+                            <span>
+                                {{ $t('additional:modules.lzsResearchClient.tabs.tabSearch.selectArchivLabel') }}
+                            </span>
+
+                            <div
+                                class="archiveSelectionList"
+                                role="group"
+                                aria-label="archives"
+                            >
+                                <div
+                                    v-for="archive in archiveList"
+                                    :key="archive.id"
+                                    class="archiveCheckboxList"
+                                >
+                                    <input
+                                        :id="`archiveCheckbox-${archive.id}`"
+                                        type="checkbox"
+                                        :value="archive.id"
+                                        :checked="selectedArchivIds.includes(archive.id)"
+                                        @change="onSelectedArchivIdsChange(archive.id, $event)"
+                                    >
+
+                                    <label :for="`archiveCheckbox-${archive.id}`">
+                                        {{ archive.name }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="yearsSelection">
+                            <span>
+                                {{ $t('additional:modules.lzsResearchClient.tabs.tabSearch.selectYearsLabel') }}
+                            </span>
+
+                            <div
+                                class="yearsSelectionList"
+                                role="group"
+                                aria-label="years"
+                            >
+                                <div
+                                    v-for="year in yearsList"
+                                    :key="year"
+                                    class="yearCheckboxItem"
+                                >
+                                    <input
+                                        :id="`yearCheckbox-${year}`"
+                                        type="checkbox"
+                                        :value="year"
+                                        :checked="selectedYears.includes(year)"
+                                        @change="onSelectedYearsChange(year, $event)"
+                                    >
+
+                                    <label :for="`yearCheckbox-${year}`">{{ year }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            v-if="showNoCommonYearError"
+                            class="noCommonYearError"
+                        >
+                            {{ $t('additional:modules.lzsResearchClient.tabs.tabSearch.noCommonYearErrorMessage') }}
+                        </div>
                     </div>
 
                     <div class="searchButtons">
@@ -309,77 +417,116 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-#TabSearch {
-    padding: 1rem 0.5rem;
-    position: relative;
-    height: 100%;
+    @import "~variables";
 
-    // Transition classes - START
-    .slide-enter-active,
-    .slide-leave-active {
-        transition: all 0.2s ease-in-out;
-    }
-
-    .slide-enter-from {
-        opacity: 0;
-        transform: translateX(-6rem);
-    }
-
-    .slide-leave-to {
-        opacity: 0;
-        transform: translateX(6rem);
-    }
-    // Transition classes - END
-
-    div.searchAttributes {
+    #TabSearch {
+        padding: 1rem 0.5rem;
+        position: relative;
         height: 100%;
 
-        div.searchFormWithAttributes {
-            select.archiv {
-                margin-bottom: 1rem;
-            }
+        // Transition classes - START
+        .slide-enter-active,
+        .slide-leave-active {
+            transition: all 0.2s ease-in-out;
         }
 
-        div.loadingSpinner {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+        .slide-enter-from {
+            opacity: 0;
+            transform: translateX(-6rem);
+        }
+
+        .slide-leave-to {
+            opacity: 0;
+            transform: translateX(6rem);
+        }
+        // Transition classes - END
+
+        div.searchAttributes {
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.7);
-            z-index: 2;
 
-            div.spinner {
-                width: 4rem;
-                height: 4rem;
+            div.searchFormWithAttributes {
+                select.archiv {
+                    margin-bottom: 1rem;
+                }
             }
 
-            p {
-                background-color: white;
-                white-space: pre-line;
-                padding: 1.5rem;
-            }
-        }
+            div.loadingSpinner {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255,255,255,0.7);
+                z-index: 2;
 
-        div.searchFormWithAttributes {
-            select.archiv {
-                margin-bottom: 1rem;
-            }
-        }
-        div.searchButtons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+                div.spinner {
+                    width: 4rem;
+                    height: 4rem;
+                }
 
-            *:nth-child(2) {
-                margin-left: auto;
+                p {
+                    background-color: white;
+                    white-space: pre-line;
+                    padding: 1.5rem;
+                }
+            }
+
+            div.searchFormWithAttributes {
+                select.archiv {
+                    margin-bottom: 1rem;
+                }
+            }
+
+            div.searchFormWithGeometry {
+                .archiveSelectionList {
+                    max-height: 12.5rem;
+                    overflow-y: auto;
+                    border: 0.0625rem solid rgba(0,0,0,0.1);
+                    padding: 0.5rem;
+                    margin: 0.5rem 0 1rem 0;
+                }
+
+                .archiveCheckboxList {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    white-space: nowrap;
+                }
+                .yearsSelection {
+                    .yearsSelectionList {
+                        min-height: 6.25rem;
+                        max-height: 12.5rem;
+                        overflow-y: auto;
+                        border: 0.0625rem solid rgba(0,0,0,0.1);
+                        padding: 0.5rem;
+                        margin: 0.5rem 0 1rem 0;
+                    }
+
+                    .yearCheckboxItem {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        white-space: nowrap;
+                    }
+                }
+                div.noCommonYearError {
+                    color: $light_red;
+                }
+            }
+            div.searchButtons {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 1rem;
+
+                *:nth-child(2) {
+                    margin-left: auto;
+                }
             }
         }
     }
-}
 </style>

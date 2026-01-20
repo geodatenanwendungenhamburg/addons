@@ -17,6 +17,8 @@
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
  * @property {Object} dataClassList - List of data classes (see fetchDataClassList) used in tab search
+ * @property {Array} yearsList - List of the years, which is searchable for selected archives
+ * @property {Array} archiveList - List of archives to use in TabSearch
  */
 
 const state = {
@@ -38,7 +40,9 @@ const state = {
     apiBasePath: "",
     searchAttributeResponse: [],
     placeholderDataClassList: {},
-    placeholderJsonPath: ""
+    placeholderJsonPath: "",
+    yearsList: [],
+    archiveList: []
 };
 
 export default state;

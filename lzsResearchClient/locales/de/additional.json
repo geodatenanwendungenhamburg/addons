@@ -19,10 +19,12 @@
                     "searchWithAttributeHeading": "Suche Daten über Attribute",
                     "searchWithGeometryHeading": "Suche Daten über räumliches Gebiet",
                     "selectArchivLabel": "Archiv",
+                    "selectYearsLabel": "Jahrgang",
                     "jahrgang": "Jahrgang",
                     "kachelnummer": "Kachelnummer",
                     "maxValueCount": "Max. Trefferanzahl",
-                    "patternError": "Please enter a numeric value with {{ digitNumber }} digit."
+                    "patternError": "Please enter a numeric value with {{ digitNumber }} digit.",
+                    "noCommonYearErrorMessage": "Es konnten keine gemeinsamen Jahrgänge zu den gewählten Archiven gefunden werden."
                 },
                 "tabResult": {
                     "label": "Ergebnisse"
