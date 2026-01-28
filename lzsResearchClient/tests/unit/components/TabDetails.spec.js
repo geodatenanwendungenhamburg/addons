@@ -19,7 +19,10 @@ describe("addons/lzsResearchClient/tests/unit/components/tabs/TabDetails.spec.js
                             namespaced: true,
                             state: () => ({
                                 // to be used later
-                            })
+                            }),
+                            getters: {
+                                getDetailsForSelectedInstanceId: () => "Details"
+                            }
                         }
                     }
                 }
