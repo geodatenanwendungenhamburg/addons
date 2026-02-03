@@ -48,7 +48,17 @@ Für maximale Flexibilität können Sie alle Aspekte der Darstellung konfigurier
     "name": "marineForecast",
     "params": {
       "stationNameProperty": "stationbf",
-      "stationPositionProperty": "position",
+      "textVersionProperty": "text_link",
+      "fontFamily": "Calibri, Arial, sans-serif",
+      "fontSize": "14px",
+      "tableFontSize": "12px",
+      "headerFontSize": "1.5em",
+      "subHeaderFontSize": "1.2em",
+      "backgroundColor": "#ffffff",
+      "tableRowEvenColor": "#f9f9f9",
+      "tableHeaderColor": "#4070a0",
+      "tableHeaderTextColor": "#ffffff",
+      "tableBorderSpacing": "2px",
       "propertyMappings": {
         "windvorhersage": {
           "title": "DWD Windvorhersagen",
@@ -81,22 +91,22 @@ Für maximale Flexibilität können Sie alle Aspekte der Darstellung konfigurier
 
 - **Typ**: String
 - **Standard**: `"stationbf"`
-- **Beschreibung**: Der Name des Properties, das den Stationsnamen enthält. Falls nicht vorhanden, wird auf `"name"` zurückgegriffen, oder es wird `"Marine Station"` als Standard verwendet.
+- **Beschreibung**: Der Name des Properties, das den Stationsnamen enthält. Falls nicht vorhanden, wird auf `"name"` zurückgegriffen.
 
 **Beispiel:**
 ```json
 "stationNameProperty": "station_name"
 ```
 
-### `stationPositionProperty` (optional)
+### `textVersionProperty` (optional)
 
 - **Typ**: String
-- **Standard**: `"position"`
-- **Beschreibung**: Der Name des Properties, das die Positionsangabe der Station enthält (z.B. Koordinaten oder geografische Bezeichnung).
+- **Standard**: `"text_link"`
+- **Beschreibung**: Der Name des Properties, das einen Link zur Textversion der Vorhersage enthält. Falls dieses Property nicht vorhanden ist, wird der Link automatisch aus dem `stationNameProperty` generiert mit dem Muster: `https://marineforecast.bsh.de/Meeresinformationen/bf/{stationbf}.html`. Der Link wird als "Link zur Textversion" unterhalb des Stationskopfes angezeigt.
 
 **Beispiel:**
 ```json
-"stationPositionProperty": "coordinates"
+"textVersionProperty": "text_url"
 ```
 
 ### `propertyMappings` (optional)
@@ -130,17 +140,129 @@ Jedes Property-Mapping kann folgende Attribute enthalten:
 }
 ```
 
-### `forceIframe` (optional)
+### Styling-Parameter (optional)
 
-- **Typ**: Boolean
-- **Standard**: `false`
-- **Beschreibung**: Erzwingt die Darstellung in einem Iframe, auch wenn der Inhalt inline gerendert werden könnte.
+Die folgenden Parameter ermöglichen die vollständige Anpassung des visuellen Erscheinungsbilds:
+
+#### `fontFamily` (optional)
+
+- **Typ**: String
+- **Standard**: `"Arial, sans-serif"`
+- **Beschreibung**: Schriftart für alle Textelemente. Mehrere Schriftarten können als Fallback angegeben werden.
 
 **Beispiel:**
 ```json
-"params": {
-  "forceIframe": true
-}
+"fontFamily": "Calibri, Arial, sans-serif"
+```
+
+#### `fontSize` (optional)
+
+- **Typ**: String
+- **Standard**: `"14px"`
+- **Beschreibung**: Basis-Schriftgröße für normalen Text und Paragraphen.
+
+**Beispiel:**
+```json
+"fontSize": "16px"
+```
+
+#### `tableFontSize` (optional)
+
+- **Typ**: String
+- **Standard**: Gleicher Wert wie `fontSize` (falls nicht angegeben)
+- **Beschreibung**: Schriftgröße speziell für Tabelleninhalte. Ermöglicht es, die Tabellenschriftgröße unabhängig von anderen Textelementen zu steuern.
+
+**Beispiel:**
+```json
+"tableFontSize": "12px"
+```
+
+#### `headerFontSize` (optional)
+
+- **Typ**: String
+- **Standard**: `"1.35em"`
+- **Beschreibung**: Schriftgröße für die Stationsnamen-Überschrift (H3).
+
+**Beispiel:**
+```json
+"headerFontSize": "1.5em"
+```
+
+#### `subHeaderFontSize` (optional)
+
+- **Typ**: String
+- **Standard**: `"1.1em"`
+- **Beschreibung**: Schriftgröße für Abschnittsüberschriften (H4).
+
+**Beispiel:**
+```json
+"subHeaderFontSize": "1.2em"
+```
+
+#### `backgroundColor` (optional)
+
+- **Typ**: String (Hex-Farbcode)
+- **Standard**: `"#ffffff"`
+- **Beschreibung**: Haupthintergrundfarbe für den Inhalt und ungerade Tabellenzeilen.
+
+**Beispiel:**
+```json
+"backgroundColor": "#f5f5f5"
+```
+
+#### `tableRowOddColor` (optional)
+
+- **Typ**: String (Hex-Farbcode)
+- **Standard**: `"#e9e9e9"`
+- **Beschreibung**: Hintergrundfarbe für ungerade Tabellenzeilen. Falls nicht angegeben, wird der gleiche Wert wie `backgroundColor` verwendet.
+
+**Beispiel:**
+```json
+"tableRowOddColor": "#f0f0f0"
+```
+
+#### `tableRowEvenColor` (optional)
+
+- **Typ**: String (Hex-Farbcode)
+- **Standard**: `"#e9e9e9"`
+- **Beschreibung**: Hintergrundfarbe für gerade Tabellenzeilen (für bessere Lesbarkeit durch alternierende Farben).
+
+**Beispiel:**
+```json
+"tableRowEvenColor": "#e8e8e8"
+```
+
+#### `tableHeaderColor` (optional)
+
+- **Typ**: String (Hex-Farbcode)
+- **Standard**: `"#4070a0"`
+- **Beschreibung**: Hintergrundfarbe für Tabellenköpfe (erste Spalte).
+
+**Beispiel:**
+```json
+"tableHeaderColor": "#0066cc"
+```
+
+#### `tableHeaderTextColor` (optional)
+
+- **Typ**: String (Hex-Farbcode)
+- **Standard**: `"#e1e1e1"`
+- **Beschreibung**: Textfarbe für Tabellenköpfe.
+
+**Beispiel:**
+```json
+"tableHeaderTextColor": "#ffffff"
+```
+
+#### `tableBorderSpacing` (optional)
+
+- **Typ**: String
+- **Standard**: `"0"`
+- **Beschreibung**: Abstand zwischen Tabellenzeilen. "0" für keine Lücken, oder z.B. "2px" für kleine Abstände.
+
+**Beispiel:**
+```json
+"tableBorderSpacing": "2px"
 ```
 
 ## Standard Property-Mappings
@@ -155,11 +277,11 @@ Wenn keine `propertyMappings` konfiguriert sind, werden folgende Standardwerte v
 | `mondereignisse` | Mondereignisse | - |
 | `sonnenereignisse` | Sonnenereignisse | - |
 
-## Anwendungsfälle
+## Anwendungsbeispiele
 
-### Fall 1: Verwendung der Standardkonfiguration
+### Einfache Verwendung (Standard-Konfiguration)
 
-Wenn Ihre WFS-/WMS-Daten die Standard-Property-Namen verwenden:
+Für die Verwendung mit Standard-Property-Namen ohne weitere Anpassungen:
 
 ```json
 "gfiTheme": {
@@ -167,16 +289,18 @@ Wenn Ihre WFS-/WMS-Daten die Standard-Property-Namen verwenden:
 }
 ```
 
-### Fall 2: Anpassung für eigene Property-Namen
+Diese Minimalkonfiguration nutzt die Standard-Property-Mappings und das Standard-Styling.
 
-Wenn Ihre Datenquelle andere Property-Namen verwendet:
+### Anpassung von Daten-Properties
+
+Falls Ihre Datenquelle andere Property-Namen verwendet oder Sie eigene Titel vergeben möchten:
 
 ```json
 "gfiTheme": {
   "name": "marineForecast",
   "params": {
-    "stationNameProperty": "name",
-    "stationPositionProperty": "location",
+    "stationNameProperty": "station_name",
+    "textVersionProperty": "text_url",
     "propertyMappings": {
       "wind_data": {
         "title": "Windvorhersage",
@@ -190,54 +314,42 @@ Wenn Ihre Datenquelle andere Property-Namen verwendet:
 }
 ```
 
-### Fall 3: Teilweise Konfiguration
+**Hinweis:** Nicht konfigurierte Properties mit HTML-Tabellen werden automatisch mit dem Property-Namen (Unterstriche werden durch Leerzeichen ersetzt) angezeigt.
 
-Sie können auch nur einige Properties konfigurieren. Nicht konfigurierte Properties mit HTML-Tabellen werden automatisch mit dem Property-Namen (Unterstriche werden durch Leerzeichen ersetzt) angezeigt:
+### Anpassung des Erscheinungsbilds
 
-```json
-"gfiTheme": {
-  "name": "marineForecast",
-  "params": {
-    "propertyMappings": {
-      "hauptvorhersage": {
-        "title": "Hauptvorhersage",
-        "timestampProperty": "stand"
-      }
-    }
-  }
-}
-```
-
-**Ergebnis:**
-- `hauptvorhersage` → wird angezeigt als "Hauptvorhersage [Zeitstempel]"
-- `andere_daten` → wird automatisch angezeigt als "andere daten"
-
-### Fall 4: WFS mit Iframe-Erzwingung
-
-Für WFS-Dienste, bei denen Sie die Iframe-Darstellung erzwingen möchten:
+Für die vollständige Kontrolle über Schriftarten, Farben und Abstände:
 
 ```json
 "gfiTheme": {
   "name": "marineForecast",
   "params": {
-    "forceIframe": true,
-    "stationNameProperty": "station",
-    "propertyMappings": {
-      "forecast": {
-        "title": "Vorhersage",
-        "timestampProperty": "time"
-      }
-    }
+    "fontFamily": "Calibri, Arial, sans-serif",
+    "fontSize": "15px",
+    "tableFontSize": "13px",
+    "headerFontSize": "1.6em",
+    "subHeaderFontSize": "1.2em",
+    "backgroundColor": "#ffffff",
+    "tableRowEvenColor": "#f0f8ff",
+    "tableHeaderColor": "#003366",
+    "tableHeaderTextColor": "#ffffff",
+    "tableBorderSpacing": "1px"
   }
 }
 ```
+
+Alle Styling-Parameter sind optional und können individuell kombiniert werden.
 
 ## Hinweise
 
 - **HTML-Tabellen-Erkennung**: Das Theme erkennt nur Properties, die HTML-Code mit `<table` und `class="featureInfo"` enthalten
 - **Automatisches Fallback**: Wenn ein Property HTML-Tabellen enthält, aber nicht in `propertyMappings` definiert ist, wird es trotzdem angezeigt
 - **Flexibilität**: Sie können das Theme für beliebige WFS-/WMS-Dienste verwenden, solange diese HTML-Tabellen mit der entsprechenden Klasse zurückgeben
-- **Styling**: Das Theme verwendet ein einheitliches Styling mit grauem Hintergrund und blauen Tabellenköpfen
+- **Stationsnamen-Formatierung**: Unterstriche in Stationsnamen werden automatisch durch Leerzeichen ersetzt
+- **Koordinaten-Darstellung**: Die Position wird aus dem `position`-Property gelesen und in Klammern neben dem Stationsnamen angezeigt, z.B. "Kiel Holtenau (54°22'20\"N)"
+- **Textausrichtung**: Alle Hauptinhalte (Überschriften, Text, Tabellen) sind linksbündig. Nur Erklärungstexte innerhalb von Tabellen (z.B. Mondphasen-Beschreibungen) sind zentriert
+- **Styling**: Das Theme verwendet standardmäßig ein sauberes weißes Design mit alternierenden Tabellenzeilen für bessere Lesbarkeit. Alle Farben, Schriftarten und Abstände sind vollständig konfigurierbar
+- **Link zur Textversion**: Falls das konfigurierte `textVersionProperty` keinen Wert enthält, wird der Link automatisch aus dem Stationsnamen mit dem Muster `https://marineforecast.bsh.de/Meeresinformationen/bf/{stationbf}.html` generiert
 
 ## Technische Details
 
@@ -248,8 +360,8 @@ Für WFS-Dienste, bei denen Sie die Iframe-Darstellung erzwingen möchten:
 
 ### Rendering-Modi
 
-1. **Iframe-Modus**: Für `text/html` MIME-Type oder wenn `forceIframe: true`
-2. **Inline-Modus**: Für JSON/WFS-Daten mit HTML-Tabellen in Properties
+1. **Iframe-Modus**: Für `text/html` MIME-Type und HTML-Tabellen in Properties
+2. **Inline-Modus**: Für einfache Property-Anzeige ohne HTML-Tabellen
 
 ### Darstellung
 

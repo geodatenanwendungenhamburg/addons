@@ -13,11 +13,6 @@ export default {
         mimeType () {
             return this.feature.getMimeType();
         },
-        useIframeForWfs () {
-            const params = this.feature.getTheme?.()?.params || {};
-
-            return Boolean(params.forceIframe);
-        },
         htmlContent () {
             if (this.mimeType === "text/html") {
                 return this.feature.getDocument();
@@ -33,32 +28,34 @@ export default {
             }
 
             if (props && typeof props === "object" && Object.keys(props).length > 0) {
-                // Check if any property contains HTML tables (marine forecast specific)
                 const htmlProperties = Object.entries(props).filter(([, value]) => typeof value === "string" && value.includes("<table") && value.includes("class=\"featureInfo\""));
 
                 if (htmlProperties.length > 0) {
-                    // Handle marine forecast data: combine all HTML table properties into one view
                     const params = this.feature.getTheme?.()?.params || {},
-                        // Get configurable property names with fallback defaults
                         stationNameProperty = params.stationNameProperty || "stationbf",
-                        stationPositionProperty = params.stationPositionProperty || "position",
-                        propertyMappings = params.propertyMappings || this.getDefaultPropertyMappings();
+                        textVersionProperty = params.textVersionProperty || "text_link",
+                        propertyMappings = params.propertyMappings || this.getDefaultPropertyMappings(),
+                        position = props.position || "",
+                        stationBf = props[stationNameProperty] || props.stationbf || "";
 
-                    let combinedHtml = "";
-                    const stationName = props[stationNameProperty] || props.name || "Marine Station",
-                        position = props[stationPositionProperty] || "";
+                    let combinedHtml = "",
+                        stationName = props[stationNameProperty] || props.name || "",
+                        textVersionUrl = props[textVersionProperty] || "";
 
-                    // Add station header
-                    combinedHtml += `<h3 style="display:inline;font-family:calibri;font-size:1.35em;">${stationName}</h3>`;
-                    if (position) {
-                        combinedHtml += `<span style="font-size:1em;font-family:calibri;"> (${position}) </span>`;
+                    if (!textVersionUrl && stationBf) {
+                        textVersionUrl = `https://marineforecast.bsh.de/Meeresinformationen/bf/${stationBf}.html`;
                     }
-                    combinedHtml += "<br>";
 
-                    // Add each HTML property with appropriate headers
+                    stationName = this.formatStationName(stationName);
+
+                    combinedHtml += `<h3>${stationName}${position ? ` <span style="font-weight: normal; font-size: 0.74em;">(${position})</span>` : ""}</h3>`;
+
+                    if (textVersionUrl) {
+                        combinedHtml += `<p class="text-version"><a href="${textVersionUrl}" target="_blank" rel="noopener noreferrer">Link zur Textversion</a></p>`;
+                    }
+
                     Object.entries(props).forEach(([key, value]) => {
                         if (typeof value === "string" && value.includes("<table") && value.includes("class=\"featureInfo\"")) {
-                            // Get section title from configuration or use default
                             let sectionTitle = "";
 
                             if (propertyMappings[key]) {
@@ -70,7 +67,6 @@ export default {
                                 sectionTitle = timestamp ? `${title} ${timestamp}` : title;
                             }
                             else {
-                                // Fallback to default formatting
                                 sectionTitle = key.replace(/_/g, " ");
                             }
 
@@ -84,7 +80,6 @@ export default {
                     return combinedHtml;
                 }
 
-                // Fallback to default table format for non-marine data
                 let rows = "";
 
                 Object.entries(props).forEach(([key, value]) => {
@@ -98,8 +93,7 @@ export default {
             if (this.mimeType === "text/html") {
                 return true;
             }
-            // For WFS/JSON: enable iframe either via theme param or when the content contains a table
-            return this.useIframeForWfs || (typeof this.htmlContent === "string" && (/<table[\s\S]*?>/i).test(this.htmlContent));
+            return typeof this.htmlContent === "string" && (/<table[\s\S]*?>/i).test(this.htmlContent);
         }
     },
     watch: {
@@ -116,10 +110,6 @@ export default {
     },
     methods: {
         ...mapMutations("Menu", ["setCurrentMenuWidth"]),
-        /**
-         * Returns default property mappings for backward compatibility
-         * @returns {Object} Default property mappings
-         */
         getDefaultPropertyMappings () {
             return {
                 "windvorhersage": {
@@ -142,6 +132,12 @@ export default {
                 }
             };
         },
+        formatStationName (name) {
+            if (typeof name !== "string") {
+                return name;
+            }
+            return name.replace(/_/g, " ");
+        },
         injectHtmlContent () {
             const iframe = this.$el.querySelector(".marine-iframe"),
                 content = this.mimeType === "text/html" ? this.feature.getDocument() : this.htmlContent;
@@ -151,18 +147,92 @@ export default {
                     return;
                 }
 
-                const style = `
+                const params = this.feature.getTheme?.()?.params || {},
+                    fontFamily = params.fontFamily || "Arial, sans-serif",
+                    fontSize = params.fontSize || "14px",
+                    tableFontSize = params.tableFontSize || params.fontSize || "14px",
+                    headerFontSize = params.headerFontSize || "1.35em",
+                    subHeaderFontSize = params.subHeaderFontSize || "1.1em",
+                    backgroundColor = params.backgroundColor || "#ffffff",
+                    tableRowOddColor = params.tableRowOddColor || "#e9e9e9",
+                    tableRowEvenColor = params.tableRowEvenColor || "#e9e9e9",
+                    tableHeaderColor = params.tableHeaderColor || "#4070a0",
+                    tableHeaderTextColor = params.tableHeaderTextColor || "#e1e1e1",
+                    tableBorderSpacing = params.tableBorderSpacing || "0",
+                    style = `
                     <style>
-                        body { color: #000; background: #e9e9e9; text-align: center; margin: 0; padding: 10px; }
-                        h3 { margin: 0 0 10px 0; }
-                        h4 { margin: 10px 0 5px 0; font-size: 1.1em; }
-                        table.featureInfo { margin: 5px 0 15px 0; }
-                        table.featureInfo tbody { color: #000; background: #e9e9e9; text-align: center; }
-                        table.featureInfo tbody tr:nth-child(even) { background: #f1f1f1; }
-                        table.featureInfo tbody td:first-child, table.featureInfo tbody th:first-child {
-                            color: #e1e1e1; background: #4070a0; font-weight: bold;
+                        body {
+                            color: #000;
+                            background: ${backgroundColor};
+                            margin: 0;
+                            padding: 10px;
+                            font-family: ${fontFamily};
+                            font-size: ${fontSize};
                         }
-                        p { margin: 5px 0; }
+                        h3 {
+                            margin: 0 0 5px 0;
+                            font-size: ${headerFontSize};
+                            text-align: left;
+                            font-family: ${fontFamily};
+                        }
+                        h4 {
+                            margin: 15px 0 5px 0;
+                            font-size: ${subHeaderFontSize};
+                            text-align: left;
+                            font-family: ${fontFamily};
+                        }
+                        p {
+                            margin: 5px 0;
+                            text-align: left;
+                            font-family: ${fontFamily};
+                        }
+                        p.station-position {
+                            margin: 0 0 10px 0;
+                            font-style: italic;
+                        }
+                        p.text-version {
+                            margin: 5px 0 10px 0;
+                        }
+                        a {
+                            color: #0066cc;
+                            text-decoration: none;
+                        }
+                        a:hover {
+                            text-decoration: underline;
+                        }
+                        table.featureInfo {
+                            margin: 5px 0 5px 0;
+                            border-collapse: ${tableBorderSpacing === "0" ? "collapse" : "separate"};
+                            border-spacing: ${tableBorderSpacing};
+                            width: 100%;
+                            font-family: ${fontFamily};
+                            font-size: ${tableFontSize};
+                        }
+                        table.featureInfo tbody {
+                            color: #000;
+                        }
+                        table.featureInfo tbody tr:nth-child(odd) {
+                            background: ${tableRowOddColor};
+                        }
+                        table.featureInfo tbody tr:nth-child(even) {
+                            background: ${tableRowEvenColor};
+                        }
+                        table.featureInfo tbody td,
+                        table.featureInfo tbody th {
+                            padding: 6px 8px;
+                            text-align: left;
+                            border: 1px solid #ffffff;
+                        }
+                        table.featureInfo tbody td:first-child,
+                        table.featureInfo tbody th:first-child {
+                            color: ${tableHeaderTextColor};
+                            background: ${tableHeaderColor};
+                            font-weight: bold;
+                            border-right: 2px solid #ffffff;
+                        }
+                        table.featureInfo p {
+                            text-align: center;
+                        }
                     </style>`,
                     doc = `<!doctype html><html><head><meta charset="utf-8">${style}</head><body>${content}</body></html>`;
 
@@ -198,7 +268,7 @@ export default {
 <style scoped>
 .marine-iframe {
     width: 100%;
-    height: 800px;
+    height: 900px;
 }
 .marine-html {
     overflow-x: auto;
@@ -214,7 +284,6 @@ export default {
 .marine-html th {
     white-space: nowrap;
 }
-/* Theming for inline HTML tables */
 .marine-html {
     color: #000;
     background: #e9e9e9;
@@ -228,5 +297,15 @@ export default {
     color: #e1e1e1;
     background: #4070a0;
     font-weight: bold;
+}
+</style>
+
+<style>
+.gfi-pager-left-margin {
+    margin-left: 0 !important;
+}
+
+.gfi-title.mx-3 {
+    margin-left: 0.7rem !important;
 }
 </style>
