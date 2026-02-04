@@ -1,9 +1,6 @@
 import axios from "axios";
 import {buildEndpointUrl} from "../utils/buildEndpointUrl";
 
-// will be imported later..
-const Token = "";
-
 export default {
     /**
      * Fetch the dataclass list from the API and store it in Vuex.
@@ -11,7 +8,7 @@ export default {
      */
     async fetchDataClassList ({state, commit}) {
         const params = {
-                Token: Token
+                Token: state.token
             },
             url = buildEndpointUrl(`${state.apiBasePath}/rest/dataclass/list`, params),
             response = await axios.get(url, {
@@ -36,7 +33,7 @@ export default {
     async searchByAttribute ({state, commit}, payload) {
         commit("setSearchAttributeResponse", []);
         const params = {
-                Token: Token,
+                Token: state.token,
                 f: "json",
                 preventCache: Date.now()
             },
@@ -71,7 +68,7 @@ export default {
      */
     async fetchYears ({state, commit}, archiveId) {
         const params = {
-                Token: Token,
+                Token: state.token,
                 f: "json",
                 preventCache: Date.now()
             },
@@ -150,7 +147,7 @@ export default {
         commit("setSearchAttributeResponse", []);
 
         const params = {
-                Token: Token,
+                Token: state.token,
                 f: "json",
                 preventCache: Date.now()
             },

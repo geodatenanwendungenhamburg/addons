@@ -61,7 +61,15 @@ export default {
             ];
         }
     },
+    created () {
+        // Temporary solution to get a token from the URL.
+        // This must be deleted later and replaced by scripts on the server side and/ or a scheduled job
+        // on the server which adds the token to the user session.
+        const params = new URLSearchParams(window.location.search),
+            token = params.get("token");
 
+        this.setToken(token);
+    },
     /**
      * KeepAlive: This addon uses the Masterportal module caching feature,
      * see docs/Dev/vueComponents/ModuleCaching.md
@@ -80,7 +88,8 @@ export default {
     },
     methods: {
         ...mapMutations("Modules/LzsResearchClient", [
-            "setShowLoadingSpinner"
+            "setShowLoadingSpinner",
+            "setToken"
         ])
     }
 };

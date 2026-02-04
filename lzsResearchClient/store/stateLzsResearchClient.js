@@ -42,6 +42,7 @@ const state = {
     hasMouseMapInteractions: true,
 
     // Addon state
+    token: "",
     showLoadingSpinner: false,
     dataClassList: [],
     apiBasePath: "",
