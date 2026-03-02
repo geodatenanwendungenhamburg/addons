@@ -3,7 +3,7 @@ import {downloadJsonToFile} from "../../utils/download";
 import {Point} from "ol/geom.js";
 import Feature from "ol/Feature.js";
 import {filterAllFeatures} from "../../utils/layer/filterAllFeatures";
-import styleJson from '../assets/Erreichbarkeitsanalyse_style.json' assert { type: 'json' };
+import styleJson from "../assets/Erreichbarkeitsanalyse_style.json" assert { type: "json" };
 
 /**
  * Prepares the export of the results of the supply analysis as geojson

@@ -831,10 +831,10 @@ export default {
                                 </div>
                             </template>
                             <!-- Column Group -->
-                            <template #[`group-header`]="{ item, columns, toggleGroup, isGroupOpen }">
+                            <template #[`group-header`]="{ item, groupColumns, toggleGroup, isGroupOpen }">
                                 <tr>
                                     <th
-                                        :colspan="columns.length"
+                                        :colspan="groupColumns.length"
                                         class="text-start"
                                     >
                                         <v-icon @click="toggleGroup(item)">
