@@ -572,9 +572,10 @@ export default {
             const items = this.selectedItems.length > 0 ? this.selectedItems : this.currentItems,
                 preparedItems = this.ignoreColumnsByExport && this.minimizedCols.length ? this.getPreparedItems(items) : items,
                 prefix = this.prefixExportFilename,
+                selectedDistrictLabels = this.getSelectedDistrictsLabels(this.selectedDistrictLevel.districts),
                 rawData = exportTimeline
-                    ? this.prepareTableExportWithTimeline(preparedItems, this.selectedDistrictNames, this.timestamps, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped)
-                    : this.prepareTableExport(preparedItems, this.selectedDistrictNames, this.selectedYear, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped),
+                    ? this.prepareTableExportWithTimeline(preparedItems, selectedDistrictLabels, this.timestamps, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped)
+                    : this.prepareTableExport(preparedItems, selectedDistrictLabels, this.selectedYear, this.keyMap, this.selectedDistrictLevel.districts, this.timestampPrefix, this.exportGrouped),
                 filename = composeFilename(this.$t("additional:modules.tools.cosi.dashboard.exportFilename", {prefix})),
                 modifiedKey = [{"oldKey": "isTemp", "newKey": "eigene Berechnungen"}];
 
