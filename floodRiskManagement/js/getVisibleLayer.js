@@ -18,7 +18,7 @@ function getVisibleLayer (printMapMarker = false) {
         groupedLayers.forEach(groupedLayer => {
             groupedLayer.getLayers().forEach(gLayer => {
                 // layer opacity is only set for printing and later it is reverted
-                gLayer.setOpacity(groupedLayer.getOpacity());
+                gLayer.setOpacity(gLayer.getOpacity() * groupedLayer.getOpacity());
                 visibleLayerList.push(gLayer);
             });
         });
