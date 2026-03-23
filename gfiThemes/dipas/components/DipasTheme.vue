@@ -67,11 +67,10 @@ export default {
                 contributionLink = "";
 
             if (!this.isTableStyle()) {
-                const urlParams = "?LAYERS=" + JSON.stringify(this.layerUrlParams.filter((layerParam) => {
-                    return layerParam.visibility;
-                })) + "&" + this.mapsUrlParams;
+                const urlParams = "?LAYERS=" + JSON.stringify(this.layerUrlParams) + "&" + this.mapsUrlParams;
 
-                parentLocation = document.referrer.split("?")[0];
+                parentLocation = location.origin + location.pathname;
+                // parentLocation = document.referrer.split("?")[0];
                 contributionLink = parentLocation.split("#")[0] + "#/contribution/" + nid + urlParams;
             }
             else {
@@ -79,7 +78,6 @@ export default {
             }
             return contributionLink;
         },
-
         /**
          * checks if the table style is set in the uiStyle
          * @returns {Boolean} true if table style is set otherwise false

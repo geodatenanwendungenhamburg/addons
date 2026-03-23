@@ -20,10 +20,27 @@ describe("addons/dipas/components/DipasTheme.vue", () => {
         gettersTable = {
             uiStyle: () => "TABLE",
             layerUrlParams: () => [{"id": "2431", "visibility": true}, {"id": "8712", "visibility": false}]
-        };
+        },
+        testLocation = "https://localhost:9001/portalconfigs/dipas/#/projektinfo",
+        jsdom = new URL(testLocation),
+        originalLocation = global.location;
+
     let wrapper,
         valueStyle = [],
         store;
+
+
+    beforeAll(() => {
+        global.location = {
+            origin: jsdom.origin,
+            pathname: jsdom.pathname,
+            search: jsdom.search
+        };
+    });
+
+    afterAll(() => {
+        global.location = originalLocation;
+    });
 
     /**
      * Creates the wrapper
@@ -156,22 +173,20 @@ describe("addons/dipas/components/DipasTheme.vue", () => {
         });
 
         it("should show path to dipas frontend contribution when table = false", function () {
-            Object.defineProperty(document, "referrer", {value: "https://localhost:9001/portalconfigs/dipas/#/projektinfo", configurable: true});
-
+            // Object.defineProperty(document, "referrer", {value: "https://localhost:9001/portalconfigs/dipas/#/projektinfo", configurable: true});
             createWrapper(false);
 
-            const path = "https://localhost:9001/portalconfigs/dipas/#/contribution/5?LAYERS=[{\"id\":\"2431\",\"visibility\":true}]&MAPS={'center':[565874,5934140], 'zoom':4}",
+            const path = "https://localhost:9001/portalconfigs/dipas/#/contribution/5?LAYERS=[{\"id\":\"2431\",\"visibility\":true},{\"id\":\"8712\",\"visibility\":false}]&MAPS={'center':[565874,5934140], 'zoom':4}",
                 ret = wrapper.vm.modifyContributionLink(wrapper.vm.feature.getMappedProperties().link, wrapper.vm.feature.getMappedProperties().nid);
 
             expect(ret).to.equal(path);
         });
 
         it("should show path to dipas frontend contribution when table = false and filter = visible", function () {
-            Object.defineProperty(document, "referrer", {value: "https://localhost:9001/portalconfigs/dipas/#/projektinfo?filter=open&test=true", configurable: true});
-
+            // Object.defineProperty(document, "referrer", {value: "https://localhost:9001/portalconfigs/dipas/#/projektinfo?filter=open&test=true", configurable: true});
             createWrapper(false);
 
-            const path = "https://localhost:9001/portalconfigs/dipas/#/contribution/5?LAYERS=[{\"id\":\"2431\",\"visibility\":true}]&MAPS={'center':[565874,5934140], 'zoom':4}",
+            const path = "https://localhost:9001/portalconfigs/dipas/#/contribution/5?LAYERS=[{\"id\":\"2431\",\"visibility\":true},{\"id\":\"8712\",\"visibility\":false}]&MAPS={'center':[565874,5934140], 'zoom':4}",
                 ret = wrapper.vm.modifyContributionLink(wrapper.vm.feature.getMappedProperties().link, wrapper.vm.feature.getMappedProperties().nid);
 
             expect(ret).to.equal(path);
