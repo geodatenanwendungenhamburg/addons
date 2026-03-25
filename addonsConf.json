@@ -103,7 +103,8 @@
     "type": "tool"
   },
   "simulationTool": {
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":false
   },
   "bimFactory": {
     "type": "tool"
@@ -147,67 +148,83 @@
    },
   "districtSelector": {
     "path": "cosi/DistrictSelector",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "districtFinder": {
     "path": "cosi/DistrictFinder",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "accessibilityAnalysis": {
     "path": "cosi/AccessibilityAnalysis",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "dashboard": {
     "path":"cosi/Dashboard",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "colorCodeMap": {
     "path":"cosi/ColorCodeMap",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "featuresList": {
     "path":"cosi/FeaturesList",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "distanceScoreService": {
     "path": "cosi/FeaturesList/service",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "polygonStyler": {
     "path":"cosi/PolygonStyler",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "areaSelector": {
     "path":"cosi/AreaSelector",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "templateAdmin": {
     "path": "cosi/TemplateAdmin",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "templateManager": {
     "path": "cosi/TemplateManager",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "saveSession": {
     "path": "cosi/SaveSession",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "calculateRatio": {
     "path": "cosi/CalculateRatio",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "reportingTool": {
     "path": "cosi/ReportingTool",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "cosiFileImport": {
     "path": "cosi/cosiFileImport",
-    "type": "tool"
+    "type": "tool",
+    "addToBundleInProdBuild":true
   },
   "cosiPrintLayoutSelection": {
     "path": "cosi/cosiPrintLayoutSelection",
-    "type": "vueComponent"
+    "type": "vueComponent",
+    "addToBundleInProdBuild":true
   },
    "waterRiskCheckSearchBar": {
     "type": "vueComponent",

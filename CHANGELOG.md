@@ -10,6 +10,7 @@
 
 ### Changed
 - gfiThemes: The GFI theme `combinedGfi` no longer displays the select element when exactly one option exists. In such cases, the singular option is automatically selected.
+- Added the boolean parameter `addToBundleInProdBuild` to configuration of each addon in addonsConf.json to exclude an addon from bundling during production build.
 
 ### Deprecated
 
