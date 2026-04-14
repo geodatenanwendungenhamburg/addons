@@ -32,7 +32,8 @@ export default {
             drawTypeLabels: [
                 {type: "polygon", label: "common:shared.modules.draw.drawTypes.polygon"},
                 {type: "box", label: "common:shared.modules.draw.drawTypes.box"},
-                {type: "circle", label: "common:shared.modules.draw.drawTypes.circle"}
+                {type: "circle", label: "common:shared.modules.draw.drawTypes.circle"},
+                {type: "line", label: "common:shared.modules.draw.drawTypes.line"}
             ],
             source: null,
             selectedDrawType: "",
@@ -103,7 +104,7 @@ export default {
         <div class="d-flex align-items-start gap-3">
             <DrawTypes
                 :current-layout="currentLayout"
-                :draw-types="['polygon', 'box', 'circle']"
+                :draw-types="['polygon', 'box', 'circle', 'line']"
                 :draw-type-labels="drawTypeLabels"
                 :selected-draw-type="selectedDrawType"
                 :selected-draw-type-main="selectedDrawTypeMain"
