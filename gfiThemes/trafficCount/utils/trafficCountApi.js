@@ -713,32 +713,82 @@ export class TrafficCountApi {
     subscribeLastUpdate (thingId, meansOfTransport, onupdate, onerror, onstart, oncomplete) {
         const url = this.baseUrlHttp + "/Things(" + thingId + ")?$expand=Datastreams($filter=properties/layerName eq '" + meansOfTransport + this.layerNameInfix + "_15-Min')";
 
-        // get the datastreamId via http to subscribe to with mqtt
         return this.http.get(url, (dataset) => {
             if (
                 Array.isArray(dataset) && dataset.length > 0 && dataset[0]?.Datastreams
                 && Array.isArray(dataset[0].Datastreams) && dataset[0].Datastreams.length > 0 && Object.prototype.hasOwnProperty.call(dataset[0].Datastreams[0], "@iot.id")
             ) {
-                // subscribe via mqtt
                 const datastreamId = dataset[0].Datastreams[0]["@iot.id"],
-                    topic = this.sensorThingsVersion + "/Datastreams(" + datastreamId + ")/Observations";
+                    topic = this.sensorThingsVersion + "/Datastreams(" + datastreamId + ")/Observations",
+                    obsUrl = this.baseUrlHttp + "/Datastreams(" + datastreamId + ")/Observations?$top=1&$orderby=phenomenonTime desc",
+                    errorHandler = (...args) => {
+                        if (typeof onerror === "function") {
+                            onerror(...args);
+                        }
+                        else if (typeof this.defaultErrorHandler === "function") {
+                            this.defaultErrorHandler(...args);
+                        }
+                        else {
+                            console.warn(...args);
+                        }
+                    };
 
-                // set retain to 0 to get the last message from the server immediately (see doc\sensorThings_EN.md)
-                this.mqttSubscribe(topic, {rh: 0}, (payload) => {
-                    if (payload && payload?.resultTime) {
+                /**
+                 * Processes time updates from payload or HTTP dataset.
+                 * @param {Object} data the received data object
+                 * @param {String} sourceName the source name for logging purposes
+                 * @returns {Void} -
+                 */
+                function processTimeUpdate (data, sourceName) {
+                    if (!data || !(data.phenomenonTime || data.resultTime)) {
+                        errorHandler("TrafficCountAPI.subscribeLastUpdate: the payload does not include a time field (" + sourceName + ")", data);
+                        return;
+                    }
+
+                    // PhenomenonTime has priority, resultTime is the fallback
+                    let timeString = data.phenomenonTime || data.resultTime;
+
+                    if (typeof timeString === "string" && timeString.includes("/")) {
+                        timeString = timeString.split("/")[1];
+                    }
+
+                    const datetime = dayjs(timeString).format("YYYY-MM-DD HH:mm:ss");
+
+                    if (datetime !== "Invalid Date") {
                         if (typeof onupdate === "function") {
-                            const datetime = dayjs(payload.resultTime).format("YYYY-MM-DD HH:mm:ss");
-
                             onupdate(datetime);
                         }
                     }
                     else {
-                        (onerror || this.defaultErrorHandler)("TrafficCountAPI.subscribeLastUpdate: the payload does not include a resultTime", payload);
+                        errorHandler("TrafficCountAPI: could not parse time", data);
                     }
+                }
+
+                // Set retain to 0 to get the last message from the server immediately (see doc\sensorThings_EN.md)
+                this.mqttSubscribe(topic, {rh: 0}, (payload) => {
+                    processTimeUpdate(payload, "Payload");
                 });
+
+                // HTTP fallback for the initial measurement directly after the subscription
+                this.http.get(obsUrl, (obsDataset) => {
+                    if (obsDataset && obsDataset.length > 0 && (obsDataset[0].phenomenonTime || obsDataset[0].resultTime)) {
+                        processTimeUpdate(obsDataset[0], "HTTP-Fallback");
+                    }
+                }, onstart, oncomplete, onerror || this.defaultErrorHandler);
+
             }
             else {
-                (onerror || this.defaultErrorHandler)("TrafficCountAPI.subscribeLastUpdate: the response does not include a Datastream with a proper @iot.id", dataset);
+                const invalidErrorMsg = "TrafficCountAPI.subscribeLastUpdate: the response does not include a Datastream with a proper @iot.id";
+
+                if (typeof onerror === "function") {
+                    onerror(invalidErrorMsg, dataset);
+                }
+                else if (typeof this.defaultErrorHandler === "function") {
+                    this.defaultErrorHandler(invalidErrorMsg, dataset);
+                }
+                else {
+                    console.error(invalidErrorMsg, dataset);
+                }
             }
         }, onstart, oncomplete, onerror || this.defaultErrorHandler);
     }
