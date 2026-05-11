@@ -188,13 +188,25 @@ export class TrafficCountApi {
      */
     mqttSubscribe (topic, options, handler) {
         if (!Object.prototype.hasOwnProperty.call(this.subscriptionTopics, topic)) {
-            // new subscription
             this.subscriptionTopics[topic] = [];
         }
         this.subscriptionTopics[topic].push(handler);
 
         if (this.mqttClient && typeof this.mqttClient.subscribe === "function") {
-            this.mqttClient.subscribe(topic, options);
+
+            // Kickstarter workaround: first call wakes up the internal stream
+            this.mqttClient.subscribe(topic, options).catch((err) => {
+                console.warn(err);
+            });
+
+            // Actual call: successfully subscribes to the topic
+            this.mqttClient.subscribe(topic, options, (grantedTopic, qos) => {
+                console.warn("Topic successfully subscribed:", grantedTopic || topic, "with QoS:", qos);
+            }, (err) => {
+                if (err) {
+                    console.error("Error while subscribing:", err);
+                }
+            });
         }
     }
 
