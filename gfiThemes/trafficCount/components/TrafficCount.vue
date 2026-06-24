@@ -179,7 +179,23 @@ export default {
             },
             immediate: true
         },
-
+        propThingId: {
+            handler (_newVal, oldVal) {
+                if (oldVal) {
+                    this.isMqttLive = true;
+                }
+            },
+            immediate: true,
+            deep: true
+        },
+        propMeansOfTransport: {
+            handler (_newVal, oldVal) {
+                if (oldVal) {
+                    this.isMqttLive = true;
+                }
+            },
+            immediate: true
+        },
         // When language is switched, the header will be rerendered
         currentLocale: function (newVal, oldVal) {
             if (oldVal) {
@@ -187,16 +203,6 @@ export default {
                 this.setComponentKey(newVal);
                 this.setActiveDefaultTab();
             }
-        },
-
-        propThingId: {
-            handler (newVal, oldVal) {
-                if (oldVal) {
-                    this.isMqttLive = true;
-                }
-            },
-            immediate: true,
-            deep: true
         }
     },
     created: function () {

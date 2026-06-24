@@ -5,25 +5,11 @@ export default {
         currentTabId: {
             type: String,
             required: true
-        },
-        api: {
-            type: Object,
-            default: null
-        },
-        thingId: {
-            type: [String, Number],
-            default: ""
-        },
-        meansOfTransport: {
-            type: String,
-            default: ""
         }
     },
     data () {
         return {
-            customStyle: {},
-            isMqttLive: true,
-            statusHandler: null
+            customStyle: {}
         };
     },
     computed: {
@@ -36,44 +22,10 @@ export default {
         }
     },
     watch: {
-        // When the gfi window switched with arrow, reset the live status
-        thingId: {
-            handler (newVal, oldVal) {
-                if (oldVal) {
-                    this.isMqttLive = true;
-                }
-            },
-            immediate: true,
-            deep: true
-        },
-
-        meansOfTransport: {
-            handler (newVal, oldVal) {
-                if (oldVal) {
-                    this.isMqttLive = true;
-                }
-            },
-            immediate: true
-        },
-
         currentTabId: function (newVal) {
             if (newVal !== "info" && newVal !== "downloads") {
                 this.fixIndicationPosition();
             }
-        }
-    },
-    mounted: function () {
-        this.statusHandler = (status) => {
-            this.isMqttLive = status;
-        };
-
-        if (typeof this.api?.api?.onMqttStatusChange === "function") {
-            this.api.api.onMqttStatusChange(this.statusHandler);
-        }
-    },
-    beforeUnmount: function () {
-        if (typeof this.api?.api?.offMqttStatusChange === "function" && this.statusHandler) {
-            this.api.api.offMqttStatusChange(this.statusHandler);
         }
     },
     methods: {
@@ -112,33 +64,6 @@ export default {
         >
             {{ indication }}
         </div>
-        <div
-            v-if="currentTabId !== 'downloads'"
-            class="footer-main-content"
-        >
-            <div
-                v-if="currentTabId !== 'info'"
-                class="action-row"
-            >
-                <div class="reset-container">
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        @click="reset"
-                    >
-                        {{ $t("additional:modules.tools.gfi.themes.trafficCount.reset") }}
-                    </button>
-                </div>
-            </div>
-            <div
-                v-if="!isMqttLive"
-                class="indication last-line mt-2 mqtt-warning"
-                :style="customStyle"
-            >
-                <i class="bi bi-exclamation-triangle-fill pe-1" />
-                {{ autoUpdateNote }}
-            </div>
-        </div>
     </div>
 </template>
 
@@ -147,11 +72,6 @@ export default {
     .tableIndication, .trucksStatusIndication, .indication {
         font-size: 10px;
     }
-    .mqtt-warning {
-        color: $danger;
-        font-weight: bold;
-    }
-
     .trucksStatusIndication {
         display: none;
     }
