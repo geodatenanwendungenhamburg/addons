@@ -26,7 +26,7 @@ export default class OgcApiProcess {
     async getDescription (accessToken) {
         try {
             const encodedProcessId = encodeURIComponent(this.processId),
-                url = new URL(`processes/${encodedProcessId}`, this.baseUrl),
+                url = new URL(`processes/${encodedProcessId}`, `${this.baseUrl}/`),
                 response = await axios.get(url, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`
@@ -123,7 +123,7 @@ export default class OgcApiProcess {
      */
     async execute (requestBody, accessToken) {
         const encodedProcessId = encodeURIComponent(this.processId),
-            url = new URL(`processes/${encodedProcessId}/execution`, this.baseUrl);
+            url = new URL(`processes/${encodedProcessId}/execution`, `${this.baseUrl}/`);
 
         console.log("=== OGC API Process Execute ===");
         console.log("Process ID:", this.processId);
