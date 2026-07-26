@@ -152,7 +152,7 @@ export default class OgcApiProcess {
      * @returns {Promise<Object>} The job status object.
      */
     async getJobStatus (jobID, accessToken) {
-        const url = new URL(`jobs/${jobID}`, this.baseUrl),
+        const url = new URL(`jobs/${jobID}`, `${this.baseUrl}/`),
             response = await axios.get(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -170,7 +170,7 @@ export default class OgcApiProcess {
      * @returns {Promise<Object>} The job results object.
      */
     async getJobResults (jobID, accessToken, onLargeResponse = null) {
-        const url = new URL(`jobs/${jobID}/results`, this.baseUrl),
+        const url = new URL(`jobs/${jobID}/results`, `${this.baseUrl}/`),
             response = await axios.get(url, {headers: {
                 Authorization: `Bearer ${accessToken}`
             }});
