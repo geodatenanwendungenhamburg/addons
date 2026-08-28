@@ -10,11 +10,25 @@ const helpers = {
      */
     findBrwFeatureByYear: function ({features, year}) {
         if (features) {
-            const brwFeatures = Object.values(features);
+            const brwFeatures = Object.values(features),
+                selectedYear = year !== undefined && year !== null ? String(year) : "";
 
-            return brwFeatures.find((feature) => {
-                return feature.get("jahrgang") === year;
+            const featureByYear = brwFeatures.find((feature) => {
+                const featureYear = feature?.get("jahrgang");
+
+                return featureYear !== undefined && featureYear !== null && String(featureYear) === selectedYear;
             });
+
+            if (!featureByYear && brwFeatures.length > 0) {
+                const availableYears = brwFeatures.map(feature => feature?.get("jahrgang"));
+
+                console.warn("BORIS DEBUG: No matching feature year found.", {
+                    selectedYear,
+                    availableYears
+                });
+            }
+
+            return featureByYear;
         }
         return null;
     },

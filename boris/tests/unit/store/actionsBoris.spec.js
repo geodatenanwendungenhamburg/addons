@@ -130,8 +130,10 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             actions.initialize({commit, rootGetters});
             resultArray = commit.args[0][1];
 
-            expect(commit.calledOnce).to.be.true;
+            expect(commit.callCount).to.equal(3);
             expect(commit.args[0][0]).to.equal("setFilteredLayerList");
+            expect(commit.args[1][0]).to.equal("setSelectedLayer");
+            expect(commit.args[2][0]).to.equal("setSelectedLayerName");
             expect(resultArray[1]).to.deep.equal(layer2);
             expect(resultArray).to.deep.equal([layer1, layer2, layer3]);
         });
@@ -427,13 +429,30 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             const featureId = "APP_V_BRW_ZONEN_GEOM_FLAECHE_2022_1393260",
                 featureYear = "2022",
                 url = "https://geodienste.hamburg.de",
-                urlParams = "typeNameapp:v_brw_zonen_geom_flaeche_2022&featureID=APP_V_BRW_ZONEN_GEOM_FLAECHE_2022_1393260",
+                urlParams = "typeName=app%3Av_brw_zonen_geom_flaeche_2022&featureID=APP_V_BRW_ZONEN_GEOM_FLAECHE_2022_1393260",
                 responseData = rawSources.featureRequestResponse;
 
             axiosGetStub.resolves({status: 200, data: responseData});
 
             await actions.getFeatureRequestById({dispatch}, {featureId, featureYear});
             expect(axiosGetStub.calledWith(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)).to.be.true;
+        });
+
+        it("uses time series endpoint and feature type", async () => {
+            Config.layerConf = "https://qs-geodienste.hamburg.de/services-internet.json";
+
+            const featureId = "DE.HH.UP.BODENRICHTWERTZONEN.12345",
+                featureYear = "2026",
+                selectedLayer = {
+                    url: "https://qs-geodienste.hamburg.de/wms_bodenrichtwerte_hamburg_zeitreihe",
+                    layers: "bodenrichtwertzonen"
+                };
+
+            await actions.getFeatureRequestById({dispatch}, {featureId, featureYear, selectedLayer});
+
+            expect(axiosGetStub.calledOnce).to.be.true;
+            expect(axiosGetStub.firstCall.args[0]).to.include("/wfs_bodenrichtwerte_hamburg_zeitreihe?service=WFS&version=2.0.0");
+            expect(axiosGetStub.firstCall.args[0]).to.include("typeNames=de.hh.up%3Abodenrichtwertzonen");
         });
     });
     describe("matchPolygonFeatureWithLanduse", () => {
@@ -509,6 +528,29 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
 
             await actions.postFeatureRequestByBrwNumber({dispatch}, {brwNumber, featureYear});
             expect(axiosPostStub.called).to.be.true;
+            expect(axiosPostStub.firstCall.args[1]).to.include("typeName='lgv_brw_zonen_2022'");
+            expect(axiosPostStub.firstCall.args[1]).to.not.include("<And>");
+        });
+
+        it("posts feature request with time series date filter", async () => {
+            Config.layerConf = "https://qs-geodienste.hamburg.de/services-fhhnet-ALL.json";
+
+            const brwNumber = "09310239",
+                featureYear = "2026",
+                stichtag = "2026-01-01",
+                jahrTimestamp = "2026-01-01",
+                selectedLayer = {
+                    url: "https://qs-geodienste.hamburg.de/wms_bodenrichtwerte_hamburg_zeitreihe",
+                    layers: "bodenrichtwertzonen"
+                };
+
+            await actions.postFeatureRequestByBrwNumber({dispatch}, {brwNumber, featureYear, stichtag, jahrTimestamp, selectedLayer});
+
+            expect(axiosPostStub.calledOnce).to.be.true;
+            expect(axiosPostStub.firstCall.args[0]).to.include("/wfs_bodenrichtwerte_hamburg_zeitreihe");
+            expect(axiosPostStub.firstCall.args[1]).to.include("de.hh.up:bodenrichtwertzonen");
+            expect(axiosPostStub.firstCall.args[1]).to.include("<PropertyName>stichtag</PropertyName>");
+            expect(axiosPostStub.firstCall.args[1]).to.include("<PropertyName>jahr_timestamp</PropertyName>");
         });
     });
     describe("handleGetFeatureResponse", () => {

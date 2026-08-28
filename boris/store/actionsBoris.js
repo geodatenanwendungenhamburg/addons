@@ -6,6 +6,308 @@ import layerCollection from "../../../src/core/layers/js/layerCollection.js";
 import WPS from "../../../src/shared/js/api/wps.js";
 import mapCollection from "../../../src/core/maps/js/mapCollection.js";
 
+/**
+ * Extracts a four digit year from date-like strings.
+ * @param {String|Number} value Source value.
+ * @returns {Number|null} Year or null.
+ */
+function getYearFromValue (value) {
+    if (typeof value === "number") {
+        return value;
+    }
+
+    if (typeof value !== "string") {
+        return null;
+    }
+
+    const match = value.match(/(\d{4})/);
+
+    if (!match) {
+        return null;
+    }
+
+    return parseInt(match[1], 10);
+}
+
+/**
+ * Determines whether a feature year belongs to area datasets.
+ * @param {String|Number} featureYear Selected year.
+ * @returns {Boolean} True for area based years.
+ */
+function isAreaYear (featureYear) {
+    const year = getYearFromValue(featureYear);
+
+    return year !== null && year > 2008;
+}
+
+/**
+ * Resolves the base host from Config.layerConf.
+ * @returns {String} Base URL.
+ */
+function getLayerConfBaseUrl () {
+    const index = Config.layerConf.lastIndexOf("/");
+
+    return index > -1 ? Config.layerConf.substring(0, index) : Config.layerConf;
+}
+
+/**
+ * Checks if selected layer belongs to the new BORIS time series services.
+ * @param {Object} selectedLayer Selected layer config.
+ * @returns {Boolean} True if time series service is used.
+ */
+function isTimeSeriesServiceLayer (selectedLayer) {
+    const layerUrl = selectedLayer?.url || "",
+        layerNames = selectedLayer?.layers || "";
+
+    return layerUrl.includes("wms_bodenrichtwerte_hamburg_zeitreihe")
+        || layerNames.includes("bodenrichtwert");
+}
+
+/**
+ * Resolves a geometry group from a layer descriptor.
+ * @param {Object} selectedLayer Selected layer config.
+ * @returns {String} One of zone, flaeche, grundstueck.
+ */
+function getLayerGeometryGroup (selectedLayer) {
+    const layerNames = (selectedLayer?.layers || "").toLowerCase();
+
+    if (layerNames.includes("flaech")) {
+        return "flaeche";
+    }
+    if (layerNames.includes("grundst") || layerNames.includes("grdstk") || layerNames.includes("lagetypisch")) {
+        return "grundstueck";
+    }
+
+    return "zone";
+}
+
+/**
+ * Resolves type name and geometry name for id based WFS requests.
+ * @param {Object} payload Input values.
+ * @param {Object} payload.selectedLayer Selected layer config.
+ * @param {String} payload.featureId Feature identifier.
+ * @param {String|Number} payload.featureYear Year of clicked feature.
+ * @returns {Object} Type and geometry metadata.
+ */
+function getTypeAndGeometryForFeatureRequest ({selectedLayer, featureId, featureYear}) {
+    const featureIdUpper = (featureId || "").toUpperCase(),
+        geometryGroup = getLayerGeometryGroup(selectedLayer),
+        yearInt = getYearFromValue(featureYear),
+        isTimeSeries = isTimeSeriesServiceLayer(selectedLayer);
+
+    if (isTimeSeries) {
+        if (geometryGroup === "flaeche") {
+            return {typeName: "de.hh.up:bodenrichtwerte_flaechendeckend", geometryName: "geom_zone_flaeche"};
+        }
+        if (geometryGroup === "grundstueck") {
+            return {typeName: "de.hh.up:bodenrichtwertgrundstuecke", geometryName: "geom_brw_grdstk"};
+        }
+        return {typeName: "de.hh.up:bodenrichtwertzonen", geometryName: "geom_zone"};
+    }
+
+    if (featureIdUpper.includes("FLAECHE")) {
+        return {
+            typeName: "app:v_brw_zonen_geom_flaeche_" + featureYear,
+            geometryName: "geom_zone_flaeche"
+        };
+    }
+    if (yearInt !== null && yearInt <= 2008) {
+        return {typeName: "lgv_brw_lagetypisch_alle", geometryName: "geom_brw_grdstk"};
+    }
+    if (yearInt !== null && yearInt <= 2014) {
+        return {typeName: "lgv_brw_zoniert_" + featureYear, geometryName: "geom_zone"};
+    }
+
+    return {typeName: "lgv_brw_zonen_" + featureYear, geometryName: "geom_zone"};
+}
+
+/**
+ * Resolves the WFS URL used for requests.
+ * @param {Object} selectedLayer Selected layer config.
+ * @returns {String} Full WFS endpoint URL.
+ */
+function getWfsEndpointUrl (selectedLayer) {
+    const baseUrl = getLayerConfBaseUrl();
+
+    if (isTimeSeriesServiceLayer(selectedLayer)) {
+        return baseUrl + "/wfs_bodenrichtwerte_hamburg_zeitreihe";
+    }
+
+    return baseUrl + "/HH_WFS_Bodenrichtwerte";
+}
+
+/**
+ * Resolves the type name for value-based feature requests.
+ * @param {Object} selectedLayer Selected layer config.
+ * @param {String|Number} featureYear Selected year.
+ * @returns {String} Type name.
+ */
+function getTypeNameForBrwRequest (selectedLayer, featureYear) {
+    const geometryGroup = getLayerGeometryGroup(selectedLayer);
+    const year = getYearFromValue(featureYear);
+
+    if (isTimeSeriesServiceLayer(selectedLayer)) {
+        if (geometryGroup === "flaeche") {
+            return "de.hh.up:bodenrichtwerte_flaechendeckend";
+        }
+        if (geometryGroup === "grundstueck") {
+            return "de.hh.up:bodenrichtwertgrundstuecke";
+        }
+        return "de.hh.up:bodenrichtwertzonen";
+    }
+
+    if (year !== null && year <= 2008) {
+        return "lgv_brw_lagetypisch_alle";
+    }
+    if (year !== null && year <= 2014) {
+        return `lgv_brw_zoniert_${year}`;
+    }
+    if (year !== null) {
+        return `lgv_brw_zonen_${year}`;
+    }
+
+    return "lgv_brw_zoniert_alle";
+}
+
+/**
+ * Resolves fallback type names for BRW detail requests.
+ * @param {Object} selectedLayer Selected layer config.
+ * @param {String|Number} featureYear Selected year.
+ * @returns {String[]} Unique type names ordered by preference.
+ */
+function getTypeNamesForBrwRequest (selectedLayer, featureYear) {
+    const defaultType = getTypeNameForBrwRequest(selectedLayer, featureYear),
+        year = getYearFromValue(featureYear),
+        legacyCandidates = [];
+
+    if (year !== null && year > 2014) {
+        legacyCandidates.push(`lgv_brw_zonen_${year}`);
+    }
+    if (year !== null && year >= 2010 && year <= 2014) {
+        legacyCandidates.push(`lgv_brw_zoniert_${year}`);
+    }
+    legacyCandidates.push("lgv_brw_zoniert_alle", "lgv_brw_lagetypisch_alle");
+
+    if (isTimeSeriesServiceLayer(selectedLayer)) {
+        return [...new Set([
+            defaultType,
+            "de.hh.up:bodenrichtwertzonen",
+            "de.hh.up:bodenrichtwerte_flaechendeckend",
+            ...legacyCandidates
+        ])];
+    }
+
+    return [...new Set([
+        defaultType,
+        ...legacyCandidates,
+        "de.hh.up:bodenrichtwertzonen"
+    ])];
+}
+
+/**
+ * Builds an optional date filter for WFS XML requests.
+ * @param {String} stichtag Date value.
+ * @param {String} jahrTimestamp Legacy date value.
+ * @returns {String} XML snippet.
+ */
+function createDateFilter (stichtag, jahrTimestamp) {
+    if (!stichtag && !jahrTimestamp) {
+        return null;
+    }
+
+    if (stichtag && jahrTimestamp) {
+        return `<Or>
+                        <PropertyIsEqualTo>
+                            <PropertyName>stichtag</PropertyName>
+                            <Literal>${stichtag}</Literal>
+                        </PropertyIsEqualTo>
+                        <PropertyIsEqualTo>
+                            <PropertyName>jahr_timestamp</PropertyName>
+                            <Literal>${jahrTimestamp}</Literal>
+                        </PropertyIsEqualTo>
+                    </Or>`;
+    }
+
+    const dateField = stichtag ? "stichtag" : "jahr_timestamp",
+        dateValue = stichtag || jahrTimestamp;
+
+    return `<PropertyIsEqualTo>
+                        <PropertyName>${dateField}</PropertyName>
+                        <Literal>${dateValue}</Literal>
+                    </PropertyIsEqualTo>`;
+}
+
+/**
+ * Builds a valid OGC filter body from mandatory and optional clauses.
+ * @param {String} brwNumber Standard land value number.
+ * @param {String|null} dateFilter Optional date filter XML.
+ * @returns {String} Filter XML.
+ */
+function createOgcFilter (brwNumber, dateFilter) {
+    const brwClause = `<PropertyIsEqualTo>
+                        <PropertyName>richtwertnummer</PropertyName>
+                        <Literal>${brwNumber}</Literal>
+                    </PropertyIsEqualTo>`;
+
+    if (dateFilter) {
+        return `<Filter xmlns='http://www.opengis.net/ogc'>
+                    <And>
+                    ${brwClause}
+                    ${dateFilter}
+                    </And>
+                </Filter>`;
+    }
+
+    return `<Filter xmlns='http://www.opengis.net/ogc'>
+                    ${brwClause}
+                </Filter>`;
+}
+
+/**
+ * Resolves the best available date value from a feature.
+ * @param {ol.Feature} feature The selected feature.
+ * @returns {String} Date-like value.
+ */
+function getFeatureDate (feature) {
+    const stichtag = feature?.get("stichtag"),
+        jahrTimestamp = feature?.get("jahr_timestamp");
+
+    return stichtag || jahrTimestamp || "";
+}
+
+/**
+ * Resolves the best matching selected layer from payload and current state.
+ * @param {Object} payload Input values.
+ * @param {Object} payload.state Boris state.
+ * @param {Object} payload.selectedLayer Optional selected layer from payload.
+ * @param {String} payload.selectedLayerName Optional layer name from payload.
+ * @returns {Object|undefined} Resolved layer.
+ */
+function resolveSelectedLayerConfig ({state = {}, selectedLayer, selectedLayerName}) {
+    if (selectedLayer) {
+        return selectedLayer;
+    }
+    if (state.selectedLayer) {
+        return state.selectedLayer;
+    }
+
+    const layerList = Array.isArray(state.filteredLayerList) ? state.filteredLayerList : [],
+        visibleLayer = layerList.find(layer => layer.visibility === true && !layer.name?.includes("-stripes"));
+
+    if (visibleLayer) {
+        return visibleLayer;
+    }
+
+    if (selectedLayerName) {
+        return layerList.find(layer => layer.name === selectedLayerName);
+    }
+    if (state.selectedLayerName) {
+        return layerList.find(layer => layer.name === state.selectedLayerName);
+    }
+
+    return layerList.find(layer => !layer.name?.includes("-stripes"));
+}
+
 const actions = {
     /**
      * Sets a filtered layerList
@@ -18,6 +320,14 @@ const actions = {
 
         if (layerList) {
             commit("setFilteredLayerList", layerList);
+
+            const visibleLayer = layerList.find(layer => layer.visibility === true && !layer.name?.includes("-stripes"))
+                || layerList.find(layer => !layer.name?.includes("-stripes"));
+
+            if (visibleLayer) {
+                commit("setSelectedLayer", visibleLayer);
+                commit("setSelectedLayerName", visibleLayer.name);
+            }
         }
     },
     /**
@@ -86,12 +396,12 @@ const actions = {
         const previousSelectedLayer = state.filteredLayerList.filter(function (layer) {
                 return layer.visibility === true;
             }),
-            currentYear = selectedLayerName.split(".")[2];
+            currentYear = getYearFromValue(selectedLayerName);
         let previousYear = null;
 
         previousSelectedLayer.forEach(layer => {
             layer.visibility = false;
-            previousYear = layer.name.split(".")[2];
+            previousYear = getYearFromValue(layer.name);
             dispatch("replaceByIdInLayerConfig", {
                 layerConfigs: [{
                     id: layer.id,
@@ -106,19 +416,19 @@ const actions = {
         dispatch("selectLayerByName", selectedLayerName);
         commit("setSelectedLayerName", selectedLayerName);
 
-        if (currentYear > 2008 && rootGetters["Maps/clickCoordinate"]) {
+        if (isAreaYear(currentYear) && rootGetters["Maps/clickCoordinate"]) {
             dispatch("requestGFI", {processFromParametricUrl: false, center: null});
         }
         else {
             dispatch("Maps/removePolygonMarker", null, {root: true});
-            if (rootGetters["Maps/clickCoordinate"] && !(previousYear > 2008 && currentYear <= 2008)) {
+            if (rootGetters["Maps/clickCoordinate"] && !(isAreaYear(previousYear) && !isAreaYear(currentYear))) {
                 dispatch("requestGFI", {processFromParametricUrl: false, center: null});
             }
         }
-        if (previousYear > 2008 && currentYear <= 2008 && rootGetters["Maps/clickCoordinate"]) {
+        if (isAreaYear(previousYear) && !isAreaYear(currentYear) && rootGetters["Maps/clickCoordinate"]) {
             dispatch("requestGFI", {processFromParametricUrl: false, center: null});
         }
-        else if (currentYear > 2008 && previousYear <= 2008) {
+        else if (isAreaYear(currentYear) && !isAreaYear(previousYear)) {
             dispatch("Maps/removePointMarker", null, {root: true});
             commit("setSelectedBrwFeature", {});
             commit("setTextIds", []);
@@ -256,9 +566,13 @@ const actions = {
         const feature = new WMSGetFeatureInfo().readFeature(response);
 
         if (feature !== null) {
-            if (parseInt(feature.get("jahrgang"), 10) > 2008) {
+            if (isAreaYear(feature.get("jahrgang"))) {
                 feature.set("nutzungsart", JSON.parse(feature.get("nutzungsart")).nutzungen);
-                dispatch("getFeatureRequestById", {featureId: feature.getId(), featureYear: feature.get("jahrgang")});
+                dispatch("getFeatureRequestById", {
+                    featureId: feature.getId(),
+                    featureYear: feature.get("jahrgang"),
+                    selectedLayer: resolveSelectedLayerConfig({state})
+                });
                 commit("setSelectedPolygon", feature);
                 dispatch("matchPolygonFeatureWithLanduse", {feature, selectedLanduse: state.selectedLanduse});
             }
@@ -288,37 +602,38 @@ const actions = {
      * @param {String} year selected year
      * @returns {void}
      */
-    getFeatureRequestById ({dispatch}, {featureId, featureYear}) {
-        const yearInt = parseInt(featureYear, 10),
-            index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index);
+    getFeatureRequestById ({dispatch, state = {}}, {featureId, featureYear, selectedLayer}) {
+        const selectedLayerConfig = resolveSelectedLayerConfig({state, selectedLayer}),
+            endpointUrl = getWfsEndpointUrl(selectedLayerConfig),
+            {typeName, geometryName} = getTypeAndGeometryForFeatureRequest({selectedLayer: selectedLayerConfig, featureId, featureYear}),
+            wfsVersion = isTimeSeriesServiceLayer(selectedLayerConfig) ? "2.0.0" : "1.1.0",
+            typeNameParam = wfsVersion === "2.0.0" ? "typeNames" : "typeName",
+            urlParams = `${typeNameParam}=${encodeURIComponent(typeName)}&featureID=${encodeURIComponent(featureId)}`;
 
-        let typeName,
-            urlParams = null,
-            geometryName = "geom_zone";
+        if (!selectedLayerConfig) {
+            console.warn("BORIS DEBUG: No selected layer resolved for getFeatureRequestById.");
+        }
 
-        if (featureId.indexOf("FLAECHE") > -1) {
-            typeName = "app:v_brw_zonen_geom_flaeche_" + featureYear;
-            geometryName = "geom_zone_flaeche";
-        }
-        else if (yearInt <= 2008) {
-            typeName = "lgv_brw_lagetypisch_alle";
-        }
-        else if (yearInt <= 2014) {
-            typeName = "lgv_brw_zoniert_" + featureYear;
-        }
-        else {
-            typeName = "lgv_brw_zonen_" + featureYear;
-        }
-        urlParams = "typeName" + typeName + "&featureID=" + featureId;
+        console.warn("BORIS DEBUG: WFS feature request by id.", {
+            endpointUrl,
+            wfsVersion,
+            typeName,
+            geometryName,
+            featureId,
+            featureYear,
+            layerName: selectedLayerConfig?.name,
+            layerId: selectedLayerConfig?.id,
+            layerNames: selectedLayerConfig?.layers
+        });
 
-
-        axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
+        axios.get(endpointUrl + `?service=WFS&version=${wfsVersion}&request=GetFeature&` + urlParams)
             .then((response) =>{
                 const feature = new WFS().readFeature(response.data);
 
                 if (feature) {
-                    feature.unset("geom_brw_grdstk");
+                    if (geometryName !== "geom_brw_grdstk") {
+                        feature.unset("geom_brw_grdstk");
+                    }
                     feature.setGeometryName(geometryName);
                     dispatch("Maps/placingPolygonMarker", feature, {root: true});
                 }
@@ -339,13 +654,19 @@ const actions = {
      * @param {String} selectedLanduse - currently selectedLanduse
      * @returns {void}
      */
-    matchPolygonFeatureWithLanduse ({dispatch, commit}, {feature, selectedLanduse}) {
+    matchPolygonFeatureWithLanduse ({state = {}, dispatch, commit}, {feature, selectedLanduse}) {
         const landuseMatch = feature.get("nutzungsart").find((typeOfUse) => {
             return typeOfUse.nutzungsart === selectedLanduse;
         });
 
         if (landuseMatch) {
-            dispatch("postFeatureRequestByBrwNumber", {brwNumber: landuseMatch.richtwertnummer, featureYear: feature.get("jahrgang")});
+            dispatch("postFeatureRequestByBrwNumber", {
+                brwNumber: landuseMatch.richtwertnummer,
+                featureYear: feature.get("jahrgang"),
+                stichtag: feature.get("stichtag"),
+                jahrTimestamp: feature.get("jahr_timestamp"),
+                selectedLayer: resolveSelectedLayerConfig({state})
+            });
         }
         else {
             commit("setSelectedLanduse", "");
@@ -359,31 +680,73 @@ const actions = {
      * @param {String} featureYear selected year
      * @returns {void}
      */
-    postFeatureRequestByBrwNumber ({dispatch}, {brwNumber, featureYear}) {
-        const typeName = parseInt(featureYear, 10) > 2008 ? "lgv_brw_zoniert_alle" : "lgv_brw_lagetypisch_alle",
-            index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index),
-            wfsString = `<GetFeature version='1.1.0' xmlns:wfs='http://www.opengis.net/wfs'>
-            <wfs:Query typeName='${typeName}'>
-                <Filter xmlns='http://www.opengis.net/ogc'>
-                    <PropertyIsEqualTo>
-                        <PropertyName>richtwertnummer</PropertyName>
-                        <Literal>${brwNumber}</Literal>
-                    </PropertyIsEqualTo>
-                </Filter>
+    async postFeatureRequestByBrwNumber ({dispatch, state = {}}, {brwNumber, featureYear, stichtag, jahrTimestamp, selectedLayer}) {
+        const selectedLayerConfig = resolveSelectedLayerConfig({state, selectedLayer}),
+            typeNames = getTypeNamesForBrwRequest(selectedLayerConfig, featureYear),
+            endpointUrl = getWfsEndpointUrl(selectedLayerConfig),
+            dateFilter = createDateFilter(stichtag, jahrTimestamp),
+            filterXml = createOgcFilter(brwNumber, dateFilter);
+
+        if (!selectedLayerConfig) {
+            console.warn("BORIS DEBUG: No selected layer resolved for postFeatureRequestByBrwNumber.");
+        }
+
+        for (const typeName of typeNames) {
+            const isTimeSeriesType = typeName.startsWith("de.hh.up:"),
+                wfsVersion = isTimeSeriesType ? "2.0.0" : "1.1.0",
+                queryAttribute = wfsVersion === "2.0.0" ? "typeNames" : "typeName",
+                wfsString = `<GetFeature version='1.1.0' xmlns:wfs='http://www.opengis.net/wfs'>
+            <wfs:Query ${queryAttribute}='${typeName}'>
+                ${filterXml}
             </wfs:Query>
         </GetFeature>`;
 
-        axios.post(url + "/HH_WFS_Bodenrichtwerte", wfsString, {
-            headers: {"Content-Type": "text/xml"}
-        }).then((response) => {
-            if (response.status === 200) {
-                dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
+            console.warn("BORIS DEBUG: WFS feature request by BRW number.", {
+                endpointUrl,
+                wfsVersion,
+                typeName,
+                brwNumber,
+                featureYear,
+                stichtag,
+                jahrTimestamp,
+                hasDateFilter: Boolean(dateFilter),
+                layerName: selectedLayerConfig?.name,
+                layerId: selectedLayerConfig?.id,
+                layerNames: selectedLayerConfig?.layers
+            });
+
+            try {
+                const response = await axios.post(endpointUrl, wfsString.replace("version='1.1.0'", `version='${wfsVersion}'`), {
+                        headers: {"Content-Type": "text/xml"}
+                    }),
+                    parsedFeatures = new WFS().readFeatures(response.data),
+                    featureCount = Array.isArray(parsedFeatures) ? parsedFeatures.length : 0;
+
+                if (response.status === 200 && featureCount > 0) {
+                    dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
+                    return;
+                }
+
+                console.warn("BORIS DEBUG: Empty BRW response for type candidate.", {
+                    endpointUrl,
+                    typeName,
+                    wfsVersion,
+                    featureCount,
+                    responsePreview: typeof response.data === "string" ? response.data.slice(0, 500) : "non-string-response"
+                });
             }
-        }).catch((error) => {
-            console.error(error.response);
-            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
-        });
+            catch (error) {
+                console.error("BORIS DEBUG: BRW request failed for type candidate.", {
+                    endpointUrl,
+                    typeName,
+                    wfsVersion,
+                    status: error?.response?.status,
+                    responsePreview: typeof error?.response?.data === "string" ? error.response.data.slice(0, 500) : "no-response-body"
+                });
+            }
+        }
+
+        dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
     },
     /**
      * Handles the response from a wfs get feature request
@@ -398,6 +761,14 @@ const actions = {
         const features = new WFS().readFeatures(response),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
 
+        console.warn("BORIS DEBUG: WFS response parsed.", {
+            selectedYear: year,
+            featureCount: Array.isArray(features) ? features.length : 0,
+            matchedFeatureYear: featureByYear?.get ? featureByYear.get("jahrgang") : null,
+            matchedFeatureStichtag: featureByYear?.get ? featureByYear.get("stichtag") : null,
+            matchedFeatureJahrTimestamp: featureByYear?.get ? featureByYear.get("jahr_timestamp") : null
+        });
+
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
     },
@@ -408,14 +779,31 @@ const actions = {
      * @param {ol.Feature[]} feature selected feature
      * @returns {void}
      */
-    async combineFeatureWithSelectedDate ({dispatch, getters}, feature) {
-        const date = await getters.getDateBySelectedLayerName;
+    combineFeatureWithSelectedDate ({dispatch, getters, rootGetters = {}}, feature) {
+        const featureDate = getFeatureDate(feature),
+            wmsTimeDate = rootGetters["Modules/WmsTime/defaultValue"],
+            layerNameDate = getters.getDateBySelectedLayerName,
+            date = featureDate || wmsTimeDate || layerNameDate;
 
         if (feature !== undefined) {
+            console.warn("BORIS DEBUG: Combining feature with date.", {
+                selectedDate: date,
+                featureDate,
+                wmsTimeDate,
+                layerNameDate,
+                featureYear: feature.get("jahrgang"),
+                stichtag: feature.get("stichtag"),
+                jahrTimestamp: feature.get("jahr_timestamp")
+            });
             dispatch("extendFeatureAttributes", {feature, date});
         }
         else {
-            console.error("Data query failed");
+            console.error("BORIS DEBUG: Data query failed in combineFeatureWithSelectedDate", {
+                selectedDate: date,
+                featureDate,
+                wmsTimeDate,
+                layerNameDate
+            });
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         }
     },

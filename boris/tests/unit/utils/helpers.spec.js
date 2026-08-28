@@ -26,6 +26,21 @@ describe("boris helper functions", () => {
 
         expect(findBrwFeatureByYear).to.equal(features[0]);
     });
+    it("findBrwFeatureByYear matches numeric selected year", () => {
+        const attribute = {
+                jahrgang: "2022"
+            },
+            features = [{
+                attribute: attribute,
+                get: (key) => {
+                    return attribute[key];
+                }
+            }],
+            year = 2022,
+            findBrwFeatureByYear = helpers.findBrwFeatureByYear({features, year});
+
+        expect(findBrwFeatureByYear).to.equal(features[0]);
+    });
     it("findBrwFeatureByYear is null", () => {
         const features = "",
             year = "2018",
