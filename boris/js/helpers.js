@@ -19,15 +19,6 @@ const helpers = {
                 return featureYear !== undefined && featureYear !== null && String(featureYear) === selectedYear;
             });
 
-            if (!featureByYear && brwFeatures.length > 0) {
-                const availableYears = brwFeatures.map(feature => feature?.get("jahrgang"));
-
-                console.warn("BORIS DEBUG: No matching feature year found.", {
-                    selectedYear,
-                    availableYears
-                });
-            }
-
             return featureByYear;
         }
         return null;

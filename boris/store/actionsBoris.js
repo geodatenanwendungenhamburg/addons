@@ -269,8 +269,13 @@ function createOgcFilter (brwNumber, dateFilter) {
  * @returns {String} Date-like value.
  */
 function getFeatureDate (feature) {
-    const stichtag = feature?.get("stichtag"),
-        jahrTimestamp = feature?.get("jahr_timestamp");
+    if (!feature) {
+        return "";
+    }
+
+    const hasGetFunction = typeof feature.get === "function",
+        stichtag = hasGetFunction ? feature.get("stichtag") : feature.stichtag,
+        jahrTimestamp = hasGetFunction ? feature.get("jahr_timestamp") : feature.jahr_timestamp;
 
     return stichtag || jahrTimestamp || "";
 }
@@ -610,22 +615,6 @@ const actions = {
             typeNameParam = wfsVersion === "2.0.0" ? "typeNames" : "typeName",
             urlParams = `${typeNameParam}=${encodeURIComponent(typeName)}&featureID=${encodeURIComponent(featureId)}`;
 
-        if (!selectedLayerConfig) {
-            console.warn("BORIS DEBUG: No selected layer resolved for getFeatureRequestById.");
-        }
-
-        console.warn("BORIS DEBUG: WFS feature request by id.", {
-            endpointUrl,
-            wfsVersion,
-            typeName,
-            geometryName,
-            featureId,
-            featureYear,
-            layerName: selectedLayerConfig?.name,
-            layerId: selectedLayerConfig?.id,
-            layerNames: selectedLayerConfig?.layers
-        });
-
         axios.get(endpointUrl + `?service=WFS&version=${wfsVersion}&request=GetFeature&` + urlParams)
             .then((response) =>{
                 const feature = new WFS().readFeature(response.data);
@@ -687,10 +676,6 @@ const actions = {
             dateFilter = createDateFilter(stichtag, jahrTimestamp),
             filterXml = createOgcFilter(brwNumber, dateFilter);
 
-        if (!selectedLayerConfig) {
-            console.warn("BORIS DEBUG: No selected layer resolved for postFeatureRequestByBrwNumber.");
-        }
-
         for (const typeName of typeNames) {
             const isTimeSeriesType = typeName.startsWith("de.hh.up:"),
                 wfsVersion = isTimeSeriesType ? "2.0.0" : "1.1.0",
@@ -700,20 +685,6 @@ const actions = {
                 ${filterXml}
             </wfs:Query>
         </GetFeature>`;
-
-            console.warn("BORIS DEBUG: WFS feature request by BRW number.", {
-                endpointUrl,
-                wfsVersion,
-                typeName,
-                brwNumber,
-                featureYear,
-                stichtag,
-                jahrTimestamp,
-                hasDateFilter: Boolean(dateFilter),
-                layerName: selectedLayerConfig?.name,
-                layerId: selectedLayerConfig?.id,
-                layerNames: selectedLayerConfig?.layers
-            });
 
             try {
                 const response = await axios.post(endpointUrl, wfsString.replace("version='1.1.0'", `version='${wfsVersion}'`), {
@@ -726,23 +697,9 @@ const actions = {
                     dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
                     return;
                 }
-
-                console.warn("BORIS DEBUG: Empty BRW response for type candidate.", {
-                    endpointUrl,
-                    typeName,
-                    wfsVersion,
-                    featureCount,
-                    responsePreview: typeof response.data === "string" ? response.data.slice(0, 500) : "non-string-response"
-                });
             }
             catch (error) {
-                console.error("BORIS DEBUG: BRW request failed for type candidate.", {
-                    endpointUrl,
-                    typeName,
-                    wfsVersion,
-                    status: error?.response?.status,
-                    responsePreview: typeof error?.response?.data === "string" ? error.response.data.slice(0, 500) : "no-response-body"
-                });
+                console.error(error.response);
             }
         }
 
@@ -761,14 +718,6 @@ const actions = {
         const features = new WFS().readFeatures(response),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
 
-        console.warn("BORIS DEBUG: WFS response parsed.", {
-            selectedYear: year,
-            featureCount: Array.isArray(features) ? features.length : 0,
-            matchedFeatureYear: featureByYear?.get ? featureByYear.get("jahrgang") : null,
-            matchedFeatureStichtag: featureByYear?.get ? featureByYear.get("stichtag") : null,
-            matchedFeatureJahrTimestamp: featureByYear?.get ? featureByYear.get("jahr_timestamp") : null
-        });
-
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
     },
@@ -786,24 +735,10 @@ const actions = {
             date = featureDate || wmsTimeDate || layerNameDate;
 
         if (feature !== undefined) {
-            console.warn("BORIS DEBUG: Combining feature with date.", {
-                selectedDate: date,
-                featureDate,
-                wmsTimeDate,
-                layerNameDate,
-                featureYear: feature.get("jahrgang"),
-                stichtag: feature.get("stichtag"),
-                jahrTimestamp: feature.get("jahr_timestamp")
-            });
             dispatch("extendFeatureAttributes", {feature, date});
         }
         else {
-            console.error("BORIS DEBUG: Data query failed in combineFeatureWithSelectedDate", {
-                selectedDate: date,
-                featureDate,
-                wmsTimeDate,
-                layerNameDate
-            });
+            console.error("Data query failed");
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         }
     },

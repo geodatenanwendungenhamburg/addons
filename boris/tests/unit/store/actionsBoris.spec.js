@@ -544,6 +544,8 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
                     layers: "bodenrichtwertzonen"
                 };
 
+            axiosPostStub.resolves({status: 200, data: rawSources.featureResponse});
+
             await actions.postFeatureRequestByBrwNumber({dispatch}, {brwNumber, featureYear, stichtag, jahrTimestamp, selectedLayer});
 
             expect(axiosPostStub.calledOnce).to.be.true;
