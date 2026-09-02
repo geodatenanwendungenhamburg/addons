@@ -291,31 +291,36 @@ const actions = {
     getFeatureRequestById ({dispatch}, {featureId, featureYear}) {
         const yearInt = parseInt(featureYear, 10),
             index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index);
+            url = Config.layerConf.substring(0, index),
+            startIndex = 0,
+            count = 10;
 
         let typeName,
             urlParams = null,
             geometryName = "geom_zone";
 
         if (featureId.indexOf("FLAECHE") > -1) {
-            typeName = "app:v_brw_zonen_geom_flaeche_" + featureYear;
+            typeName = "de.hh.up:bodenrichtwerte_flaechendeckend";
             geometryName = "geom_zone_flaeche";
         }
-        else if (yearInt <= 2008) {
-            typeName = "lgv_brw_lagetypisch_alle";
-        }
-        else if (yearInt <= 2014) {
-            typeName = "lgv_brw_zoniert_" + featureYear;
+        else if (featureId.indexOf("GRUNDSTUECK") > -1) {
+            typeName = "de.hh.up:bodenrichtwertgrundstuecke";
         }
         else {
-            typeName = "lgv_brw_zonen_" + featureYear;
+            typeName = "de.hh.up:bodenrichtwertzonen";
         }
-        urlParams = "typeName" + typeName + "&featureID=" + featureId;
+        urlParams = `typeName=${typeName}&featureID=${featureId}`;
+
+        console.log("Ganzer Reuqesut", url + "/wfs_bodenrichtwerte_hamburg_zeitreihe?Service=WFS&version=2.0.0&request=GetFeature&" + urlParams);
 
 
-        axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
+        axios.get("https://qs-geodienste.hamburg.de/wfs_bodenrichtwerte_hamburg_zeitreihe?Service=WFS&Version=2.0.0&request=GetFeature&typeName=de.hh.up:bodenrichtwerte_flaechendeckend&filter=<Filter><PropertyIsEqualTo><PropertyName>jahrgang</PropertyName><Literal>2025</Literal></PropertyIsEqualTo></Filter>")
             .then((response) =>{
                 const feature = new WFS().readFeature(response.data);
+
+                console.log("WFS Feature:", feature);
+                console.log("Properties:", feature.getProperties());
+                console.log("Entwicklungszustand", feature.get("entwicklungszustand"));
 
                 if (feature) {
                     feature.unset("geom_brw_grdstk");
@@ -360,24 +365,37 @@ const actions = {
      * @returns {void}
      */
     postFeatureRequestByBrwNumber ({dispatch}, {brwNumber, featureYear}) {
-        const typeName = parseInt(featureYear, 10) > 2008 ? "lgv_brw_zoniert_alle" : "lgv_brw_lagetypisch_alle",
+        const typeName = parseInt(featureYear, 10) > 2008 ? "bodenrichtwerte_flaechendeckend" : "bodenrichtwertzonen",
             index = Config.layerConf.lastIndexOf("/"),
             url = Config.layerConf.substring(0, index),
-            wfsString = `<GetFeature version='1.1.0' xmlns:wfs='http://www.opengis.net/wfs'>
-            <wfs:Query typeName='${typeName}'>
-                <Filter xmlns='http://www.opengis.net/ogc'>
+            wfsString = `<GetFeature version='2.0.0' xmlns:wfs='http://www.opengis.net/wfs/2.0'>
+            <wfs:Query typeNames='${typeName}'>
+                <Filter xmlns='http://www.opengis.net/wfs/2.0'>
+                <And>
                     <PropertyIsEqualTo>
                         <PropertyName>richtwertnummer</PropertyName>
                         <Literal>${brwNumber}</Literal>
                     </PropertyIsEqualTo>
+                                    <PropertyIsEqualTo>
+                    <PropertyName>jahrgang</PropertyName>
+                    <Literal>${featureYear}</Literal>
+                </PropertyIsEqualTo>
+                </And>
                 </Filter>
             </wfs:Query>
-        </GetFeature>`;
+        </GetFeature>
+                `;
 
-        axios.post(url + "/HH_WFS_Bodenrichtwerte", wfsString, {
+        console.log(typeName, brwNumber, featureYear);
+
+        axios({
+            method: "post",
+            url: url + "/wfs_bodenrichtwerte_hamburg_zeitreihe",
+            data: wfsString,
             headers: {"Content-Type": "text/xml"}
         }).then((response) => {
             if (response.status === 200) {
+                console.log("Response", response.data);
                 dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
             }
         }).catch((error) => {
