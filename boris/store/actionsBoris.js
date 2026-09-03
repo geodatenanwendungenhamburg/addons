@@ -312,7 +312,7 @@ const actions = {
         else {
             typeName = "lgv_brw_zonen_" + featureYear;
         }
-        urlParams = "typeName" + typeName + "&featureID=" + featureId;
+        urlParams = "typeName=" + encodeURIComponent(typeName) + "&featureID=" + encodeURIComponent(featureId);
 
 
         axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
@@ -342,11 +342,16 @@ const actions = {
      * @returns {void}
      */
     matchPolygonFeatureWithLanduse ({dispatch, commit}, {feature, selectedLanduse}) {
-        const landuseMatch = feature.get("nutzungsart").find((typeOfUse) => {
-            return typeOfUse.nutzungsart === selectedLanduse;
-        });
+        const landuses = Array.isArray(feature.get("nutzungsart")) ? feature.get("nutzungsart") : [],
+            selectedMatch = landuses.find((typeOfUse) => {
+                return typeOfUse.nutzungsart === selectedLanduse;
+            }),
+            landuseMatch = selectedMatch || landuses[0] || null;
 
         if (landuseMatch) {
+            if (!selectedMatch && landuseMatch.nutzungsart) {
+                commit("setSelectedLanduse", landuseMatch.nutzungsart);
+            }
             dispatch("postFeatureRequestByBrwNumber", {brwNumber: landuseMatch.richtwertnummer, featureYear: feature.get("jahrgang")});
         }
         else {
@@ -362,43 +367,43 @@ const actions = {
      * @returns {void}
      */
     postFeatureRequestByBrwNumber ({dispatch}, {brwNumber, featureYear}) {
-        const typeName = parseInt(featureYear, 10) > 2008 ? "bodenrichtwerte_flaechendeckend" : "bodenrichtwertgrundstuecke",
-            index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index),
-            zonenNr = brwNumber.slice(-5),
+        const brwNumberValue = String(brwNumber || ""),
+            typeName = "bodenrichtwertzonen",
+            url = "https://qs-geodienste.hamburg.de",
             wfsString = `
-                <wfs:GetFeature service="WFS" version="2.0.0"
-                    xmlns:wfs="http://www.opengis.net/wfs/2.0"
-                    xmlns:fes="http://www.opengis.net/fes/2.0"
-                    xmlns:de.hh.up="https://registry.gdi-de.org/id/de.hh.up">
+<wfs:GetFeature service="WFS" version="2.0.0"
+    xmlns:wfs="http://www.opengis.net/wfs/2.0"
+    xmlns:fes="http://www.opengis.net/fes/2.0"
+    xmlns:dehhup="https://registry.gdi-de.org/id/de.hh.up">
+    <wfs:Query typeNames="dehhup:${typeName}">
+        <fes:Filter>
+            <fes:And>
+                <fes:PropertyIsEqualTo>
+                    <fes:ValueReference>jahrgang</fes:ValueReference>
+                    <fes:Literal>${featureYear}</fes:Literal>
+                </fes:PropertyIsEqualTo>
+                <fes:PropertyIsEqualTo>
+                    <fes:ValueReference>richtwertnummer</fes:ValueReference>
+                    <fes:Literal>${brwNumberValue}</fes:Literal>
+                </fes:PropertyIsEqualTo>
+            </fes:And>
+        </fes:Filter>
+    </wfs:Query>
+</wfs:GetFeature>`;
 
-                    <wfs:Query typeNames="de.hh.up:${typeName}">
-                        <fes:Filter>
-                            <fes:And>
-                                <fes:PropertyIsEqualTo>
-                                    <fes:ValueReference>de.hh.up:jahrgang</fes:ValueReference>
-                                    <fes:Literal>${featureYear}</fes:Literal>
-                                </fes:PropertyIsEqualTo>
-                                <fes:PropertyIsEqualTo>
-                                    <fes:ValueReference>de.hh.up:zonen_nr</fes:ValueReference>
-                                    <fes:Literal>${zonenNr}</fes:Literal>
-                                </fes:PropertyIsEqualTo>
+        if (!brwNumberValue) {
+            console.error("No BRW number available for WFS request");
+            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
+            return;
+        }
 
-                            </fes:And>
-                        </fes:Filter>
-                    </wfs:Query>
-
-                </wfs:GetFeature>
-                `;
-
-        console.log("brwNumeber:", brwNumber);
-        console.log("Zonen-Nummer:", zonenNr);
+        console.log("brwNumeber:", brwNumberValue);
 
         axios({
             method: "post",
             url: url + "/wfs_bodenrichtwerte_hamburg_zeitreihe",
             data: wfsString,
-            headers: {"Content-Type": "text/xml"}
+            headers: {"Content-Type": "application/xml"}
         }).then((response) => {
             if (response.status === 200) {
                 const parser = new DOMParser(),
@@ -429,12 +434,13 @@ const actions = {
             fixedXml = xmlString.replace(/<wfs:member>/g, "<gml:featureMember>").replace(/<\/wfs:member>/g, "</gml:featureMember>"),
             parser = new DOMParser(),
             xml = parser.parseFromString(fixedXml, "text/xml"),
+            featureType = "bodenrichtwertzonen",
             format = new WFS({
                 gmlFormat: new GML32()
             }),
             features = format.readFeatures(xml, {
                 featureNS: "https://registry.gdi-de.org/id/de.hh.up",
-                featureType: "bodenrichtwerte_flaechendeckend",
+                featureType,
                 dataProjection: "EPSG:25832",
                 featureProjection: "EPSG:3857"
             }),
