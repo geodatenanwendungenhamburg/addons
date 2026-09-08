@@ -11,7 +11,7 @@ import {addProjection} from "ol/proj.js";
 import Projection from "ol/proj/Projection.js";
 
 
-describe.only("ADDONS: addons/boris/store/actionsBoris.js", () => {
+describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
     const layer1 = {
             name: "Layer1",
             id: "1",
