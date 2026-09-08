@@ -345,14 +345,10 @@ const actions = {
         const landuses = Array.isArray(feature.get("nutzungsart")) ? feature.get("nutzungsart") : [],
             selectedMatch = landuses.find((typeOfUse) => {
                 return typeOfUse.nutzungsart === selectedLanduse;
-            }),
-            landuseMatch = selectedMatch || landuses[0] || null;
+            });
 
-        if (landuseMatch) {
-            if (!selectedMatch && landuseMatch.nutzungsart) {
-                commit("setSelectedLanduse", landuseMatch.nutzungsart);
-            }
-            dispatch("postFeatureRequestByBrwNumber", {brwNumber: landuseMatch.richtwertnummer, featureYear: feature.get("jahrgang")});
+        if (selectedMatch) {
+            dispatch("postFeatureRequestByBrwNumber", {brwNumber: selectedMatch.richtwertnummer, featureYear: feature.get("jahrgang")});
         }
         else {
             commit("setSelectedLanduse", "");
@@ -397,8 +393,6 @@ const actions = {
             return;
         }
 
-        console.log("brwNumeber:", brwNumberValue);
-
         axios({
             method: "post",
             url: url + "/wfs_bodenrichtwerte_hamburg_zeitreihe",
@@ -406,13 +400,6 @@ const actions = {
             headers: {"Content-Type": "application/xml"}
         }).then((response) => {
             if (response.status === 200) {
-                const parser = new DOMParser(),
-                    xmlDoc = parser.parseFromString(response.data, "application/xml"),
-                    members = xmlDoc.getElementsByTagNameNS("https://registry.gdi-de.org/id/de.hh.up", "bodenrichtwerte_flaechendeckend");
-
-                console.log(response.data);
-                console.log("Members", members);
-
                 dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
             }
         }).catch((error) => {
@@ -497,8 +484,6 @@ const actions = {
 
         commit("setSelectedBrwFeature", feature);
         dispatch("sendWpsConvertRequest", state);
-
-        console.log("Richtwert DM:", feature.richtwert_euro);
 
         return feature;
     },
