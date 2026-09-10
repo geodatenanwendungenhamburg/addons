@@ -6,6 +6,8 @@ import SearchBarResultList from "./SearchBarResultList.vue";
 import {Point} from "ol/geom";
 import MultiPolygon from "ol/geom/MultiPolygon.js";
 import getOAFFeature from "@shared/js/api/oaf/getOAFFeature";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 /**
  * Searchbar to access search results.
@@ -56,7 +58,7 @@ export default {
             "addressSearchCoordinates",
             "alkisBaseUrl"
         ]),
-        ...mapGetters("Menu", {
+        ...mapState(useMenuStore, {
             menuCurrentComponent: "currentComponent"
         }),
         /**
@@ -189,7 +191,7 @@ export default {
                         this.setSearchResultsActive(false);
                         this.setShowAllResults(false);
                         this.setCurrentActionEvent("");
-                        this.navigateBack(this.currentSide);
+                        this.navigateBack({side: this.currentSide});
                     }
                 }
             },
@@ -303,7 +305,7 @@ export default {
             "activateActions",
             "search"
         ]),
-        ...mapActions("Menu", ["navigateBack"]),
+        ...mapPiniaActions(useMenuStore, ["navigateBack"]),
         ...mapMutations("Modules/LzsResearchClient", [
             "addSuggestionItem",
             "setCurrentActionEvent",

@@ -2,6 +2,7 @@ import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
 import {createStore} from "vuex";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import StoryPlayer from "../../../components/storyPlayer/StoryPlayer.vue";
 
@@ -119,23 +120,6 @@ describe("addons/dataNarrator/tests/unit/components/StoryPlayer.spec.js", () => 
                     getters: {
                         mode: () => "2D"
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    actions: {
-                        changeCurrentComponent: sinon.stub(),
-                        resetMenu: sinon.stub()
-                    },
-                    getters: {
-                        mainMenu: () => ({sections: []}),
-                        secondaryMenu: () => ({sections: []}),
-                        expanded: () => sinon.stub()
-                    },
-                    mutations: {
-                        setExpandedBySide: (state, {expanded, side}) => {
-                            state[`${side}Expanded`] = expanded;
-                        }
-                    }
                 }
             },
             state: {
@@ -149,6 +133,8 @@ describe("addons/dataNarrator/tests/unit/components/StoryPlayer.spec.js", () => 
                 layerConfigsByAttributes: () => []
             }
         });
+
+        const {pinia} = initTestPinia();
 
         wrapper = shallowMount(StoryPlayer, {
             props: {
@@ -178,7 +164,7 @@ describe("addons/dataNarrator/tests/unit/components/StoryPlayer.spec.js", () => 
                         EasingFunction: {QUADRATIC_OUT: sinon.stub()}
                     }
                 },
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
     });

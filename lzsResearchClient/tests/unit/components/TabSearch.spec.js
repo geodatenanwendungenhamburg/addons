@@ -7,6 +7,7 @@ import getOAFFeature from "@shared/js/api/oaf/getOAFFeature";
 import layerCollection from "@core/layers/js/layerCollection.js";
 import {rawLayerList} from "@masterportal/masterportalapi/src/index.js";
 import {treeSubjectsKey} from "@shared/js/utils/constants.js";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import Point from "ol/geom/Point";
 import LineString from "ol/geom/LineString";
@@ -17,6 +18,8 @@ import Component from "../../../components/TabSearch.vue";
 describe("addons/lzsResearchClient/tests/unit/components/tabs/TabSearch.spec.js", () => {
     let wrapper,
         store,
+        pinia,
+        menuStore,
         drawLayerSourceMock,
         currentModifyInteractionMock,
         layerConfigByIdStub,
@@ -230,15 +233,13 @@ describe("addons/lzsResearchClient/tests/unit/components/tabs/TabSearch.spec.js"
                             state.scale = value;
                         }
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        expanded: () => sinon.stub()
-                    }
                 }
             }
         });
+        ({pinia, menuStore} = initTestPinia());
+
+        menuStore.secondaryMenu.expanded = false;
+        menuStore.mainMenu.expanded = false;
 
         wrapper = shallowMount(Component, {
             global: {
@@ -250,7 +251,7 @@ describe("addons/lzsResearchClient/tests/unit/components/tabs/TabSearch.spec.js"
                         return key;
                     }
                 },
-                plugins: [store],
+                plugins: [store, pinia],
                 stubs: {
                     SwitchInput: false
                 }

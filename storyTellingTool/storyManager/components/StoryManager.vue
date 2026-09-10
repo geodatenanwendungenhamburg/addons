@@ -7,10 +7,12 @@ import ConfirmModal from "@shared/modules/modals/components/ConfirmModal.vue";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import InfoCard from "../../shared/card/components/InfoCard.vue";
 import InfoText from "../../shared/card/components/InfoText.vue";
-import {mapGetters, mapMutations, mapActions} from "vuex";
+import {mapGetters, mapMutations} from "vuex";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
 import StoryCreator from "../../storyCreator/components/StoryCreator.vue";
 import Toast from "../../shared/toasts/components/ToastsElement.vue";
+import {mapActions} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "StoryManager",
@@ -149,7 +151,7 @@ export default {
     methods: {
         ...mapMutations("Modules/StoryManager", ["setCurrentStoryIndex", "setFixedStoryLoaded", "setStoryList"]),
         ...mapMutations("Modules/StoryPlayer", ["setImageAssetsById", "setStoryConf", "setCurrentStoryName"]),
-        ...mapActions("Menu", ["changeCurrentComponent", "resetMenu"]),
+        ...mapActions(useMenuStore, ["changeCurrentComponent", "resetMenu"]),
 
         /**
          * Called when the user confirms leaving the tool via the navigation modal.

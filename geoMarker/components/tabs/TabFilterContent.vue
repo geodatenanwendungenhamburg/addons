@@ -14,6 +14,8 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isBetween from "dayjs/plugin/isBetween";
 import {GeoJSON} from "ol/format";
 import Style from "ol/style/Style";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -59,7 +61,7 @@ export default {
             "departments",
             "geoMarkerShortFeatureId"
         ]),
-        ...mapGetters("Menu", ["expanded"]),
+        ...mapState(useMenuStore, ["expanded"]),
         ...mapGetters("Modules/GraphicalSelect", [
             "selectedAreaGeoJson"
         ]),

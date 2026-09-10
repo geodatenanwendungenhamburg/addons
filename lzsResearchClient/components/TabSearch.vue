@@ -28,6 +28,9 @@ import {getArea} from "ol/sphere";
 
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import Multiselect from "vue-multiselect";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapState} from "pinia";
+
 /**
  * Rectangle interaction class extending ExtentInteraction to handle rectangle drawing events.
  * It dispatches custom events "modifystart" and "modifyend" when the user starts and ends drawing an extent, respectively.
@@ -142,9 +145,7 @@ export default {
             "extent"
         ]),
         ...mapGetters(["layerConfigById"]),
-        ...mapGetters("Menu", [
-            "expanded"
-        ]),
+        ...mapState(useMenuStore, ["expanded"]),
         archiveWithGeorefList () {
             return this.archiveList.filter((archive) => {
                 return this.archiveHasGeoref(archive.id);

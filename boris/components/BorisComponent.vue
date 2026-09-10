@@ -7,6 +7,8 @@ import FloorComponent from "./FloorComponent.vue";
 import SpinnerItem from "../../../src/shared/modules/spinner/components/SpinnerItem.vue";
 import {preparePrint} from "../js/preparePrint.js";
 import axios from "axios";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions} from "pinia";
 
 export default {
     name: "BorisComponent",
@@ -139,8 +141,13 @@ export default {
         }
     },
     created () {
-        this.changeCurrentMouseMapInteractionsComponent({type: this.type, side: this.menuSide});
-        this.setDefaultComponent(this.id);
+        this.changeCurrentMouseMapInteractionsComponent({
+            type: this.type,
+            side: this.menuSide
+        });
+
+        useMenuStore().defaultComponent = this.id;
+
         this.initialize();
     },
     mounted () {
@@ -171,13 +178,11 @@ export default {
             "sendWpsConvertRequest",
             "requestGFI"
         ]),
-        ...mapActions("Menu", ["changeCurrentMouseMapInteractionsComponent"]),
         ...mapActions("Maps", [
             "registerListener",
             "unregisterListener"
         ]),
         ...mapMutations("Modules/BorisComponent", Object.keys(mutations)),
-        ...mapMutations("Menu", ["setDefaultComponent"]),
         preparePrint,
         /**
          * Toggles info text if clicked on info icon
@@ -242,7 +247,10 @@ export default {
             preparePrint(async (url, payload) => {
                 return axios.post(url, payload);
             });
-        }
+        },
+        ...mapPiniaActions(useMenuStore, [
+            "changeCurrentMouseMapInteractionsComponent"
+        ])
     }
 };
 </script>

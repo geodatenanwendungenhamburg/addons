@@ -3,6 +3,7 @@ import {shallowMount, mount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
 import {Point} from "ol/geom";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import SearchBarComponent from "../../../../components/searchBar/components/LzsResearchClientSearchBar.vue";
 
@@ -15,8 +16,8 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
     ];
     let searchResults,
         store,
+        pinia,
         wrapper,
-        menuActionsSpy,
         searchBarActionsSpy,
         searchBarMutationsSpy,
         searchInputValue,
@@ -36,7 +37,7 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
         return {
             props,
             global: {
-                plugins: [store],
+                plugins: [store, pinia],
                 mocks: {
                     $t: key => key
                 }
@@ -47,6 +48,7 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
 
     beforeEach(() => {
         consoleWarnStub = sinon.stub(console, "warn");
+        ({pinia} = initTestPinia());
 
         global.mapCollection = {
             getMapView: () => ({
@@ -85,9 +87,6 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
                 }
             }
         ];
-        menuActionsSpy = {
-            navigateBack: sinon.stub()
-        };
 
         searchBarActionsSpy = {
             instantiateSearchInterfaces: sinon.stub(),
@@ -148,15 +147,6 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
                         }
                     }
                 },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        titleBySide: () => () => true,
-                        currentComponent: () => () => "root",
-                        previousNavigationEntryText: () => () => ""
-                    },
-                    actions: menuActionsSpy
-                },
                 Maps: {
                     namespaced: true,
                     actions: mapsActionsSpy
@@ -184,35 +174,21 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
 
     describe("render SearchBar in LzsResearchClient", () => {
         it("should render the SearchBar with button and input and mounted values", async () => {
-            wrapper = mount(SearchBarComponent, {
-                global: {
-                    plugins: [store],
-                    mocks: {
-                        $t: key => key
-                    }
-                }
-            });
+            wrapper = mount(SearchBarComponent, buildOptions());
 
             await wrapper.vm.$nextTick();
             expect(wrapper.find("#lzs-research-client-search-bar").exists()).to.be.true;
             expect(wrapper.find("#lzs-research-client-search-button").exists()).to.be.true;
             expect(wrapper.find("input").exists()).to.be.true;
             expect(wrapper.vm.currentSide).to.eql("secondaryMenu");
-            expect(wrapper.vm.currentComponentSide).to.be.undefined;
+            expect(wrapper.vm.currentComponentSide).to.equal("root");
             expect(wrapper.vm.searchInputValue).to.deep.eql("abc-straße");
         });
     });
 
     describe("should trigger startSearch", () => {
         it("should start search to abc-straße, if button is clicked", async () => {
-            wrapper = shallowMount(SearchBarComponent, {
-                global: {
-                    plugins: [store],
-                    mocks: {
-                        $t: key => key
-                    }
-                }
-            });
+            wrapper = shallowMount(SearchBarComponent, buildOptions());
 
             const startSearchSpy = sinon.spy(wrapper.vm, "startSearch");
 
@@ -311,11 +287,7 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
 
     describe("test input element", () => {
         it("should start search to abc-straße, if button is clicked", async () => {
-            wrapper = shallowMount(SearchBarComponent, {
-                global: {
-                    plugins: [store]
-                }
-            });
+            wrapper = shallowMount(SearchBarComponent, buildOptions());
 
             const testInput = wrapper.find({ref: "searchInput"});
 
@@ -353,14 +325,7 @@ describe("addons/lzsResearchClient/searchBar/components/lzsResearchClientSearchB
                     }
                 }
             ];
-            wrapper = shallowMount(SearchBarComponent, {
-                global: {
-                    plugins: [store],
-                    mocks: {
-                        $t: key => key
-                    }
-                }
-            });
+            wrapper = shallowMount(SearchBarComponent, buildOptions());
 
             const activateActionsSpy = sinon.spy(wrapper.vm, "activateActions");
 

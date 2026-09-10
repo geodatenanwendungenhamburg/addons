@@ -24,6 +24,8 @@ import thousandsSeparator from "@shared/js/utils/thousandsSeparator.js";
 import {truncate} from "@turf/truncate";
 import wktParser from "../../utils/wktParser";
 import WPS from "@shared/js/api/wps.js";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "DistrictSelectorSubject",
@@ -56,7 +58,7 @@ export default {
     },
     computed: {
         ...mapGetters(["allLayerConfigs", "restServiceById"]),
-        ...mapGetters("Menu", ["zoomToExtentPadding"]),
+        ...mapState(useMenuStore, ["zoomToExtentPadding"]),
         ...mapGetters("Modules/DistrictSelector", ["selectedInteraction", "wpsProcess", "wpsServiceId", "keyOfAttrName"]),
         ...mapGetters("Modules/DistrictSelector", {
             cardsStatistical: "selectionCardsStatisticalData",

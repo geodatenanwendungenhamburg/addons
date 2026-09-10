@@ -4,7 +4,7 @@ import BorisComponent from "../../../components/BorisComponent.vue";
 import Boris from "../../../store/indexBoris.js";
 import {expect} from "chai";
 import sinon from "sinon";
-
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
     const mockConfigJson = {
@@ -22,6 +22,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
         }
     };
     let store,
+        pinia,
         wrapper,
         originalInitialize,
         originalMatchPolygonFeatureWithLanduse,
@@ -30,6 +31,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
         originalUpdateSelectedBrwFeature;
 
     beforeAll(() => {
+        ({pinia} = initTestPinia());
         mapCollection.clear();
         const map = {
             id: "ol",
@@ -92,15 +94,6 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
                         registerListener: () => sinon.stub(),
                         unregisterListener: () => sinon.stub()
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    actions: {
-                        changeCurrentMouseMapInteractionsComponent: sinon.stub()
-                    },
-                    mutations: {
-                        setDefaultComponent: sinon.stub()
-                    }
                 }
             },
             getters: {
@@ -123,11 +116,11 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
 
     describe("Boris template", () => {
         it("renders Boris", () => {
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             expect(wrapper.find("#boris").exists()).to.be.true;
         });
         it("renders input to toggle boarder stripes", () => {
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
 
             expect(wrapper.find("#showStripes").exists()).to.be.true;
             expect(wrapper.find("#showStripes").element.checked).to.be.false;
@@ -138,7 +131,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
 
         });
         it("render text to click on polygon if no polygon is selected", () => {
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             expect(wrapper.find("#selectPolygonText").text()).to.equals("additional:modules.boris.SelectAreaInMap");
         });
         it("render choose landuse selection", () => {
@@ -147,7 +140,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
             };
 
             store.commit("Modules/BorisComponent/setSelectedPolygon", feature);
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
 
             expect(wrapper.find("#landuseSelect").exists()).to.be.true;
         });
@@ -164,7 +157,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
         it("getFilterListWithoutStripes includes & does not include layer without stripes", () => {
             store.state.Modules.BorisComponent.filteredLayerList.push(layer1);
             store.state.Modules.BorisComponent.filteredLayerList.push(layer2);
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
 
             expect(wrapper.vm.getFilterListWithoutStripes).to.have.lengthOf(1);
             expect(wrapper.vm.getFilterListWithoutStripes[0]).to.deep.equal(layer2);
@@ -176,7 +169,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
 
         it("selectedLanduseComputed equals newValue but does not equal oldValue", () => {
             store.commit("Modules/BorisComponent/setSelectedLanduse", newValue);
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             expect(wrapper.vm.selectedLanduseComputed).to.equal(newValue);
             expect(wrapper.vm.selectedLanduseComputed).to.not.equal(oldValue);
         });
@@ -184,7 +177,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
     describe("selectedPolygon watcher", () => {
         it("landuse select should be simulated if parametric Url is being used ", () => {
             store.state.Modules.BorisComponent.isProcessFromParametricUrl = true;
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.$options.watch.selectedPolygon.call(wrapper.vm);
 
             expect(Boris.actions.simulateLanduseSelect.calledOnce).to.equal(true);
@@ -197,7 +190,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
                 newValue = "A Acker";
 
             store.state.Modules.BorisComponent.buttonValue = "liste";
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.$options.watch.selectedLanduse.call(wrapper.vm, newValue, oldValue);
 
             expect(store.state.Modules.BorisComponent.buttonValue).to.equals("info");
@@ -208,7 +201,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
                 newValue = "EFH Ein- und Zweifamilienhäuser";
 
             store.state.Modules.BorisComponent.buttonValue = "liste";
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.$options.watch.selectedLanduse.call(wrapper.vm, newValue, oldValue);
 
             expect(store.state.Modules.BorisComponent.buttonValue).to.equals("info");
@@ -220,7 +213,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
                 newValue = "MFH Mehrfamilienhäuser";
 
             store.state.Modules.BorisComponent.buttonValue = "liste";
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.$options.watch.selectedLanduse.call(wrapper.vm, newValue, oldValue);
 
             expect(store.state.Modules.BorisComponent.selectedBuildDesign).to.equals("");
@@ -248,7 +241,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
 
             store.state.Modules.BorisComponent.selectedPolygon = null;
             store.state.Modules.BorisComponent.buttonValue = "liste";
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.$options.watch.selectedBrwFeature.call(wrapper.vm, newValue, oldValue);
             expect(store.state.Modules.BorisComponent.buttonValue).to.equals("info");
         });
@@ -256,7 +249,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
     describe("toggleInfoText method", () => {
         it("toggleInfoText", () => {
             store.state.Modules.BorisComponent.textIds = ["id1", "id2"];
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.toggleInfoText("id3");
             wrapper.vm.toggleInfoText("id2");
 
@@ -270,7 +263,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
             const event = {target: {value: store.state.Modules.BorisComponent.buildingDesigns[1]}, get: () => "value"},
                 subject = "zBauweise";
 
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
 
             wrapper.vm.handleBuildingDesignOptionChange(event, subject);
             expect(store.state.Modules.BorisComponent.selectedBuildDesign).to.equal(store.state.Modules.BorisComponent.buildingDesigns[1]);
@@ -282,7 +275,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
             const event = {target: {value: store.state.Modules.BorisComponent.positionsToStreet[1]}, get: () => "value"},
                 subject = "zStrassenLage";
 
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.handlePositionToStreetOptionChange(event, subject);
 
             expect(store.state.Modules.BorisComponent.selectedPositionToStreet).to.equal(store.state.Modules.BorisComponent.positionsToStreet[1]);
@@ -294,7 +287,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
             const event = {type: "change", key: "Enter", currentTarget: {value: "12,34"}},
                 subject = "345";
 
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             wrapper.vm.handleInputChange(event, subject);
             expect(Boris.actions.updateSelectedBrwFeature.calledOnce).to.equal(true);
             expect(Boris.actions.sendWpsConvertRequest.calledOnce).to.equal(true);
@@ -308,7 +301,7 @@ describe("ADDONS: addons/boris/components/BorisComponent.vue", () => {
             let printButton = null;
             const startPrintSpy = sinon.stub(BorisComponent.methods, "startPrint");
 
-            wrapper = shallowMount(BorisComponent, {global: {plugins: [store]}});
+            wrapper = shallowMount(BorisComponent, {global: {plugins: [store, pinia]}});
             printButton = wrapper.find(".btn-infos");
 
             printButton.trigger("click");

@@ -1,8 +1,10 @@
 <script>
 import Icon from "ol/style/Icon";
 import CircleStyle from "ol/style/Circle";
-import {mapActions, mapGetters} from "vuex";
+import {mapActions} from "vuex";
 import {buffer} from "ol/extent";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 /**
  * @todo Make a util to read the icon of a feature
@@ -16,7 +18,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters("Menu", ["zoomToExtentPadding"]),
+        ...mapState(useMenuStore, ["zoomToExtentPadding"]),
 
         style () {
             return Array.isArray(this.item.style) ? this.item.style[0] : this.item.style;

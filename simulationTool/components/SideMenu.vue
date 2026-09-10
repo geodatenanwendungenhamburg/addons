@@ -1,5 +1,7 @@
 <script>
-import {mapActions, mapMutations, mapGetters} from "vuex";
+import {mapMutations, mapGetters} from "vuex";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "SideMenu",
@@ -11,7 +13,7 @@ export default {
         ...mapGetters("Modules/Login", [
             "loggedIn"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "currentComponentName"
         ])
     },
@@ -22,17 +24,13 @@ export default {
         ...mapMutations("Modules/SimulationTool", [
             "setMode"
         ]),
-        ...mapMutations("Menu", [
-            "setCurrentComponent",
-            "setCurrentComponentPropsName"
-        ]),
-        ...mapActions("Menu", [
+        ...mapPiniaActions(useMenuStore, [
             "resetMenu"
         ]),
         closeSimulationTool () {
             this.restoreDefaultLayout();
             if (this.currentComponentName("secondaryMenu") !== "Simulationen") {
-                this.setCurrentComponentPropsName({side: "secondaryMenu", name: "Simulationen"});
+                useMenuStore().secondaryMenu.navigation.currentComponent.props.name = "Simulationen";
             }
             this.resetMenu("secondaryMenu");
         },

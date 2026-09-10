@@ -51,6 +51,8 @@ import {VSnackbar} from "vuetify/components/VSnackbar";
 import wktParser from "../../utils/wktParser";
 import WPS from "@shared/js/api/wps.js";
 import {Polygon} from "ol/geom";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "AccessibilityAnalysis",
@@ -162,7 +164,7 @@ export default {
     },
     computed: {
         ...mapGetters(["allLayerConfigs", "restServiceById", "visibleSubjectDataLayerConfigs"]),
-        ...mapGetters("Menu", ["zoomToExtentPadding"]),
+        ...mapState(useMenuStore, ["zoomToExtentPadding"]),
         ...mapGetters("Modules/Language", ["currentLocale"]),
         ...mapGetters("Maps", ["clickCoordinate", "getVisibleLayerList", "projectionCode"]),
         ...mapGetters("Modules/AccessibilityAnalysis", Object.keys(getters)),

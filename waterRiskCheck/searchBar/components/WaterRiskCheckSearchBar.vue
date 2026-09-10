@@ -3,6 +3,8 @@ import debounce from "@shared/js/utils/debounce";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import SearchBarSuggestionList from "./SearchBarSuggestionList.vue";
 import SearchBarResultList from "./SearchBarResultList.vue";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 /**
  * Searchbar to access search results.
@@ -50,7 +52,7 @@ export default {
             "type",
             "currentSide"
         ]),
-        ...mapGetters("Menu", {
+        ...mapState(useMenuStore, {
             menuCurrentComponent: "currentComponent",
             previousNavigationEntryText: "previousNavigationEntryText"
         }),
@@ -243,7 +245,7 @@ export default {
             "search",
             "removeHighlight3DTile"
         ]),
-        ...mapActions("Menu", ["navigateBack"]),
+        ...mapPiniaActions(useMenuStore, ["navigateBack"]),
         ...mapMutations("Modules/WaterRiskCheckSearchBar", [
             "setGlobalPlaceholder",
             "addSuggestionItem",
@@ -257,12 +259,6 @@ export default {
             "setSearchSuggestions",
             "setCurrentSide",
             "setZoomLevel"
-        ]),
-        ...mapMutations("Menu", [
-            "switchToRoot",
-            "switchToPreviousComponent",
-            "setCurrentComponentBySide",
-            "setCurrentComponentPropsName", "setNavigationCurrentComponentBySide", "setNavigationHistoryBySide"
         ]),
         /**
          * Handles search submit: selects a matching result or triggers a new search.
@@ -288,15 +284,23 @@ export default {
                     this.clickAction();
                 }
                 if (this.isMobile) {
-                    this.setNavigationCurrentComponentBySide({
-                        side: this.currentSide,
-                        newComponent: {props: {name: "Suchübersicht"}, type: "waterRiskCheckSearchBar"}
-                    });
-                    this.setCurrentComponentBySide({side: this.currentSide, type: "waterRiskCheckSearchBar"});
-                    this.setNavigationHistoryBySide({
-                        side: this.currentSide,
-                        newHistory: [{type: "waterRiskCheck", props: {name: "Wegweiser Überflutungsvorsorge"}}]
-                    });
+                    const menuStore = useMenuStore(),
+                          side = this.currentSide;
+
+                    menuStore[side].navigation.currentComponent = {
+                        props: {name: "Suchübersicht"},
+                        type: "waterRiskCheckSearchBar"
+                    };
+
+                    menuStore[side].currentComponent = "waterRiskCheckSearchBar";
+
+                    menuStore[side].navigation.history = [
+                        {
+                            type: "waterRiskCheck",
+                            props: {name: "Wegweiser Überflutungsvorsorge"}
+                        }
+                    ];
+
                     const searchInput = this.searchInput;
 
                     this.$nextTick(() => this.setSearchInput(searchInput));

@@ -3,6 +3,7 @@ import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
 import DipasNavigatorTheme from "../../../components/DipasNavigatorTheme.vue";
+import {initTestPinia} from "@devtools/tests/initTestPinia.js";
 
 
 describe("addons/dipasNavigator/components/DipaNavigatorTheme.vue", () => {
@@ -66,18 +67,13 @@ describe("addons/dipasNavigator/components/DipaNavigatorTheme.vue", () => {
          */
         createWrapper = function (isMobile) {
             setCenterSpy = sinon.spy();
+            const {pinia, menuStore} = initTestPinia();
 
+            menuStore.mainMenu.expanded = false;
+            menuStore.secondaryMenu.expanded = false;
             store = createStore({
                 modules: {
                     DipasNavigatorTheme,
-                    Menu: {
-                        namespaced: true,
-                        getters: {
-                            expanded: () => (side) => {
-                                return side === "unbekannt";
-                            }
-                        }
-                    },
                     Maps: {
                         namespaced: true,
                         actions: {
@@ -92,7 +88,7 @@ describe("addons/dipasNavigator/components/DipaNavigatorTheme.vue", () => {
 
             wrapper = shallowMount(DipasNavigatorTheme, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 },
                 props: {
                     feature: featureStub
@@ -106,7 +102,7 @@ describe("addons/dipasNavigator/components/DipaNavigatorTheme.vue", () => {
             wrapper.unmount();
         }
 
-        sinon.resetHistory();
+        sinon.restore();
     });
 
     it("should render 13 individual html elements", async () => {

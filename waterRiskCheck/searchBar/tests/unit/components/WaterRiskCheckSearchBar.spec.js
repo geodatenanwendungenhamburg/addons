@@ -2,6 +2,7 @@ import {createStore} from "vuex";
 import {shallowMount, mount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import SearchBarComponent from "../../../components/WaterRiskCheckSearchBar.vue";
 
@@ -14,6 +15,8 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
     ];
     let searchResults,
         store,
+        pinia,
+        menuStore,
         wrapper,
         menuActionsSpy,
         searchBarActionsSpy,
@@ -27,6 +30,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
 
 
     beforeEach(() => {
+        ({pinia, menuStore} = initTestPinia());
         searchResults = [
             {
                 "category": "Straße",
@@ -57,7 +61,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
             }
         ];
         menuActionsSpy = {
-            navigateBack: sinon.stub()
+            navigateBack: sinon.stub(menuStore, "navigateBack")
         };
 
         searchBarActionsSpy = {
@@ -119,14 +123,6 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
                         }
                     }
                 },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        titleBySide: () => () => true,
-                        currentComponent: () => () => "root"
-                    },
-                    actions: menuActionsSpy
-                },
                 Maps: {
                     namespaced: true,
                     actions: {
@@ -149,7 +145,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("should render the SearchBar with button and input and mounted values", async () => {
             wrapper = mount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             wrapper.vm.setCurrentSide("root");
@@ -158,7 +154,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
             expect(wrapper.find("#water-risk-check-search-button").exists()).to.be.true;
             expect(wrapper.find("input").exists()).to.be.true;
             expect(wrapper.vm.currentSide).to.eql("mainMenu");
-            expect(wrapper.vm.currentComponentSide).to.be.undefined;
+            expect(wrapper.vm.currentComponentSide).to.equal("root");
             expect(wrapper.vm.searchInputValue).to.deep.eql("abc-straße");
         });
     });
@@ -167,7 +163,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("should start search to abc-straße, if button is clicked", async () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -182,7 +178,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("should start search to abc-straße, if button is clicked", async () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -224,7 +220,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
             ];
             wrapper = await shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             expect(wrapper.vm.searchResultsWithUniqueCategories).to.deep.equal([
@@ -262,7 +258,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("check if search should be activated", () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -276,7 +272,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("tests the computed property SearchBarSuggestionList", async () => {
             wrapper = await shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -298,7 +294,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("startSearch is executed for modules", async () => {
             wrapper = await mount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             const startSearchSpy = sinon.spy(wrapper.vm, "startSearch");
@@ -340,7 +336,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
             ];
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -381,7 +377,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
 
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -397,7 +393,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("The method 'startSearch' should trigger only from watch, if input is changed", async () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -414,7 +410,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("currentComponentSide layerSelection, addLayerButtonSearchActive is true", async () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -430,7 +426,7 @@ describe("addons/waterRiskCheck/searchBar/components/WaterRiskCheckSearchBar.vue
         it("currentComponentSide root, addLayerButtonSearchActive is true", async () => {
             wrapper = shallowMount(SearchBarComponent, {
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 

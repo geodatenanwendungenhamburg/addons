@@ -2,6 +2,8 @@
 import {mapGetters, mapActions} from "vuex";
 import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
 import dayjs from "dayjs";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "DipasNavigatorTheme",
@@ -12,7 +14,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "expanded"
         ]),
         ...mapGetters(["isMobile"]),

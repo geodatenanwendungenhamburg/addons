@@ -2,12 +2,15 @@ import {flushPromises, shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import {createStore} from "vuex";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import Component from "../../../components/LzsResearchClient.vue";
 
 describe("addons/lzsResearchClient/tests/unit/LzsResearchClient.spec.js", () => {
     let wrapper,
-        store;
+        store,
+        pinia,
+        menuStore;
 
     beforeEach(() => {
         store = createStore({
@@ -50,31 +53,28 @@ describe("addons/lzsResearchClient/tests/unit/LzsResearchClient.spec.js", () => 
                             }
                         }
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        currentMenuWidth: () => sinon.stub().returns("25%"),
-                        currentSecondaryMenuWidth: () => sinon.stub().returns(0.25)
-                    },
-                    mutations: {
-                        setCurrentMenuWidth: sinon.stub(),
-                        setCurrentSecondaryMenuWidth: sinon.stub()
-                    }
                 }
             }
         });
 
+
+        ({pinia, menuStore} = initTestPinia());
+
+        menuStore.secondaryMenu.width = "25%";
+        menuStore.currentSecondaryMenuWidth = 0.25;
+
         wrapper = shallowMount(Component, {
-            props: {
+            attrs: {
+                side: "secondaryMenu"
             },
             global: {
                 mocks: {
                     $t: key => key
                 },
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
+
     });
 
     afterEach(() => {

@@ -1,7 +1,9 @@
 <script>
-import {mapGetters, mapActions, mapMutations} from "vuex";
-import SpinnerItem from "../../../src/shared/modules/spinner/components/SpinnerItem.vue";
-import FlatButton from "../../../src/shared/modules/buttons/components/FlatButton.vue";
+import {mapGetters, mapActions} from "vuex";
+import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
+import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     components: {
@@ -31,7 +33,7 @@ export default {
             "currentWorkflowId",
             "isRequestErrorGeneral"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "mainMenu",
             "secondaryMenu",
             "currentComponent"
@@ -102,8 +104,7 @@ export default {
         ...mapActions("Modules/BimFactory", ["submitCreateIfcRequest", "forceFileDownload"]),
         ...mapActions("Modules/BimViewer", ["loadModel", "addMetaInformationToModel"]),
         ...mapActions("Modules/BimViewer/ToolSceneFit", ["fit"]),
-        ...mapActions("Menu", ["changeCurrentComponent"]),
-        ...mapMutations("Menu", ["setCurrentComponentProps"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent"]),
         openGeneratedIfcUrl () {
             if (this.ifcUrl) {
                 this.forceFileDownload(this.ifcUrl);

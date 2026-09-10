@@ -2,22 +2,21 @@ import {createStore} from "vuex";
 import {mount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import SearchBarSuggestionListComponent from "../../../components/SearchBarSuggestionList.vue";
 
 
 describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue", () => {
     let store,
+        pinia,
+        menuStore,
         wrapper,
         showInTree,
         showAllResultsSearchInterfaceInstances,
-        setNavigationCurrentComponentBySideSpy,
         setPlaceholderSpy,
         setCurrentAvailableCategoriesSpy,
-        setShowAllResultsSearchInterfaceInstancesSpy,
-        setCurrentComponentBySideSpy,
-        setNavigationHistoryBySideSpy;
-
+        setShowAllResultsSearchInterfaceInstancesSpy;
     const searchResults = [
             {
                 "category": "Straße",
@@ -77,12 +76,9 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
     beforeEach(() => {
         showInTree = false;
         showAllResultsSearchInterfaceInstances = [];
-        setNavigationCurrentComponentBySideSpy = sinon.spy();
         setPlaceholderSpy = sinon.spy();
         setCurrentAvailableCategoriesSpy = sinon.spy();
         setShowAllResultsSearchInterfaceInstancesSpy = sinon.spy();
-        setCurrentComponentBySideSpy = sinon.spy();
-        setNavigationHistoryBySideSpy = sinon.spy();
         store = createStore({
             modules: {
                 Maps: {
@@ -123,26 +119,18 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                             }
                         }
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        currentComponent: () => () => "root",
-                        menuBySide: () => () => true
-                    },
-                    mutations: {
-                        setNavigationCurrentComponentBySide: setNavigationCurrentComponentBySideSpy,
-                        setCurrentComponentBySide: setCurrentComponentBySideSpy,
-                        setNavigationHistoryBySide: setNavigationHistoryBySideSpy
-                    }
                 }
             },
             getters: {
                 layerConfigById: () => sinon.stub()
             }
         });
+        ({pinia, menuStore} = initTestPinia());
+        sinon.stub(menuStore, "handleModulesConfiguredMultipleTimes");
     });
-
+    afterEach(() => {
+        sinon.restore();
+    });
 
     describe("test the rendering with different parameters", () => {
         it("renders the SearchBarSuggestionList", async () => {
@@ -151,7 +139,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             expect(wrapper.find("#search-bar-suggestion-list").exists()).to.be.true;
@@ -164,7 +152,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             expect(wrapper.find("#search-bar-suggestion-list").exists()).to.be.false;
@@ -176,7 +164,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             await wrapper.vm.$nextTick();
@@ -199,22 +187,19 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
             await wrapper.vm.prepareShowAllResults("Straße");
             wrapper.vm.$nextTick();
 
-            expect(setNavigationCurrentComponentBySideSpy.calledOnce).to.be.true;
-            expect(setNavigationCurrentComponentBySideSpy.firstCall.args[1]).to.be.deep.equals({
-                side: "mainMenu",
-                newComponent: {props: {name: "modules.searchBar.searchResults - Straße"}, type: "searchBar"}
+
+            expect(menuStore.mainMenu.navigation.currentComponent).to.deep.equal({props: {name: "modules.searchBar.searchResults - Straße"},
+                type: "searchBar"
             });
             expect(setPlaceholderSpy.calledOnce).to.be.true;
             expect(setPlaceholderSpy.firstCall.args[1]).to.be.equals("modules.searchBar.placeholder.searchFor Straße");
-            expect(setCurrentComponentBySideSpy.calledOnce).to.be.true;
-            expect(setNavigationHistoryBySideSpy.calledOnce).to.be.true;
             expect(setShowAllResultsSearchInterfaceInstancesSpy.notCalled).to.be.true;
             expect(setCurrentAvailableCategoriesSpy.calledOnce).to.be.true;
             expect(setCurrentAvailableCategoriesSpy.firstCall.args[1]).to.equal("Straße");
@@ -243,22 +228,24 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
             await wrapper.vm.prepareShowAllResults("Straße");
             wrapper.vm.$nextTick();
 
-            expect(setNavigationCurrentComponentBySideSpy.calledOnce).to.be.true;
-            expect(setNavigationCurrentComponentBySideSpy.firstCall.args[1]).to.be.deep.equals({
-                side: "mainMenu",
-                newComponent: {props: {name: "modules.searchBar.searchResults - Straße"}, type: "searchBar"}
+
+            expect(menuStore.mainMenu.navigation.currentComponent).to.deep.equal({
+                props: {
+                    name: "modules.searchBar.searchResults - Straße"
+                },
+                type: "searchBar"
             });
+
             expect(setPlaceholderSpy.calledOnce).to.be.true;
             expect(setPlaceholderSpy.firstCall.args[1]).to.be.equals("modules.searchBar.placeholder.searchFor Straße");
-            expect(setCurrentComponentBySideSpy.calledOnce).to.be.true;
-            expect(setNavigationHistoryBySideSpy.calledOnce).to.be.true;
+
             expect(setShowAllResultsSearchInterfaceInstancesSpy.calledOnce).to.be.true;
             expect(setShowAllResultsSearchInterfaceInstancesSpy.firstCall.args[1]).to.be.deep.equals(expected);
             expect(setCurrentAvailableCategoriesSpy.calledOnce).to.be.true;
@@ -276,7 +263,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             const result = wrapper.vm.getFirstByCategory("Straße");
@@ -309,7 +296,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarSuggestionList.vue
                     limitedSortedSearchResults: customLimitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 

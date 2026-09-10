@@ -2,12 +2,14 @@ import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
 import {createStore} from "vuex";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import StoryPlayer from "../../../components/StoryPlayer.vue";
 
 describe("addons/storyPlayer/tests/unit/components/StoryPlayer.spec.js", () => {
     let wrapper,
         store,
+        pinia,
         map,
         originalXMLHttpRequest,
         originalIntersectionObserver,
@@ -189,23 +191,6 @@ describe("addons/storyPlayer/tests/unit/components/StoryPlayer.spec.js", () => {
                         mode: () => "2D"
                     }
                 },
-                Menu: {
-                    namespaced: true,
-                    actions: {
-                        changeCurrentComponent: sinon.stub(),
-                        resetMenu: sinon.stub()
-                    },
-                    getters: {
-                        mainMenu: () => ({sections: []}),
-                        secondaryMenu: () => ({sections: []}),
-                        expanded: () => sinon.stub()
-                    },
-                    mutations: {
-                        setExpandedBySide: (state, {expanded, side}) => {
-                            state[`${side}Expanded`] = expanded;
-                        }
-                    }
-                },
                 Alerting: {
                     namespaced: true,
                     actions: {
@@ -238,7 +223,7 @@ describe("addons/storyPlayer/tests/unit/components/StoryPlayer.spec.js", () => {
                 updateLayerConfigs: () => sinon.stub()
             }
         });
-
+        ({pinia} = initTestPinia());
         wrapper = shallowMount(StoryPlayer, {
             props: {
                 storyConfProp: {
@@ -283,7 +268,7 @@ describe("addons/storyPlayer/tests/unit/components/StoryPlayer.spec.js", () => {
                         EasingFunction: {QUADRATIC_OUT: sinon.stub()}
                     }
                 },
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
 
@@ -451,7 +436,7 @@ describe("addons/storyPlayer/tests/unit/components/StoryPlayer.spec.js", () => {
                     storyConfProp: {},
                     imageAssetsById: {}
                 },
-                global: {plugins: [store]
+                global: {plugins: [store, pinia]
                 }});
 
                 await wrapper.vm.$nextTick();

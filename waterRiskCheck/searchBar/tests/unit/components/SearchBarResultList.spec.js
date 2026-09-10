@@ -2,6 +2,7 @@ import {createStore} from "vuex";
 import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import SearchBarResultListComponent from "../../../components/SearchBarResultList.vue";
 
@@ -9,6 +10,8 @@ import SearchBarResultListComponent from "../../../components/SearchBarResultLis
 describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", () => {
     let currentAvailableCategories,
         store,
+        pinia,
+        menuStore,
         wrapper,
         addLayerButtonSearchActive;
 
@@ -85,6 +88,9 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
     beforeEach(() => {
         addLayerButtonSearchActive = false;
         currentAvailableCategories = "Adresse";
+        ({pinia, menuStore} = initTestPinia());
+
+        menuStore.mainMenu.navigation.currentComponent = currentComponent;
 
         store = createStore({
             modules: {
@@ -115,12 +121,6 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                             }
                         }
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        currentComponent: () => () => currentComponent
-                    }
                 }
             }
         });
@@ -134,7 +134,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
             expect(wrapper.find(".results-container").exists()).to.be.true;
@@ -149,7 +149,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -163,7 +163,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -178,7 +178,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -204,7 +204,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 
@@ -233,7 +233,7 @@ describe("addons/waterRiskCheck/searchBar/components/SearchBarResultList.vue", (
                     limitedSortedSearchResults
                 },
                 global: {
-                    plugins: [store]
+                    plugins: [store, pinia]
                 }
             });
 

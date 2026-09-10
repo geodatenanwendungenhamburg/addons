@@ -17,6 +17,8 @@ import Overlay from "ol/Overlay.js";
 import StoryPlayerFeature from "./StoryPlayerFeature.vue";
 import StoryPlayerToolbar from "./StoryPlayerToolbar.vue";
 import tipTapJsonToHtml from "../../storyCreator/shared/modules/tipTapEditor/js/tipTapJsonToHtml";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "StoryPlayer",
@@ -76,7 +78,7 @@ export default {
             "visibleBaselayerConfigs"
         ]),
         ...mapGetters("Maps", ["mode"]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "mainMenu",
             "secondaryMenu",
             "expanded"
@@ -224,7 +226,7 @@ export default {
         ...mapActions("Maps", ["changeMapMode", "placingPointMarker", "removePointMarker", "zoomToExtent"]),
         ...mapActions(["addLayerToLayerConfig", "addOrReplaceLayer", "replaceByIdInLayerConfig", "updateLayerConfigs"]),
         ...mapActions("Modules/StoryManager", ["removeLayerFromLayerConfig"]),
-        ...mapActions("Menu", ["changeCurrentComponent", "resetMenu"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent", "resetMenu"]),
 
         getDirectVideo,
         getEmbedLink,

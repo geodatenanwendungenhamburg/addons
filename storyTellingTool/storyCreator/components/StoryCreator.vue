@@ -7,12 +7,14 @@ import InfoCard from "../../shared/card/components/InfoCard.vue";
 import InfoText from "../../shared/card/components/InfoText.vue";
 import InputText from "@shared/modules/inputs/components/InputText.vue";
 import isObject from "@shared/js/utils/isObject.js";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import {mapGetters, mapMutations} from "vuex";
 import store from "@appstore/index.js";
 import StoryCreatorAddImageCard from "./StoryCreatorAddImageCard.vue";
 import StoryCreatorBreadcrumb from "./StoryCreatorBreadcrumb.vue";
 import StoryCreatorChapter from "./StoryCreatorChapter.vue";
 import Toast from "../../shared/toasts/components/ToastsElement.vue";
+import {mapActions} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "StoryCreator",
@@ -121,7 +123,7 @@ export default {
     },
     methods: {
         ...mapMutations("Modules/StoryPlayer", ["setImageAssetsById", "setStoryConf"]),
-        ...mapActions("Menu", ["changeCurrentComponent"]),
+        ...mapActions(useMenuStore, ["changeCurrentComponent"]),
         /**
          * Sanitizes a filename for safe ZIP entry paths.
          * @param {String} originalName - The original filename.

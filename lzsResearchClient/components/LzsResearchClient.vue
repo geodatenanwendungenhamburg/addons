@@ -8,6 +8,8 @@ import TabResult from "./TabResult.vue";
 import TabSearch from "./TabSearch.vue";
 import DownloadProgressBar from "./DownloadProgressBar.vue";
 import ConfirmModal from "@shared/modules/modals/components/ConfirmModal.vue";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapState, mapActions as mapPiniaActions} from "pinia";
 
 export default {
     name: "LzsResearchClient",
@@ -39,7 +41,7 @@ export default {
             "selectedDetail",
             "menuWidthOnStart"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "currentMenuWidth",
             "currentSecondaryMenuWidth"
         ]),
@@ -93,7 +95,8 @@ export default {
             this.lzsMenuWidth = this.menuWidthOnStart;
 
             // Convert widthWithoutLzs to a decimal value for currentSecondaryMenuWidth
-            this.setCurrentSecondaryMenuWidth(parseFloat(this.widthWithoutLzs) / 100);
+            useMenuStore().currentSecondaryMenuWidth =
+                parseFloat(this.widthWithoutLzs) / 100;
         }
     },
     /**
@@ -135,7 +138,10 @@ export default {
 
         if (!this.isMobile) {
             this.widthWithoutLzs = this.currentMenuPercentage();
-            this.setCurrentMenuWidth({side: this.$attrs.side, width: this.lzsMenuWidth});
+            this.setCurrentMenuWidth({
+                type: this.$attrs.side,
+                attributes: {width: this.lzsMenuWidth}
+            });
         }
     },
     /**
@@ -163,7 +169,10 @@ export default {
 
         if (!this.isMobile) {
             this.lzsMenuWidth = this.currentMenuPercentage();
-            this.setCurrentMenuWidth({side: this.$attrs.side, width: this.widthWithoutLzs});
+            this.setCurrentMenuWidth({
+                type: this.$attrs.side,
+                attributes: {width: this.widthWithoutLzs}
+            });
         }
     },
     methods: {
@@ -174,10 +183,7 @@ export default {
             "setShowLoadingSpinner",
             "setErrorMessage"
         ]),
-        ...mapMutations("Menu", [
-            "setCurrentMenuWidth",
-            "setCurrentSecondaryMenuWidth"
-        ]),
+        ...mapPiniaActions(useMenuStore, ["setCurrentMenuWidth"]),
         hideErrorMessage () {
             this.setErrorMessage("");
         },

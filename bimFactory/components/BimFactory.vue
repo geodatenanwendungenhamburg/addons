@@ -2,6 +2,7 @@
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import BimFactoryStartpage from "./BimFactoryStartpage.vue";
 import BimFactoryWorkflow from "./BimFactoryWorkflow.vue";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "BimFactory",
@@ -20,10 +21,9 @@ export default {
     mounted () {
         this.removeTitleFromDOM();
         this.loadWorkflows();
-        this.setCurrentMouseMapInteractionsComponent(this.type);
+        useMenuStore().currentMouseMapInteractionsComponent = this.type;
     },
     methods: {
-        ...mapMutations("Menu", ["setCurrentMenuWidth", "setCurrentMouseMapInteractionsComponent"]),
         ...mapMutations("Modules/BimFactory", ["setCurrentWorkflowId", "setGeneratedIfcUrl", "setIsRequestErrorGeneral"]),
         ...mapActions("Modules/BimFactory", ["loadWorkflows"]),
         removeTitleFromDOM () {

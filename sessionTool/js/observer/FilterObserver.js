@@ -1,5 +1,6 @@
 import isObject from "../../../../src/shared/js/utils/isObject.js";
 import store from "../../../../src/app-store/index.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 /**
  * Registers the Observer.
@@ -33,9 +34,8 @@ function setFilter (payload) {
     }
 
     store.dispatch("Modules/Filter/deserializeState", payload);
-    store.dispatch("Menu/changeCurrentComponent", {type: "filter", side: "secondaryMenu", props: {name: "filter"}}, {root: true});
+    useMenuStore().changeCurrentComponent({type: "filter", side: "secondaryMenu", props: {name: "filter"}});
 }
-
 export {
     register,
     getFilterState,

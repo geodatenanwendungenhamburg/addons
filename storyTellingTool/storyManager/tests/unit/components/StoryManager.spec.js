@@ -3,12 +3,14 @@ import {expect} from "chai";
 import {shallowMount} from "@vue/test-utils";
 import StoryManager from "../../../components/StoryManager.vue";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 describe("addons/storyManager/tests/unit/components/StoryManager.spec.js", () => {
-    let store, wrapper, changeCurrentComponentSpy;
+    let store, wrapper, changeCurrentComponentSpy, pinia, menuStore;
 
     beforeEach(() => {
-        changeCurrentComponentSpy = sinon.spy();
+        ({pinia, menuStore} = initTestPinia());
+        changeCurrentComponentSpy = sinon.stub(menuStore, "changeCurrentComponent");
         store = createStore({
             modules: {
                 Modules: {
@@ -104,19 +106,13 @@ describe("addons/storyManager/tests/unit/components/StoryManager.spec.js", () =>
                             }
                         }
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    actions: {
-                        changeCurrentComponent: changeCurrentComponentSpy
-                    }
                 }
             }
         });
 
         wrapper = shallowMount(StoryManager, {
             global: {
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
     });
@@ -367,7 +363,7 @@ describe("addons/storyManager/tests/unit/components/StoryManager.spec.js", () =>
                 await wrapper.vm.playStory(1);
 
                 expect(changeCurrentComponentSpy.calledOnce).to.be.true;
-                expect(changeCurrentComponentSpy.firstCall.args[1]).to.deep.equal({
+                expect(changeCurrentComponentSpy.firstCall.args[0]).to.deep.equal({
                     type: "storyPlayer",
                     side: "secondaryMenu",
                     props: {name: "additional:modules.storyPlayer.name"}
@@ -397,7 +393,7 @@ describe("addons/storyManager/tests/unit/components/StoryManager.spec.js", () =>
                 expect(wrapper.vm.currentView).to.equal("manager");
                 expect(wrapper.vm.pendingNavigation).to.be.null;
                 expect(changeCurrentComponentSpy.calledOnce).to.be.true;
-                expect(changeCurrentComponentSpy.firstCall.args[1]).to.deep.equal(pendingNav);
+                expect(changeCurrentComponentSpy.firstCall.args[0]).to.deep.equal(pendingNav);
             });
 
             it("negative: does not dispatch navigation when pendingNavigation is null", () => {

@@ -12,6 +12,8 @@ import TagGroup from "../../shared/modules/tags/components/TagGroup.vue";
 import TemplateManagerCard from "./TemplateManagerCard.vue";
 import layerCollection from "@core/layers/js/layerCollection";
 import store from "@appstore/index.js";
+import {mapActions as mapPiniaActions} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "TemplateManager",
@@ -293,8 +295,7 @@ export default {
         ...mapActions("Modules/LayerTree", ["removeLayer"]),
         ...mapMutations("Modules/TemplateManager", Object.keys(mutations)),
         ...mapActions("Modules/TemplateManager", Object.keys(actions)),
-        ...mapActions("Menu", ["changeCurrentComponent"]),
-        ...mapMutations("Menu", ["setNavigationHistoryBySide"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent"]),
         ...mapMutations("Modules/Dashboard", ["setCalculations", "setStatsFeatureFilter"]),
         ...mapActions("Modules/DistrictSelector", ["setDistrictsByName"]),
         ...mapMutations("Modules/DistrictSelector", ["setMapping", "setSelectedDistrictLevelId"]),
@@ -810,6 +811,16 @@ export default {
             const selectedLabels = districts.map(i => i.label);
 
             this.selectedDistricts = selectedLabels;
+        },
+        /**
+ * Sets the navigation history for the specified menu side.
+ * @param {Object} options The navigation options.
+ * @param {string} options.side The menu side.
+ * @param {Object[]} options.newHistory The new navigation history.
+ * @returns {void}
+ */
+        setNavigationHistoryBySide ({side, newHistory}) {
+            useMenuStore()[side].navigation.history = newHistory;
         }
     }
 };

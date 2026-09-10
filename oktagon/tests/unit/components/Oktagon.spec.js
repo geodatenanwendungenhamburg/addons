@@ -3,10 +3,11 @@ import {shallowMount} from "@vue/test-utils";
 import sinon from "sinon";
 import {expect} from "chai";
 import OktagonComponent from "../../../components/OktagonComponent.vue";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 
 describe("OktagonComponent.vue", () => {
-    let store, wrapper;
+    let store, wrapper, pinia, menuStore;
 
     const mockConfigJson = {
         Portalconfig: {
@@ -70,15 +71,6 @@ describe("OktagonComponent.vue", () => {
                         removePointMarker: sinon.stub(),
                         placingPointMarker: sinon.stub()
                     }
-                },
-                Menu: {
-                    namespaced: true,
-                    getters: {
-                        expanded: () => key => key === "secondaryMenu"
-                    },
-                    actions: {
-                        toggleMenu: sinon.stub()
-                    }
                 }
             },
             state: {configJson: mockConfigJson}
@@ -87,7 +79,9 @@ describe("OktagonComponent.vue", () => {
 
     beforeEach(() => {
         store = createMockStore({foo: "bar"});
-        wrapper = shallowMount(OktagonComponent, {global: {plugins: [store]}});
+        ({pinia, menuStore} = initTestPinia());
+        menuStore.secondaryMenu.expanded = true;
+        wrapper = shallowMount(OktagonComponent, {global: {plugins: [store, pinia]}});
     });
 
     it("sets focus to submit button", async () => {
@@ -120,9 +114,8 @@ describe("OktagonComponent.vue", () => {
 
     it("calls close() correctly when Close button is clicked", async () => {
         const removePointMarkerSpy = sinon.spy(wrapper.vm, "removePointMarker"),
-            toggleMenuSpy = sinon.spy(wrapper.vm, "toggleMenu"),
+            toggleMenuSpy = sinon.stub(menuStore, "toggleMenu"),
             setSubmitObjectSpy = sinon.spy(wrapper.vm, "setSubmitObject"),
-
             closeButton = wrapper.find("#oktagonCloseButton");
 
         await closeButton.trigger("click");

@@ -2,6 +2,8 @@
 
 import {mapGetters, mapMutations} from "vuex";
 import StoryPlayer from "./storyPlayer/StoryPlayer.vue";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "DataNarrator",
@@ -27,7 +29,7 @@ export default {
             "configJs",
             "isMobile"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "secondaryExpanded"
         ]),
         storyMode () {

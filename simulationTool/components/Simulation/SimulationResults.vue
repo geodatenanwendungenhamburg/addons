@@ -27,6 +27,8 @@ import Style from "ol/style/Style.js";
 import Text from "ol/style/Text.js";
 import {infrastructureLayerId} from "../../layerIds.js";
 import getStyleFunctionFromDisplayOptions from "../../js/getStyleFunctionFromDisplayOptions.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "SimulationResults",
@@ -58,7 +60,7 @@ export default {
             "simulations",
             "simulationIdForResults"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "mainMenu",
             "mainExpanded"
         ]),
@@ -287,7 +289,7 @@ export default {
             "zoomToFeature"
         ]),
         ...mapActions("Maps", ["addInteraction", "removeInteraction"]),
-        ...mapActions("Menu", ["changeCurrentComponent", "toggleMenu"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent", "toggleMenu"]),
         ...mapActions(["addLayerToLayerConfig"]),
         ...mapActions("Modules/LayerSelection", ["changeVisibility"]),
         ...mapMutations("Modules/SimulationTool", [

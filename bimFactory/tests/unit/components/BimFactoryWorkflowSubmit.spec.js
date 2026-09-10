@@ -4,7 +4,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import BimFactoryWorkflowSubmit from "../../../components/BimFactoryWorkflowSubmit.vue";
 import FlatButton from "../../../../../src/shared/modules/buttons/components/FlatButton.vue";
-
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 describe("BimFactoryWorkflowSubmit.vue", () => {
     /**
@@ -80,7 +80,15 @@ describe("BimFactoryWorkflowSubmit.vue", () => {
      * @returns {Wrapper} Wrapper object
      */
     function mountComponent (storeOptions = {}) {
-        const store = createBimFactoryStore(storeOptions);
+        const store = createBimFactoryStore(storeOptions),
+            {pinia, menuStore} = initTestPinia();
+
+        if (storeOptions.mainMenu) {
+            menuStore.mainMenu.sections = storeOptions.mainMenu.sections;
+        }
+        if (storeOptions.secondaryMenu) {
+            menuStore.secondaryMenu.sections = storeOptions.secondaryMenu.sections;
+        }
 
         return shallowMount(BimFactoryWorkflowSubmit, {
             props: {
@@ -93,7 +101,7 @@ describe("BimFactoryWorkflowSubmit.vue", () => {
                 isOpen: true
             },
             global: {
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
     }

@@ -1,6 +1,8 @@
 <script>
 import {mapGetters, mapMutations} from "vuex";
 import SearchBarSuggestionListItem from "./SearchBarSuggestionListItem.vue";
+import {mapActions, mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 /**
  * Searchbar result list to show the categorized overview or single search results.
@@ -35,7 +37,7 @@ export default {
             "currentSide",
             "showAllResultsSearchInterfaceInstances"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "menuBySide"
         ]),
         ...mapGetters([
@@ -49,11 +51,8 @@ export default {
             "setShowAllResults",
             "setShowAllResultsSearchInterfaceInstances"
         ]),
-        ...mapMutations("Menu", [
-            "setNavigationCurrentComponentBySide",
-            "setNavigationHistoryBySide",
-            "setCurrentComponent",
-            "setCurrentComponentBySide"
+        ...mapActions(useMenuStore, [
+            "changeCurrentComponent"
         ]),
         /**
          * Prepares the all results list of one category and adapts the navigation history
@@ -74,10 +73,17 @@ export default {
             if (this.menuBySide(side)) {
                 const name = i18next.t("common:modules.searchBar.searchResults") + " - " + categoryItem;
 
-                this.setNavigationCurrentComponentBySide({side: side, newComponent: {props: {name}, type: "searchBar"}});
+                this.changeCurrentComponent({
+                    side,
+                    type: "searchBar",
+                    props: {name}
+                });
+                useMenuStore()[side].navigation.history = [
+                    {type: "root", props: []},
+                    {type: "searchBar", props: {name}},
+                    {type: "searchBar", props: {name: "modules.searchBar.searchResultList"}}
+                ];
                 this.setPlaceholder(i18next.t("common:modules.searchBar.placeholder.searchFor") + " " + categoryItem);
-                this.setCurrentComponentBySide({side: side, type: "searchBar"});
-                this.setNavigationHistoryBySide({side: side, newHistory: [{type: "root", props: []}, {type: "searchBar", props: {name}}, {type: "searchBar", props: {name: "modules.searchBar.searchResultList"}}]});
             }
             this.setCurrentAvailableCategories(categoryItem);
             this.currentShowAllList = this.limitedSortedSearchResults.currentShowAllList.filter(value => {

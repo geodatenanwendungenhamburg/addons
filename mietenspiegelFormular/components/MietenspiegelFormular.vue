@@ -8,6 +8,7 @@ import rawLayerList from "@masterportal/masterportalapi/src/rawLayerList.js";
 import {requestGfi} from "../../../src/shared/js/api/wmsGetFeatureInfo.js";
 import wfsRequest from "../../../src/shared/js/api/wfs/getFeature.js";
 import {WFS} from "ol/format.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "MietenspiegelFormular",
@@ -95,7 +96,7 @@ export default {
 
         residentialInformation: {
             handler () {
-                this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+                useMenuStore().secondaryMenu.expanded = true;
             },
             deep: true
         }
@@ -119,7 +120,6 @@ export default {
     methods: {
         ...mapActions("Maps", ["placingPointMarker", "removePointMarker"]),
         ...mapActions("Modules/MietenspiegelFormular", ["setAddressCoordinate"]),
-        ...mapMutations("Menu", ["setExpandedBySide"]),
         ...mapMutations("Modules/MietenspiegelFormular", Object.keys(mutations)),
         requestGfi,
 

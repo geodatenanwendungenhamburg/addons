@@ -2,7 +2,7 @@
 import AccordionItem from "../../../src/shared/modules/accordion/components/AccordionItem.vue";
 import FlatButton from "../../../src/shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "../../../src/shared/modules/buttons/components/IconButton.vue";
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import getOAFFeature from "../../../src/shared/js/api/oaf/getOAFFeature.js";
 import Point from "ol/geom/Point.js";
 import MultiPolygon from "ol/geom/MultiPolygon.js";
@@ -21,6 +21,8 @@ import MapfishDialog from "../../shared/js/mapfishUtils/mapfishDialog.js";
 import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
 import WaterRiskCheckSearchBar from "../searchBar/components/WaterRiskCheckSearchBar.vue";
 import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "WaterRiskCheck",
@@ -173,7 +175,7 @@ export default {
         ...mapGetters("Modules/WaterRiskCheckSearchBar", [
             "searchResults"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "menuBySide"
         ]),
 
@@ -442,7 +444,7 @@ export default {
     },
     created () {
         if (this.isMobile) {
-            this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+            useMenuStore().secondaryMenu.expanded = true;
         }
         if (!this.isMobile && window.innerWidth < 992) {
             this.menuBySide("mainMenu").expanded = false;
@@ -457,7 +459,9 @@ export default {
             this.menuBySide("secondaryMenu").width = "50%";
         }
         if (this.isMobile) {
-            this.setNavigationHistoryBySide({side: "secondaryMenu", newHistory: [{type: "root", props: []}]});
+            useMenuStore().secondaryMenu.navigation.history = [
+                {type: "root", props: []}
+            ];
         }
         this.setConfig();
     },
@@ -470,12 +474,8 @@ export default {
         ...mapActions("Modules/WaterRiskCheck", [
             "updateAddress"
         ]),
-        ...mapActions("Menu", [
+        ...mapPiniaActions(useMenuStore, [
             "closeMenu"
-        ]),
-        ...mapMutations("Menu", [
-            "setExpandedBySide",
-            "setNavigationHistoryBySide"
         ]),
 
         /**

@@ -3,6 +3,9 @@ import {mapGetters, mapActions, mapMutations} from "vuex";
 import {extractEventCoordinates} from "../../../src/shared/js/utils/extractEventCoordinates.js";
 import findWhereJs from "../../../src/shared/js/utils/findWhereJs.js";
 import layerCollection from "@core/layers/js/layerCollection.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
+
 
 export default {
     name: "OktagonComponent",
@@ -12,7 +15,7 @@ export default {
             "submitURL",
             "submitObject",
             "zoomLevel"]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "expanded"
         ])
     },
@@ -31,7 +34,7 @@ export default {
     methods: {
         ...mapActions("Maps", ["zoomToCoordinates", "registerListener", "unregisterListener", "placingPointMarker", "removePointMarker"]),
         ...mapActions("Modules/OktagonComponent", ["requestALKISWMS", "initURLParameter", "addCoordinatesToSubmitObject"]),
-        ...mapActions("Menu", ["toggleMenu"]),
+        ...mapPiniaActions(useMenuStore, ["toggleMenu"]),
         ...mapMutations("Modules/OktagonComponent", ["setSubmitObject"]),
 
         /**
@@ -69,7 +72,7 @@ export default {
         * @returns {void}
         */
         async onSubmit () {
-            // eslint-disable-next-line local/no-window-open
+            // eslint-disable-next-line local/no-window-open -- Opens in the same tab.
             window.open(await this.submitURL, "_self");
         },
 

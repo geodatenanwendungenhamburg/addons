@@ -31,6 +31,8 @@ import TagGroup from "../../shared/modules/tags/components/TagGroup.vue";
 import thousandsSeparator from "@shared/js/utils/thousandsSeparator.js";
 import {truncate} from "@turf/truncate";
 import wktParser from "../../utils/wktParser";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "DistrictSelectorStatistical",
@@ -64,7 +66,7 @@ export default {
             cards: "selectionCardsStatisticalData",
             cardsSubject: "selectionCardsSubjectData"
         }),
-        ...mapGetters("Menu", ["zoomToExtentPadding"]),
+        ...mapState(useMenuStore, ["zoomToExtentPadding"]),
         ...mapGetters(["allLayerConfigs", "restServiceById", "visibleSubjectDataLayerConfigs"]),
 
         /**

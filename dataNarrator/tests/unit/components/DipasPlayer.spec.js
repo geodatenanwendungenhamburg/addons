@@ -3,11 +3,13 @@ import {expect} from "chai";
 import {createStore} from "vuex";
 import {vi, beforeEach, afterEach, describe, it} from "vitest";
 import DipasPlayer from "../../../components/storyPlayer/DipasPlayer.vue";
-
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 describe("addons/dataNarrator/tests/unit/DipasPlayer.spec.js", () => {
     let steps;
     let store;
+    let pinia;
+    let menuStore;
     let wrapper;
     let storyConf;
     let toolDiv;
@@ -101,7 +103,7 @@ describe("addons/dataNarrator/tests/unit/DipasPlayer.spec.js", () => {
                 screenOrientationType: screen.orientation?.type || "portrait-primary"
             },
             global: {
-                plugins: [storeInstance],
+                plugins: [storeInstance, pinia],
                 mocks: {
                     $t: key => key
                 },
@@ -285,6 +287,8 @@ describe("addons/dataNarrator/tests/unit/DipasPlayer.spec.js", () => {
             coverImageCopyright: ""
         };
         // Create store and mount wrapper
+        ({pinia, menuStore} = initTestPinia());
+        menuStore.secondaryMenu.expanded = true;
         store = createTestStore(storyConf);
         wrapper = mountComponent(store);
     });

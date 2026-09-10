@@ -5,6 +5,8 @@ import {formatDateTime} from "../../utils/dateHelpers";
 import SelectableList from "../SelectableList.vue";
 import GeoMarkerForm from "../GeoMarkerForm.vue";
 import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
+import {mapState} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "TabListContent",
@@ -42,7 +44,7 @@ export default {
             "geoMarkerUpdateFeature",
             "isGemisFeature"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "currentMenuWidth",
             "expanded"
         ]),

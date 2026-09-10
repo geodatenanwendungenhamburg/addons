@@ -4,6 +4,8 @@ import TableOfContents from "./TableOfContents.vue";
 import axios from "axios";
 import getters from "../../store/gettersDataNarrator";
 import mutations from "../../store/mutationsDataNarrator";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "DipasPlayer",
@@ -77,7 +79,7 @@ export default {
             "isMobile",
             "uiStyle"
         ]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "mainMenu",
             "secondaryMenu",
             "secondaryExpanded",
@@ -111,7 +113,7 @@ export default {
         },
         mainExpanded (expanded) {
             if (!expanded && this.isMobilePortrait) {
-                this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+                useMenuStore().secondaryMenu.expanded = true;
             }
             else if (expanded && !this.isMobilePortrait) {
                 this.menuBySide("mainMenu").width = "40%";
@@ -154,7 +156,7 @@ export default {
             document.getElementsByTagName("head")[0].appendChild(element);
         }
 
-        this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+        useMenuStore().secondaryMenu.expanded = true;
 
         if (window.matchMedia("(max-width: 768px)").matches && !this.isMobilePortrait) {
             this.menuBySide("secondaryMenu").width = "40%";
@@ -251,8 +253,7 @@ export default {
     },
     methods: {
         ...mapMutations("Modules/DataNarrator", Object.keys(mutations)),
-        ...mapMutations("Menu", ["setExpandedBySide"]),
-        ...mapActions("Menu", ["changeCurrentComponent"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent"]),
         ...mapMutations([
             "setDeviceMode"
         ]),
@@ -473,7 +474,7 @@ export default {
         applyMobileLandscapeLayout () {
             this.setDeviceMode("Desktop");
             this.$nextTick(() => {
-                this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+                useMenuStore().secondaryMenu.expanded = true;
                 this.menuBySide("secondaryMenu").width = "40%";
             });
         },
@@ -487,7 +488,7 @@ export default {
             }
 
             this.$nextTick(() => {
-                this.setExpandedBySide({expanded: true, side: "secondaryMenu"});
+                useMenuStore().secondaryMenu.expanded = true;
 
                 const menuPanel = document.getElementById("mp-menu-secondaryMenu");
 

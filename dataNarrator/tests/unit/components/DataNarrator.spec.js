@@ -1,33 +1,22 @@
 import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import {createStore} from "vuex";
-
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 import Component from "../../../components/DataNarrator.vue";
 
 
 describe("addons/dataNarrator/tests/unit/DataNarrator.spec.js", () => {
     let wrapper,
-        store;
+        store,
+        pinia,
+        menuStore;
 
     beforeEach(() => {
-
+        ({pinia, menuStore} = initTestPinia());
+        menuStore.secondaryMenu.expanded = true;
         store = createStore({
             modules: {
                 namespaced: true,
-                Menu: {
-                    namespaced: true,
-                    state: () => ({
-                        secondaryExpanded: true
-                    }),
-                    getters: {
-                        secondaryExpanded: state => state.secondaryExpanded
-                    },
-                    mutations: {
-                        setSecondaryExpanded (state, payload) {
-                            state.secondaryExpanded = payload;
-                        }
-                    }
-                },
                 Modules: {
                     namespaced: true,
                     modules: {
@@ -75,7 +64,7 @@ describe("addons/dataNarrator/tests/unit/DataNarrator.spec.js", () => {
                 mocks: {
                     $t: key => key
                 },
-                plugins: [store]
+                plugins: [store, pinia]
             }
         });
     });
@@ -102,7 +91,7 @@ describe("addons/dataNarrator/tests/unit/DataNarrator.spec.js", () => {
         wrapper.vm.isActive = true;
         await wrapper.vm.$nextTick();
 
-        store.commit("Menu/setSecondaryExpanded", false);
+        menuStore.secondaryMenu.expanded = false;
         await wrapper.vm.$nextTick();
 
         expect(icon.classList.contains("bi-book")).to.be.true;

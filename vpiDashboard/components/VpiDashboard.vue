@@ -5,6 +5,8 @@ import actions from "../store/actionsVpiDashboard.js";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import LoaderOverlay from "../utils/loaderOverlay.js";
 import {nextTick} from "vue";
+import {mapActions as mapPiniaActions} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 // Components Import
 import Tabs from "./DashboardTabs.vue";
@@ -110,8 +112,16 @@ export default {
         }
     },
     async mounted () {
-        await this.changeCurrentMouseMapInteractionsComponent({type: this.type, side: this.$attrs.side});
-        this.setCurrentMenuWidth({side: this.$attrs.side, width: "40%"});
+        await this.changeCurrentMouseMapInteractionsComponent({
+            type: this.type,
+            side: this.$attrs.side
+        });
+
+        this.setCurrentMenuWidth({
+            type: this.$attrs.side,
+            attributes: {width: "40%"}
+        });
+
         this.initCurrentLocale();
         this.map = mapCollection.getMap("2D");
         this.createYearList();
@@ -121,20 +131,26 @@ export default {
         this.initSelectInteraction();
     },
     async unmounted () {
-        await this.replaceByIdInLayerConfig({layerConfigs: [{
-            id: this.gridLayerId,
-            layer: {
-                visibility: false
-            }
-        }]});
+        await this.replaceByIdInLayerConfig({
+            layerConfigs: [{
+                id: this.gridLayerId,
+                layer: {
+                    visibility: false
+                }
+            }]
+        });
 
-        this.setCurrentMenuWidth({side: this.$attrs.side, width: "25%"});
+        this.setCurrentMenuWidth({
+            type: this.$attrs.side,
+            attributes: {width: "25%"}
+        });
     },
     methods: {
         ...mapMutations("Modules/VpiDashboard", Object.keys(mutations)),
-        ...mapMutations("Menu", ["setCurrentMenuWidth"]),
-        ...mapActions("Menu", ["changeCurrentMouseMapInteractionsComponent"]),
-        ...mapActions("Modules/VpiDashboard", Object.keys(actions)),
+        ...mapPiniaActions(useMenuStore, [
+            "changeCurrentMouseMapInteractionsComponent",
+            "setCurrentMenuWidth"
+        ]), ...mapActions("Modules/VpiDashboard", Object.keys(actions)),
         ...mapActions("Maps", ["createVectorLayer"]),
         ...mapActions(["replaceByIdInLayerConfig"]),
         createYearList () {

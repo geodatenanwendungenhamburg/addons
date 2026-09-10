@@ -1,5 +1,5 @@
 <script>
-import AlertMessage from "../../shared/modules/alerts/components/AlertMessage.vue";
+import AlertMessage from "@shared/modules/alerts/components/AlertMessage.vue";
 import dayjs from "dayjs";
 import {debounce} from "chart.js/helpers";
 import DistrictFinderFilterCard from "./DistrictFinderFilterCard.vue";
@@ -7,7 +7,7 @@ import DistrictFinderFilterExport from "./DistrictFinderFilterExport.vue";
 import DistrictFinderFilterImport from "./DistrictFinderFilterImport.vue";
 import DistrictFinderFilterOperator from "./DistrictFinderFilterOperator.vue";
 import {Fill, Style} from "ol/style.js";
-import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
+import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import getOAFFeature from "@shared/js/api/oaf/getOAFFeature";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import isObject from "@shared/js/utils/isObject";
@@ -15,6 +15,8 @@ import {mapActions, mapGetters, mapMutations} from "vuex";
 import {uniqueId} from "@shared/js/utils/uniqueId";
 import {getMappingJsonJS} from "../../utils/getMappingJson";
 import {VSnackbar} from "vuetify/components/VSnackbar";
+import {mapActions as mapPiniaActions} from "pinia";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 
 export default {
     name: "DistrictFinderFilter",
@@ -127,7 +129,7 @@ export default {
     },
     methods: {
         ...mapActions("Modules/DistrictSelector", ["setDistrictsByName"]),
-        ...mapActions("Menu", ["changeCurrentComponent"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent"]),
         ...mapActions("Maps", ["addNewLayerIfNotExists"]),
         ...mapMutations("Modules/DistrictFinder", ["setCardList", "setConditionDate", "setConditionTitle", "setFilteredLayer", "setMapping"]),
         ...mapMutations("Modules/DistrictSelector", ["setSelectedDistrictLevel", "setSelectedDistrictLevelId"]),

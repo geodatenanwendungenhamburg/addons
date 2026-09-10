@@ -2,6 +2,7 @@ import {createStore} from "vuex";
 import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import sinon from "sinon";
+import {initTestPinia} from "@devtools/tests/initTestPinia";
 
 import Component from "../../../components/BimFactoryWorkflow.vue";
 
@@ -338,9 +339,10 @@ describe("addons/bimFactory/components/BimFactoryWorkflow.vue", () => {
             actions: {
                 replaceByIdInLayerConfig: sinon.stub().resolves()
             }
-        }),
+        });
+    const {pinia} = initTestPinia(),
         globalMocks = {
-            plugins: [store]
+            plugins: [store, pinia]
         };
 
     it("should exist", () => {

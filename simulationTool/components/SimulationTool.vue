@@ -19,6 +19,8 @@ import simulationResults from "./Simulation/SimulationResults.vue";
 import {infrastructureLayerId} from "../layerIds.js";
 import {readAllPlanningScenariosFromIndexedDb} from "../js/planningScenariosIndexedDb.js";
 import isObject from "@shared/js/utils/isObject.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions} from "pinia";
 
 import TutorialPanel from "./HelpSection/TutorialPanel.vue";
 
@@ -71,7 +73,7 @@ export default {
         ...mapActions("Modules/Login", [
             "checkLoggedIn"
         ]),
-        ...mapMutations("Menu", [
+        ...mapPiniaActions(useMenuStore, [
             "setCurrentMenuWidth"
         ]),
         ...mapMutations("Modules/SimulationTool", Object.keys(mutations)),
@@ -176,8 +178,10 @@ export default {
 
         maximizeDrawer () {
             this.setCurrentMenuWidth({
-                side: "secondaryMenu",
-                width: MIN_WIDTH_PERCENT + "dvw"
+                type: "secondaryMenu",
+                attributes: {
+                    width: MIN_WIDTH_PERCENT + "dvw"
+                }
             });
         },
         /**

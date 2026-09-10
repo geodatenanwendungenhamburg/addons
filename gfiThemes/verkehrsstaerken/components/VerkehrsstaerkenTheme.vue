@@ -1,11 +1,13 @@
 <script>
 
-import {mapGetters, mapActions} from "vuex";
+import {mapGetters} from "vuex";
 import {createNewRowName, combineYearsData} from "../utils/helpers.js";
 import VerkehrsstaerkenThemeTable from "./VerkehrsstaerkenThemeTable.vue";
 import VerkehrsstaerkenThemeLineChart from "./VerkehrsstaerkenThemeLineChart.vue";
 import FlatButton from "../../../../src/shared/modules/buttons/components/FlatButton.vue";
 import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions, mapState} from "pinia";
 
 export default {
     name: "VerkehrsstaerkenTheme",
@@ -33,7 +35,7 @@ export default {
     computed: {
         ...mapGetters("Modules/Language", ["currentLocale"]),
         ...mapGetters(["isMobile"]),
-        ...mapGetters("Menu", ["currentSecondaryMenuWidth", "mainExpanded"]),
+        ...mapState(useMenuStore, ["currentSecondaryMenuWidth", "mainExpanded"]),
         gfiParams: function () {
             return this.feature.getTheme()?.params;
         },
@@ -75,7 +77,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions("Menu", ["toggleMenu", "setCurrentMenuWidth"]),
+        ...mapActions(useMenuStore, ["toggleMenu", "setCurrentMenuWidth"]),
         /**
          * Parses the mapped properties of gfi into several variables for the graphics and for the info tab.
          * @returns {void}

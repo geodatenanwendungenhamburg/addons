@@ -4,6 +4,8 @@ import DipasPlayer from "./DipasPlayer.vue";
 import fetchDataFromUrl from "../../utils/getStoryFromUrl";
 import getters from "../../store/gettersDataNarrator";
 import mutations from "../../store/mutationsDataNarrator";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
+import {mapActions as mapPiniaActions, mapState} from "pinia";
 
 export default {
     name: "StoryPlayer",
@@ -40,7 +42,7 @@ export default {
             "layerConfigById"
         ]),
         ...mapGetters("Maps", ["mode"]),
-        ...mapGetters("Menu", [
+        ...mapState(useMenuStore, [
             "mainMenu",
             "secondaryMenu",
             "expanded"
@@ -123,10 +125,9 @@ export default {
     },
     methods: {
         ...mapMutations("Modules/DataNarrator", Object.keys(mutations)),
-        ...mapMutations("Menu", ["setExpandedBySide"]),
         ...mapActions("Maps", ["changeMapMode"]),
         ...mapActions(["replaceByIdInLayerConfig"]),
-        ...mapActions("Menu", ["changeCurrentComponent", "resetMenu"]),
+        ...mapPiniaActions(useMenuStore, ["changeCurrentComponent", "resetMenu"]),
         /**
          * Activates a tool
          * @param {Object} toolId the id of the tool to activate
@@ -142,7 +143,7 @@ export default {
                   module = this.$store.state.Modules && this.$store.state.Modules[toolKey],
                   name = module && module.name ? module.name : toolKey;
 
-            this.setExpandedBySide({expanded: true, side: toolMenuSide});
+            useMenuStore()[toolMenuSide].expanded = true;
             this.changeCurrentComponent({type: toolId, side: toolMenuSide, props: {name}});
         },
         /**
@@ -152,7 +153,7 @@ export default {
         deactivateTool () {
             const toolMenuSide = this.dataNarratorMenuSide === "mainMenu" ? "secondaryMenu" : "mainMenu";
 
-            this.setExpandedBySide({expanded: false, side: toolMenuSide});
+            useMenuStore()[toolMenuSide].expanded = false;
 
             this.resetMenu(toolMenuSide);
         },

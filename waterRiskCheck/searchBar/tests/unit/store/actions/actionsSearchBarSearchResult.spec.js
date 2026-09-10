@@ -2,6 +2,7 @@ import sinon from "sinon";
 import {expect} from "chai";
 import {createPinia, setActivePinia} from "pinia";
 import {useLayerInformationStore} from "@modules/layerInformation/store/layerInformationStore.js";
+import {useMenuStore} from "@modules/menu/menu-store/menuStore.js";
 import rawLayerList from "@masterportal/masterportalapi/src/rawLayerList.js";
 import WKTUtil from "@shared/js/utils/getWKTGeom.js";
 import wmsGFIUtil from "@shared/js/utils/getWmsFeaturesByMimeType.js";
@@ -15,10 +16,15 @@ describe("src/modules/searchBar/store/actions/actionsSearchBarSearchResult.spec.
         commit,
         getters,
         zoomLevel,
-        map;
+        map,
+        menuStore,
+        changeCurrentComponentSpy;
 
     beforeEach(() => {
         setActivePinia(createPinia());
+
+        menuStore = useMenuStore();
+        changeCurrentComponentSpy = sinon.stub(menuStore, "changeCurrentComponent");
 
         zoomLevel = 5;
 
@@ -234,13 +240,19 @@ describe("src/modules/searchBar/store/actions/actionsSearchBarSearchResult.spec.
             dispatch = sinon.stub().resolves({id: layerId});
             await actions.showInTree({commit, dispatch}, {layerId});
 
-            expect(dispatch.callCount).to.be.equals(3);
-            expect(dispatch.firstCall.args[0]).to.equals("retrieveLayerConfig");
-            expect(dispatch.firstCall.args[1]).to.be.deep.equals({layerId, source: undefined});
-            expect(dispatch.secondCall.args[0]).to.equals("Menu/changeCurrentComponent");
-            expect(dispatch.secondCall.args[1]).to.be.deep.equals({type: "layerSelection", side: "mainMenu", props: {name: "common:modules.layerSelection.name"}});
-            expect(dispatch.thirdCall.args[0]).to.equals("Modules/LayerSelection/showLayer");
-            expect(dispatch.thirdCall.args[1]).to.be.deep.equals({
+            expect(dispatch.callCount).to.be.equals(2);
+
+            expect(changeCurrentComponentSpy.calledOnce).to.be.true;
+            expect(changeCurrentComponentSpy.firstCall.args[0]).to.be.deep.equals({
+                type: "layerSelection",
+                side: "mainMenu",
+                props: {
+                    name: "common:modules.layerSelection.name"
+                }
+            });
+
+            expect(dispatch.secondCall.args[0]).to.equals("Modules/LayerSelection/showLayer");
+            expect(dispatch.secondCall.args[1]).to.be.deep.equals({
                 layerId: "123"
             });
             expect(commit.callCount).to.be.equals(1);
@@ -259,13 +271,21 @@ describe("src/modules/searchBar/store/actions/actionsSearchBarSearchResult.spec.
                 ]});
             await actions.showInTree({commit, dispatch}, {layerId});
 
-            expect(dispatch.callCount).to.be.equals(3);
+            expect(dispatch.callCount).to.be.equals(2);
             expect(dispatch.firstCall.args[0]).to.equals("retrieveLayerConfig");
             expect(dispatch.firstCall.args[1]).to.be.deep.equals({layerId, source: undefined});
-            expect(dispatch.secondCall.args[0]).to.equals("Menu/changeCurrentComponent");
-            expect(dispatch.secondCall.args[1]).to.be.deep.equals({type: "layerSelection", side: "mainMenu", props: {name: "common:modules.layerSelection.name"}});
-            expect(dispatch.thirdCall.args[0]).to.equals("Modules/LayerSelection/showLayer");
-            expect(dispatch.thirdCall.args[1]).to.be.deep.equals({
+
+            expect(changeCurrentComponentSpy.calledOnce).to.be.true;
+            expect(changeCurrentComponentSpy.firstCall.args[0]).to.be.deep.equals({
+                type: "layerSelection",
+                side: "mainMenu",
+                props: {
+                    name: "common:modules.layerSelection.name"
+                }
+            });
+
+            expect(dispatch.secondCall.args[0]).to.equals("Modules/LayerSelection/showLayer");
+            expect(dispatch.secondCall.args[1]).to.be.deep.equals({
                 layerId: "123"
             });
             expect(commit.callCount).to.be.equals(2);
@@ -284,13 +304,19 @@ describe("src/modules/searchBar/store/actions/actionsSearchBarSearchResult.spec.
             await actions.showInTree({commit, dispatch}, {layerId});
 
             expect(warnSpy.callCount).to.equal(1);
-            expect(dispatch.callCount).to.equal(3);
+            expect(dispatch.callCount).to.equal(2);
             expect(dispatch.firstCall.args[0]).to.equals("retrieveLayerConfig");
             expect(dispatch.firstCall.args[1]).to.be.deep.equals({layerId, source: undefined});
-            expect(dispatch.secondCall.args[0]).to.equals("Menu/changeCurrentComponent");
-            expect(dispatch.secondCall.args[1]).to.be.deep.equals({type: "layerSelection", side: "mainMenu", props: {name: "common:modules.layerSelection.name"}});
-            expect(dispatch.thirdCall.args[0]).to.equals("Alerting/addSingleAlert");
-            expect(dispatch.thirdCall.args[1]).to.be.deep.equals({
+            expect(changeCurrentComponentSpy.calledOnce).to.be.true;
+            expect(changeCurrentComponentSpy.firstCall.args[0]).to.be.deep.equals({
+                type: "layerSelection",
+                side: "mainMenu",
+                props: {
+                    name: "common:modules.layerSelection.name"
+                }
+            });
+            expect(dispatch.secondCall.args[0]).to.equals("Alerting/addSingleAlert");
+            expect(dispatch.secondCall.args[1]).to.be.deep.equals({
                 category: "info",
                 content: i18next.t("common:modules.searchBar.layerResultNotShown")
             });
