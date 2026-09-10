@@ -234,13 +234,16 @@ const actions = {
             url = groupedLayers.layerSource.getFeatureInfoUrl(coordinates, mapView.getResolution(), mapView.getProjection());
         }
 
+        console.time("BORIS: WMS GFI request");
         axios.get(url)
             .then((response) => {
+                console.timeEnd("BORIS: WMS GFI request");
                 if (response.status === 200) {
                     dispatch("handleGfiResponse", {response: response.data, coordinate: coordinates});
                 }
             })
             .catch((error) => {
+                console.timeEnd("BORIS: WMS GFI request");
                 console.error(error.response);
                 dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
             });
@@ -315,8 +318,10 @@ const actions = {
         urlParams = "typeName=" + encodeURIComponent(typeName) + "&featureID=" + encodeURIComponent(featureId);
 
 
+        console.time("BORIS: legacy WFS marker request");
         axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
             .then((response) =>{
+                console.timeEnd("BORIS: legacy WFS marker request");
                 const feature = new WFS().readFeature(response.data);
 
                 if (feature) {
@@ -326,6 +331,7 @@ const actions = {
                 }
             })
             .catch((error) => {
+                console.timeEnd("BORIS: legacy WFS marker request");
                 console.error(error.message);
                 dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
             });
@@ -393,16 +399,19 @@ const actions = {
             return;
         }
 
+        console.time("BORIS: QS WFS request");
         axios({
             method: "post",
             url: url + "/wfs_bodenrichtwerte_hamburg_zeitreihe",
             data: wfsString,
             headers: {"Content-Type": "application/xml"}
         }).then((response) => {
+            console.timeEnd("BORIS: QS WFS request");
             if (response.status === 200) {
                 dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
             }
         }).catch((error) => {
+            console.timeEnd("BORIS: QS WFS request");
             console.error(error.response);
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         });
@@ -417,6 +426,7 @@ const actions = {
      * @returns {void}
      */
     async handleGetFeatureResponse ({dispatch, commit}, {response, year}) {
+        console.time("BORIS: GML parse/reproject");
         const xmlString = response.responseText || response,
             fixedXml = xmlString.replace(/<wfs:member>/g, "<gml:featureMember>").replace(/<\/wfs:member>/g, "</gml:featureMember>"),
             parser = new DOMParser(),
@@ -432,6 +442,8 @@ const actions = {
                 featureProjection: "EPSG:3857"
             }),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
+
+        console.timeEnd("BORIS: GML parse/reproject");
 
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
@@ -499,6 +511,7 @@ const actions = {
             console.warn("Rest Service with the ID " + this.wpsId + " is not configured in rest-services.json!");
         }
         else {
+            console.time("BORIS: WPS convert request");
             WPS.wpsRequest(state.wpsId, url.url, state.fmwProcess, data, (response, status) => dispatch("handleConvertResponse", {response, status}));
         }
     },
@@ -512,6 +525,8 @@ const actions = {
         let complexData,
             executeResponse,
             showErrorMessage = false;
+
+        console.timeEnd("BORIS: WPS convert request");
 
         if (status === 200) {
             executeResponse = response.ExecuteResponse;
