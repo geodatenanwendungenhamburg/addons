@@ -3,7 +3,7 @@ import helpers from "../js/helpers";
 import thousandsSeparator from "../../../src/shared/js/utils/thousandsSeparator";
 import {WMSGetFeatureInfo} from "ol/format.js";
 import WFS from "ol/format/WFS";
-import GML32 from "ol/format/GML32";
+import GeoJSON from "ol/format/GeoJSON";
 import layerCollection from "../../../src/core/layers/js/layerCollection";
 import WPS from "../../../src/shared/js/api/wps";
 import mapCollection from "../../../src/core/maps/js/mapCollection";
@@ -369,50 +369,68 @@ const actions = {
      * @returns {void}
      */
     postFeatureRequestByBrwNumber ({dispatch}, {brwNumber, featureYear}) {
-        const brwNumberValue = String(brwNumber || ""),
-            typeName = "bodenrichtwertzonen",
-            url = "https://qs-geodienste.hamburg.de",
-            wfsString = `
-<wfs:GetFeature service="WFS" version="2.0.0"
-    xmlns:wfs="http://www.opengis.net/wfs/2.0"
-    xmlns:fes="http://www.opengis.net/fes/2.0"
-    xmlns:dehhup="https://registry.gdi-de.org/id/de.hh.up">
-    <wfs:Query typeNames="dehhup:${typeName}">
-        <fes:Filter>
-            <fes:And>
-                <fes:PropertyIsEqualTo>
-                    <fes:ValueReference>jahrgang</fes:ValueReference>
-                    <fes:Literal>${featureYear}</fes:Literal>
-                </fes:PropertyIsEqualTo>
-                <fes:PropertyIsEqualTo>
-                    <fes:ValueReference>richtwertnummer</fes:ValueReference>
-                    <fes:Literal>${brwNumberValue}</fes:Literal>
-                </fes:PropertyIsEqualTo>
-            </fes:And>
-        </fes:Filter>
-    </wfs:Query>
-</wfs:GetFeature>`;
-
-        if (!brwNumberValue) {
-            console.error("No BRW number available for WFS request");
-            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
+        if (!featureYear || !brwNumber) {
             return;
         }
 
-        console.time("BORIS: QS WFS request");
-        axios({
-            method: "post",
-            url: url + "/wfs_bodenrichtwerte_hamburg_zeitreihe",
-            data: wfsString,
-            headers: {"Content-Type": "application/xml"}
-        }).then((response) => {
-            console.timeEnd("BORIS: QS WFS request");
-            if (response.status === 200) {
-                dispatch("handleGetFeatureResponse", {response: response.data, status: response.status, year: featureYear});
+        const brwNumberValue = String(brwNumber || ""),
+            typeName = "bodenrichtwerte_flaechendeckend",
+            url = `https://qs-api.hamburg.de/ldproxy_dev/bodenrichtwerte_hamburg_zeitreihe/collections/${typeName}/items`;
+
+        const zonenNrValue = parseInt(brwNumberValue.slice(-5), 10);
+
+        const config = {
+            method: "get",
+            url: url,
+            params: {
+                "jahrgang": parseInt(featureYear, 10),
+                "zonen_nr": zonenNrValue,
+                "f": "json"
+            }
+        };
+
+        console.log("🔗 Generierte OAF-Test-URL:", axios.getUri(config));
+
+                axios(config).then((response) => {
+            if (response.status === 200 && response.data && response.data.features) {
+                
+                // Wir filtern das eine gelieferte Feature, um zu prüfen, ob die BRW-Nummer drinsteckt
+                const matchingFeatures = response.data.features.filter(feature => {
+                    const props = feature.properties;
+                    if (props && props.nutzungsart) {
+                        try {
+                            // Flexibles Parsen: Akzeptiert JSON-Objekt ODER String-Text vom Server
+                            const data = typeof props.nutzungsart === "string" 
+                                ? JSON.parse(props.nutzungsart) 
+                                : props.nutzungsart;
+                            
+                            if (data && Array.isArray(data.nutzungen)) {
+                                return data.nutzungen.some(n => String(n.richtwertnummer) === brwNumberValue);
+                            }
+                        } catch (e) {
+                            console.error("Fehler beim Parsen der Nutzungsart:", e);
+                        }
+                    }
+                    return false;
+                });
+
+                if (matchingFeatures.length > 0) {
+                    // Wir übergeben das exakt validierte Feature im GeoJSON-Format
+                    response.data.features = matchingFeatures;
+
+                    dispatch("handleGetFeatureResponse", {
+                        response: response.data, 
+                        status: response.status, 
+                        year: featureYear
+                    });
+                }
+                else {
+                    console.warn(`Zonennummer passte, aber Richtwertnummer ${brwNumberValue} wurde im JSON nicht gefunden.`);
+                    dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
+                }
             }
         }).catch((error) => {
-            console.timeEnd("BORIS: QS WFS request");
-            console.error(error.response);
+            console.error("Fehler beim OAF-Abruf:", error.response || error);
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         });
     },
@@ -426,28 +444,19 @@ const actions = {
      * @returns {void}
      */
     async handleGetFeatureResponse ({dispatch, commit}, {response, year}) {
-        console.time("BORIS: GML parse/reproject");
-        const xmlString = response.responseText || response,
-            fixedXml = xmlString.replace(/<wfs:member>/g, "<gml:featureMember>").replace(/<\/wfs:member>/g, "</gml:featureMember>"),
-            parser = new DOMParser(),
-            xml = parser.parseFromString(fixedXml, "text/xml"),
-            featureType = "bodenrichtwertzonen",
-            format = new WFS({
-                gmlFormat: new GML32()
-            }),
-            features = format.readFeatures(xml, {
-                featureNS: "https://registry.gdi-de.org/id/de.hh.up",
-                featureType,
+
+        const geojsonData = typeof response === "string" ? JSON.parse(response) : response,
+            format = new GeoJSON(),
+            features = format.readFeatures(geojsonData, {
                 dataProjection: "EPSG:25832",
                 featureProjection: "EPSG:3857"
             }),
             featureByYear = await helpers.findBrwFeatureByYear({features, year});
 
-        console.timeEnd("BORIS: GML parse/reproject");
-
         commit("setBrwFeatures", features);
         dispatch("combineFeatureWithSelectedDate", featureByYear);
     },
+
     /**
      * Get the actually selected date and set date and feature to get the extended feature attributes
      * @param {Object} combineFeatureWithSelectedDate.dispatch the dispatch
