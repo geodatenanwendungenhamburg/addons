@@ -234,16 +234,13 @@ const actions = {
             url = groupedLayers.layerSource.getFeatureInfoUrl(coordinates, mapView.getResolution(), mapView.getProjection());
         }
 
-        console.time("BORIS: WMS GFI request");
         axios.get(url)
             .then((response) => {
-                console.timeEnd("BORIS: WMS GFI request");
                 if (response.status === 200) {
                     dispatch("handleGfiResponse", {response: response.data, coordinate: coordinates});
                 }
             })
             .catch((error) => {
-                console.timeEnd("BORIS: WMS GFI request");
                 console.error(error.response);
                 dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
             });
@@ -317,11 +314,8 @@ const actions = {
         }
         urlParams = "typeName=" + encodeURIComponent(typeName) + "&featureID=" + encodeURIComponent(featureId);
 
-
-        console.time("BORIS: legacy WFS marker request");
         axios.get(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)
             .then((response) =>{
-                console.timeEnd("BORIS: legacy WFS marker request");
                 const feature = new WFS().readFeature(response.data);
 
                 if (feature) {
@@ -331,7 +325,6 @@ const actions = {
                 }
             })
             .catch((error) => {
-                console.timeEnd("BORIS: legacy WFS marker request");
                 console.error(error.message);
                 dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
             });
@@ -374,62 +367,40 @@ const actions = {
         }
 
         const brwNumberValue = String(brwNumber || ""),
-            typeName = "bodenrichtwerte_flaechendeckend",
+            typeName = "bodenrichtwertzonen",
             url = `https://qs-api.hamburg.de/ldproxy_dev/bodenrichtwerte_hamburg_zeitreihe/collections/${typeName}/items`;
 
-        const zonenNrValue = parseInt(brwNumberValue.slice(-5), 10);
+        // const zonenNrValue = parseInt(brwNumberValue.slice(-5), 10);
+
+        if (!brwNumberValue) {
+            console.error("No BRW number available for WFS request");
+            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
+            return;
+        }
 
         const config = {
             method: "get",
             url: url,
             params: {
                 "jahrgang": parseInt(featureYear, 10),
-                "zonen_nr": zonenNrValue,
-                "f": "json"
+                "richtwertnummer": brwNumberValue,
+                "f": "json",
+                "limit": 1
             }
         };
 
-        console.log("🔗 Generierte OAF-Test-URL:", axios.getUri(config));
-
-                axios(config).then((response) => {
+        console.time("BORIS: OAF feature request");
+        axios.get(url, config).then((response) => {
+            console.timeEnd("BORIS: OAF feature request");
             if (response.status === 200 && response.data && response.data.features) {
-                
-                // Wir filtern das eine gelieferte Feature, um zu prüfen, ob die BRW-Nummer drinsteckt
-                const matchingFeatures = response.data.features.filter(feature => {
-                    const props = feature.properties;
-                    if (props && props.nutzungsart) {
-                        try {
-                            // Flexibles Parsen: Akzeptiert JSON-Objekt ODER String-Text vom Server
-                            const data = typeof props.nutzungsart === "string" 
-                                ? JSON.parse(props.nutzungsart) 
-                                : props.nutzungsart;
-                            
-                            if (data && Array.isArray(data.nutzungen)) {
-                                return data.nutzungen.some(n => String(n.richtwertnummer) === brwNumberValue);
-                            }
-                        } catch (e) {
-                            console.error("Fehler beim Parsen der Nutzungsart:", e);
-                        }
-                    }
-                    return false;
+
+                dispatch("handleGetFeatureResponse", {
+                    response: response.data,
+                    status: response.status
                 });
-
-                if (matchingFeatures.length > 0) {
-                    // Wir übergeben das exakt validierte Feature im GeoJSON-Format
-                    response.data.features = matchingFeatures;
-
-                    dispatch("handleGetFeatureResponse", {
-                        response: response.data, 
-                        status: response.status, 
-                        year: featureYear
-                    });
-                }
-                else {
-                    console.warn(`Zonennummer passte, aber Richtwertnummer ${brwNumberValue} wurde im JSON nicht gefunden.`);
-                    dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
-                }
             }
         }).catch((error) => {
+            console.timeEnd("BORIS: OAF feature request");
             console.error("Fehler beim OAF-Abruf:", error.response || error);
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         });
@@ -443,18 +414,29 @@ const actions = {
      * @param {Number} year selected year
      * @returns {void}
      */
-    async handleGetFeatureResponse ({dispatch, commit}, {response, year}) {
+    async handleGetFeatureResponse ({dispatch, commit}, {response}) {
 
-        const geojsonData = typeof response === "string" ? JSON.parse(response) : response,
+        const features = response.features || [],
             format = new GeoJSON(),
-            features = format.readFeatures(geojsonData, {
-                dataProjection: "EPSG:25832",
-                featureProjection: "EPSG:3857"
-            }),
-            featureByYear = await helpers.findBrwFeatureByYear({features, year});
+            parsedFeatures = format.readFeatures(
+                {type: "FeatureCollection", features: features},
+                {
+                    dataProjection: "EPSG:25832",
+                    featureProjection: "EPSG:3857"
+                }
+            );
 
-        commit("setBrwFeatures", features);
-        dispatch("combineFeatureWithSelectedDate", featureByYear);
+        if (parsedFeatures.length > 0) {
+            const featureByYear = parsedFeatures[0];
+
+            commit("setBrwFeatures", parsedFeatures);
+            dispatch("combineFeatureWithSelectedDate", featureByYear);
+        }
+        else {
+            console.warn("Keine Features von OAF zurückbekommen");
+            dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
+        }
+
     },
 
     /**
@@ -520,7 +502,6 @@ const actions = {
             console.warn("Rest Service with the ID " + this.wpsId + " is not configured in rest-services.json!");
         }
         else {
-            console.time("BORIS: WPS convert request");
             WPS.wpsRequest(state.wpsId, url.url, state.fmwProcess, data, (response, status) => dispatch("handleConvertResponse", {response, status}));
         }
     },
@@ -534,8 +515,6 @@ const actions = {
         let complexData,
             executeResponse,
             showErrorMessage = false;
-
-        console.timeEnd("BORIS: WPS convert request");
 
         if (status === 200) {
             executeResponse = response.ExecuteResponse;

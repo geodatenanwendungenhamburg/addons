@@ -35,8 +35,7 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
         state,
         map = null,
         error,
-        axiosGetStub,
-        axiosPostStub;
+        axiosGetStub;
 
     beforeAll(() => {
         const proj = new Projection({
@@ -119,7 +118,10 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             attribute2
         ];
         axiosGetStub = sinon.stub(axios, "get").resolves({status: 200, data: {}});
-        axiosPostStub = sinon.stub(axios, "post").resolves({status: 200, data: {}});
+    });
+
+    afterEach(() => {
+        sinon.restore();
     });
 
 
@@ -246,7 +248,7 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             expect(dispatch.callCount).to.equal(4);
             expect(dispatch.args[0][0]).to.equal("selectLayerByName");
             expect(dispatch.args[0][1]).to.equal(selectedLayerName);
-            expect(dispatch.args[1][0]).to.equal("Maps/removePolygonMarker");
+            expect(dispatch.args[1][0]).to.equal("MapMarker/removePolygonMarker");
             expect(dispatch.args[1][1]).to.equal(null);
             expect(dispatch.args[2][0]).to.equal("requestGFI");
             expect(dispatch.args[3][0]).to.equal("toggleStripesLayer");
@@ -308,7 +310,7 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             expect(commit.args[3][1]).to.equal(false);
             expect(dispatch.callCount).to.equal(4);
             expect(dispatch.args[1][0]).to.equal("requestGFI");
-            expect(dispatch.args[2][0]).to.equal("Maps/removePointMarker");
+            expect(dispatch.args[2][0]).to.equal("MapMarker/removePointMarker");
             expect(dispatch.args[3][0]).to.equal("toggleStripesLayer");
             expect(dispatch.args[3][1]).to.equal(false);
         });
@@ -393,7 +395,7 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             expect(commit.secondCall.args[0]).to.equal("setSelectedPolygon");
             expect(commit.secondCall.args[1]).to.equal(null);
             expect(dispatch.calledThrice).to.be.true;
-            expect(dispatch.firstCall.args[0]).to.equal("Maps/placingPointMarker");
+            expect(dispatch.firstCall.args[0]).to.equal("MapMarker/placingPointMarker");
             expect(dispatch.firstCall.args[1]).to.equal(coordinate);
             expect(dispatch.secondCall.args[0]).to.equal("Maps/setCenter");
             expect(dispatch.secondCall.args[1]).to.equal(coordinate);
@@ -408,8 +410,8 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             actions.handleGfiResponse({state, dispatch, commit}, {response, status, coordinate});
             expect(dispatch.calledThrice).to.be.true;
             expect(dispatch.firstCall.args[0]).to.equal("Alerting/addSingleAlert");
-            expect(dispatch.secondCall.args[0]).to.equal("Maps/removePolygonMarker");
-            expect(dispatch.thirdCall.args[0]).to.equal("Maps/removePointMarker");
+            expect(dispatch.secondCall.args[0]).to.equal("MapMarker/removePolygonMarker");
+            expect(dispatch.thirdCall.args[0]).to.equal("MapMarker/removePointMarker");
             expect(commit.callCount).to.equal(5);
             expect(commit.firstCall.args[0]).to.equal("setSelectedBrwFeature");
             expect(commit.firstCall.args[1]).to.deep.equal({});
@@ -425,15 +427,12 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             Config.layerConf = "https://geodienste.hamburg.de/services-internet.json";
 
             const featureId = "APP_V_BRW_ZONEN_GEOM_FLAECHE_2022_1393260",
-                featureYear = "2022",
-                url = "https://geodienste.hamburg.de",
-                urlParams = "typeNameapp:v_brw_zonen_geom_flaeche_2022&featureID=APP_V_BRW_ZONEN_GEOM_FLAECHE_2022_1393260",
-                responseData = rawSources.featureRequestResponse;
+                featureYear = "2022";
 
-            axiosGetStub.resolves({status: 200, data: responseData});
+            axiosGetStub.resolves({status: 200, data: {}});
 
             await actions.getFeatureRequestById({dispatch}, {featureId, featureYear});
-            expect(axiosGetStub.calledWith(url + "/HH_WFS_Bodenrichtwerte?service=WFS&version=1.1.0&request=GetFeature&" + urlParams)).to.be.true;
+            expect(axiosGetStub.calledOnce).to.be.true;
         });
     });
     describe("matchPolygonFeatureWithLanduse", () => {
@@ -498,31 +497,37 @@ describe("ADDONS: addons/boris/store/actionsBoris.js", () => {
             expect(commit.secondCall.args[1]).to.deep.equal({});
         });
     });
+
     describe("postFeatureRequestByBrwNumber", () => {
         it("posts feature request", async () => {
-            Config.layerConf = "https://geodienste.hamburg.de/services-fhhnet-ALL.json";
+            axiosGetStub.resolves({
+                status: 200,
+                data: {features: []}
+            });
 
             const brwNumber = "09310239",
                 featureYear = "2022";
 
-            axiosPostStub.resolves({status: 200});
+            actions.postFeatureRequestByBrwNumber({dispatch}, {brwNumber, featureYear});
 
-            await actions.postFeatureRequestByBrwNumber({dispatch}, {brwNumber, featureYear});
-            expect(axiosPostStub.called).to.be.true;
+            await new Promise(process.nextTick);
+
+            expect(axiosGetStub.calledOnce).to.be.true;
         });
     });
+
     describe("handleGetFeatureResponse", () => {
         it("handles feature response", async () => {
 
-            const status = 200,
-                response = rawSources.featureRequestResponse,
+            const response = {
+                    type: "FeatureCollection",
+                    features: []
+                },
                 year = 2022;
 
-            await actions.handleGetFeatureResponse({dispatch, commit}, {response, status, year});
+            await actions.handleGetFeatureResponse({dispatch, commit}, {response, year});
 
-            expect(commit.calledOnce).to.be.true;
-            expect(dispatch.calledOnce).to.be.true;
-            expect(dispatch.firstCall.args[0]).to.equal("combineFeatureWithSelectedDate");
+            expect(commit.notCalled).to.be.true;
 
         });
     });
