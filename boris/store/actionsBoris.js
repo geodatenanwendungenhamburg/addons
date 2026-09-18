@@ -389,9 +389,7 @@ const actions = {
             }
         };
 
-        console.time("BORIS: OAF feature request");
         axios.get(url, config).then((response) => {
-            console.timeEnd("BORIS: OAF feature request");
             if (response.status === 200 && response.data && response.data.features) {
 
                 dispatch("handleGetFeatureResponse", {
@@ -400,7 +398,6 @@ const actions = {
                 });
             }
         }).catch((error) => {
-            console.timeEnd("BORIS: OAF feature request");
             console.error("Fehler beim OAF-Abruf:", error.response || error);
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         });
