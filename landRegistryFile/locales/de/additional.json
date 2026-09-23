@@ -1,0 +1,11 @@
+{
+    "modules": {
+        "landRegistryFile": {
+            "name": "Digitale Grundstücksakte",
+            "description": "Anzeige von grundstückbezogenen Vorgängen im Hoch-Tief-Bau und Wegerecht.",
+            "loadingSpinnerText": {
+                "general": "Daten werden geladen. Bitte warten..."
+            }
+        }
+    }
+}

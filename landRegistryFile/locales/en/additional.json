@@ -1,0 +1,11 @@
+{
+    "modules": {
+        "landRegistryFile": {
+            "name": "Digital Land Registry File",
+            "description": "Displays land-related processes in building and easement law.",
+            "loadingSpinnerText": {
+                "general": "Data is loading. Please wait..."
+            }
+        }
+    }
+}
