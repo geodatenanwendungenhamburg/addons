@@ -370,8 +370,6 @@ const actions = {
             typeName = "bodenrichtwertzonen",
             url = `https://qs-api.hamburg.de/ldproxy_dev/bodenrichtwerte_hamburg_zeitreihe/collections/${typeName}/items`;
 
-        // const zonenNrValue = parseInt(brwNumberValue.slice(-5), 10);
-
         if (!brwNumberValue) {
             console.error("No BRW number available for WFS request");
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
@@ -382,10 +380,10 @@ const actions = {
             method: "get",
             url: url,
             params: {
-                "jahrgang": parseInt(featureYear, 10),
-                "richtwertnummer": brwNumberValue,
+                "gid": brwNumberValue,
                 "f": "json",
-                "limit": 1
+                "limit": 1,
+                "skipGeometry": "true"
             }
         };
 
@@ -398,7 +396,7 @@ const actions = {
                 });
             }
         }).catch((error) => {
-            console.error("Fehler beim OAF-Abruf:", error.response || error);
+            console.error("Error during OAF request:", error.response || error);
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         });
     },
@@ -430,7 +428,6 @@ const actions = {
             dispatch("combineFeatureWithSelectedDate", featureByYear);
         }
         else {
-            console.warn("Keine Features von OAF zurückbekommen");
             dispatch("Alerting/addSingleAlert", i18next.t("additional:modules.boris.alertMessage:noData"), {root: true});
         }
 
