@@ -92,14 +92,13 @@ export default {
                 </p>
             </div>
 
-            <template v-else>
-                <TabContainer
-                    ref="tabContainer"
-                    class="TabContainer"
-                    :tabs="tabs"
-                    initial-active-tab-id="tabSearch"
-                />
-            </template>
+            <TabContainer
+                v-show="!showLoadingSpinner"
+                ref="tabContainer"
+                class="TabContainer"
+                :tabs="tabs"
+                initial-active-tab-id="tabSearch"
+            />
         </div>
     </div>
 </template>

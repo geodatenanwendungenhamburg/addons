@@ -12,6 +12,16 @@
 
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
+ * @property {Object[]} landRegistryFileFeatures The array of land registry file features retrieved from the OAF collection.
+ * @property {Object} oafParams The parameters for querying the OAF collection.
+ * @property {string} oafParams.url - The URL of the OAF service.
+ * @property {string} oafParams.collection - The name of the OAF collection to query.
+ * @property {Object} oafParams.filters - The filter configuration for the OAF query.
+ * @property {string} oafParams.filters.dateRangeField - The field name for date range filtering.
+ * @property {string[]} oafParams.filters.textSearchFields - The field names for text search filtering.
+ * @property {Object} oafParams.filters.select - The select filter configuration.
+ * @property {string} oafParams.filters.select.field - The field name for select filtering.
+ * @property {string[]} oafParams.filters.select.options - The available options for select filtering.
  */
 
 const state = {
@@ -26,7 +36,27 @@ const state = {
     hasMouseMapInteractions: true,
 
     // Addon state
-    showLoadingSpinner: false
+    showLoadingSpinner: false,
+    landRegistryFileFeatures: [],
+    oafParams: {
+        url: "",
+        collection: "",
+        filters: {
+            dateRangeField: "",
+            textSearchFields: [],
+            select: {
+                field: "",
+                options: [
+                    "Bauaufsichtsakte",
+                    "Straßenakte",
+                    "Grünanlagenakte",
+                    "Naturschutzakte",
+                    "Wasserwirtschaftsakte",
+                    "Kehrakte"
+                ]
+            }
+        }
+    }
 };
 
 export default state;

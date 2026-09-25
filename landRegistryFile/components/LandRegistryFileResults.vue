@@ -1,6 +1,7 @@
 <script>
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
+import {mapGetters} from "vuex";
 
 export default {
     name: "LandRegistryFileResults",
@@ -9,6 +10,11 @@ export default {
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
+    },
+    computed: {
+        ...mapGetters("Modules/LandRegistryFile", [
+            "landRegistryFileFeatures"
+        ])
     }
 };
 </script>
@@ -19,7 +25,7 @@ export default {
         class="InnerLayoutFrame"
     >
         <div class="ScrollableContent">
-            <p>Ergebnisse</p>
+            <div>{{ landRegistryFileFeatures }}</div>
         </div>
 
         <div class="FixedContent buttons-footer">
