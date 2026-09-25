@@ -1,11 +1,16 @@
 <script>
 import {mapGetters, mapMutations} from "vuex";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
+import TabContainer from "@shared/modules/tabs/components/TabContainer.vue";
+import LandRegistryFileDetails from "./LandRegistryFileDetails.vue";
+import LandRegistryFileResults from "./LandRegistryFileResults.vue";
+import LandRegistryFileSearch from "./LandRegistryFileSearch.vue";
 
 export default {
     name: "LandRegistryFile",
     components: {
-        SpinnerItem
+        SpinnerItem,
+        TabContainer
     },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
@@ -13,6 +18,37 @@ export default {
         ]),
         loadingSpinnerText () {
             return this.$t("additional:modules.landRegistryFile.loadingSpinnerText.general");
+        },
+        tabs () {
+            return [
+                {
+                    id: "tabSearch",
+                    contentId: "tabSearchContent",
+                    ref: "tabSearch",
+                    label: this.$t("additional:modules.landRegistryFile.tabs.tabSearch.label"),
+                    component: LandRegistryFileSearch,
+                    propsForTabContent: {},
+                    renderComponent: true
+                },
+                {
+                    id: "tabResults",
+                    contentId: "tabResultsContent",
+                    ref: "tabResults",
+                    label: this.$t("additional:modules.landRegistryFile.tabs.tabResults.label"),
+                    component: LandRegistryFileResults,
+                    propsForTabContent: {},
+                    renderComponent: true
+                },
+                {
+                    id: "tabDetails",
+                    contentId: "tabDetailsContent",
+                    ref: "tabDetails",
+                    label: this.$t("additional:modules.landRegistryFile.tabs.tabDetails.label"),
+                    component: LandRegistryFileDetails,
+                    propsForTabContent: {},
+                    renderComponent: true
+                }
+            ];
         }
     },
     /**
@@ -41,30 +77,40 @@ export default {
 
 <template lang="html">
     <div id="landRegistryFile">
-        <div
-            v-if="showLoadingSpinner"
-            class="loadingSpinner"
-        >
-            <SpinnerItem
-                custom-class="spinner"
-                class="ms-3"
-            />
+        <div class="LayoutFrame">
+            <div
+                v-if="showLoadingSpinner"
+                class="loadingSpinner"
+            >
+                <SpinnerItem
+                    custom-class="spinner"
+                    class="ms-3"
+                />
 
-            <p v-if="loadingSpinnerText">
-                {{ loadingSpinnerText }}
-            </p>
+                <p v-if="loadingSpinnerText">
+                    {{ loadingSpinnerText }}
+                </p>
+            </div>
+
+            <template v-else>
+                <TabContainer
+                    ref="tabContainer"
+                    class="TabContainer"
+                    :tabs="tabs"
+                    initial-active-tab-id="tabSearch"
+                />
+            </template>
         </div>
-
-        <template v-else>
-            <p>
-                Grundstücksakte.
-            </p>
-        </template>
     </div>
 </template>
 
 <style lang="scss" scoped>
     #landRegistryFile{
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+
         div.loadingSpinner {
             position: absolute;
             top: 0;
@@ -88,6 +134,67 @@ export default {
                 background-color: white;
                 white-space: pre-line;
                 padding: 1.5rem;
+            }
+        }
+
+        :deep(div.LayoutFrame) {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+
+            div.TabContainer {
+                height: unset;
+                display: flex;
+                flex-direction: column;
+                flex: 1 1 0%;
+                min-height: 0;
+
+                div.tab-content {
+                    height: unset;
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1 1 0%;
+                    min-height: 0;
+                }
+            }
+
+            div.InnerLayoutFrame {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            div.FixedContent {
+                display: flex;
+                flex-shrink: 0;
+                gap: 0.5rem;
+
+                &.top-header {
+                    padding-top: 1rem;
+                    padding-bottom: 0.25rem;
+                }
+
+                &.buttons-footer {
+                    padding-top: 0.5rem;
+                    padding-bottom: 0;
+                }
+
+                button {
+                    margin-bottom: 0;
+                }
+            }
+
+            div.ScrollableContent {
+                display: flex;
+                flex-direction: column;
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+                padding-right: 0.5rem;
             }
         }
     }

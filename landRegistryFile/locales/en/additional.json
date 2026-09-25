@@ -5,6 +5,22 @@
             "description": "Displays land-related processes in building and easement law.",
             "loadingSpinnerText": {
                 "general": "Data is loading. Please wait..."
+            },
+            "tabs": {
+              "tabSearch": {
+                "label": "Search",
+                "searchButtonLabel": "Search",
+                "resetButtonLabel": "Reset"
+              },
+              "tabResults": {
+                "label": "Results",
+                "backToSearchButtonLabel": "Back to search"
+              },
+              "tabDetails": {
+                "label": "Details",
+                "backToSearchButtonLabel": "Back to search",
+                "backToResultsButtonLabel": "Back to results list"
+              }
             }
         }
     }

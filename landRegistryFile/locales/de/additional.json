@@ -5,6 +5,22 @@
             "description": "Anzeige von grundstückbezogenen Vorgängen im Hoch-Tief-Bau und Wegerecht.",
             "loadingSpinnerText": {
                 "general": "Daten werden geladen. Bitte warten..."
+            },
+            "tabs": {
+              "tabSearch": {
+                "label": "Suche",
+                "searchButtonLabel": "Suche",
+                "resetButtonLabel": "Zurücksetzen"
+              },
+              "tabResults": {
+                "label": "Ergebnisse",
+                "backToSearchButtonLabel": "Zurück zur Suche"
+              },
+              "tabDetails": {
+                "label": "Details",
+                "backToSearchButtonLabel": "Zurück zur Suche",
+                "backToResultsButtonLabel": "Zurück zur Ergebnisliste"
+              }
             }
         }
     }
