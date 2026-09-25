@@ -10,7 +10,18 @@
               "tabSearch": {
                 "label": "Search",
                 "searchButtonLabel": "Search",
-                "resetButtonLabel": "Reset"
+                "resetButtonLabel": "Reset",
+                "searchModeSwitchLabel": "Restrict search to map extent",
+                "searchModeInExtent": "Search will be restricted to map extent.",
+                "searchModeOverall": "Search will cover the entire city of Hamburg.",
+                "yearLabel": "Year",
+                "yearFromLabel": "From",
+                "yearToLabel": "To",
+                "errors": {
+                  "errorYearDigit": "Please enter a number with 4 digits.",
+                  "errorYearBoth": "Please enter both 'From' and 'To' to search by year.",
+                  "errorYearOrder": "'To' has to be bigger than or equal to 'From'."
+                }
               },
               "tabResults": {
                 "label": "Results",

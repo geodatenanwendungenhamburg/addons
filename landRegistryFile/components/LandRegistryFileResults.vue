@@ -25,6 +25,7 @@ export default {
         class="InnerLayoutFrame"
     >
         <div class="ScrollableContent">
+            <p>{{ landRegistryFileFeatures.length }}</p>
             <div>{{ landRegistryFileFeatures }}</div>
         </div>
 

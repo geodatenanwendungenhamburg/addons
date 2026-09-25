@@ -78,6 +78,8 @@ export default {
                 content: "Fehler beim Abrufen der Grundstücksakten. Bitte versuchen Sie es erneut."
             }, {root: true});
 
+            console.error(error);
+
             return false;
         }
     }

@@ -10,7 +10,18 @@
               "tabSearch": {
                 "label": "Suche",
                 "searchButtonLabel": "Suche",
-                "resetButtonLabel": "Zurücksetzen"
+                "resetButtonLabel": "Zurücksetzen",
+                "searchModeSwitchLabel": "Suche auf Kartenausschnitt beschränken",
+                "searchModeInExtent": "Suche erfolgt im aktuellen Kartenausschnitt.",
+                "searchModeOverall": "Suche erfolgt in ganz Hamburg.",
+                "yearLabel": "Jahrgang",
+                "yearFromLabel": "Von",
+                "yearToLabel": "Bis",
+                "errors": {
+                  "errorYearDigit": "Bitte ein Zahl mit 4 Ziffern eingeben.",
+                  "errorYearBoth": "Geben Sie 'Von' und 'Bis' an, um nach Jahrgang zu suchen.",
+                  "errorYearOrder": "'Bis' muss größer oder gleich 'Von' sein."
+                }
               },
               "tabResults": {
                 "label": "Ergebnisse",
