@@ -380,7 +380,7 @@ const actions = {
             method: "get",
             url: url,
             params: {
-                "gid": brwNumberValue,
+                "br_id": brwNumberValue + "_" + featureYear,
                 "f": "json",
                 "limit": 1,
                 "skipGeometry": "true"
