@@ -21,7 +21,9 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", (
                                 landRegistryFileFeatures: []
                             }),
                             getters: {
-                                landRegistryFileFeatures: state => state.landRegistryFileFeatures
+                                landRegistryFileFeatures: state => state.landRegistryFileFeatures,
+                                tableFields: () => [],
+                                oafSchema: () => null
                             }
                         }
                     }

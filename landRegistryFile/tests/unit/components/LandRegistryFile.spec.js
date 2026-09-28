@@ -20,6 +20,9 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFile.spec.js", () => {
                             state: () => ({
                                 showLoadingSpinner: false
                             }),
+                            actions: {
+                                queryOafSchema: () => Promise.resolve()
+                            },
                             getters: {
                                 showLoadingSpinner: state => state.showLoadingSpinner
                             },

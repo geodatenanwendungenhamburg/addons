@@ -13,6 +13,7 @@
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
  * @property {Object[]} landRegistryFileFeatures The array of land registry file features retrieved from the OAF collection.
+ * @property {Object|null} oafSchema The schema of the OAF collection.
  * @property {Object} oafParams The parameters for querying the OAF collection.
  * @property {string} oafParams.url - The URL of the OAF service.
  * @property {string} oafParams.collection - The name of the OAF collection to query.
@@ -24,6 +25,8 @@
  * @property {string[]} oafParams.filters.select.options - The available options for select filtering.
  * @property {string} styleConf - The URL to the style configuration for the land registry features.
  * @property {Object} styles - The styles applied to the land registry features.
+ * @property {Object[]} tableFields - The configuration for the table fields to display in the results.
+ * @property {Object|null} selectedDetail - The selected detail object containing the land registry file feature details.
  */
 
 const state = {
@@ -40,6 +43,7 @@ const state = {
     // Addon state
     showLoadingSpinner: false,
     landRegistryFileFeatures: [],
+    oafSchema: null,
     oafParams: {
         url: "",
         collection: "",
@@ -60,7 +64,9 @@ const state = {
         }
     },
     styleConf: "",
-    styles: {}
+    styles: {},
+    tableFields: [],
+    selectedDetail: null
 };
 
 export default state;

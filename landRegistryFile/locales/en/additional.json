@@ -27,13 +27,22 @@
               },
               "tabResults": {
                 "label": "Results",
-                "backToSearchButtonLabel": "Back to search"
+                "backToSearchButtonLabel": "Back to search",
+                "showMoreFieldsLabel": "Show more fields",
+                "actionsHeader": "Actions",
+                "actionsShowPosition": "Show map position",
+                "actionsShowDetails": "Show details",
+                "noResultsMessage": "No results found. Please change your search criteria.",
+                "numberOfResults": "Number of records found:"
               },
               "tabDetails": {
                 "label": "Details",
                 "backToSearchButtonLabel": "Back to search",
                 "backToResultsButtonLabel": "Back to results list"
               }
+            },
+            "errors": {
+              "oafError": "Error retrieving necessary data for '{{oafParams.collection}}'. Please try again."
             }
         }
     }

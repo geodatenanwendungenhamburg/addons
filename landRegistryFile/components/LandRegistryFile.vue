@@ -1,5 +1,5 @@
 <script>
-import {mapGetters, mapMutations} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
 import TabContainer from "@shared/modules/tabs/components/TabContainer.vue";
 import LandRegistryFileDetails from "./LandRegistryFileDetails.vue";
@@ -59,7 +59,11 @@ export default {
      * shown or closed via "menu" link.
      */
     async mounted () {
-        // this.setShowLoadingSpinner(true);
+        if (this.oafSchema) {
+            return;
+        }
+
+        this.queryOafSchema();
     },
     activated () {
         // Handle KeepAlive visibility. Triggered if component is activated
@@ -68,6 +72,9 @@ export default {
         // Handle KeepAlive visibility. Triggered if component is deactivated
     },
     methods: {
+        ...mapActions("Modules/LandRegistryFile", [
+            "queryOafSchema"
+        ]),
         ...mapMutations("Modules/LandRegistryFile", [
             "setShowLoadingSpinner"
         ])

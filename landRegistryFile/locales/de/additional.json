@@ -27,13 +27,22 @@
               },
               "tabResults": {
                 "label": "Ergebnisse",
-                "backToSearchButtonLabel": "Zurück zur Suche"
+                "backToSearchButtonLabel": "Zurück zur Suche",
+                "showMoreFieldsLabel": "Mehr Felder anzeigen",
+                "actionsHeader": "Aktionen",
+                "actionsShowPosition": "Kartenposition anzeigen",
+                "actionsShowDetails": "Details anzeigen",
+                "noResultsMessage": "Keine Ergebnisse gefunden. Bitte ändern Sie Ihre Suchkriterien.",
+                "numberOfResults": "Anzahl der gefundenen Datensätze:"
               },
               "tabDetails": {
                 "label": "Details",
                 "backToSearchButtonLabel": "Zurück zur Suche",
                 "backToResultsButtonLabel": "Zurück zur Ergebnisliste"
               }
+            },
+            "errors": {
+              "oafError": "Fehler beim Abrufen notwendiger Daten für '{{oafParams.collection}}'. Bitte versuchen Sie es erneut."
             }
         }
     }
