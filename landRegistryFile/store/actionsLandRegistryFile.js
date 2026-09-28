@@ -1,4 +1,6 @@
 import getOAFFeature from "@shared/js/api/oaf/getOAFFeature.js";
+import createStyle from "@masterportal/masterportalapi/src/vectorStyle/createStyle.js";
+import GeoJSON from "ol/format/GeoJSON.js";
 
 export default {
     /**
@@ -58,7 +60,8 @@ export default {
             filter: completeFilterString !== "" ? completeFilterString : undefined,
             bbox: params.bbox,
             bboxCrs: params.crs,
-            filterCrs: params.crs
+            filterCrs: params.crs,
+            crs: params.crs
         };
 
         try {
@@ -69,6 +72,8 @@ export default {
             );
 
             commit("setLandRegistryFileFeatures", landRegistryFileFeatures);
+
+            dispatch("addFeaturesToMap", landRegistryFileFeatures);
 
             return true;
         }
@@ -82,5 +87,40 @@ export default {
 
             return false;
         }
+    },
+    /**
+     * Adds the provided GeoJSON features to the map using the configured style.
+     * @param {Object} context - The Vuex action context.
+     * @param {Function} context.dispatch - Vuex dispatch function.
+     * @param {Object} context.state - Vuex state object.
+     * @param {Array<Object>} features - The GeoJSON features to add to the map.
+     * @returns {Promise<void>} A promise that resolves when the features have been added.
+     */
+    async addFeaturesToMap ({dispatch, state}, features) {
+        const styleConf = await fetch(state.styleConf)
+            .then(response => response.json())
+            .then(styles => {
+                return styles;
+            });
+
+        const layerStyleObject = styleConf.find(item => item.styleId === "belegenheiten"),
+            geoJson = new GeoJSON();
+
+        const styledFeatures = features.map(feature => {
+            const olFeature = geoJson.readFeature(feature),
+                style = createStyle.createStyle(layerStyleObject, olFeature, false, Config.wfsImgPath);
+
+            olFeature.setStyle(style);
+
+            return olFeature;
+        });
+
+        const layer = await dispatch("Maps/addNewLayerIfNotExists",
+            {layerName: "Module/landRegistryFile/layer/belegenheiten",
+                alwaysOnTop: true},
+            {root: true});
+
+        layer.getSource().clear();
+        layer.getSource().addFeatures(styledFeatures);
     }
 };

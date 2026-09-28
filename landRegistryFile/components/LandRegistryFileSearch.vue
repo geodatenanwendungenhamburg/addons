@@ -32,6 +32,12 @@ export default {
         ...mapGetters("Modules/LandRegistryFile", [
             "showLoadingSpinner"
         ]),
+        ...mapGetters("Maps", [
+            "extent"
+        ]),
+        ...mapGetters("Menu", [
+            "expanded"
+        ]),
         /**
          * Checks if any errorMessage has been set in the errorMessages object
          *  returns 'false' if an errorMessage is available and 'true' if there is none
@@ -145,12 +151,10 @@ export default {
          * @returns {void}
          */
         prepareSearch () {
-            const map = mapCollection.getMap("2D"),
-                  view = map?.getView(),
-                  searchDateFrom = this.yearFrom !== "" ? `${this.yearFrom}-01-01` : false,
+            const searchDateFrom = this.yearFrom !== "" ? `${this.yearFrom}-01-01` : false,
                   searchDateTo = this.yearTo !== "" ? `${this.yearTo}-12-31` : false,
                   searchExtent = this.searchInExtent
-                      ? view?.calculateExtent(map.getSize())
+                      ? this.getCurrentVisibleMapExtent()
                       : undefined;
 
             this.startSearch({
@@ -158,6 +162,34 @@ export default {
                 startDate: searchDateFrom,
                 endDate: searchDateTo
             });
+        },
+        /**
+         * Gets the current map extent and if needed adjusts it for expanded menus
+         *
+         *  @returns {Array<Array<number[]>>} The coordinates of the visible map extent as a polygon.
+         */
+        getCurrentVisibleMapExtent () {
+            const map = mapCollection.getMap("2D"),
+                  bottomLeftPixelAtCoordinates = map?.getPixelFromCoordinate([this.extent[0], this.extent[1]]),
+                  topRightPixelAtCoordinates = map?.getPixelFromCoordinate([this.extent[2], this.extent[3]]),
+                  rightPadding = this.expanded("secondaryMenu")
+                      ? document.getElementById("mp-menu-secondaryMenu").offsetWidth
+                      : 20,
+                  leftPadding = this.expanded("mainMenu")
+                      ? document.getElementById("mp-menu-mainMenu").offsetWidth
+                      : 20,
+                  shiftedBottomLeftPixelX = bottomLeftPixelAtCoordinates[0] + leftPadding,
+                  shiftedBottomLeftCoordinate = map.getCoordinateFromPixel([shiftedBottomLeftPixelX, bottomLeftPixelAtCoordinates[1]]),
+                  shiftedTopRightPixelX = topRightPixelAtCoordinates[0] - rightPadding,
+                  shiftedTopRightCoordinate = map.getCoordinateFromPixel([shiftedTopRightPixelX, topRightPixelAtCoordinates[1]]),
+                  visibleExtentCoordinates = [[
+                      shiftedBottomLeftCoordinate[0],
+                      shiftedBottomLeftCoordinate[1],
+                      shiftedTopRightCoordinate[0],
+                      shiftedTopRightCoordinate[1]
+                  ]];
+
+            return visibleExtentCoordinates;
         }
     }
 };
