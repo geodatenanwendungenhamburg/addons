@@ -17,8 +17,10 @@
                 "yearLabel": "Year",
                 "yearFromLabel": "From",
                 "yearToLabel": "To",
+                "selectRecordLabel": "Record type",
+                "selectRecordPlaceholder": "Select record types",
                 "errors": {
-                  "errorYearDigit": "Please enter a number with 4 digits.",
+                  "errorYearDigit": "Please enter a number with 4 digits for '{{fieldname}}'.",
                   "errorYearBoth": "Please enter both 'From' and 'To' to search by year.",
                   "errorYearOrder": "'To' has to be bigger than or equal to 'From'."
                 }

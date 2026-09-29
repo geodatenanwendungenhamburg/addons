@@ -6,13 +6,15 @@ import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import InputText from "./shared/InputText.vue";
+import Multiselect from "vue-multiselect";
 
 export default {
     name: "LandRegistryFileSearch",
     components: {
         FlatButton,
         SwitchInput,
-        InputText
+        InputText,
+        Multiselect
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
@@ -25,12 +27,14 @@ export default {
             errorMessages: {
                 yearFrom: "",
                 yearTo: ""
-            }
+            },
+            selectedRecords: []
         };
     },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
-            "showLoadingSpinner"
+            "showLoadingSpinner",
+            "oafParams"
         ]),
         ...mapGetters("Maps", [
             "extent"
@@ -104,6 +108,7 @@ export default {
             Object.keys(this.errorMessages).forEach(key => {
                 this.errorMessages[key] = "";
             });
+            this.selectedRecords = [];
         },
         /**
          * Validates all search input fields and updates their validation state.
@@ -121,7 +126,9 @@ export default {
 
             if (yearFromString.length > 0 || yearToString.length > 0) {
                 if (!regexForYear.test(yearFromString)) {
-                    this.errorMessages.yearFrom = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
+                    this.errorMessages.yearFrom = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit", {
+                        fieldname: this.$t("additional:modules.landRegistryFile.tabs.tabSearch.yearFromLabel")
+                    });
                 }
 
                 if ((yearFromString.length > 0 && yearToString.length === 0) || (yearToString.length > 0 && yearFromString.length === 0)) {
@@ -129,7 +136,9 @@ export default {
                         this.errorMessages.yearFrom = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearBoth");
 
                         if (!regexForYear.test(yearToString)) {
-                            this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
+                            this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit", {
+                                fieldname: this.$t("additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel")
+                            });
                         }
                     }
                     else {
@@ -137,7 +146,9 @@ export default {
                     }
                 }
                 else if (!regexForYear.test(yearToString)) {
-                    this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
+                    this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit", {
+                        fieldname: this.$t("additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel")
+                    });
                 }
                 else if (this.yearFrom > this.yearTo) {
                     this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearOrder");
@@ -155,12 +166,14 @@ export default {
                   searchDateTo = this.yearTo !== "" ? `${this.yearTo}-12-31` : false,
                   searchExtent = this.searchInExtent
                       ? this.getCurrentVisibleMapExtent()
-                      : undefined;
+                      : undefined,
+                  searchRecords = this.selectedRecords.length > 0 ? this.selectedRecords : undefined;
 
             this.startSearch({
                 bbox: searchExtent,
                 startDate: searchDateFrom,
-                endDate: searchDateTo
+                endDate: searchDateTo,
+                selectedOptions: searchRecords
             });
         },
         /**
@@ -210,32 +223,65 @@ export default {
                 :interaction="(evt) => searchInExtent = evt.target.checked"
             />
 
+            <div class="recordtype-select-container">
+                <label for="recordtype-select">
+                    {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel") }}
+                </label>
+
+                <Multiselect
+                    id="recordtype-select"
+                    v-model="selectedRecords"
+                    :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel')"
+                    :options="oafParams?.filters?.select?.options"
+                    name="recordtype-select"
+                    :multiple="true"
+                    :placeholder="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectRecordPlaceholder')"
+                    :show-labels="false"
+                    open-direction="bottom"
+                    :hide-selected="false"
+                    :allow-empty="true"
+                    :close-on-select="true"
+                    :clear-on-select="false"
+                    :internal-search="true"
+                />
+            </div>
+
             <p class="searchYearFormLabel">
                 {{ $t('additional:modules.landRegistryFile.tabs.tabSearch.yearLabel') }}
             </p>
 
             <div id="searchYearForm">
-                <InputText
-                    id="searchYearFrom"
-                    key="searchYearFrom"
-                    v-model="yearFrom"
-                    :class-obj="['form-control' + (errorMessages.yearFrom.length > 0 ? ' is-invalid': ' is-valid')]"
-                    :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearFromLabel')"
-                    placeholder="2023"
-                    :error-message="errorMessages.yearFrom"
-                    @input="validateInputs()"
-                />
+                <div class="searchYearFormInputs">
+                    <InputText
+                        id="searchYearFrom"
+                        key="searchYearFrom"
+                        v-model="yearFrom"
+                        :class-obj="['form-control' + (errorMessages.yearFrom.length > 0 ? ' is-invalid': ' is-valid')]"
+                        :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearFromLabel')"
+                        placeholder="2023"
+                        :error-message="errorMessages.yearFrom"
+                        @input="validateInputs()"
+                    />
 
-                <InputText
-                    id="searchYearTo"
-                    key="searchYearTo"
-                    v-model="yearTo"
-                    :class-obj="['form-control' + (errorMessages.yearTo.length > 0 ? ' is-invalid': ' is-valid')]"
-                    :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel')"
-                    placeholder="2024"
-                    :error-message="errorMessages.yearTo"
-                    @input="validateInputs()"
-                />
+                    <InputText
+                        id="searchYearTo"
+                        key="searchYearTo"
+                        v-model="yearTo"
+                        :class-obj="['form-control' + (errorMessages.yearTo.length > 0 ? ' is-invalid': ' is-valid')]"
+                        :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel')"
+                        placeholder="2024"
+                        :error-message="errorMessages.yearTo"
+                        @input="validateInputs()"
+                    />
+                </div>
+
+                <p class="errorInSearchYear">
+                    {{ errorMessages.yearFrom }}
+                </p>
+
+                <p class="errorInSearchYear">
+                    {{ errorMessages.yearTo }}
+                </p>
             </div>
         </div>
 
@@ -273,12 +319,19 @@ export default {
     </div>
 </template>
 
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
+
 <style lang="scss" scoped>
     #landRegistryFileSearch{
         height: 100%;
 
         div.searchModeSwitch {
             margin-top: 1rem;
+        }
+
+        div.recordtype-select-container {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         p.searchYearFormLabel {
@@ -296,7 +349,29 @@ export default {
             border-style: solid;
             border-width: 1px;
             border-radius: 5px;
-            padding: 1.5rem 1rem 0 1rem;
+            padding: 1.5rem 1rem 1rem 1rem;
+
+            div.searchYearFormInputs {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 0.5rem;
+
+                div.InputText {
+                    flex: 1;
+                    margin-bottom: 0;
+
+                    :deep(span.invalid-feedback) {
+                        display: none;
+                    }
+                }
+            }
+
+            p.errorInSearchYear {
+                color: var(--bs-form-invalid-color);
+                width: 100%;
+                margin-top: 0.25rem;
+                font-size: 0.875em;
+            }
         }
 
         div.searchExtentHint {

@@ -17,8 +17,10 @@
                 "yearLabel": "Jahrgang",
                 "yearFromLabel": "Von",
                 "yearToLabel": "Bis",
+                "selectRecordLabel": "Aktenart",
+                "selectRecordPlaceholder": "Aktenarten auswählen",
                 "errors": {
-                  "errorYearDigit": "Bitte ein Zahl mit 4 Ziffern eingeben.",
+                  "errorYearDigit": "Bitte bei '{{fieldname}}' ein Zahl mit 4 Ziffern eingeben.",
                   "errorYearBoth": "Geben Sie 'Von' und 'Bis' an, um nach Jahrgang zu suchen.",
                   "errorYearOrder": "'Bis' muss größer oder gleich 'Von' sein."
                 }

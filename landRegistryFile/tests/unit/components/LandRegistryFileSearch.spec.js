@@ -18,10 +18,21 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
                         LandRegistryFile: {
                             namespaced: true,
                             state: () => ({
-                                showLoadingSpinner: false
+                                showLoadingSpinner: false,
+                                oafParams: {
+                                    filters: {
+                                        select: {
+                                            options: [
+                                                "Bauakte",
+                                                "Straßenakte"
+                                            ]
+                                        }
+                                    }
+                                }
                             }),
                             getters: {
-                                showLoadingSpinner: state => state.showLoadingSpinner
+                                showLoadingSpinner: state => state.showLoadingSpinner,
+                                oafParams: state => state.oafParams
                             },
                             mutations: {
                                 setShowLoadingSpinner (state, payload) {
@@ -174,6 +185,7 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
         it("should reset form and empty all error hints", () => {
             wrapper.vm.yearFrom = "12345";
             wrapper.vm.yearTo = "1235";
+            wrapper.vm.selectedRecords = ["Bauakte"];
             wrapper.vm.validateInputs();
             expect(wrapper.vm.allInputsValid).to.be.false;
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
@@ -184,6 +196,7 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
             expect(wrapper.vm.yearTo).to.equal("");
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("");
             expect(wrapper.vm.errorMessages.yearTo).to.equal("");
+            expect(wrapper.vm.selectedRecords).to.deep.equal([]);
         });
 
         it("should disable search button if form is invalid", async () => {
