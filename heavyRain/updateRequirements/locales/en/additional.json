@@ -25,6 +25,7 @@
         "createdAt": "Created on: ",
         "createdBy": "Created by: "
       },
+      "loginRequired": "Please log in to see and edit the reports.",
       "messages": {
         "invalid": "The input fields for name, initiator and contact person can not be left blank.",
         "missingGeometry": "Please draw the affected area as a polygon on the map first.",

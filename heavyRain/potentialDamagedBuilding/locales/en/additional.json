@@ -33,11 +33,12 @@
       "currentlyUsed": "currently used",
       "updateDateLabel": "Update date",
       "lastUpdate": "last update",
-      "adjustedDamagePotentialClassHint": "Please select the proposed change here",
-      "lastUpdatedHint": "The proposed amendment was submitted on: ",
-      "commentHint": "Please briefly explain the proposed amendment:",
-      "reset": "Reset entries",
-      "save": "Save and overwrite",
+      "adjustedDamagePotentialClassHint": "The final entry of location-specific values for each property or area.",
+      "lastUpdatedHint": "Date of entry: ",
+      "commentHint": "Indication of the responsible department, with additional explanations if necessary",
+      "reset": "Reset",
+      "save": "Save",
+      "loginRequired": "Please log in to see and edit the damage potential of the buildings.",
       "messages": {
         "invalid": "Please enter a damage potential class from 1 to 6 and a comment with a maximum of 255 characters.",
         "success": "The adjustment has been saved."

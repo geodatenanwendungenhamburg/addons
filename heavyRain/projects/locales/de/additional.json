@@ -13,6 +13,7 @@
       "detailsDescription": "Bitte füllen Sie die folgenden Felder aus, um das Projekt zu beschreiben.",
       "noProjects": "Noch keine Projekte vorhanden.",
       "editAriaLabel": "Projekt bearbeiten",
+      "loginRequired": "Bitte melden Sie sich an, um die Projekte zu sehen und zu bearbeiten.",
       "messages": {
         "noGeometry": "Keine Geometrie für dieses Projekt hinterlegt.",
         "geometryError": "Fehler beim Verarbeiten der Geometrie.",

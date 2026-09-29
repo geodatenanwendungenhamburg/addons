@@ -13,6 +13,7 @@
       "detailsDescription": "Please fill in the following fields to describe the project.",
       "noProjects": "No projects available yet.",
       "editAriaLabel": "Edit project",
+      "loginRequired": "Please log in to see and edit the projects.",
       "messages": {
         "noGeometry": "No geometry stored for this project.",
         "geometryError": "Error processing the geometry.",

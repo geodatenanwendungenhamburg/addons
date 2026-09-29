@@ -23,11 +23,13 @@ export default {
         return {
             showSnackbar: false,
             snackbarMessage: "",
-            snackbarColor: "success"
+            snackbarColor: "success",
+            wfstLayerShown: false
         };
     },
     computed: {
         ...mapGetters("Modules/UpdateRequirements", ["informationType", "currentRequirement", "currentView", "wfstAttributes", "wfstLayerId"]),
+        ...mapGetters("Modules/Login", ["loggedIn"]),
 
         /**
          * Gets the current opinion.
@@ -45,15 +47,27 @@ export default {
             return toImageSrc(this.currentRequirement?.formValues?.image);
         }
     },
+    watch: {
+        /**
+         * Shows the layer after the login and hides it after the logout, as the secured service can only be requested by a logged in user.
+         * The current report is reset after the logout, so that its content is not shown anymore.
+         * @param {Boolean} value true, if the user is logged in.
+         * @returns {void}
+         */
+        loggedIn (value) {
+            if (value) {
+                this.showWfstLayer();
+                return;
+            }
+
+            this.hideWfstLayer();
+            this.setCurrentRequirement(undefined);
+            this.setCurrentView("main");
+        }
+    },
     async mounted () {
-        if (this.wfstLayerId) {
-            await this.addOrReplaceLayer({layerId: this.wfstLayerId, visibility: true});
-            // the layer is created by a watcher of the layer config, so it exists after the next tick
-            await this.$nextTick();
-            layerCollection.getLayerById(this.wfstLayerId)?.setStyle(createPolygonStyle(this.getFeatureColor));
-            // the content of a clicked report is shown in the module, so the gfi is not needed
-            layerCollection.getLayerById(this.wfstLayerId)?.getLayer()?.set("gfiAttributes", "ignore");
-            this.registerListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainUpdateRequirementsClick"});
+        if (this.loggedIn) {
+            this.showWfstLayer();
         }
 
         if (typeof this.currentRequirement !== "undefined") {
@@ -61,17 +75,48 @@ export default {
         }
     },
     unmounted () {
-        this.removePointMarker();
-        if (this.wfstLayerId) {
-            this.unregisterListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainUpdateRequirementsClick"});
-            this.replaceByIdInLayerConfig({layerConfigs: [{id: this.wfstLayerId, layer: {visibility: false}}]});
-        }
+        this.hideWfstLayer();
     },
     methods: {
         formatDate,
         ...mapActions(["addOrReplaceLayer", "replaceByIdInLayerConfig"]),
         ...mapActions("Maps", ["placingPointMarker", "registerListener", "removePointMarker", "unregisterListener"]),
         ...mapMutations("Modules/UpdateRequirements", ["setCurrentRequirement", "setCurrentView"]),
+
+        /**
+         * Shows the layer of the saved reports on the map, colors it and registers the click on its features.
+         * @returns {Promise<void>} resolves when the layer is shown.
+         */
+        async showWfstLayer () {
+            if (!this.wfstLayerId || this.wfstLayerShown) {
+                return;
+            }
+
+            this.wfstLayerShown = true;
+            await this.addOrReplaceLayer({layerId: this.wfstLayerId, visibility: true});
+            // the layer is created by a watcher of the layer config, so it exists after the next tick
+            await this.$nextTick();
+            layerCollection.getLayerById(this.wfstLayerId)?.setStyle(createPolygonStyle(this.getFeatureColor));
+            // the content of a clicked report is shown in the module, so the gfi is not needed
+            layerCollection.getLayerById(this.wfstLayerId)?.getLayer()?.set("gfiAttributes", "ignore");
+            this.registerListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainUpdateRequirementsClick"});
+        },
+
+        /**
+         * Hides the layer of the saved reports and removes the click on its features and the marker.
+         * @returns {void}
+         */
+        hideWfstLayer () {
+            this.removePointMarker();
+
+            if (!this.wfstLayerShown) {
+                return;
+            }
+
+            this.wfstLayerShown = false;
+            this.unregisterListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainUpdateRequirementsClick"});
+            this.replaceByIdInLayerConfig({layerConfigs: [{id: this.wfstLayerId, layer: {visibility: false}}]});
+        },
 
         /**
          * Opens the form for a new report.
@@ -133,7 +178,15 @@ export default {
 
 <template lang="html">
     <div>
-        <template v-if="currentView === 'main'">
+        <div
+            v-if="!loggedIn"
+            class="alert alert-info d-flex align-items-center gap-2"
+            role="alert"
+        >
+            <i class="bi bi-lock-fill" />
+            {{ $t('additional:modules.updateRequirements.loginRequired') }}
+        </div>
+        <template v-else-if="currentView === 'main'">
             <HrHeader
                 :text="$t('additional:modules.updateRequirements.description')"
                 :button-text="$t('additional:modules.updateRequirements.createMessage')"

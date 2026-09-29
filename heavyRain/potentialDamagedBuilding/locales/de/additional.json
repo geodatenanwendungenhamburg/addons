@@ -33,11 +33,12 @@
       "currentlyUsed": "aktuell verwendet",
       "updateDateLabel": "Aktualisierungsdatum",
       "lastUpdate": "letzte Aktualisierung",
-     "adjustedDamagePotentialClassHint": "Bitte wählen Sie hier den Änderungsvorschlag aus",
-      "lastUpdatedHint": "Der Änderungsvorschlag wurde eingegeben am: ",
-      "commentHint": "Bitte erläutern Sie kurz den Änderungsvorschlag:",
-      "reset": "Eingaben zurücksetzen",
-      "save": "Speichern und Überschreiben",
+      "adjustedDamagePotentialClassHint": "Die letzte Eingabe der ortsspezifischer Werte pro Objekt oder Fläche.",
+      "lastUpdatedHint": "Die Anpassung wurde vorgenommen am: ",
+      "commentHint": "Angabe der zuständigen Dienststelle mit ggf. weiteren Erläuterungen",
+      "reset": "Zurücksetzen",
+      "save": "Speichern",
+      "loginRequired": "Bitte melden Sie sich an, um das Schadenspotenzial der Gebäude zu sehen und zu bearbeiten.",
       "messages": {
         "invalid": "Bitte geben Sie eine Schadenspotenzialklasse von 1 bis 6 und einen Kommentar mit maximal 255 Zeichen ein.",
         "success": "Die Anpassung wurde gespeichert."
