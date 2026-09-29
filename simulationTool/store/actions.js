@@ -173,7 +173,7 @@ export default {
      * @param {Object} [payload.planningScenario] The planning scenario to persist after polling.
      * @returns {Promise<void>}
      */
-    async pollAndAssignSimulationJobsResults ({dispatch, getters, rootGetters}, {jobs, jobIds, processConfigs, planningScenario}) {
+    async pollAndAssignSimulationJobsResults ({commit, dispatch, getters, rootGetters}, {jobs, jobIds, processConfigs, planningScenario}) {
         const accessToken = rootGetters["Modules/Login/accessToken"];
 
         if (!accessToken || !Array.isArray(jobs) || !Array.isArray(jobIds) || !Array.isArray(processConfigs)) {
@@ -206,6 +206,7 @@ export default {
                     return;
                 }
                 currentJob.jobResults = jobResults;
+                commit("setOnResultsAvailable", getters.onResultsAvailable + 1);
                 dispatch("jobStatusChanged");
             }
             catch (error) {

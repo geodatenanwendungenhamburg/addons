@@ -52,12 +52,12 @@ export default {
     },
     mounted: async function () {
         await this.checkLoggedIn();
-        if (this.shouldSaveSimulations) {
-            await this.restorePlanningScenariosFromIndexedDb();
-        }
         this.maximizeDrawer();
         this.fetchProcesses();
         this.fetchJobs();
+        if (this.shouldSaveSimulations) {
+            await this.restorePlanningScenariosFromIndexedDb();
+        }
         // this.fetchEnsembles();
         // this.fetchProviders();
     },
