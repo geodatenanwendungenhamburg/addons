@@ -1,6 +1,8 @@
 import getOAFFeature from "@shared/js/api/oaf/getOAFFeature.js";
 import createStyle from "@masterportal/masterportalapi/src/vectorStyle/createStyle.js";
 import GeoJSON from "ol/format/GeoJSON.js";
+import layerCollection from "@core/layers/js/layerCollection.js";
+import layerFactory from "@core/layers/js/layerFactory";
 
 export default {
     /**
@@ -91,36 +93,58 @@ export default {
     /**
      * Adds the provided GeoJSON features to the map using the configured style.
      * @param {Object} context - The Vuex action context.
-     * @param {Function} context.dispatch - Vuex dispatch function.
      * @param {Object} context.state - Vuex state object.
+     * @param {Function} context.commit - Vuex commit function.
      * @param {Array<Object>} features - The GeoJSON features to add to the map.
      * @returns {Promise<void>} A promise that resolves when the features have been added.
      */
-    async addFeaturesToMap ({dispatch, state}, features) {
-        const styleConf = await fetch(state.styleConf)
-            .then(response => response.json())
-            .then(styles => {
-                return styles;
-            });
+    async addFeaturesToMap ({state, commit}, features) {
+        let definedStyles = state.styles;
 
-        const layerStyleObject = styleConf.find(item => item.styleId === "belegenheiten"),
+        if (Object.keys(definedStyles).length === 0) {
+            const styles = await fetch(state.styleConf)
+                .then(response => response.json());
+
+            commit("setStyles", styles);
+            definedStyles = styles;
+        }
+
+        const layerStyleObject = definedStyles.find(item => item.styleId === "belegenheiten"),
             geoJson = new GeoJSON();
 
-        const styledFeatures = features.map(feature => {
-            const olFeature = geoJson.readFeature(feature),
-                style = createStyle.createStyle(layerStyleObject, olFeature, false, Config.wfsImgPath);
+        let featuresToMap = features;
 
-            olFeature.setStyle(style);
+        if (layerStyleObject) {
+            const styledFeatures = features.map(feature => {
+                const olFeature = geoJson.readFeature(feature),
+                    style = createStyle.createStyle(layerStyleObject, olFeature, false, Config.wfsImgPath);
 
-            return olFeature;
-        });
+                olFeature.setStyle(style);
 
-        const layer = await dispatch("Maps/addNewLayerIfNotExists",
-            {layerName: "Module/landRegistryFile/layer/belegenheiten",
-                alwaysOnTop: true},
-            {root: true});
+                return olFeature;
+            });
 
-        layer.getSource().clear();
-        layer.getSource().addFeatures(styledFeatures);
+            featuresToMap = styledFeatures;
+        }
+
+        let layer;
+
+        if (typeof layerCollection.getLayerById("Module/landRegistryFile/layer/belegenheiten") !== "undefined") {
+            layer = layerCollection.getLayerById("Module/landRegistryFile/layer/belegenheiten");
+        }
+        else {
+            layer = layerFactory.createLayer({
+                typ: "VECTORBASE",
+                id: "Module/landRegistryFile/layer/belegenheiten",
+                name: "Module/landRegistryFile/layer/belegenheiten",
+                alwaysOnTop: true,
+                renderer: "webgl"
+            });
+
+            layerCollection.addLayer(layer);
+        }
+
+        layer.layer.getSource().clear();
+        layer.layer.getSource().addFeatures(featuresToMap);
     }
 };

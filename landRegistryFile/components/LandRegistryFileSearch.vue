@@ -28,7 +28,10 @@ export default {
                 yearFrom: "",
                 yearTo: ""
             },
-            selectedRecords: []
+            selectedRecords: [],
+            moveEndKey: null,
+            map: null,
+            searchInitiated: false
         };
     },
     computed: {
@@ -52,9 +55,23 @@ export default {
             return Object.values(this.errorMessages).every(message => message.length === 0);
         }
     },
+    activated () {
+        this.map = mapCollection.getMap("2D");
+        this.moveEndKey = this.map?.on("moveend", () => {
+            if (!this.searchedOnFullExtent && this.searchInitiated) {
+                this.prepareSearch();
+            }
+        });
+    },
+    deactivated () {
+        if (this.map && this.moveEndKey) {
+            this.map.un("moveend", this.moveEndKey.listener);
+        }
+    },
     methods: {
         ...mapMutations("Modules/LandRegistryFile", [
-            "setShowLoadingSpinner"
+            "setShowLoadingSpinner",
+            "setLandRegistryFileFeatures"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
             "queryOaf"
@@ -75,6 +92,7 @@ export default {
                   crs = epsgCodeToURI(projectionCode);
 
             this.setShowLoadingSpinner(true);
+            this.searchInitiated = true;
 
             try {
                 const success = await this.queryOaf({
@@ -94,10 +112,12 @@ export default {
             }
             finally {
                 this.setShowLoadingSpinner(false);
+                this.searchedOnFullExtent = !this.searchInExtent;
             }
         },
         /**
-         * Resets all search form fields, validation messages, and the search mode.
+         * Resets all search form fields, validation messages, and the search mode
+         * and the search results on the map and in the table.
          *
          * @returns {void}
          */
@@ -109,6 +129,10 @@ export default {
                 this.errorMessages[key] = "";
             });
             this.selectedRecords = [];
+
+            this.setLandRegistryFileFeatures([]);
+            this.removeFeaturesFromMap();
+            this.searchInitiated = false;
         },
         /**
          * Validates all search input fields and updates their validation state.
@@ -203,6 +227,22 @@ export default {
                   ]];
 
             return visibleExtentCoordinates;
+        },
+        /**
+         * Removes all features from the land registry layer on the map.
+         */
+        removeFeaturesFromMap () {
+            const map = mapCollection.getMap("2D");
+
+            if (!map) {
+                return;
+            }
+
+            const layer = map.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/belegenheiten");
+
+            if (layer) {
+                layer.getSource().clear();
+            }
         }
     }
 };

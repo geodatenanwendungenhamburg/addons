@@ -37,6 +37,9 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
                             mutations: {
                                 setShowLoadingSpinner (state, payload) {
                                     state.showLoadingSpinner = payload;
+                                },
+                                setLandRegistryFileFeatures (state, payload) {
+                                    state.landRegistryFileFeatures = payload;
                                 }
                             }
                         }

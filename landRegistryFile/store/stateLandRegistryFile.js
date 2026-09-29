@@ -22,7 +22,8 @@
  * @property {Object} oafParams.filters.select - The select filter configuration.
  * @property {string} oafParams.filters.select.field - The field name for select filtering.
  * @property {string[]} oafParams.filters.select.options - The available options for select filtering.
- * @property {string} styleConf - The URL or path to the style configuration for the land registry file features.
+ * @property {string} styleConf - The URL to the style configuration for the land registry features.
+ * @property {Object} styles - The styles applied to the land registry features.
  */
 
 const state = {
@@ -58,7 +59,8 @@ const state = {
             }
         }
     },
-    styleConf: ""
+    styleConf: "",
+    styles: {}
 };
 
 export default state;
