@@ -317,6 +317,14 @@ export default {
                     this.removeLayer(each);
                 }
             });
+
+            if (this.mode === "3D") {
+                this.allLayerConfigs.forEach(layerConf => {
+                    if (layerConf?.is3DLayer) {
+                        this.removeLayer(layerConf);
+                    }
+                });
+            }
         },
         /**
          * Deactivates a tool on the opposite menu side of where the storyPlayer is located
