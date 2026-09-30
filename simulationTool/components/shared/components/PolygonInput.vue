@@ -57,7 +57,11 @@ export default {
 
             drawLayer: new VectorLayer({
                 source: new VectorSource(),
-                zIndex: Infinity
+                zIndex: Infinity,
+                style: {
+                    "stroke-color": "#ff00ff",
+                    "stroke-width": 4
+                }
             }),
 
             isDrawing: false,

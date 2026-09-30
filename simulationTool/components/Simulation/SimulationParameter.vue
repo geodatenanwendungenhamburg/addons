@@ -20,6 +20,11 @@ import SwitchInput from "../../../../src/shared/modules/checkboxes/components/Sw
 import {infrastructureLayerId} from "../../layerIds.js";
 import {upsertPlanningScenarioInIndexedDb} from "../../js/planningScenariosIndexedDb.js";
 
+/**
+ * @import {InputDescription} from "../../types/ogcApi.processes.js"
+ * @import {Geometry} from "geojson"
+ */
+
 const geoJson = new GeoJSON();
 
 export default {
@@ -82,7 +87,7 @@ export default {
         /**
          * Gets the combined inputs from all process descriptions.
          * This includes every input that is defined in at least one process description.
-         * @returns {Object} The combined inputs.
+         * @returns {Record<string, InputDescription} The combined inputs.
          */
         combinedInputs () {
             if (!this.processDescriptions.length) {
@@ -174,6 +179,14 @@ export default {
         },
 
         /**
+         * Gets the feature of the planning scenario if there is one.
+         * @returns {Geometry|null} The GeoJSON Feature or null.
+         */
+        scenarioGeometry () {
+            return this.currentPlanningScenario?.scenarioFeature?.features?.[0]?.geometry ?? null;
+        },
+
+        /**
          * Gets the simulation configuration to the currently selected planning scenario.
          * @returns {Object} The current simulation configuration.
          */
@@ -186,8 +199,14 @@ export default {
          * Render current scenario feature and shows it.
          */
         currentPlanningScenario () {
-            this.updateFeatures();
-            this.zoomToFeature();
+            this.currentSimulationId = "";
+            if (this.currentPlanningScenario?.scenarioFeature) {
+                this.updateFeatures();
+                this.zoomToFeature();
+            }
+            else {
+                layerCollection.getLayerById("planning-scenario")?.getLayerSource()?.clear();
+            }
         },
 
         /**
@@ -230,8 +249,11 @@ export default {
 
         currentSimulationId: {
             async handler () {
-                this.isLoading = true;
                 this.hideDisplayedInputLayers();
+                if (!this.currentSimulationId) {
+                    return;
+                }
+                this.isLoading = true;
                 await this.prepareRequestBodies();
                 this.primaryTypeInputs = this.getPrimaryTypeInputs();
                 this.selectedOutputOptions = this.outputOptions;
@@ -485,6 +507,12 @@ export default {
 
                 // Skip inputs marked as "nowhere"
                 if (inputConfig?.menu === "nowhere") {
+                    return;
+                }
+
+                // Conditionally skip inputs with useScenarioFeatureIfSet
+                if (inputConfig.useScenarioFeatureIfSet && this.scenarioGeometry) {
+                    this.setRequestBodyInput(inputKey, "", this.scenarioGeometry);
                     return;
                 }
 
