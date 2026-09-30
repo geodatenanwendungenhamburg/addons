@@ -19,10 +19,18 @@
                 "yearToLabel": "Bis",
                 "selectRecordLabel": "Aktenart",
                 "selectRecordPlaceholder": "Aktenarten auswählen",
+                "textSearchLabel": "Textliche Suche",
+                "textSearchPlaceholder": "Suchtext",
+                "textSearchInfo": "Hinweise zur textlichen Suche",
+                "textSearchInfoModal": {
+                  "searchIn": "Es wird gesucht in folgenden Feldern:",
+                  "searchValidChars": "Sie können folgende Sonderzeichen verwenden:"
+                },
                 "errors": {
                   "errorYearDigit": "Bitte bei '{{fieldname}}' ein Zahl mit 4 Ziffern eingeben.",
                   "errorYearBoth": "Geben Sie 'Von' und 'Bis' an, um nach Jahrgang zu suchen.",
-                  "errorYearOrder": "'Bis' muss größer oder gleich 'Von' sein."
+                  "errorYearOrder": "'Bis' muss größer oder gleich 'Von' sein.",
+                  "errorInvalidChars": "Der Text enthält folgende ungültige Zeichen: {{invalidChars}}"
                 }
               },
               "tabResults": {

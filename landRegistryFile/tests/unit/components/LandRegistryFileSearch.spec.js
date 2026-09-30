@@ -1,12 +1,27 @@
 import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import {createStore} from "vuex";
+import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
 import Component from "../../../components/LandRegistryFileSearch.vue";
 
 describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", () => {
     let wrapper,
         store;
+
+    const oafSchema = {
+        properties: {
+            geschaeftszeichen: {
+                title: "Geschäftszeichen"
+            },
+            adresse: {
+                title: "Adresse"
+            },
+            sonstige_anlage: {
+                title: "sonstige Anlage"
+            }
+        }
+    };
 
     beforeEach(() => {
         store = createStore({
@@ -21,6 +36,10 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
                                 showLoadingSpinner: false,
                                 oafParams: {
                                     filters: {
+                                        textSearchFields: [
+                                            "adresse",
+                                            "geschaeftszeichen"
+                                        ],
                                         select: {
                                             options: [
                                                 "Bauakte",
@@ -32,7 +51,8 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
                             }),
                             getters: {
                                 showLoadingSpinner: state => state.showLoadingSpinner,
-                                oafParams: state => state.oafParams
+                                oafParams: state => state.oafParams,
+                                oafSchema: () => oafSchema
                             },
                             mutations: {
                                 setShowLoadingSpinner (state, payload) {
@@ -218,6 +238,62 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
 
             await wrapper.vm.$nextTick();
             expect(wrapper.find("#landRegistrySearchButton").attributes("disabled")).to.equal("false");
+        });
+    });
+
+    describe("validate text input, set error message and handle text search hint", () => {
+        beforeEach(() => {
+            wrapper.vm.searchText = "";
+        });
+
+        it("should validate the text input and find out forbidden characters", () => {
+            wrapper.vm.validateInputs();
+
+            expect(wrapper.vm.allInputsValid).to.be.true;
+
+            wrapper.vm.searchText = "abc";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.true;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("");
+
+            wrapper.vm.searchText = "abcdé 19 §36a - f HBauO";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.true;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("");
+
+            wrapper.vm.searchText = "Bu/BA3/00521/";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.true;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("");
+
+            wrapper.vm.searchText = "abc@";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.false;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorInvalidChars");
+
+            wrapper.vm.searchText = "<html>";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.false;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorInvalidChars");
+
+            wrapper.vm.searchText = "";
+            wrapper.vm.validateInputs();
+            expect(wrapper.vm.allInputsValid).to.be.true;
+            expect(wrapper.vm.errorMessages.searchText).to.equal("");
+        });
+
+        it("should handle search hint", () => {
+            expect(wrapper.vm.fieldNamesForTextSearch).to.deep.equal(["Adresse", "Geschäftszeichen"]);
+            expect(wrapper.vm.showTextSearchInfo).to.be.false;
+
+            const infoButton = wrapper.findComponent(IconButton);
+
+            expect(infoButton.exists()).to.be.true;
+
+            infoButton.trigger("click");
+            wrapper.vm.$nextTick();
+            expect(wrapper.vm.showTextSearchInfo).to.be.true;
+
         });
     });
 });

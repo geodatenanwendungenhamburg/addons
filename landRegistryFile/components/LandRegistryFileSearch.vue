@@ -5,6 +5,8 @@ import epsgCodeToURI from "@modules/filter/utils/epsgCodeToURI.js";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
+import IconButton from "@shared/modules/buttons/components/IconButton.vue";
+import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
 import InputText from "./shared/InputText.vue";
 import Multiselect from "vue-multiselect";
 
@@ -14,7 +16,9 @@ export default {
         FlatButton,
         SwitchInput,
         InputText,
-        Multiselect
+        Multiselect,
+        IconButton,
+        ModalItem
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
@@ -26,18 +30,24 @@ export default {
             yearTo: "",
             errorMessages: {
                 yearFrom: "",
-                yearTo: ""
+                yearTo: "",
+                searchText: ""
             },
             selectedRecords: [],
             moveEndKey: null,
             map: null,
-            searchInitiated: false
+            searchInitiated: false,
+            searchText: "",
+            showTextSearchInfo: false,
+            // eslint-disable-next-line no-useless-escape
+            searchTextValidationRegex: "^[\\p{L}0-9 ,\.\/§()\-]+$"
         };
     },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
             "showLoadingSpinner",
-            "oafParams"
+            "oafParams",
+            "oafSchema"
         ]),
         ...mapGetters("Maps", [
             "extent"
@@ -53,6 +63,23 @@ export default {
          */
         allInputsValid () {
             return Object.values(this.errorMessages).every(message => message.length === 0);
+        },
+        /**
+         * Gets the display titles of the fields configured for text search from the oafSchema.
+         *
+         * @returns {Array<string|undefined>} The configured field titles.
+         */
+        fieldNamesForTextSearch () {
+            const propertiesToSearch = this.oafParams?.filters.textSearchFields,
+                  fieldNamesToSearch = [];
+
+            propertiesToSearch?.forEach(prop => {
+                if (this.oafSchema?.properties?.[prop]?.title) {
+                    fieldNamesToSearch.push(this.oafSchema?.properties?.[prop]?.title);
+                }
+            });
+
+            return fieldNamesToSearch;
         }
     },
     activated () {
@@ -133,6 +160,7 @@ export default {
             this.setLandRegistryFileFeatures([]);
             this.removeFeaturesFromMap();
             this.searchInitiated = false;
+            this.searchText = "";
         },
         /**
          * Validates all search input fields and updates their validation state.
@@ -141,8 +169,10 @@ export default {
          */
         validateInputs () {
             const regexForYear = new RegExp("^[0-9]{4}$"),
+                  regexForText = new RegExp(this.searchTextValidationRegex, "u"),
                   yearFromString = String(this.yearFrom).trim(),
-                  yearToString = String(this.yearTo).trim();
+                  yearToString = String(this.yearTo).trim(),
+                  textToCheck = String(this.searchText).trim();
 
             Object.keys(this.errorMessages).forEach(key => {
                 this.errorMessages[key] = "";
@@ -178,6 +208,23 @@ export default {
                     this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearOrder");
                 }
             }
+
+            if (textToCheck.length > 0) {
+                const invalidCharacters = [...new Set(
+                    [...textToCheck].filter(character => !regexForText.test(character))
+                )];
+
+                if (invalidCharacters.length > 0) {
+                    this.errorMessages.searchText = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorInvalidChars", {
+                        invalidChars: invalidCharacters.join(" "),
+                        interpolation: {
+                            // Disabling i18next escaping is safe here because InputText.vue renders this value with Vue text interpolation, which escapes HTML.
+                            // If the value is rendered with v-html, do not disable escaping; escape or sanitize the value instead.
+                            escapeValue: false
+                        }
+                    });
+                }
+            }
         },
         /**
          * Prepares the search parameters based on the selected years,
@@ -197,7 +244,8 @@ export default {
                 bbox: searchExtent,
                 startDate: searchDateFrom,
                 endDate: searchDateTo,
-                selectedOptions: searchRecords
+                selectedOptions: searchRecords,
+                textValue: this.searchText
             });
         },
         /**
@@ -263,7 +311,7 @@ export default {
                 :interaction="(evt) => searchInExtent = evt.target.checked"
             />
 
-            <div class="recordtype-select-container">
+            <div class="recordtypeSelectContainer">
                 <label for="recordtype-select">
                     {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel") }}
                 </label>
@@ -286,11 +334,35 @@ export default {
                 />
             </div>
 
+            <p class="searchTextFormLabel">
+                {{ $t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchLabel') }}
+            </p>
+
+            <div class="searchTextContainer">
+                <InputText
+                    id="searchTextField"
+                    key="searchTextField"
+                    v-model="searchText"
+                    :class-obj="['form-control' + (errorMessages.searchText.length > 0 ? ' is-invalid': ' is-valid')]"
+                    :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchPlaceholder')"
+                    placeholder=""
+                    :error-message="errorMessages.searchText"
+                    @input="validateInputs()"
+                />
+
+                <IconButton
+                    :class-array="['btn-light', 'textSearchInfoButton']"
+                    :aria="$t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchInfo')"
+                    icon="bi-info-circle"
+                    @click="showTextSearchInfo = true"
+                />
+            </div>
+
             <p class="searchYearFormLabel">
                 {{ $t('additional:modules.landRegistryFile.tabs.tabSearch.yearLabel') }}
             </p>
 
-            <div id="searchYearForm">
+            <div class="searchYearContainer">
                 <div class="searchYearFormInputs">
                     <InputText
                         id="searchYearFrom"
@@ -315,11 +387,17 @@ export default {
                     />
                 </div>
 
-                <p class="errorInSearchYear">
+                <p
+                    v-if="errorMessages.yearFrom.length > 0"
+                    class="errorInSearchYear"
+                >
                     {{ errorMessages.yearFrom }}
                 </p>
 
-                <p class="errorInSearchYear">
+                <p
+                    v-if="errorMessages.yearTo.length > 0"
+                    class="errorInSearchYear"
+                >
                     {{ errorMessages.yearTo }}
                 </p>
             </div>
@@ -356,6 +434,32 @@ export default {
                 />
             </div>
         </div>
+
+        <ModalItem
+            :show-modal="showTextSearchInfo"
+            :title="$t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchInfo')"
+            @close="showTextSearchInfo = false"
+            @modalHid="showTextSearchInfo = false"
+        >
+            <template #default>
+                <h4>{{ $t("additional:modules.landRegistryFile.tabs.tabSearch.textSearchInfo") }}</h4>
+
+                <p>{{ $t("additional:modules.landRegistryFile.tabs.tabSearch.textSearchInfoModal.searchIn") }}</p>
+
+                <ul>
+                    <li
+                        v-for="(fieldName, fnIndex) in fieldNamesForTextSearch"
+                        :key="fnIndex"
+                    >
+                        {{ fieldName }}
+                    </li>
+                </ul>
+
+                <p>{{ $t("additional:modules.landRegistryFile.tabs.tabSearch.textSearchInfoModal.searchValidChars") }}</p>
+
+                <span>, . / § - ( ) </span>
+            </template>
+        </ModalItem>
     </div>
 </template>
 
@@ -369,12 +473,28 @@ export default {
             margin-top: 1rem;
         }
 
-        div.recordtype-select-container {
+        div.recordtypeSelectContainer {
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
         }
 
-        p.searchYearFormLabel {
+        div.searchTextContainer {
+            display: flex;
+            align-items: center;
+            border: #222;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 5px;
+            padding: 1.5rem 1rem 1rem 1rem;
+
+            div.InputText {
+                margin-bottom: 0;
+                flex: 1;
+            }
+        }
+
+        p.searchYearFormLabel,
+        p.searchTextFormLabel {
             background-color: white;
             z-index: 1;
             width: fit-content;
@@ -384,7 +504,7 @@ export default {
             padding-right: 0.5rem;
         }
 
-        div#searchYearForm {
+        div.searchYearContainer {
             border: #222;
             border-style: solid;
             border-width: 1px;
@@ -394,7 +514,6 @@ export default {
             div.searchYearFormInputs {
                 display: flex;
                 gap: 1rem;
-                margin-bottom: 0.5rem;
 
                 div.InputText {
                     flex: 1;
@@ -411,6 +530,10 @@ export default {
                 width: 100%;
                 margin-top: 0.25rem;
                 font-size: 0.875em;
+
+                &:first-of-type {
+                    margin-top: 0.75rem;
+                }
             }
         }
 

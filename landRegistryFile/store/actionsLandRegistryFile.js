@@ -91,6 +91,29 @@ export default {
         }
     },
     /**
+         * Loads the OAF collection schema and stores it in the module state.
+         * @param {Object} context Vuex action context.
+         * @param {Function} context.commit Vuex commit function.
+         * @param {Object} context.state Vuex module state.
+         * @param {Function} context.dispatch Vuex dispatch function.
+         * @returns {void}
+    */
+    queryOafSchema ({commit, state, dispatch}) {
+        const oafParams = state.oafParams;
+
+        getOAFFeature.getCollectionSchema(oafParams.url, oafParams.collection)
+            .then(schema => {
+                commit("setOafSchema", schema);
+            })
+            .catch(error => {
+                console.error(error);
+                dispatch("Alerting/addSingleAlert", {
+                    category: "error",
+                    content: `Fehler beim Abrufen notwendiger Daten für ${oafParams.collection}. Bitte versuchen Sie es erneut.`
+                }, {root: true});
+            });
+    },
+    /**
      * Adds the provided GeoJSON features to the map using the configured style.
      * @param {Object} context - The Vuex action context.
      * @param {Object} context.state - Vuex state object.
@@ -146,28 +169,5 @@ export default {
 
         layer.layer.getSource().clear();
         layer.layer.getSource().addFeatures(featuresToMap);
-    },
-    /**
-     * Loads the OAF collection schema and stores it in the module state.
-     * @param {Object} context Vuex action context.
-     * @param {Function} context.commit Vuex commit function.
-     * @param {Object} context.state Vuex module state.
-     * @param {Function} context.dispatch Vuex dispatch function.
-     * @returns {void}
-     */
-    queryOafSchema ({commit, state, dispatch}) {
-        const oafParams = state.oafParams;
-
-        getOAFFeature.getCollectionSchema(oafParams.url, oafParams.collection)
-            .then(schema => {
-                commit("setOafSchema", schema);
-            })
-            .catch(error => {
-                console.error(error);
-                dispatch("Alerting/addSingleAlert", {
-                    category: "error",
-                    content: i18next.t("additional:modules.landRegistryFile.errors.oafError", {oafParams})
-                }, {root: true});
-            });
     }
 };

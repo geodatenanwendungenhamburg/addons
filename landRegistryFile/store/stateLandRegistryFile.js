@@ -13,7 +13,11 @@
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
  * @property {Object[]} landRegistryFileFeatures The array of land registry file features retrieved from the OAF collection.
+<<<<<<< HEAD
  * @property {Object|null} oafSchema The schema of the OAF collection.
+=======
+ * @property {Object|null} oafSchema The schema of the OAF collection, if loaded.
+>>>>>>> 3cb0e94f8 (G31DEV2-484 add text filter)
  * @property {Object} oafParams The parameters for querying the OAF collection.
  * @property {string} oafParams.url - The URL of the OAF service.
  * @property {string} oafParams.collection - The name of the OAF collection to query.
