@@ -280,12 +280,18 @@ export default {
                   groupLayers = this.layerConfigsByAttributes({typ: "GROUP"});
 
             visibleLayerList.forEach(layer => {
-                if (!this.addLayerButton.active) {
+                const layerId = layer?.get("id");
+
+                if (!layerId) {
+                    return;
+                }
+
+                if (!this.addLayerButton?.active) {
                     if (layer instanceof LayerGroup) {
-                        const childrenId = layer.getSource().map(childLayer => childLayer.get("id"));
+                        const childrenId = layer.getSource()?.map(childLayer => childLayer.get("id")) || [];
 
                         groupLayers.forEach(groupLayer => {
-                            if (groupLayer?.children.some(childlayer => childrenId.includes(childlayer.id))) {
+                            if (groupLayer?.children?.some(childlayer => childrenId.includes(childlayer.id))) {
                                 this.addOrReplaceLayer({
                                     layerId: groupLayer.id,
                                     visibility: false
@@ -295,20 +301,22 @@ export default {
                     }
                     else {
                         this.addOrReplaceLayer({
-                            layerId: layer.get("id"),
+                            layerId: layerId,
                             visibility: false
                         });
                     }
                 }
                 else {
-                    const layerConf = this.layerConfigById(layer.get("id"));
+                    const layerConf = this.layerConfigById(layerId);
 
-                    this.removeLayer(layerConf);
+                    if (layerConf) {
+                        this.removeLayer(layerConf);
+                    }
                 }
             });
 
             this.allLayerConfigs.forEach(each => {
-                if (!this.originalLayerConfig.some(oriLayer => oriLayer.id === each.id)) {
+                if (each?.id && !this.originalLayerConfig.some(oriLayer => oriLayer?.id === each.id)) {
                     this.replaceByIdInLayerConfig({
                         layerId: each.id,
                         visibility: false,
