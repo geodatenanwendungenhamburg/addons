@@ -1074,13 +1074,13 @@ export default {
                 <div
                     class="d-flex justify-content-between button"
                 >
-                    <FlatButton
+                    <!-- <FlatButton
                         id="back"
                         :icon="'bi bi-gear'"
                         :aria-label="$t('additional:modules.tools.simulationTool.showProperties')"
                         :text="$t('additional:modules.tools.simulationTool.showProperties')"
                         @click="() => setMode('simulationParameter')"
-                    />
+                    /> -->
                     <FlatButton
                         id="delete-simulation"
                         secondary

@@ -732,10 +732,31 @@ export default {
             }
 
             this.initializeProcessHandlers();
-            await this.fetchProcessDescriptions();
+            try {
+                await this.fetchProcessDescriptions();
+            }
+            catch (error) {
+                console.error("Failed to fetch process descriptions:", error);
+                this.addSingleAlert({
+                    title: "Error",
+                    content: "Failed to fetch process descriptions.",
+                    category: "error"
+                });
+                return;
+            }
             this.setupIgnoreProperties();
             this.createRequestBodies();
-            await this.loadRequiredOafInputs();
+            try {
+                await this.loadRequiredOafInputs();
+            }
+            catch (error) {
+                console.error("Failed to load required OAF inputs:", error);
+                this.addSingleAlert({
+                    title: "Error",
+                    content: "Failed to load required OAF inputs.",
+                    category: "error"
+                });
+            }
         },
 
         /**
