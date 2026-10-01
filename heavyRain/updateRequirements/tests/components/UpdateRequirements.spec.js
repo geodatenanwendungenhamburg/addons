@@ -40,7 +40,7 @@ describe("addons/heavyRain/updateRequirements/components/updateRequirements.vue"
      * @param {String} [options.currentView="main"] - The current view.
      * @returns {Object} the store.
      */
-    function createTestStore ({wfstLayerId = "36013", informationType = [], currentRequirement = {}, currentView = "main"} = {}) {
+    function createTestStore ({wfstLayerId = "36013", informationType = [], currentRequirement = {geometry: {getExtent: () => []}}, currentView = "main"} = {}) {
         return createStore({
             namespaced: true,
             actions: {
@@ -200,14 +200,14 @@ describe("addons/heavyRain/updateRequirements/components/updateRequirements.vue"
 
     describe("Computed Properties", () => {
         it("should get the source of the saved image of the current report", () => {
-            const currentRequirement = {formValues: {name: "Meldung A", image: "data:image/png;base64,iVBOR"}},
+            const currentRequirement = {formValues: {name: "Meldung A", image: "data:image/png;base64,iVBOR"}, geometry: {getExtent: () => []}},
                 wrapper = shallowMount(UpdateRequirements, {global: {plugins: [createTestStore({currentRequirement})]}});
 
             expect(wrapper.vm.imageSrc).to.equal("data:image/png;base64,iVBOR");
         });
 
         it("should get no image source if the report has no image", () => {
-            const currentRequirement = {formValues: {name: "Meldung A", image: ""}},
+            const currentRequirement = {formValues: {name: "Meldung A", image: ""}, geometry: {getExtent: () => []}},
                 wrapper = shallowMount(UpdateRequirements, {global: {plugins: [createTestStore({currentRequirement})]}});
 
             expect(wrapper.vm.imageSrc).to.be.undefined;
@@ -223,6 +223,9 @@ describe("addons/heavyRain/updateRequirements/components/updateRequirements.vue"
             const currentRequirement = {
                     formValues: {
                         informationType: "Aktualisierungsbedarf SRGK"
+                    },
+                    geometry: {
+                        getExtent: () => []
                     }
                 },
                 wrapper = shallowMount(UpdateRequirements, {global: {plugins: [createTestStore({informationType: informationTypes, currentRequirement})]}});

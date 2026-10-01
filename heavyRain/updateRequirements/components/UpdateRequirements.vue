@@ -1,6 +1,7 @@
 <script>
 import {createPolygonStyle} from "../../shared/js/createPolygonStyle.js";
 import {formatDate} from "../../shared/js/formatDate.js";
+import {getCenter} from "ol/extent.js";
 import {getClickedWfstFeature} from "../../shared/js/getClickedWfstFeature.js";
 import HrCard from "../../shared/components/HrCard.vue";
 import HrHeader from "../../shared/components/HrHeader.vue";
@@ -53,6 +54,10 @@ export default {
             // the content of a clicked report is shown in the module, so the gfi is not needed
             layerCollection.getLayerById(this.wfstLayerId)?.getLayer()?.set("gfiAttributes", "ignore");
             this.registerListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainUpdateRequirementsClick"});
+        }
+
+        if (typeof this.currentRequirement !== "undefined") {
+            this.placingPointMarker(getCenter(this.currentRequirement?.geometry?.getExtent()));
         }
     },
     unmounted () {

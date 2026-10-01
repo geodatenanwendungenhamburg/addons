@@ -147,6 +147,7 @@ export default {
     },
     unmounted () {
         setWfstFeatureVisibility(this.wfstLayerId, this.currentProject?.id, true);
+        this.setCurrentView("main");
     },
     methods: {
         ...mapActions("Maps", ["placingPointMarker"]),

@@ -1,6 +1,7 @@
 <script>
 import {createPolygonStyle} from "../../shared/js/createPolygonStyle.js";
 import {formatDate} from "../../shared/js/formatDate.js";
+import {getCenter} from "ol/extent.js";
 import {getClickedWfstFeature} from "../../shared/js/getClickedWfstFeature.js";
 import {getDownloadFileName, toFileHref} from "../../shared/js/fileData.js";
 import HrCard from "../../shared/components/HrCard.vue";
@@ -67,6 +68,9 @@ export default {
             // the content of a clicked project is shown in the module, so the gfi is not needed
             layerCollection.getLayerById(this.wfstLayerId)?.getLayer()?.set("gfiAttributes", "ignore");
             this.registerListener({type: "singleclick", listener: this.onMapClick, keyForBoundFunctions: "heavyRainProjectsClick"});
+        }
+        if (typeof this.currentProject !== "undefined") {
+            this.placingPointMarker(getCenter(this.currentProject?.geometry?.getExtent()));
         }
     },
     unmounted () {

@@ -122,6 +122,7 @@ export default {
     },
     unmounted () {
         setWfstFeatureVisibility(this.wfstLayerId, this.currentRequirement?.id, true);
+        this.$emit("click:cancel");
     },
     methods: {
         ...mapActions("Maps", ["placingPointMarker"]),
