@@ -329,9 +329,10 @@ export default {
 
 <template lang="html">
     <div>
-        <p>
-            {{ $t("additional:modules.potentialDamagedBuilding.description") }}
-        </p>
+        <p
+            class="mb-4"
+            v-html="$t('additional:modules.potentialDamagedBuilding.description')"
+        />
         <h5 class="mt-3">
             {{ $t("additional:modules.potentialDamagedBuilding.headline.buildingAttributes") }}
         </h5>
@@ -409,6 +410,18 @@ export default {
                         <div class="card-body">
                             <h6 class="headline card-title">
                                 {{ $t("additional:modules.potentialDamagedBuilding.headline.adjustedDamagePotentialClass") }}
+                                <button
+                                    type="button"
+                                    class="btn btn-link p-0 text-dark border-0"
+                                    tabindex="0"
+                                    data-bs-toggle="popover"
+                                    data-bs-placement="bottom"
+                                    data-bs-trigger="focus"
+                                    data-bs-html="true"
+                                    :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.adjustedDamagePotentialClassDes')"
+                                >
+                                    <i class="bi bi-info-circle" />
+                                </button>
                             </h6>
                             <span class="card-hint">
                                 {{ $t("additional:modules.potentialDamagedBuilding.adjustedDamagePotentialClassHint") }}
@@ -432,6 +445,18 @@ export default {
                         <div class="card-body">
                             <h6 class="headline card-title">
                                 {{ $t("additional:modules.potentialDamagedBuilding.headline.comment") }}
+                                <button
+                                    type="button"
+                                    class="btn btn-link p-0 text-dark border-0"
+                                    tabindex="0"
+                                    data-bs-toggle="popover"
+                                    data-bs-placement="bottom"
+                                    data-bs-trigger="focus"
+                                    data-bs-html="true"
+                                    :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.commentDes')"
+                                >
+                                    <i class="bi bi-info-circle" />
+                                </button>
                             </h6>
                             <span class="card-hint">
                                 {{ $t("additional:modules.potentialDamagedBuilding.commentHint") }}
@@ -456,22 +481,30 @@ export default {
                 :color="snackbarColor"
                 @update:model-value="val => showSnackbar = val"
             />
+            <div class="mt-3">
+                <i class="headline me-3 bi bi-info-circle" />
+                <span class="comment">{{ $t('additional:modules.potentialDamagedBuilding.popover.resetDes') }}</span>
+            </div>
             <div class="d-flex justify-content-between align-items-center mt-4">
-                <FlatButton
-                    id="reset"
-                    icon="bi bi-arrow-counterclockwise"
-                    :secondary="true"
-                    :aria-label="$t('additional:modules.potentialDamagedBuilding.reset')"
-                    :text="$t('additional:modules.potentialDamagedBuilding.reset')"
-                    @click="setDataFromFeature(selectedFeature)"
-                />
-                <FlatButton
-                    id="save"
-                    icon="bi bi-save"
-                    :aria-label="$t('additional:modules.potentialDamagedBuilding.save')"
-                    :text="$t('additional:modules.potentialDamagedBuilding.save')"
-                    @click="onSave"
-                />
+                <div class="d-flex justify-content-between align-items-center">
+                    <FlatButton
+                        id="reset"
+                        icon="bi bi-arrow-counterclockwise"
+                        :secondary="true"
+                        :aria-label="$t('additional:modules.potentialDamagedBuilding.reset')"
+                        :text="$t('additional:modules.potentialDamagedBuilding.reset')"
+                        @click="setDataFromFeature(selectedFeature)"
+                    />
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <FlatButton
+                        id="save"
+                        icon="bi bi-save"
+                        :aria-label="$t('additional:modules.potentialDamagedBuilding.save')"
+                        :text="$t('additional:modules.potentialDamagedBuilding.save')"
+                        @click="onSave"
+                    />
+                </div>
             </div>
             <h5 class="headline mt-5 mb-3">
                 <i class="bi bi-file-text me-3" />
@@ -482,17 +515,6 @@ export default {
                     <h6 class="headline-group mb-0">
                         {{ $t("additional:modules.potentialDamagedBuilding.headline.potentialDamagedClass") }}
                     </h6>
-                    <button
-                        type="button"
-                        class="btn btn-link p-0 text-dark border-0"
-                        tabindex="0"
-                        data-bs-toggle="popover"
-                        data-bs-placement="bottom"
-                        data-bs-trigger="focus"
-                        :data-bs-content="$t('additional:modules.potentialDamagedBuilding.description')"
-                    >
-                        <i class="ms-2 bi bi-info-circle" />
-                    </button>
                 </div>
                 <div class="row g-0 mb-1 ms-4">
                     <div class="col-4 col-md-8 box-label">
@@ -548,17 +570,6 @@ export default {
                     <h6 class="headline-group mb-0">
                         {{ $t("additional:modules.potentialDamagedBuilding.headline.buildingFunction") }}
                     </h6>
-                    <button
-                        type="button"
-                        class="btn btn-link p-0 text-dark border-0"
-                        tabindex="0"
-                        data-bs-toggle="popover"
-                        data-bs-placement="bottom"
-                        data-bs-trigger="focus"
-                        :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.buildingKey')"
-                    >
-                        <i class="ms-2 bi bi-info-circle" />
-                    </button>
                 </div>
                 <div class="row g-0 mb-1 ms-4">
                     <div class="col-4 col-md-8 box-label">
@@ -582,17 +593,6 @@ export default {
                     <h6 class="headline-group mb-0">
                         {{ $t("additional:modules.potentialDamagedBuilding.headline.additionalBuildingFunction") }}
                     </h6>
-                    <button
-                        type="button"
-                        class="btn btn-link p-0 text-dark border-0"
-                        tabindex="0"
-                        data-bs-toggle="popover"
-                        data-bs-placement="bottom"
-                        data-bs-trigger="focus"
-                        :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.additionalBuildingFunction')"
-                    >
-                        <i class="ms-2 bi bi-info-circle" />
-                    </button>
                 </div>
                 <div class="row g-0 mb-1 ms-4">
                     <div class="col-4 col-md-8 box-label">
@@ -618,17 +618,6 @@ export default {
                 <div class="row g-0 mb-1 ms-4">
                     <div class="col-4 col-md-8 d-flex align-items-center">
                         <span class="box-label">{{ gfiAttributes.bezofl }}</span>
-                        <button
-                            type="button"
-                            class="btn btn-link p-0 text-dark border-0 lh-1"
-                            tabindex="0"
-                            data-bs-toggle="popover"
-                            data-bs-placement="bottom"
-                            data-bs-trigger="focus"
-                            :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.earthSurface')"
-                        >
-                            <i class="ms-2 bi bi-info-circle" />
-                        </button>
                     </div>
                     <div class="col text-muted">
                         {{ selectedFeature.get("bezofl") }}
@@ -637,17 +626,6 @@ export default {
                 <div class="row g-0 ms-4">
                     <div class="col-4 col-md-8 d-flex align-items-center">
                         <span class="box-label"> {{ gfiAttributes.bezbat }} </span>
-                        <button
-                            type="button"
-                            class="btn btn-link p-0 text-dark border-0 lh-1"
-                            tabindex="0"
-                            data-bs-toggle="popover"
-                            data-bs-placement="bottom"
-                            data-bs-trigger="focus"
-                            :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.buildingConstructionType')"
-                        >
-                            <i class="ms-2 bi bi-info-circle" />
-                        </button>
                     </div>
                     <div class="col text-muted">
                         {{ selectedFeature.get("bezbat") }}
@@ -656,17 +634,6 @@ export default {
                 <div class="row g-0 ms-4">
                     <div class="col-4 col-md-8 d-flex align-items-center">
                         <span class="box-label"> {{ gfiAttributes.check_ug }} </span>
-                        <button
-                            type="button"
-                            class="btn btn-link p-0 text-dark border-0 lh-1"
-                            tabindex="0"
-                            data-bs-toggle="popover"
-                            data-bs-placement="bottom"
-                            data-bs-trigger="focus"
-                            :data-bs-content="$t('additional:modules.potentialDamagedBuilding.popover.basementLevels')"
-                        >
-                            <i class="ms-2 bi bi-info-circle" />
-                        </button>
                     </div>
                     <div class="col text-muted">
                         {{ selectedFeature.get("check_ug") }}
@@ -695,15 +662,14 @@ export default {
         font-size: clamp(1.2rem, 4vw, 2rem);
         color: $secondary;
     }
-    .comment {
-        font-size: $font_size_sm;
-        color: $dark_grey;
-        font-size: clamp(0.85rem, 3vw, 1rem);
-    }
     span:not(.value) {
         font-size: clamp(0.8rem, 2vw, 1rem);
         line-height: 1.2;
     }
+}
+.comment {
+    font-size: $font_size_sm;
+    color: $dark_grey;
 }
 .headline {
     color: $secondary;
