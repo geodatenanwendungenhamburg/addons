@@ -12,9 +12,17 @@ export default {
         SpinnerItem,
         TabContainer
     },
+    data () {
+        return {
+            tabWatcherAttached: false,
+            unwatchTabContainer: null
+        };
+    },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
-            "showLoadingSpinner"
+            "showLoadingSpinner",
+            "getSortedFeatures",
+            "selectedDetailFeatureId"
         ]),
         loadingSpinnerText () {
             return this.$t("additional:modules.landRegistryFile.loadingSpinnerText.general");
@@ -65,19 +73,66 @@ export default {
 
         this.queryOafSchema();
     },
-    activated () {
-        // Handle KeepAlive visibility. Triggered if component is activated
+    async activated () {
+        await this.attachTabWatcher();
     },
     deactivated () {
-        // Handle KeepAlive visibility. Triggered if component is deactivated
+        if (this.unwatchTabContainer) {
+            this.unwatchTabContainer();
+            this.unwatchTabContainer = null;
+        }
+        this.tabWatcherAttached = false;
     },
     methods: {
         ...mapActions("Modules/LandRegistryFile", [
             "queryOafSchema"
         ]),
         ...mapMutations("Modules/LandRegistryFile", [
-            "setShowLoadingSpinner"
-        ])
+            "setShowLoadingSpinner",
+            "setSelectedDetailFeatureId"
+        ]),
+        /**
+         * Handle tab changes in the TabContainer.
+         * @param {Object} tabContainerRef - Reference to the TabContainer component.
+         * @param {string} newTabId - Id of the newly activated tab.
+         * @param {string} oldTabId - Id of the previously active tab.
+         */
+        handleTabChange (tabContainerRef, newTabId, oldTabId) {
+            const tabResults = tabContainerRef.$refs.tabResults?.[0];
+
+            if (newTabId === "tabDetails" && !this.selectedDetailFeatureId && this.getSortedFeatures.length > 0) {
+                this.setSelectedDetailFeatureId(this.getSortedFeatures[0].id);
+            }
+
+            if (oldTabId === "tabDetails" && newTabId === "tabResults") {
+                this.$nextTick(() => {
+                    if (this.selectedDetailFeatureId) {
+                        tabResults?.scrollToSelectedDetail();
+                    }
+                });
+            }
+        },
+        /**
+         * Activates a watcher on the activeTabIdLocal of the TabContainer to react to tab changes.
+         * Calls handleTabChange when the active tab changes.
+         */
+        async attachTabWatcher () {
+            if (this.tabWatcherAttached) {
+                return;
+            }
+            await this.$nextTick();
+
+            const tabContainerRef = this.$refs.tabContainer;
+
+            if (!tabContainerRef) {
+                return;
+            }
+            this.tabWatcherAttached = true;
+
+            this.unwatchTabContainer = tabContainerRef.$watch("activeTabIdLocal", (newTabId, oldTabId) => {
+                this.handleTabChange(tabContainerRef, newTabId, oldTabId);
+            });
+        }
     }
 };
 </script>

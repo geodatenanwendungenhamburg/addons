@@ -24,7 +24,9 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFile.spec.js", () => {
                                 queryOafSchema: () => Promise.resolve()
                             },
                             getters: {
-                                showLoadingSpinner: state => state.showLoadingSpinner
+                                showLoadingSpinner: state => state.showLoadingSpinner,
+                                landRegistryFileFeatures: () => [],
+                                selectedDetailFeatureId: () => null
                             },
                             mutations: {
                                 setShowLoadingSpinner (state, payload) {

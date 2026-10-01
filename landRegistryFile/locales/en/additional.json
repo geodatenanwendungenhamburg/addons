@@ -46,7 +46,10 @@
               "tabDetails": {
                 "label": "Details",
                 "backToSearchButtonLabel": "Back to search",
-                "backToResultsButtonLabel": "Back to results list"
+                "backToResultsButtonLabel": "Back to results list",
+                "noDetailsMessage": "No details found. Please change your search criteria.",
+                "buttonBack": "Show previous record",
+                "buttonForward": "Show next record"
               }
             },
             "errors": {

@@ -7,6 +7,26 @@ import Component from "../../../components/LandRegistryFileResults.vue";
 describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", () => {
     let wrapper,
         store;
+    const mockFeatures = [
+        {
+            id: "1",
+            properties: {
+                name: "Feature 1"
+            }
+        },
+        {
+            id: "2",
+            properties: {
+                name: "Feature 2"
+            }
+        },
+        {
+            id: "3",
+            properties: {
+                name: "Feature 3"
+            }
+        }
+    ];
 
     beforeEach(() => {
         store = createStore({
@@ -18,12 +38,19 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", (
                         LandRegistryFile: {
                             namespaced: true,
                             state: () => ({
-                                landRegistryFileFeatures: []
+                                landRegistryFileFeatures: mockFeatures,
+                                showLoadingSpinner: false
                             }),
                             getters: {
-                                landRegistryFileFeatures: state => state.landRegistryFileFeatures,
+                                selectedDetailFeatureId: () => null,
                                 tableFields: () => [],
-                                oafSchema: () => null
+                                oafSchema: () => null,
+                                sorting: () => ({
+                                    columnName: "",
+                                    order: "origin"
+                                }),
+                                getSortedFeatures: state => state.landRegistryFileFeatures,
+                                showLoadingSpinner: state => state.showLoadingSpinner
                             }
                         }
                     }

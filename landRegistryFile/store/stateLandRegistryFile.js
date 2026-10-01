@@ -13,11 +13,7 @@
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
  * @property {Object[]} landRegistryFileFeatures The array of land registry file features retrieved from the OAF collection.
-<<<<<<< HEAD
- * @property {Object|null} oafSchema The schema of the OAF collection.
-=======
  * @property {Object|null} oafSchema The schema of the OAF collection, if loaded.
->>>>>>> 3cb0e94f8 (G31DEV2-484 add text filter)
  * @property {Object} oafParams The parameters for querying the OAF collection.
  * @property {string} oafParams.url - The URL of the OAF service.
  * @property {string} oafParams.collection - The name of the OAF collection to query.
@@ -30,7 +26,11 @@
  * @property {string} styleConf - The URL to the style configuration for the land registry features.
  * @property {Object} styles - The styles applied to the land registry features.
  * @property {Object[]} tableFields - The configuration for the table fields to display in the results.
- * @property {Object|null} selectedDetail - The selected detail object containing the land registry file feature details.
+ * @property {string[]} detailsFields - The configuration for the fields to display in the details view of a selected feature.
+ * @property {string|null} selectedDetailFeatureId - The selected feature ID for displaying details.
+ * @property {Object} sorting - The sorting configuration for the results table.
+ * @property {string} sorting.columnName - The name of the column to sort by.
+ * @property {string} sorting.order - The order of sorting, can be "origin", "asc", or "desc".
  */
 
 const state = {
@@ -70,7 +70,12 @@ const state = {
     styleConf: "",
     styles: {},
     tableFields: [],
-    selectedDetail: null
+    detailsFields: [],
+    selectedDetailFeatureId: null,
+    sorting: {
+        columnName: "",
+        order: "origin"
+    }
 };
 
 export default state;

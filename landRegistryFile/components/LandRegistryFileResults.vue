@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapMutations} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
-import TableComponent from "@shared/modules/table/components/TableComponent.vue";
+import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
@@ -20,14 +20,17 @@ export default {
     data () {
         return {
             showMoreFields: false,
-            tableRenderKey: 0
+            scrollPending: false
         };
     },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
-            "landRegistryFileFeatures",
+            "selectedDetailFeatureId",
             "tableFields",
-            "oafSchema"
+            "oafSchema",
+            "sorting",
+            "getSortedFeatures",
+            "showLoadingSpinner"
         ]),
         /**
          * Prepares the data structure for the table component, including headers and items.
@@ -48,9 +51,10 @@ export default {
                           index: this.tableFields.length
                       }
                   ],
-                  items = (this.landRegistryFileFeatures || []).map(feature => {
-                      return feature.properties;
-                  });
+                  items = (this.getSortedFeatures || []).map(feature => ({
+                      ...feature.properties,
+                      id: feature.id
+                  }));
 
             return {
                 headers,
@@ -59,20 +63,79 @@ export default {
         }
     },
     watch: {
-        landRegistryFileFeatures () {
-            this.tableRenderKey += 1;
+        getSortedFeatures () {
+            this.scrollPending = true;
+            this.performPendingScroll();
+        },
+        showLoadingSpinner (isLoading) {
+            if (!isLoading) {
+                this.performPendingScroll();
+            }
         }
     },
     methods: {
         ...mapMutations("Modules/LandRegistryFile", [
-            "setSelectedDetail"
+            "setSelectedDetailFeatureId",
+            "setSorting"
         ]),
         showPosition (row) {
             console.warn("showPosition noch nicht implementiert", row);
         },
+        /**
+         * Sets the selected feature ID and switches to the details tab.
+         * @param {Object} row - The row object containing the feature ID.
+         * @returns {void}
+         */
         showDetails (row) {
-            this.setSelectedDetail(row);
+            if (this.selectedDetailFeatureId === row.id) {
+                this.setSelectedDetailFeatureId(null);
+                return;
+            }
+
+            this.setSelectedDetailFeatureId(row.id);
             this.setCurrentTab("tabDetails");
+        },
+        /**
+         * Scrolls to the selected row or the top, but only if a scroll is pending and the table is visible.
+         * @returns {void}
+         */
+        performPendingScroll () {
+            this.$nextTick(() => {
+                if (!this.scrollPending || this.$el.offsetParent === null) {
+                    return;
+                }
+                this.scrollPending = false;
+
+                if (this.selectedDetailFeatureId) {
+                    this.scrollToSelectedDetail();
+                }
+                else {
+                    this.scrollToTop();
+                }
+            });
+        },
+        /**
+         * Scrolls the results table back to the top after new results are loaded.
+         * @returns {void}
+         */
+        scrollToTop () {
+            this.$nextTick(() => {
+                this.$el
+                    .querySelectorAll(".table-wrapper, .land-registry-table-scroll")
+                    .forEach(el => el.scrollTo({top: 0, behavior: "smooth"}));
+            });
+        },
+        /**
+         * Scrolls the selected detail row into view after the the selected feature or the table sorting changes.
+         * @returns {void}
+         */
+        scrollToSelectedDetail () {
+            this.$nextTick(() => {
+                const selectedButton = this.$el.querySelector(".selected-button"),
+                      selectedRow = selectedButton?.closest("tr");
+
+                selectedRow?.scrollIntoView({behavior: "smooth", block: "center"});
+            });
         }
     }
 };
@@ -97,7 +160,7 @@ export default {
         >
             <p class="number-of-results-wrapper">
                 {{ $t("additional:modules.landRegistryFile.tabs.tabResults.numberOfResults") }}
-                <span class="number-of-results">{{ landRegistryFileFeatures.length }}</span>
+                <span class="number-of-results">{{ getSortedFeatures.length }}</span>
             </p>
             <div class="switch-container">
                 <SwitchInput
@@ -112,22 +175,26 @@ export default {
             </div>
 
             <TableComponent
-                :key="tableRenderKey"
+                table-class="land-registry-table-scroll"
                 :data="tableData"
                 :sortable="true"
+                :sorting="sorting"
+                :manual-sorting="true"
+                @update:sorting="(newSorting) => setSorting(newSorting)"
             >
                 <template #cell-actions="{ row }">
                     <div class="actions-wrapper">
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowPosition')"
                             icon="bi-crosshair"
-                            class="action-item"
+                            :class-array="['action-button']"
                             @click.stop="showPosition(row)"
                         />
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowDetails')"
                             icon="bi-arrow-right-circle"
-                            class="action-item"
+                            :class-array="['action-button', row.id === selectedDetailFeatureId ?'selected-button' : '']"
+                            :style="selectedDetailCssVars"
                             @click.stop="showDetails(row)"
                         />
                     </div>
@@ -190,10 +257,15 @@ export default {
                 align-items: center;
                 gap: 0.25rem;
 
-                :deep(.action-item .btn) {
+                :deep(.action-button) {
                     width: 1.6rem;
                     height: 1.6rem;
                     z-index: 1;
+
+                    &.selected-button {
+                        background-color: rgb(214, 227, 255);
+                        border-color: rgb(60, 95, 148);
+                    }
 
                     > i {
                         font-size: 1.2rem;

@@ -46,7 +46,10 @@
               "tabDetails": {
                 "label": "Details",
                 "backToSearchButtonLabel": "Zurück zur Suche",
-                "backToResultsButtonLabel": "Zurück zur Ergebnisliste"
+                "backToResultsButtonLabel": "Zurück zur Ergebnisliste",
+                "noDetailsMessage": "Keine Details gefunden. Bitte ändern Sie Ihre Suchkriterien.",
+                "buttonBack": "Vorherige Akte anzeigen",
+                "buttonForward": "Nächste Akte anzeigen"
               }
             },
             "errors": {
