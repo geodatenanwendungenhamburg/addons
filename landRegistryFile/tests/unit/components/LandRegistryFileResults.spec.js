@@ -1,13 +1,14 @@
 import {shallowMount} from "@vue/test-utils";
 import {expect} from "chai";
 import {createStore} from "vuex";
+import sinon from "sinon";
 
 import Component from "../../../components/LandRegistryFileResults.vue";
 
-describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", () => {
+describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.spec.js", () => {
     let wrapper,
         store;
-    const mockFeatures = [
+    const landRegistryFileFeatures = [
         {
             id: "1",
             properties: {
@@ -38,19 +39,28 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", (
                         LandRegistryFile: {
                             namespaced: true,
                             state: () => ({
-                                landRegistryFileFeatures: mockFeatures,
-                                showLoadingSpinner: false
-                            }),
-                            getters: {
-                                selectedDetailFeatureId: () => null,
-                                tableFields: () => [],
-                                oafSchema: () => null,
-                                sorting: () => ({
+                                landRegistryFileFeatures: landRegistryFileFeatures,
+                                showLoadingSpinner: false,
+                                selectedDetailFeatureId: null,
+                                tableFields: [],
+                                oafSchema: null,
+                                sorting: {
                                     columnName: "",
                                     order: "origin"
-                                }),
+                                }
+                            }),
+                            getters: {
                                 getSortedFeatures: state => state.landRegistryFileFeatures,
-                                showLoadingSpinner: state => state.showLoadingSpinner
+                                showLoadingSpinner: state => state.showLoadingSpinner,
+                                selectedDetailFeatureId: state => state.selectedDetailFeatureId,
+                                tableFields: state => state.tableFields,
+                                oafSchema: state => state.oafSchema,
+                                sorting: state => state.sorting
+                            },
+                            mutations: {
+                                setSelectedDetailFeatureId (state, featureId) {
+                                    state.selectedDetailFeatureId = featureId;
+                                }
                             }
                         }
                     }
@@ -68,6 +78,8 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", (
                 plugins: [store]
             }
         });
+
+        wrapper.vm.setCurrentTab = () => sinon.stub();
     });
 
     afterEach(() => {
@@ -78,5 +90,33 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileResults.spec.js", (
 
     it("should exist", () => {
         expect(wrapper.exists()).to.be.true;
+    });
+
+    it("showDetails should set selectedDetailFeatureId in the store", async () => {
+        const featureId = wrapper.vm.getSortedFeatures[0].id;
+
+        await wrapper.vm.showDetails({id: featureId});
+        expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId);
+    });
+
+    it("showDetails with a different featureId should set selectedDetailFeatureId in the store", async () => {
+        const featureId1 = wrapper.vm.getSortedFeatures[0].id;
+        const featureId2 = wrapper.vm.getSortedFeatures[1].id;
+
+        await wrapper.vm.showDetails({id: featureId1});
+        expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId1);
+
+        await wrapper.vm.showDetails({id: featureId2});
+        expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId2);
+    });
+
+    it("calling showDetails with the same featureId should set selectedDetailFeatureId to null in the store", async () => {
+        const featureId = wrapper.vm.getSortedFeatures[0].id;
+
+        await wrapper.vm.showDetails({id: featureId});
+        expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId);
+
+        await wrapper.vm.showDetails({id: featureId});
+        expect(wrapper.vm.selectedDetailFeatureId).to.be.null;
     });
 });

@@ -177,7 +177,7 @@ export default {
          */
         scrollToSelectedDetail () {
             this.$nextTick(() => {
-                const selectedButton = this.$el.querySelector(".selected-button"),
+                const selectedButton = this.$el.querySelector(".detail-selected-button"),
                       selectedRow = selectedButton?.closest("tr");
 
                 selectedRow?.scrollIntoView({behavior: "smooth", block: "center"});
@@ -313,7 +313,7 @@ export default {
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowDetails')"
                             icon="bi-arrow-right-circle"
-                            :class-array="['action-button', row.id === selectedDetailFeatureId ?'selected-button' : '']"
+                            :class-array="['action-button', row.id === selectedDetailFeatureId ? 'detail-selected-button' : '']"
                             @click.stop="showDetails(row)"
                         />
                     </div>
@@ -381,7 +381,7 @@ export default {
                     height: 1.6rem;
                     z-index: 1;
 
-                    &.selected-button {
+                    &.detail-selected-button {
                         background-color: rgb(214, 227, 255);
                         border-color: rgb(60, 95, 148);
                     }

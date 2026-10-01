@@ -5,7 +5,7 @@ import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 
 import Component from "../../../components/LandRegistryFileSearch.vue";
 
-describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", () => {
+describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.spec.js", () => {
     let wrapper,
         store;
 
