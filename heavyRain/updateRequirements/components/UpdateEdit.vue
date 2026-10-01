@@ -6,7 +6,6 @@ import {formatDate} from "../../shared/js/formatDate.js";
 import {getGeometryCenter} from "../../shared/js/getGeometryCenter.js";
 import HrDraw from "../../shared/components/HrDraw.vue";
 import HrFooter from "../../shared/components/HrFooter.vue";
-import HrSnackbar from "../../shared/components/HrSnackbar.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import InputText from "@shared/modules/inputs/components/InputText.vue";
 import layerCollection from "@core/layers/js/layerCollection.js";
@@ -21,7 +20,6 @@ export default {
         FileUpload,
         HrDraw,
         HrFooter,
-        HrSnackbar,
         IconButton,
         InputText
     },
@@ -39,10 +37,7 @@ export default {
             createdAt: dayjs(),
             drawnGeometry: null,
             invalid: false,
-            isSaving: false,
-            showSnackbar: false,
-            snackbarMessage: "",
-            snackbarColor: "error"
+            isSaving: false
         };
     },
     computed: {
@@ -82,6 +77,14 @@ export default {
          */
         hasDrawnGeometry () {
             return this.drawnGeometry !== null;
+        },
+
+        /**
+         * Gets the maximum image size in megabytes.
+         * @returns {Number} the maximum image size in MB.
+         */
+        maxImageSizeInMB () {
+            return this.maxImageSize / (1024 * 1024);
         },
 
         /**
@@ -179,7 +182,7 @@ export default {
             if (file.size > this.maxImageSize) {
                 this.showErrorMessage(this.$t("additional:modules.updateRequirements.messages.imageTooLarge", {
                     imageName: file.name,
-                    maxSize: this.maxImageSize / (1024 * 1024)
+                    maxSize: this.maxImageSizeInMB
                 }));
                 return;
             }
@@ -249,14 +252,12 @@ export default {
         },
 
         /**
-         * Shows the given message in the snackbar of the form.
+         * Shows the given message as error in the snackbar of the parent component.
          * @param {String} message the message to display.
          * @returns {void}
          */
         showErrorMessage (message) {
-            this.snackbarMessage = message;
-            this.snackbarColor = "error";
-            this.showSnackbar = true;
+            this.$emit("showSnackbarMessage", message, "error");
         }
     }
 };
@@ -342,6 +343,9 @@ export default {
         <h5 class="mb-2">
             {{ $t('additional:modules.updateRequirements.form.uploadOptional') }}
         </h5>
+        <p class="small text-muted mb-2">
+            {{ $t('additional:modules.updateRequirements.form.maxImageSize', {maxSize: maxImageSizeInMB}) }}
+        </p>
         <div
             v-if="typeof imageSrc !== 'undefined'"
             class="d-flex align-items-center gap-3 mb-2"
@@ -373,12 +377,6 @@ export default {
             :drop="loadImage"
             :multiple="false"
             accept="image/*"
-        />
-        <HrSnackbar
-            :model-value="showSnackbar"
-            :message="snackbarMessage"
-            :color="snackbarColor"
-            @update:model-value="val => showSnackbar = val"
         />
         <HrFooter
             :cancel-text="$t('additional:modules.updateRequirements.cancelButtonLabel')"

@@ -19,6 +19,7 @@
         "uploadOptional": "Bild hochladen (optional)",
         "removeImage": "Bild löschen",
         "imagePreview": "Vorschau des Bildes",
+        "maxImageSize": "Maximale Bildgröße: {{maxSize}} MB",
         "pleaseSelect": "Bitte wählen",
         "lastUpdate": "letzte Aktualisierung",
         "createdAt": "erstellt am: ",

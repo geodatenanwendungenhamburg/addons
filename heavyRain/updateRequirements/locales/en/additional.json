@@ -19,6 +19,7 @@
         "uploadOptional": "Upload image (optional)",
         "removeImage": "Delete image",
         "imagePreview": "Preview of the image",
+        "maxImageSize": "Maximum image size: {{maxSize}} MB",
         "pleaseSelect": "Please select",
         "lastUpdate": "Last update",
         "createdAt": "Created on: ",

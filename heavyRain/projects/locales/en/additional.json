@@ -40,6 +40,7 @@
         "description": "Short description / Type of measure",
         "protectedAreas": "Areas where protection level criteria are met",
         "fileUpload": "Upload file (optional)",
+        "maxFileSize": "Maximum file size: {{maxSize}} MB",
         "removeFile": "Delete file",
         "lastUpdate": "Last update"
       }

@@ -40,6 +40,7 @@
         "description": "Kurzbeschreibung / Art der Maßnahme",
         "protectedAreas": "Bereiche, wo die Kriterien des Schutzniveau erreicht sind",
         "fileUpload": "Datei hochladen (optional)",
+        "maxFileSize": "Maximale Dateigröße: {{maxSize}} MB",
         "removeFile": "Datei löschen",
         "lastUpdate": "Aktualisierung"
       }
