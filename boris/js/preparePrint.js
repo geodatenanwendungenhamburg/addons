@@ -90,14 +90,14 @@ export async function preparePrint (getResponse) {
 }
 
 /**
- * Helpers function for preparePrint that creates an address string based on the ol.feature\"s attributes strassenname, hausnummer and hausnummerzusatz
+ * Helpers function for preparePrint that creates an address string based on the ol.feature\"s attributes strasse, hausnummer and hausnummerzusatz
  * @param  {ol.feature} feature The ol-Feature
  * @return {String} The result string
  */
 export function createAddressString (feature) {
     let addressString = "";
 
-    addressString += feature.get("strassenname") || "";
+    addressString += feature.get("strasse") || "";
     addressString += " ";
     addressString += feature.get("hausnummer") || "";
     addressString += feature.get("hausnummerzusatz") || "";
@@ -112,7 +112,7 @@ export function createAddressString (feature) {
 export function createPostalCodeCityString (feature) {
     let postalCodeCityString = "";
 
-    postalCodeCityString += feature.get("postleitzahl") || "";
+    postalCodeCityString += feature.get("plz") || "";
     postalCodeCityString += " ";
     postalCodeCityString += feature.get("gemeinde") || "";
 

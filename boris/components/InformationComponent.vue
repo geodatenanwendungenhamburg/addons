@@ -106,7 +106,7 @@ export default {
             <dl>
                 <DetailComponent
                     :feature="selectedBrwFeature"
-                    :keys="['postleitzahl', 'gemeinde']"
+                    :keys="['plz', 'gemeinde']"
                     :label="$t('additional:modules.boris.locationDescription.codeCity')"
                 />
                 <DetailComponent
@@ -131,7 +131,7 @@ export default {
                 />
                 <DetailComponent
                     :feature="selectedBrwFeature"
-                    :keys="['strassenname', 'hausnummer', 'hausnummerzusatz']"
+                    :keys="['strasse', 'hausnummer', 'hausnummerzusatz']"
                     :label="$t('additional:modules.boris.locationDescription.address')"
                 />
                 <DetailComponent
