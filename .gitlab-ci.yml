@@ -1,0 +1,36 @@
+spec:
+  inputs:
+    pipeline_action:
+      description: "Select the custom pipeline to execute"
+      type: string
+      options:
+        - npm_audit
+      default: npm_audit
+    
+    deploy_tag:
+      description: "Tag to deploy (e.g., v1.0.0) - required for deploy_tag_opencode"
+      type: string
+      default: ""
+
+---
+image: node:22.19.0
+
+stages:
+  - security
+
+variables:
+  GIT_DEPTH: 5000  # include the last five hundred commits
+  PIPELINE_ACTION: "$[[ inputs.pipeline_action ]]"
+
+# ===== Custom Pipelines (triggered manually) =====
+
+npm_audit_security:
+  stage: security
+  cache:
+    paths:
+      - node_modules/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $PIPELINE_ACTION == "npm_audit"'
+  script:
+    - npm install
+    - npm audit --json
