@@ -3,7 +3,7 @@ import {expect} from "chai";
 
 describe("boris preparePrint functions", () => {
     it("createAddressString", () => {
-        const attributes = {"strassenname": "Bananas", "hausnummer": "19", "hausnummerzusatz": "b"},
+        const attributes = {"strasse": "Bananas", "hausnummer": "19", "hausnummerzusatz": "b"},
             feature = {
                 "attributes": attributes,
                 get: (key)=> {
@@ -15,7 +15,7 @@ describe("boris preparePrint functions", () => {
 
     });
     it("createPostalCodeCityString", () => {
-        const attributes = {"postleitzahl": "21109", "gemeinde": "Hamburg"},
+        const attributes = {"plz": "21109", "gemeinde": "Hamburg"},
             feature = {
                 "attributes": attributes,
                 get: (key)=> {
