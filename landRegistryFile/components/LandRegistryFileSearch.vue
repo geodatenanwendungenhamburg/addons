@@ -9,6 +9,7 @@ import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
 import InputText from "./shared/InputText.vue";
 import Multiselect from "vue-multiselect";
+import GeoJSON from "ol/format/GeoJSON";
 
 export default {
     name: "LandRegistryFileSearch",
@@ -89,10 +90,15 @@ export default {
                 this.prepareSearch();
             }
         });
+
+        this.map.on("singleclick", this.handleMapFeatureClick);
     },
     deactivated () {
         if (this.map && this.moveEndKey) {
             this.map.un("moveend", this.moveEndKey.listener);
+        }
+        if (this.map && this.mapClickHandler) {
+            this.map.un("singleclick", this.mapClickHandler);
         }
     },
     methods: {
@@ -291,6 +297,43 @@ export default {
             if (layer) {
                 layer.getSource().clear();
             }
+        },
+        /**
+         * Get features clicked on the map.
+         * @param {Object} evt - The map click event.
+         * @returns {void}
+         */
+        handleMapFeatureClick (evt) {
+            const map = evt?.map,
+                  clickedFeatures = [];
+
+            if (!map) {
+                return;
+            }
+
+            console.log("Map click event:", evt);
+
+            const format = new GeoJSON();
+
+            map.forEachFeatureAtPixel(evt.pixel, feature => {
+                                          const geojsonFeature = JSON.parse(format.writeFeature(feature));
+
+                                          console.log(feature.getStyle().getImage().getSrc());
+
+                                          feature.getStyle().getImage().setSrc("./resources/triangleBlack_selected.svg")
+
+                                          feature.changed();
+
+                                          clickedFeatures.push(geojsonFeature);
+                                          return false; // continue iteration, or true to stop after first
+                                      },
+                                      {
+                                          hitTolerance: 5,
+                                          layerFilter: layer => layer.get("name") === "Module/landRegistryFile/layer/belegenheiten"
+                                      }
+            );
+
+            this.setLandRegistryFileFeatures(clickedFeatures);
         }
     }
 };
