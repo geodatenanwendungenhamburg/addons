@@ -425,7 +425,8 @@ export default {
                         this.addOrReplaceLayer({
                             layerId: layerId,
                             visibility: true,
-                            showInLayerTree: true
+                            showInLayerTree: true,
+                            transparency: layerConf?.transparency ? layerConf?.transparency : 0
                         });
                     }
                 })
