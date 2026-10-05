@@ -10,6 +10,9 @@ import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
 import InputText from "./shared/InputText.vue";
 import Multiselect from "vue-multiselect";
 import GeoJSON from "ol/format/GeoJSON";
+import Style from "ol/style/Style";
+import Circle from "ol/style/Circle";
+import Fill from "ol/style/Fill";
 
 export default {
     name: "LandRegistryFileSearch",
@@ -48,7 +51,8 @@ export default {
         ...mapGetters("Modules/LandRegistryFile", [
             "showLoadingSpinner",
             "oafParams",
-            "oafSchema"
+            "oafSchema",
+            "mapFeaturesSelected"
         ]),
         ...mapGetters("Maps", [
             "extent"
@@ -86,7 +90,7 @@ export default {
     activated () {
         this.map = mapCollection.getMap("2D");
         this.moveEndKey = this.map?.on("moveend", () => {
-            if (!this.searchedOnFullExtent && this.searchInitiated) {
+            if (!this.searchedOnFullExtent && this.searchInitiated && !this.mapFeaturesSelected) {
                 this.prepareSearch();
             }
         });
@@ -97,8 +101,8 @@ export default {
         if (this.map && this.moveEndKey) {
             this.map.un("moveend", this.moveEndKey.listener);
         }
-        if (this.map && this.mapClickHandler) {
-            this.map.un("singleclick", this.mapClickHandler);
+        if (this.map && this.handleMapFeatureClick) {
+            this.map.un("singleclick", this.handleMapFeatureClick);
         }
     },
     methods: {
@@ -107,7 +111,8 @@ export default {
             "setLandRegistryFileFeatures"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
-            "queryOaf"
+            "queryOaf",
+            "updateSelectionLayer"
         ]),
         /**
         * Runs the queryOaf action with the provided parameters.
@@ -165,6 +170,7 @@ export default {
 
             this.setLandRegistryFileFeatures([]);
             this.removeFeaturesFromMap();
+            this.updateSelectionLayer({features: [], layerName: "Module/landRegistryFile/layer/selection"});
             this.searchInitiated = false;
             this.searchText = "";
         },
@@ -305,35 +311,80 @@ export default {
          */
         handleMapFeatureClick (evt) {
             const map = evt?.map,
-                  clickedFeatures = [];
+                  clickedFeatures = [],
+                  clickedOlFeatures = [];
 
             if (!map) {
                 return;
             }
 
-            console.log("Map click event:", evt);
-
             const format = new GeoJSON();
 
-            map.forEachFeatureAtPixel(evt.pixel, feature => {
-                                          const geojsonFeature = JSON.parse(format.writeFeature(feature));
+            map.forEachFeatureAtPixel(
+                evt.pixel, feature => {
+                    const geojsonFeature = JSON.parse(format.writeFeature(feature));
 
-                                          console.log(feature.getStyle().getImage().getSrc());
+                    clickedFeatures.push(geojsonFeature);
 
-                                          feature.getStyle().getImage().setSrc("./resources/triangleBlack_selected.svg")
+                    const clonedFeature = feature.clone(),
+                          clonedFeatureStyle = new Style({
+                              image: new Circle({
+                                  radius: 5,
+                                  fill: new Fill({color: "#03ffff"})
+                              })
+                          });
 
-                                          feature.changed();
-
-                                          clickedFeatures.push(geojsonFeature);
-                                          return false; // continue iteration, or true to stop after first
-                                      },
-                                      {
-                                          hitTolerance: 5,
-                                          layerFilter: layer => layer.get("name") === "Module/landRegistryFile/layer/belegenheiten"
-                                      }
+                    clonedFeature.setStyle(clonedFeatureStyle);
+                    clickedOlFeatures.push(clonedFeature);
+                    return false; // continue iteration, or true to stop after first
+                },
+                {
+                    hitTolerance: 5,
+                    layerFilter: layer => layer.get("name") === "Module/landRegistryFile/layer/belegenheiten"
+                }
             );
 
-            this.setLandRegistryFileFeatures(clickedFeatures);
+            const hasClickedFeatures = clickedFeatures.length > 0;
+
+            if (hasClickedFeatures) {
+                this.setLandRegistryFileFeatures(clickedFeatures);
+            }
+
+            else {
+                const features = this.getGeoJsonFeaturesFromLayer("Module/landRegistryFile/layer/belegenheiten");
+
+                this.setLandRegistryFileFeatures(features);
+            }
+            this.updateSelectionLayer({features: clickedOlFeatures, layerName: "Module/landRegistryFile/layer/selection"});
+            this.setCurrentTab("tabResults");
+        },
+        /**
+         * Gets GeoJSON features from the specified map layer.
+         *
+         * @param {String} layerName Name of the layer to retrieve features from.
+         * @returns {Array<Object>} GeoJSON features, or an empty array if the map is unavailable.
+         */
+        getGeoJsonFeaturesFromLayer (layerName) {
+            const map = mapCollection.getMap("2D"),
+                  features = [],
+                  format = new GeoJSON();
+
+            if (!map) {
+                return features;
+            }
+
+            const layer = map.getLayers().getArray().find(l => l.get("name") === layerName);
+            const source = layer.getSource();
+
+            if (!layer || !source) {
+                return features;
+            }
+
+            source.getFeatures().forEach(feature => {
+                features.push(JSON.parse(format.writeFeature(feature)));
+            });
+
+            return features;
         }
     }
 };

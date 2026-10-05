@@ -13,7 +13,7 @@
  * Addon state
  * @property {Boolean} showLoadingSpinner - Show loading spinner or not
  * @property {Object[]} landRegistryFileFeatures The array of land registry file features retrieved from the OAF collection.
- * @property {Object|null} oafSchema The schema of the OAF collection, if loaded.
+ * @property {Object|null} oafSchema The schema of the OAF collection.
  * @property {Object} oafParams The parameters for querying the OAF collection.
  * @property {string} oafParams.url - The URL of the OAF service.
  * @property {string} oafParams.collection - The name of the OAF collection to query.
@@ -31,6 +31,7 @@
  * @property {Object} sorting - The sorting configuration for the results table.
  * @property {string} sorting.columnName - The name of the column to sort by.
  * @property {string} sorting.order - The order of sorting, can be "origin", "asc", or "desc".
+ * @property {Boolean} mapFeaturesSelected - Indicates whether any features are currently selected on the map.
  */
 
 const state = {
@@ -75,7 +76,8 @@ const state = {
     sorting: {
         columnName: "",
         order: "origin"
-    }
+    },
+    mapFeaturesSelected: false
 };
 
 export default state;

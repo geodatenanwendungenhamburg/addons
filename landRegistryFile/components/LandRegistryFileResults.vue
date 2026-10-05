@@ -1,10 +1,15 @@
 <script>
-import {mapGetters, mapMutations} from "vuex";
+import {mapGetters, mapMutations, mapActions} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import Style from "ol/style/Style";
+import Circle from "ol/style/Circle";
+import Fill from "ol/style/Fill";
 
 export default {
     name: "LandRegistryFileResults",
@@ -20,7 +25,8 @@ export default {
     data () {
         return {
             showMoreFields: false,
-            scrollPending: false
+            scrollPending: false,
+            selectedRowId: null
         };
     },
     computed: {
@@ -31,6 +37,9 @@ export default {
             "sorting",
             "getSortedFeatures",
             "showLoadingSpinner"
+        ]),
+        ...mapGetters("Menu", [
+            "expanded"
         ]),
         /**
          * Prepares the data structure for the table component, including headers and items.
@@ -66,6 +75,7 @@ export default {
         getSortedFeatures () {
             this.scrollPending = true;
             this.performPendingScroll();
+            this.selectedRowId = null;
         },
         showLoadingSpinner (isLoading) {
             if (!isLoading) {
@@ -78,8 +88,43 @@ export default {
             "setSelectedDetailFeatureId",
             "setSorting"
         ]),
-        showPosition (row) {
-            console.warn("showPosition noch nicht implementiert", row);
+        ...mapActions("Modules/LandRegistryFile", [
+            "updateSelectionLayer"
+        ]),
+        ...mapActions("Maps", [
+            "setCenter",
+            "setZoom"
+        ]),
+        /**
+         * Displays the position of the table row on the map.
+         * @param {Object} row - The table row containing UTM coordinates.
+         * @returns {void}
+         */
+        showMapPosition (row) {
+            let feature = null;
+
+            if (this.selectedRowId === row.id) {
+                this.selectedRowId = null;
+            }
+            else {
+                this.selectedRowId = row.id;
+
+                feature = new Feature({
+                    geometry: new Point([row.utm_rw, row.utm_hw])
+                });
+
+                const selectionStyle = new Style({
+                    image: new Circle({
+                        radius: 5,
+                        fill: new Fill({color: "#03ffff"})
+                    })
+                });
+
+                feature.setStyle(selectionStyle);
+                this.zoomToSelectedFeature(feature);
+            }
+
+            this.updateSelectionLayer({features: feature ? [feature] : [], layerName: "Module/landRegistryFile/layer/selection"});
         },
         /**
          * Sets the selected feature ID and switches to the details tab.
@@ -136,6 +181,61 @@ export default {
 
                 selectedRow?.scrollIntoView({behavior: "smooth", block: "center"});
             });
+        },
+        /** Centers the map on the given coordinate, accounting for visible menus.
+         * @param {Array<number>|null} coord - The coordinate to center the map on.
+         * @returns {void}
+         */
+        centerVisibleMap (coord = null) {
+            const coordinates = coord;
+
+            const map = mapCollection.getMap("2D"),
+                  pixelAtCoordinates = map?.getPixelFromCoordinate(coordinates);
+
+            if (!map || !pixelAtCoordinates) {
+                return;
+            }
+
+            const rightPadding = this.expanded("secondaryMenu")
+                      ? document.getElementById("mp-menu-secondaryMenu").offsetWidth + 20
+                      : 20,
+                  leftPadding = this.expanded("mainMenu")
+                      ? document.getElementById("mp-menu-mainMenu").offsetWidth + 20
+                      : 20,
+                  offset = (rightPadding - leftPadding) / 2,
+                  shiftedPixel = [pixelAtCoordinates[0] + offset, pixelAtCoordinates[1]],
+                  shiftedCoordinate = map.getCoordinateFromPixel(shiftedPixel);
+
+            this.setCenter(shiftedCoordinate);
+        },
+        /**
+         * Zooms to the selected feature and centers it in the visible map area.
+         * @param {Feature|null} feature - The feature to zoom to.
+         * @returns {void}
+         */
+        zoomToSelectedFeature (feature) {
+            if (feature) {
+                const map = mapCollection.getMap("2D"),
+                      view = map?.getView(),
+                      setZoom = 7;
+
+                if (!map || !view) {
+                    return;
+                }
+
+                if (view.getZoom() === setZoom) {
+                    this.centerVisibleMap(feature.getGeometry().getCoordinates());
+                }
+                else {
+                    const onMoveEnd = () => {
+                        this.centerVisibleMap(feature.getGeometry().getCoordinates());
+                        map.un("moveend", onMoveEnd);
+                    };
+
+                    map.on("moveend", onMoveEnd);
+                    view.setZoom(setZoom);
+                }
+            }
         }
     }
 };
@@ -187,14 +287,13 @@ export default {
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowPosition')"
                             icon="bi-crosshair"
-                            :class-array="['action-button']"
-                            @click.stop="showPosition(row)"
+                            :class-array="['action-button', row.id === selectedRowId ?'map-selected-button' : '']"
+                            @click.stop="showMapPosition(row)"
                         />
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowDetails')"
                             icon="bi-arrow-right-circle"
                             :class-array="['action-button', row.id === selectedDetailFeatureId ?'selected-button' : '']"
-                            :style="selectedDetailCssVars"
                             @click.stop="showDetails(row)"
                         />
                     </div>
@@ -265,6 +364,10 @@ export default {
                     &.selected-button {
                         background-color: rgb(214, 227, 255);
                         border-color: rgb(60, 95, 148);
+                    }
+
+                    &.map-selected-button {
+                        background-color: #03ffff;
                     }
 
                     > i {

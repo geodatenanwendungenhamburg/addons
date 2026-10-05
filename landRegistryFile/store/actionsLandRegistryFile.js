@@ -169,5 +169,39 @@ export default {
 
         layer.layer.getSource().clear();
         layer.layer.getSource().addFeatures(featuresToMap);
+    },
+    /**
+     * Adds or removes the selected features to/from the given selection layer and creates it if needed.
+     * @param {Object} context Vuex action context.
+     * @param {Function} context.commit Vuex commit function.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Array} features - The OpenLayers features to display as selection.
+     * @param {string} layerName - The name of the selection layer.
+     * @returns {Promise<void>} Resolves after the selected features have been added to the layer.
+     */
+    async updateSelectionLayer ({commit, dispatch}, {features, layerName}) {
+        const map = mapCollection.getMap("2D");
+
+        if (!map) {
+            return;
+        }
+
+        if (!features || features.length === 0) {
+            commit("setMapFeaturesSelected", false);
+        }
+        else {
+            commit("setMapFeaturesSelected", true);
+        }
+
+        let selectionLayer = map.getLayers().getArray().find(l => l.get("name") === layerName);
+
+        if (!selectionLayer) {
+            selectionLayer = await dispatch("Maps/addNewLayerIfNotExists", {layerName: layerName}, {root: true});
+        }
+
+        selectionLayer.getSource().clear();
+        if (features && features.length > 0) {
+            selectionLayer.getSource().addFeatures(features);
+        }
     }
 };

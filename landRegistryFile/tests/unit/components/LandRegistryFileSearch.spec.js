@@ -61,6 +61,9 @@ describe("addons/landRegistryFile/tests/unit/LandRegistryFileSearch.spec.js", ()
                                 setLandRegistryFileFeatures (state, payload) {
                                     state.landRegistryFileFeatures = payload;
                                 }
+                            },
+                            actions: {
+                                updateSelectionLayer: () => Promise.resolve()
                             }
                         }
                     }
