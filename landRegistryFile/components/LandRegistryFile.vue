@@ -107,6 +107,7 @@ export default {
             if (oldTabId === "tabDetails" && newTabId === "tabResults") {
                 this.$nextTick(() => {
                     if (this.selectedDetailFeatureId) {
+                        tabResults?.updatePageToShowSelectedFeature(this.selectedDetailFeatureId);
                         tabResults?.scrollToSelectedDetail();
                     }
                 });

@@ -42,7 +42,8 @@
                 "actionsShowDetails": "Details anzeigen",
                 "actionsOpenLink": "Akte in ELDORADO öffnen",
                 "noResultsMessage": "Keine Ergebnisse gefunden. Bitte ändern Sie Ihre Suchkriterien.",
-                "numberOfResults": "Anzahl der gefundenen Datensätze:"
+                "numberOfResults": "Anzahl der gefundenen Datensätze:",
+                "datasetsPerPageLabel": "Datensätze pro Seite"
               },
               "tabDetails": {
                 "label": "Details",

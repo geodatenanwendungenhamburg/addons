@@ -119,4 +119,50 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
         await wrapper.vm.showDetails({id: featureId});
         expect(wrapper.vm.selectedDetailFeatureId).to.be.null;
     });
+
+    describe("handle pagination on result table", () => {
+
+        it("should find the correct number of pages", async () => {
+            wrapper.vm.currentDatasetsPerPage = 2;
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.totalNumberOfPages).to.equal(2);
+            expect(wrapper.vm.currentPage).to.equal(1);
+
+            wrapper.vm.pageChange(2);
+            expect(wrapper.vm.currentPage).to.equal(2);
+
+            wrapper.vm.currentDatasetsPerPage = 4;
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.totalNumberOfPages).to.equal(1);
+            expect(wrapper.vm.currentPage).to.equal(1);
+        });
+
+        it("should find the page for a feature", async () => {
+            wrapper.vm.currentDatasetsPerPage = 2;
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.currentPage).to.equal(1);
+
+            wrapper.vm.updatePageToShowSelectedFeature("3");
+            expect(wrapper.vm.currentPage).to.equal(2);
+
+            wrapper.vm.updatePageToShowSelectedFeature("2");
+            expect(wrapper.vm.currentPage).to.equal(1);
+
+            wrapper.vm.updatePageToShowSelectedFeature("1");
+            expect(wrapper.vm.currentPage).to.equal(1);
+        });
+
+        it("should not change the page for a feature that was not found", async () => {
+            wrapper.vm.currentDatasetsPerPage = 2;
+            await wrapper.vm.$nextTick();
+
+            expect(wrapper.vm.currentPage).to.equal(1);
+
+            wrapper.vm.updatePageToShowSelectedFeature("5");
+            expect(wrapper.vm.currentPage).to.equal(1);
+        });
+    });
 });

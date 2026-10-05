@@ -11,6 +11,7 @@ import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
+import PaginationControl from "@shared/modules/pagination/components/PaginationControl.vue";
 
 export default {
     name: "LandRegistryFileResults",
@@ -18,7 +19,8 @@ export default {
         FlatButton,
         TableComponent,
         IconButton,
-        SwitchInput
+        SwitchInput,
+        PaginationControl
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
@@ -27,7 +29,10 @@ export default {
         return {
             showMoreFields: false,
             scrollPending: false,
-            selectedRowId: null
+            selectedRowId: null,
+            currentDatasetsPerPage: 10,
+            datasetsPerPage: [10, 25, 50],
+            currentPage: 1
         };
     },
     computed: {
@@ -61,19 +66,36 @@ export default {
                           index: this.tableFields.length
                       }
                   ],
+                  startIndex = (this.currentPage - 1) * this.currentDatasetsPerPage,
                   items = (this.getSortedFeatures || []).map(feature => ({
                       ...feature.properties,
                       id: feature.id
-                  }));
+                  })).slice(startIndex, startIndex + this.currentDatasetsPerPage);
 
             return {
                 headers,
                 items
             };
+        },
+        /**
+         * Calculate the total number of pages to show in the paginator. Based on the total number of datasets and the number of datasets to display on one page
+         * @returns {Number} total number of pages
+         */
+        totalNumberOfPages () {
+            const addLastPage = this.getSortedFeatures.length % this.currentDatasetsPerPage > 0 ? 1 : 0;
+
+            return Math.floor(this.getSortedFeatures.length / this.currentDatasetsPerPage) + addLastPage;
         }
     },
     watch: {
         getSortedFeatures () {
+            if (this.selectedDetailFeatureId) {
+                this.updatePageToShowSelectedFeature(this.selectedDetailFeatureId);
+            }
+            else {
+                this.currentPage = 1;
+            }
+
             this.scrollPending = true;
             this.performPendingScroll();
             this.selectedRowId = null;
@@ -82,6 +104,9 @@ export default {
             if (!isLoading) {
                 this.performPendingScroll();
             }
+        },
+        currentDatasetsPerPage () {
+            this.currentPage = 1;
         }
     },
     methods: {
@@ -249,6 +274,32 @@ export default {
             else {
                 console.warn("Der Datensatz hat keinen ELDORADO-Link");
             }
+        },
+        /**
+         * Updates the current page.
+         * @param {number} newPage - The page number to display.
+         * @returns {void}
+         */
+        pageChange (newPage) {
+            this.currentPage = newPage;
+        },
+        /**
+         * Navigates to the page containing the feature with the given ID.
+         * @param {string|number} featureId - The ID of the feature to display.
+         * @returns {void}
+         */
+        updatePageToShowSelectedFeature (featureId) {
+            const indexInSortedFeatures = (this.getSortedFeatures || []).findIndex((feature) => {
+                      return feature.id === featureId;
+                  }),
+                  addOnePage = (indexInSortedFeatures + 1) % this.currentDatasetsPerPage > 0 ? 1 : 0,
+                  updatedPage = Math.floor((indexInSortedFeatures + 1) / this.currentDatasetsPerPage) + addOnePage;
+
+            if (indexInSortedFeatures === -1 || updatedPage < 1) {
+                return;
+            }
+
+            this.pageChange(updatedPage);
         }
     }
 };
@@ -275,6 +326,7 @@ export default {
                 {{ $t("additional:modules.landRegistryFile.tabs.tabResults.numberOfResults") }}
                 <span class="number-of-results">{{ getSortedFeatures.length }}</span>
             </p>
+
             <div class="switch-container">
                 <SwitchInput
                     id="idShowMoreFieldsSwitch"
@@ -319,6 +371,13 @@ export default {
                     </div>
                 </template>
             </TableComponent>
+
+            <PaginationControl
+                v-if="totalNumberOfPages > 1"
+                :current-page="currentPage"
+                :total-pages="totalNumberOfPages"
+                @page-change="pageChange"
+            />
         </div>
 
         <div class="FixedContent buttons-footer">
@@ -328,6 +387,24 @@ export default {
                 :secondary="true"
                 @click="setCurrentTab('tabSearch')"
             />
+
+            <div>
+                <label for="datasetsPerPage">
+                    {{ $t("additional:modules.landRegistryFile.tabs.tabResults.datasetsPerPageLabel") }}
+                </label>
+                <select
+                    id="datasetsPerPage"
+                    v-model.number="currentDatasetsPerPage"
+                >
+                    <option
+                        v-for="datasetCount in datasetsPerPage"
+                        :key="datasetCount"
+                        :value="datasetCount"
+                    >
+                        {{ datasetCount }}
+                    </option>
+                </select>
+            </div>
         </div>
     </div>
 </template>
@@ -343,6 +420,7 @@ export default {
         }
 
         div.table-wrapper {
+            display: flex;
             gap: 0.25rem;
 
             p.number-of-results-wrapper {
@@ -359,6 +437,10 @@ export default {
                     font-family: $font_family_accent;
                     margin-left: 1rem;
                 }
+            }
+
+            :deep(div.fixed) {
+                flex: 1;
             }
 
             div.switch-container {
@@ -464,6 +546,23 @@ export default {
                 tbody tr:nth-of-type(even):not(.fixed-row):not(.fixed) > td {
                     background-color: rgba(0, 0, 0, 0.05);
                 }
+            }
+        }
+
+        div.buttons-footer {
+            justify-content: space-between;
+            align-items: center;
+
+            label {
+                font-size: 13px;
+                font-weight: normal;
+                line-height: 17px;
+                color: #646262;
+                margin-right: 0.5rem;
+            }
+
+            #datasetsPerPage {
+                padding: 0.2rem;
             }
         }
     }
