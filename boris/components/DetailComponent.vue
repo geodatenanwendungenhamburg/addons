@@ -21,6 +21,9 @@ export default {
 
             this.keys.forEach(key => {
                 if (this.feature.get(key) !== undefined) {
+                    if (key === "hausnummerzusatz" && value.endsWith(" ")) {
+                        value = value.slice(0, -1);
+                    }
                     value += this.feature.get(key);
                     value += " ";
                 }

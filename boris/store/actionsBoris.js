@@ -209,6 +209,12 @@ const actions = {
         let groupedLayers = "",
             url = null;
 
+        console.warn("requestGFI called", {
+            list: state.filteredLayerList.map(l => [l.id, l.name, l.visibility]),
+            selected: selectedLayer?.id,
+            coordinates
+        });
+
         await dispatch("replaceByIdInLayerConfig", {
             layerConfigs: [{
                 id: selectedLayer.id,
@@ -292,8 +298,7 @@ const actions = {
      */
     getFeatureRequestById ({dispatch}, {featureId, featureYear}) {
         const yearInt = parseInt(featureYear, 10),
-            index = Config.layerConf.lastIndexOf("/"),
-            url = Config.layerConf.substring(0, index);
+            url = "https://geodienste.hamburg.de";
 
         let typeName,
             urlParams = null,

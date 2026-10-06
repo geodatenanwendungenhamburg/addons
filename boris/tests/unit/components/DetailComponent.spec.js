@@ -110,7 +110,7 @@ describe("ADDONS: addons/boris/components/DetailComponent.vue", () => {
 
             const result = wrapper.vm.getValue();
 
-            expect(result).to.be.equal("Sesamstraße 10 abc");
+            expect(result).to.be.equal("Sesamstraße 10abc");
         });
     });
 });
