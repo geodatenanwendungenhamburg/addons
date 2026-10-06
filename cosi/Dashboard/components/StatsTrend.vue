@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {getTrendStyle, getTrend} from "../utils/trends";
 import {VIcon} from "vuetify/components/VIcon";
 import {VTooltip} from "vuetify/components/VTooltip";
@@ -66,7 +67,7 @@ export default {
                 :style="getTrendStyle(dy, trendColors)"
                 v-bind="props"
             >
-                mdi-arrow-right
+                class:mdi mdi-arrow-right
             </v-icon>
         </template>
         <span>

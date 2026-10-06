@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import StatsTrend from "./StatsTrend.vue";
 import {getValue, getValueClass, getValueTooltip, isValueCalculated} from "../utils/tableCells";
 import {mapGetters} from "vuex";
@@ -91,7 +92,7 @@ export default {
                                 x-small
                                 :title="$t('additional:modules.tools.cosi.dashboard.titleForCalculatedStatistic')"
                             >
-                                mdi-information
+                                class:mdi mdi-information
                             </v-icon>
                             <span
                                 :title="getValueTooltip(item, header, year)"
@@ -108,7 +109,7 @@ export default {
                         x-small
                         :title="$t('additional:modules.tools.cosi.dashboard.titleForCalculatedStatistic')"
                     >
-                        mdi-information
+                        class:mdi mdi-information
                     </v-icon>
                     <span
                         :title="getValueTooltip(item, header, currentTimestamp)"

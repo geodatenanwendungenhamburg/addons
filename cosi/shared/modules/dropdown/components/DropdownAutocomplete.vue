@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {VAutocomplete} from "vuetify/components/VAutocomplete";
 import {VCheckboxBtn} from "vuetify/components/VCheckbox";
 import {VChip} from "vuetify/components/VChip";
@@ -166,7 +167,7 @@ export default {
                     v-if="index < maxChipCount"
                     v-bind="props"
                     closable
-                    close-icon="mdi-close"
+                    close-icon="class:mdi mdi-close"
                     @click="removeItem(item.value)"
                 >
                     {{ item }}
@@ -219,7 +220,7 @@ export default {
                     v-if="index < maxChipCount"
                     v-bind="props"
                     closable
-                    close-icon="mdi-close"
+                    close-icon="class:mdi mdi-close"
                     @click="removeItem(internalItem.value)"
                 >
                     {{ internalItem.value }}

@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {VIcon} from "vuetify/components/VIcon";
 
 export default {
@@ -45,7 +46,7 @@ export default {
                     :color="colors[index]"
                     small
                 >
-                    mdi-square-rounded
+                    class:mdi mdi-square-rounded
                 </v-icon>
                 <span
                     class="steps"
@@ -58,20 +59,20 @@ export default {
                     :color="colors[index]"
                     x-small
                 >
-                    mdi-minus-thick
+                    class:mdi mdi-minus-thick
                 </v-icon>
                 <v-icon
                     :color="colors[index]"
                     x-small
                 >
-                    mdi-minus-thick
+                    class:mdi mdi-minus-thick
                 </v-icon>
                 <v-icon
                     class="me-1"
                     :color="colors[index]"
                     x-small
                 >
-                    mdi-minus-thick
+                    class:mdi mdi-minus-thick
                 </v-icon>
                 <span
                     class="steps"

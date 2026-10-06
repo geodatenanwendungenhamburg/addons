@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {Select} from "ol/interaction";
 import {mapGetters} from "vuex";
 import Modal from "@shared/modules/modals/components/ModalItem.vue";
@@ -186,7 +187,7 @@ export default {
             @click="togglePickReference"
         >
             <span v-if="useIcons">
-                <v-icon>mdi-eyedropper</v-icon>
+                <v-icon>class:mdi mdi-eyedropper</v-icon>
             </span>
             <span v-else>
                 {{ $t('additional:modules.tools.cosi.scenarioBuilder.pickReference') }}

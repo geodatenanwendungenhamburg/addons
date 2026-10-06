@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import getters from "../store/gettersScenarioBuilder";
 import mutations from "../store/mutationsScenarioBuilder";
 import actions from "../store/actionsScenarioBuilder";
@@ -211,7 +212,7 @@ export default {
                             @click="activeScenario ? activeScenario.exportScenario() : null"
                         >
                             <span v-if="useIcons">
-                                <v-icon>mdi-download</v-icon>
+                                <v-icon>class:mdi mdi-download</v-icon>
                             </span>
                             <span v-else>
                                 {{ $t('additional:modules.tools.cosi.scenarioManager.exportScenario') }}
@@ -232,7 +233,7 @@ export default {
                                 @click="activeScenario ? activeScenario.exportScenarioFeatures() : null"
                             >
                                 <span v-if="useIcons">
-                                    <v-icon>mdi-map-marker-multiple</v-icon>
+                                    <v-icon>class:mdi mdi-map-marker-multiple</v-icon>
                                 </span>
                                 <span v-else>
                                     {{ $t('additional:modules.tools.cosi.scenarioManager.exportSimulatedFeatures') }}
@@ -251,7 +252,7 @@ export default {
                                 @click="activeScenario ? activeScenario.exportScenarioNeighborhoods() : null"
                             >
                                 <span v-if="useIcons">
-                                    <v-icon>mdi-home</v-icon>
+                                    <v-icon>class:mdi mdi-home</v-icon>
                                 </span>
                                 <span v-else>
                                     {{ $t('additional:modules.tools.cosi.scenarioManager.exportNeighborhoods') }}
@@ -270,7 +271,7 @@ export default {
                                 @click="activeScenario ? activeScenario.exportScenario() : null"
                             >
                                 <span v-if="useIcons">
-                                    <v-icon>mdi-download</v-icon>
+                                    <v-icon>class:mdi mdi-download</v-icon>
                                 </span>
                                 <span v-else>
                                     {{ $t('additional:modules.tools.cosi.scenarioManager.exportScenario') }}
@@ -290,7 +291,7 @@ export default {
                     @click="onDelete"
                 >
                     <span v-if="useIcons">
-                        <v-icon>mdi-delete-forever</v-icon>
+                        <v-icon>class:mdi mdi-delete-forever</v-icon>
                     </span>
                     <span v-else>
                         {{ $t('additional:modules.tools.cosi.scenarioManager.deleteScenario') }}
@@ -322,7 +323,7 @@ export default {
                             @click="onPruneAll"
                         >
                             <v-icon left>
-                                mdi-domain-remove
+                                class:mdi mdi-domain-remove
                             </v-icon>
                             {{ $t('additional:modules.tools.cosi.scenarioManager.pruneAllFeatures') }}
                         </v-btn>
@@ -341,7 +342,7 @@ export default {
                                 @click="onPruneSimulation"
                             >
                                 <v-icon left>
-                                    mdi-map-marker-remove
+                                    class:mdi mdi-map-marker-remove
                                 </v-icon>
                                 {{ $t('additional:modules.tools.cosi.scenarioManager.pruneSimulatedFeatures') }}
                             </v-btn>
@@ -358,7 +359,7 @@ export default {
                                 @click="onPruneNeighborhoods"
                             >
                                 <v-icon left>
-                                    mdi-home-remove
+                                    class:mdi mdi-home-remove
                                 </v-icon>
                                 {{ $t('additional:modules.tools.cosi.scenarioManager.pruneNeighborhoods') }}
                             </v-btn>
@@ -375,7 +376,7 @@ export default {
                                 @click="onPruneAll"
                             >
                                 <v-icon left>
-                                    mdi-domain-remove
+                                    class:mdi mdi-domain-remove
                                 </v-icon>
                                 {{ $t('additional:modules.tools.cosi.scenarioManager.pruneAllFeatures') }}
                             </v-btn>

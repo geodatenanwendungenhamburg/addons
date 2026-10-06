@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import DropdownAutocomplete from "../../shared/modules/dropdown/components/DropdownAutocomplete.vue";
 import getNestedValues from "@shared/js/utils/getNestedValues.js";
 import ToolInfo from "../../shared/modules/toolInfo/components/ToolInfo.vue";
@@ -244,7 +245,7 @@ export default {
                 :title="$t('additional:modules.tools.cosi.featuresList.distanceScoreChartTooltip')"
                 @click.native="$emit('showDistanceScoresForSelected', selectedLayerList)"
             >
-                <v-icon>mdi-radar</v-icon>
+                <v-icon>class:mdi mdi-radar</v-icon>
             </v-btn>
             <v-btn
                 depressed
@@ -254,7 +255,7 @@ export default {
                 :title="$t('additional:modules.tools.cosi.featuresList.distanceScoreHistogramTooltip')"
                 @click.native="$emit('showDistanceScoreHistogram', selectedLayerList)"
             >
-                <v-icon>mdi-chart-histogram</v-icon>
+                <v-icon>class:mdi mdi-chart-histogram</v-icon>
             </v-btn>
             -->
         </v-card-actions>

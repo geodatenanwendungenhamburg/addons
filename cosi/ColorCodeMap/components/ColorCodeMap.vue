@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapMutations, mapActions} from "vuex";
 import getters from "../store/gettersColorCodeMap";
 import mutations from "../store/mutationsColorCodeMap";
@@ -359,12 +360,12 @@ export default {
                     >
                         <template v-if="minimize">
                             <v-icon>
-                                mdi-plus
+                                class:mdi mdi-plus
                             </v-icon>
                         </template>
                         <template v-else>
                             <v-icon>
-                                mdi-minus
+                                class:mdi mdi-minus
                             </v-icon>
                         </template>
                     </button>
@@ -378,12 +379,12 @@ export default {
                         <v-icon
                             v-if="visualizationState"
                         >
-                            mdi-eye-off
+                            class:mdi mdi-eye-off
                         </v-icon>
                         <v-icon
                             v-else
                         >
-                            mdi-eye
+                            class:mdi mdi-eye
                         </v-icon>
                     </button>
                     <button
@@ -392,7 +393,7 @@ export default {
                         @click="changeSelector(-1)"
                     >
                         <v-icon>
-                            mdi-chevron-left
+                            class:mdi mdi-chevron-left
                         </v-icon>
                     </button>
                     <button
@@ -401,7 +402,7 @@ export default {
                         @click="changeSelector(1)"
                     >
                         <v-icon>
-                            mdi-chevron-right
+                            class:mdi mdi-chevron-right
                         </v-icon>
                     </button>
                     <v-select
@@ -458,7 +459,7 @@ export default {
                     @click="showInfo"
                 >
                     <v-icon>
-                        mdi-help-circle
+                        class:mdi mdi-help-circle
                     </v-icon>
                 </button>
                 <div
@@ -474,12 +475,12 @@ export default {
                         <v-icon
                             v-if="!playState"
                         >
-                            mdi-play-circle
+                            class:mdi mdi-play-circle
                         </v-icon>
                         <v-icon
                             v-else
                         >
-                            mdi-pause-circle-outline
+                            class:mdi mdi-pause-circle-outline
                         </v-icon>
                     </button>
                     <input
@@ -492,7 +493,7 @@ export default {
                     :title="$t('additional:modules.tools.colorCodeMap.generateChart')"
                 >
                     <v-icon>
-                        mdi-poll
+                        class:mdi mdi-poll
                     </v-icon>
                 </button>
                 <button
@@ -500,7 +501,7 @@ export default {
                     @click="openMetadata()"
                 >
                     <v-icon>
-                        mdi-information
+                        class:mdi mdi-information
                     </v-icon>
                 </button>
             </div>

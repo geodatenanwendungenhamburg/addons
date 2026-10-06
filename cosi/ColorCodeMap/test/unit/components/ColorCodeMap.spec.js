@@ -189,7 +189,7 @@ describe.skip("ColorCodeMap.vue", () => {
             const wrapper = await mount(),
                 button = wrapper.findComponent({name: "v-icon"});
 
-            expect(button.text()).to.be.equal("mdi-plus");
+            expect(button.text()).to.be.equal("class:mdi mdi-plus");
         });
 
         it("should find mdi-minus icon if minimize is false", async () => {
@@ -212,7 +212,7 @@ describe.skip("ColorCodeMap.vue", () => {
                 minimize: false
             });
 
-            expect(button.text()).to.be.equal("mdi-minus");
+            expect(button.text()).to.be.equal("class:mdi mdi-minus");
         });
 
         it("should find mdi-eye icon if visualizationState is false", async () => {
@@ -231,7 +231,7 @@ describe.skip("ColorCodeMap.vue", () => {
             const wrapper = await mount(),
                 button = wrapper.find("#switch");
 
-            expect(button.text()).to.be.equal("mdi-eye");
+            expect(button.text()).to.be.equal("class:mdi mdi-eye");
         });
 
         it("should find mdi-eye-off icon if visualizationState is true", async () => {
@@ -252,7 +252,7 @@ describe.skip("ColorCodeMap.vue", () => {
             wrapper.vm.setVisualizationState(true);
             await wrapper.vm.$nextTick();
 
-            expect(wrapper.find("#switch").text()).to.be.equal("mdi-eye-off");
+            expect(wrapper.find("#switch").text()).to.be.equal("class:mdi mdi-eye-off");
         });
 
         it("should find mdi-chevron-left icon", async () => {
@@ -270,7 +270,7 @@ describe.skip("ColorCodeMap.vue", () => {
 
             const wrapper = await mount();
 
-            expect(wrapper.find(".prev").text()).to.be.equal("mdi-chevron-left");
+            expect(wrapper.find(".prev").text()).to.be.equal("class:mdi mdi-chevron-left");
         });
 
         it("should find mdi-chevron-right icon", async () => {
@@ -288,7 +288,7 @@ describe.skip("ColorCodeMap.vue", () => {
 
             const wrapper = await mount();
 
-            expect(wrapper.find(".next").text()).to.be.equal("mdi-chevron-right");
+            expect(wrapper.find(".next").text()).to.be.equal("class:mdi mdi-chevron-right");
         });
     });
 
@@ -315,7 +315,7 @@ describe.skip("ColorCodeMap.vue", () => {
 
             await button.trigger("click");
             await wrapper.vm.$nextTick();
-            expect(button.text()).to.be.equal("mdi-minus");
+            expect(button.text()).to.be.equal("class:mdi mdi-minus");
             expect(ccm.classes("minimized")).to.be.false;
         });
 
@@ -340,7 +340,7 @@ describe.skip("ColorCodeMap.vue", () => {
             await wrapper.vm.$nextTick();
             await button.trigger("click");
             await wrapper.vm.$nextTick();
-            expect(button.text()).to.be.equal("mdi-plus");
+            expect(button.text()).to.be.equal("class:mdi mdi-plus");
             expect(ccm.classes("minimized")).to.be.true;
         });
 
@@ -362,10 +362,10 @@ describe.skip("ColorCodeMap.vue", () => {
 
             await button.trigger("click");
             await wrapper.vm.$nextTick();
-            expect(button.text()).to.be.equal("mdi-eye-off");
+            expect(button.text()).to.be.equal("class:mdi mdi-eye-off");
             await button.trigger("click");
             await wrapper.vm.$nextTick();
-            expect(button.text()).to.be.equal("mdi-eye");
+            expect(button.text()).to.be.equal("class:mdi mdi-eye");
         });
     });
 });

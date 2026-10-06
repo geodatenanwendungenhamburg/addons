@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import getters from "../store/gettersFeaturesList";
 import mutations from "../store/mutationsFeaturesList";
@@ -749,13 +750,13 @@ export default {
                                     v-if="item.isModified"
                                     :title="$t('additional:modules.tools.cosi.featuresList.warningIsModified')"
                                 >
-                                    mdi-alert
+                                    class:mdi mdi-alert
                                 </v-icon>
                                 <v-icon
                                     v-if="item.isSimulation"
                                     :title="$t('additional:modules.tools.cosi.featuresList.warningIsSimulated')"
                                 >
-                                    mdi-sprout
+                                    class:mdi mdi-sprout
                                 </v-icon>
                             </template>
                             <template #[`item.style`]="{ item }">
@@ -768,7 +769,7 @@ export default {
                                         class="featureToggle"
                                         @click="toggleFeature(item)"
                                     >
-                                        {{ item.enabled ? 'mdi-eye' : 'mdi-eye-off' }}
+                                        {{ item.enabled ? 'class:mdi mdi-eye' : 'class:mdi mdi-eye-off' }}
                                     </v-icon>
                                 </div>
                             </template>

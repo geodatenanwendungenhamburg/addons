@@ -1,4 +1,6 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
+
 export default {
     name: "AnalysisPagination",
     props: {
@@ -85,7 +87,7 @@ export default {
                     <v-icon
                         density="compact"
                     >
-                        mdi-plus-box-outline
+                        class:mdi mdi-plus-box-outline
                     </v-icon>
                 </v-btn>
                 <template v-if="downloadCondition">
@@ -103,7 +105,7 @@ export default {
                         <v-icon
                             density="compact"
                         >
-                            mdi-download
+                            class:mdi mdi-download
                         </v-icon>
                     </v-btn>
                 </template>
@@ -119,7 +121,7 @@ export default {
                     <v-icon
                         density="compact"
                     >
-                        mdi-folder-download
+                        class:mdi mdi-folder-download
                     </v-icon>
                 </v-btn>
                 <v-btn
@@ -134,7 +136,7 @@ export default {
                     <v-icon
                         density="compact"
                     >
-                        mdi-close
+                        class:mdi mdi-close
                     </v-icon>
                 </v-btn>
                 <v-btn
@@ -149,7 +151,7 @@ export default {
                     <v-icon
                         density="compact"
                     >
-                        mdi-folder-remove
+                        class:mdi mdi-folder-remove
                     </v-icon>
                 </v-btn>
             </v-col>

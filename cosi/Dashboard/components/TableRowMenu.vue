@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapActions, mapMutations} from "vuex";
 import {VIcon} from "vuetify/components/VIcon";
 
@@ -51,14 +52,14 @@ export default {
             class="visualize"
             @click="renderFeature"
         >
-            {{ isItemVisualized ? 'mdi-eye' : 'mdi-eye-off' }}
+            {{ isItemVisualized ? 'class:mdi mdi-eye' : 'class:mdi mdi-eye-off' }}
         </v-icon>
         <v-icon
             :title="$t('additional:modules.tools.cosi.dashboard.tableRowMenu.expandTooltip')"
             class="expand"
             @click="_item.expanded = !_item.expanded"
         >
-            {{ _item.expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+            {{ _item.expanded ? 'class:mdi mdi-chevron-up' : 'class:mdi mdi-chevron-down' }}
         </v-icon>
     </div>
 </template>

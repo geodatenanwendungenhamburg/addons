@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import getters from "../store/gettersCosiFileImport";
 import mutations from "../store/mutationsCosiFileImport";
@@ -456,7 +457,7 @@ export default {
                             class="remove"
                             @click="removeLayer(filename)"
                         >
-                            <v-icon>mdi-trash-can-outline</v-icon>
+                            <v-icon>class:mdi mdi-trash-can-outline</v-icon>
                         </v-btn>
                     </li>
                 </ul>
@@ -812,7 +813,7 @@ export default {
                                         <v-btn
                                             @click="removeFilterFromWhiteList(i)"
                                         >
-                                            <v-icon>mdi-close</v-icon>
+                                            <v-icon>class:mdi mdi-close</v-icon>
                                         </v-btn>
                                     </li>
                                 </ul>
@@ -824,7 +825,7 @@ export default {
                                     <p>
                                         {{ $t("additional:modules.tools.cosiFileImport.addSetToFilter") }}
                                     </p>
-                                    <v-icon>mdi-plus-thick</v-icon>
+                                    <v-icon>class:mdi mdi-plus-thick</v-icon>
                                 </v-btn>
                                 <div
                                     v-if="addFilter"

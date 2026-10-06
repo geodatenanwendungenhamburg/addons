@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {Select, Translate} from "ol/interaction";
 import {mapGetters, mapActions} from "vuex";
 import {unpackCluster} from "../../utils/features/unpackCluster";
@@ -296,7 +297,7 @@ export default {
             @click="moveFeaturesActive = !moveFeaturesActive"
         >
             <span v-if="useIcons">
-                <v-icon>mdi-axis-arrow</v-icon>
+                <v-icon>class:mdi mdi-axis-arrow</v-icon>
             </span>
             <span v-else>
                 {{ $t('additional:modules.tools.cosi.moveFeatures.title') }}
@@ -312,7 +313,7 @@ export default {
             @click="toggleOnlySimulated"
         >
             <span v-if="useIcons">
-                <v-icon>{{ onlyEditSimulated ? 'mdi-lock' : 'mdi-lock-open' }}</v-icon>
+                <v-icon>{{ onlyEditSimulated ? 'class:mdi mdi-lock' : 'class:mdi mdi-lock-open' }}</v-icon>
             </span>
             <span v-else>
                 {{ $t('additional:modules.tools.cosi.moveFeatures.toggleOnlySimulated') }}
@@ -328,7 +329,7 @@ export default {
             @click="resetFeatureLocations"
         >
             <span v-if="useIcons">
-                <v-icon>mdi-undo</v-icon>
+                <v-icon>class:mdi mdi-undo</v-icon>
             </span>
             <span v-else>
                 {{ $t('additional:modules.tools.cosi.moveFeatures.resetFeatureLocations') }}
@@ -346,7 +347,7 @@ export default {
                     text
                     @click="dialog.open = false"
                 >
-                    <v-icon>mdi-close</v-icon>
+                    <v-icon>class:mdi mdi-close</v-icon>
                 </v-btn>
             </template>
         </v-snackbar>

@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapActions} from "vuex";
 import beautifyKey from "@shared/js/utils/beautifyKey.js";
 import {getOlGeomTypeByGmlType} from "../utils/getOlGeomByGmlType";
@@ -446,7 +447,7 @@ export default {
                         @click="toggleLocationPicker(geomField.type)"
                     >
                         <span v-if="useIcons">
-                            <v-icon>mdi-lead-pencil</v-icon>
+                            <v-icon>class:mdi mdi-lead-pencil</v-icon>
                         </span>
                         <span v-else>
                             {{ $t('additional:modules.tools.cosi.scenarioBuilder.chooseLocation') }}
@@ -463,7 +464,7 @@ export default {
                         @click="undoDrawPolygonStep"
                     >
                         <span v-if="useIcons">
-                            <v-icon>mdi-undo</v-icon>
+                            <v-icon>class:mdi mdi-undo</v-icon>
                         </span>
                         <span v-else>
                             {{ $t('additional:modules.tools.cosi.scenarioBuilder.undo') }}
@@ -481,7 +482,7 @@ export default {
                         @click="togglePickPolygon"
                     >
                         <span v-if="useIcons">
-                            <v-icon>mdi-selection-ellipse-arrow-inside</v-icon>
+                            <v-icon>class:mdi mdi-selection-ellipse-arrow-inside</v-icon>
                         </span>
                         <span v-else>
                             {{ $t('additional:modules.tools.cosi.scenarioBuilder.pick') }}
@@ -498,7 +499,7 @@ export default {
                         @click="resetLocation"
                     >
                         <span v-if="useIcons">
-                            <v-icon>mdi-delete-forever</v-icon>
+                            <v-icon>class:mdi mdi-delete-forever</v-icon>
                         </span>
                         <span v-else>
                             {{ $t('additional:modules.tools.cosi.scenarioBuilder.resetLocation') }}

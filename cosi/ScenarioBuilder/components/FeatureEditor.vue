@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters} from "vuex";
 // import Modal from "@shared/modules/modals/components/ModalItem.vue";
 import {unpackCluster} from "../../utils/features/unpackCluster";
@@ -224,7 +225,7 @@ export default {
                     v-bind="attrs"
                     @click="noScenarioWarning = false"
                 >
-                    <v-icon>mdi-close</v-icon>
+                    <v-icon>class:mdi mdi-close</v-icon>
                 </v-btn>
             </template>
         </v-snackbar> -->
@@ -264,7 +265,7 @@ export default {
                     v-bind="attrs"
                     @click="editDialog = false"
                 >
-                    <v-icon>mdi-close</v-icon>
+                    <v-icon>class:mdi mdi-close</v-icon>
                 </v-btn>
             </template>
         </v-snackbar>
@@ -326,7 +327,7 @@ export default {
                             @click="lock = !lock"
                         >
                             <span>
-                                <v-icon>{{ lock ? 'mdi-lock' : 'mdi-lock-open' }}</v-icon>
+                                <v-icon>{{ lock ? 'class:mdi mdi-lock' : 'class:mdi mdi-lock-open' }}</v-icon>
                             </span>
                         </v-btn>
                     </v-card-subtitle>
@@ -373,7 +374,7 @@ export default {
                             :title="$t('additional:modules.tools.cosi.featureEditor.update')"
                             @click="updateSelectedFeature"
                         >
-                            <v-icon>mdi-pencil</v-icon>
+                            <v-icon>class:mdi mdi-pencil</v-icon>
                             <span>
                                 {{ $t('additional:modules.tools.cosi.featureEditor.update') }}
                             </span>
@@ -387,7 +388,7 @@ export default {
                             :title="$t('additional:modules.tools.cosi.featureEditor.reset')"
                             @click="resetSelectedFeature"
                         >
-                            <v-icon>mdi-undo</v-icon>
+                            <v-icon>class:mdi mdi-undo</v-icon>
                             <span>
                                 {{ $t('additional:modules.tools.cosi.featureEditor.reset') }}
                             </span>
@@ -400,7 +401,7 @@ export default {
                             :title="$t('common:button.cancel')"
                             @click="reset"
                         >
-                            <v-icon>mdi-close</v-icon>
+                            <v-icon>class:mdi mdi-close</v-icon>
                             <span>
                                 {{ $t('common:button.cancel') }}
                             </span>

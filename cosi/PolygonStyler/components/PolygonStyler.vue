@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapMutations} from "vuex";
 import {VApp} from "vuetify/components/VApp";
 import {VSelect} from "vuetify/components/VSelect";
@@ -305,14 +306,14 @@ export default {
                     icon
                     @click="setSelectedTableItem(item)"
                 >
-                    <v-icon>mdi-pencil</v-icon>
+                    <v-icon>class:mdi mdi-pencil</v-icon>
                 </v-btn>
                 <v-btn
                     :title="$t('additional:modules.tools.cosi.polygonStyler.removeButton')"
                     icon
                     @click="setFeaturesDefaultStyle(item.layer, item.defaultStyle)"
                 >
-                    <v-icon>mdi-delete</v-icon>
+                    <v-icon>class:mdi mdi-delete</v-icon>
                 </v-btn>
             </template>
         </v-data-table>

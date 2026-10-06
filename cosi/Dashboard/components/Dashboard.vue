@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import actions from "../store/actionsDashboard.js";
 import {
     addCalculation,
@@ -804,7 +805,7 @@ export default {
                                         class="text-start"
                                     >
                                         <v-icon @click="toggleGroup(item)">
-                                            {{ isGroupOpen(item) ? 'mdi-minus' : 'mdi-plus' }}
+                                            {{ isGroupOpen(item) ? 'class:mdi mdi-minus' : 'class:mdi mdi-plus' }}
                                         </v-icon>
                                         {{ items.find(i => i.groupIndex === item.value).group }}
                                     </th>

@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {Dropdown} from "bootstrap";
 import DropdownAutocomplete from "../../shared/modules/dropdown/components/DropdownAutocomplete.vue";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
@@ -276,7 +277,7 @@ export default {
                 >
                     {{ item }}
                     <template #close>
-                        <v-icon>mdi-close</v-icon>
+                        <v-icon>class:mdi mdi-close</v-icon>
                     </template>
                 </v-chip>
                 <button

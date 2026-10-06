@@ -1,4 +1,5 @@
 <script>
+import "@mdi/font/css/materialdesignicons.css";
 import {mapGetters, mapActions, mapMutations} from "vuex";
 import getters from "../store/gettersCosiFileImport";
 import mutations from "../store/mutationsCosiFileImport";
@@ -201,7 +202,7 @@ export default {
                         class="remove"
                         @click="removeLayer(layer)"
                     >
-                        <v-icon>mdi-trash-can-outline</v-icon>
+                        <v-icon>class:mdi mdi-trash-can-outline</v-icon>
                     </v-btn>
                 </li>
             </ul>
