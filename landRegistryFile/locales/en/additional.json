@@ -40,6 +40,7 @@
                 "actionsHeader": "Actions",
                 "actionsShowPosition": "Show map position",
                 "actionsShowDetails": "Show details",
+                "actionsOpenLink": "Open record in ELDORADO",
                 "noResultsMessage": "No results found. Please change your search criteria.",
                 "numberOfResults": "Number of records found:"
               },

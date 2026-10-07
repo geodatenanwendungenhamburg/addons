@@ -10,6 +10,7 @@ import Point from "ol/geom/Point";
 import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
+import {isWebLink} from "@shared/js/utils/urlHelper.js";
 
 export default {
     name: "LandRegistryFileResults",
@@ -236,6 +237,18 @@ export default {
                     view.setZoom(setZoom);
                 }
             }
+        },
+        /**
+         * Opens the link to the record in ELDORADO by opening it in a new window
+         * @returns {void}
+         */
+        goToEldorado (row) {
+            if (row?.eldorado && isWebLink(row.eldorado)) {
+                window.open(row.eldorado, "_blank", "noopener,noreferrer");
+            }
+            else {
+                console.warn("Der Datensatz hat keinen ELDORADO-Link");
+            }
         }
     }
 };
@@ -284,6 +297,13 @@ export default {
             >
                 <template #cell-actions="{ row }">
                     <div class="actions-wrapper">
+                        <IconButton
+                            v-if="row.eldorado"
+                            :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsOpenLink')"
+                            icon="bi-folder-symlink"
+                            :class-array="['action-button']"
+                            @click.stop="goToEldorado(row)"
+                        />
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowPosition')"
                             icon="bi-crosshair"

@@ -40,6 +40,7 @@
                 "actionsHeader": "Aktionen",
                 "actionsShowPosition": "Kartenposition anzeigen",
                 "actionsShowDetails": "Details anzeigen",
+                "actionsOpenLink": "Akte in ELDORADO öffnen",
                 "noResultsMessage": "Keine Ergebnisse gefunden. Bitte ändern Sie Ihre Suchkriterien.",
                 "numberOfResults": "Anzahl der gefundenen Datensätze:"
               },
