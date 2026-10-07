@@ -3,16 +3,15 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
-## Unreleased - in development
-### __Breaking Changes__
+## 2026-10-07 v3.27.0 (LTS)
 
 ### Added
 
 ### Changed
-
-### Deprecated
-
-### Removed
+- userTracking: 
+    - Renamed several Matomo actions for clarity (see userTracking/README.md for details).
+    - Matomo events no longer send a numeric "value" (see userTracking/README.md for details).
+    - Page view URLs are now lower-cased consistently to prevent duplicate entries in Matomo caused by casing differences.
 
 ### Fixed
 
@@ -39,8 +38,6 @@
     - Fixed the "Changed map-mode" event being tracked automatically on initial load when the current URL already reflected that map mode.
 
 ---
-
-## 2026-09-11 v3.26.1
 
 ## 2026-09-02 v3.26.0
 
