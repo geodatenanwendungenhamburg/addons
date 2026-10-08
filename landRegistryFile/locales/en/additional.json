@@ -26,6 +26,7 @@
                   "searchIn": "Searches are performed in the following fields:",
                   "searchValidChars": "You can use the following special characters:"
                 },
+                "unsubmittedSearchWarning": "Your current search criteria does not affect the results. Please click on 'Search' to update the results.",
                 "errors": {
                   "errorYearDigit": "Please enter a number with 4 digits for '{{fieldname}}'.",
                   "errorYearBoth": "Please enter both 'From' and 'To' to search by year.",

@@ -26,6 +26,7 @@
                   "searchIn": "Es wird gesucht in folgenden Feldern:",
                   "searchValidChars": "Sie können folgende Sonderzeichen verwenden:"
                 },
+                "unsubmittedSearchWarning": "Ihre aktuellen Suchkriterien haben noch keine Auswirkungen auf die Ergebnisse. Bitte klicken Sie auf 'Suche', um die Ergebnisse zu aktualisieren.",
                 "errors": {
                   "errorYearDigit": "Bitte bei '{{fieldname}}' ein Zahl mit 4 Ziffern eingeben.",
                   "errorYearBoth": "Geben Sie 'Von' und 'Bis' an, um nach Jahrgang zu suchen.",

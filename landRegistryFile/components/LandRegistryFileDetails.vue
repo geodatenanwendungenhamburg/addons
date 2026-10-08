@@ -2,7 +2,7 @@
 import {mapGetters, mapMutations} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
-import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
+import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
 
 export default {

@@ -54,6 +54,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFile.spec.js
                             getters: {
                                 showLoadingSpinner: state => state.showLoadingSpinner,
                                 getSortedFeatures: state => state.landRegistryFileFeatures,
+                                landRegistryFileFeatures: state => state.landRegistryFileFeatures,
                                 selectedDetailFeatureId: state => state.selectedDetailFeatureId
                             },
                             mutations: {
@@ -62,6 +63,9 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFile.spec.js
                                 },
                                 setSelectedDetailFeatureId (state, featureId) {
                                     state.selectedDetailFeatureId = featureId;
+                                },
+                                setLandRegistryFileFeatures (state, features) {
+                                    state.landRegistryFileFeatures = features;
                                 }
                             }
                         }
@@ -108,5 +112,37 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFile.spec.js
         wrapper.vm.handleTabChange(tabContainerRef, "tabDetails", "tabResults");
 
         expect(store.state.Modules.LandRegistryFile.selectedDetailFeatureId).to.equal("2");
+    });
+
+    it("resets the results badge when the results tab opens", () => {
+        wrapper.vm.resultsBadge = 5;
+
+        wrapper.vm.handleTabChange(tabContainerRef, "tabResults", "tabSearch");
+        expect(wrapper.vm.resultsBadge).to.be.null;
+    });
+
+    it("changing the number of features updates the results badge", async () => {
+        expect(wrapper.vm.resultsBadge).to.be.null;
+
+        const features = [
+            {
+                id: "1",
+                properties: {
+                    name: "Feature 1"
+                }
+            },
+            {
+                id: "2",
+                properties: {
+                    name: "Feature 2"
+                }
+            }
+        ];
+
+        store.commit("Modules/LandRegistryFile/setLandRegistryFileFeatures", features);
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.resultsBadge).to.equal(2);
     });
 });

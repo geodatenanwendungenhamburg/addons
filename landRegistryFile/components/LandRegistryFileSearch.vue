@@ -3,7 +3,7 @@ import {mapActions, mapMutations, mapGetters} from "vuex";
 import mapCollection from "@core/maps/js/mapCollection";
 import epsgCodeToURI from "@modules/filter/utils/epsgCodeToURI.js";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
-import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
+import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
@@ -31,19 +31,28 @@ export default {
     },
     data () {
         return {
-            searchInExtent: true,
-            yearFrom: "",
-            yearTo: "",
+            searchForm: {
+                searchInExtent: true,
+                yearFrom: "",
+                yearTo: "",
+                selectedRecords: [],
+                searchText: ""
+            },
+            activeSearchCriteria: {
+                searchInExtent: true,
+                yearFrom: "",
+                yearTo: "",
+                selectedRecords: [],
+                searchText: ""
+            },
             errorMessages: {
                 yearFrom: "",
                 yearTo: "",
                 searchText: ""
             },
-            selectedRecords: [],
             moveEndKey: null,
             map: null,
             searchInitiated: false,
-            searchText: "",
             showTextSearchInfo: false,
             // eslint-disable-next-line no-useless-escape
             searchTextValidationRegex: "^[\\p{L}0-9 ,\.\/§()\-]+$"
@@ -87,12 +96,29 @@ export default {
             });
 
             return fieldNamesToSearch;
+        },
+        /**
+         * Checks if the search form has been modified since the last search was initiated.
+         * @returns {boolean} True if the search form has been modified, false otherwise.
+         */
+        showUnsubmittedSearchWarning () {
+            const form = this.searchForm,
+                  active = this.activeSearchCriteria,
+                  selectedRecordsChanged = form.selectedRecords.length !== active.selectedRecords.length ||
+                      form.selectedRecords.some(record => !active.selectedRecords.includes(record));
+
+            return this.searchInitiated &&
+                (form.searchInExtent !== active.searchInExtent ||
+                    form.yearFrom !== active.yearFrom ||
+                    form.yearTo !== active.yearTo ||
+                    form.searchText !== active.searchText ||
+                    selectedRecordsChanged);
         }
     },
     activated () {
         this.map = mapCollection.getMap("2D");
         this.moveEndKey = this.map?.on("moveend", () => {
-            if (!this.searchedOnFullExtent && this.searchInitiated && !this.mapFeaturesSelected) {
+            if (this.activeSearchCriteria.searchInExtent && this.searchInitiated && !this.mapFeaturesSelected) {
                 this.prepareSearch();
             }
         });
@@ -124,8 +150,9 @@ export default {
         * @param {string|null} [options.endDate] - The end date for filtering in YYYY-MM-DD format.
         * @param {string|null} [options.textValue] - The text value for text search filtering.
         * @param {Array<string>|null} [options.selectedOptions] - The selected options for select filtering.
+        * @param {boolean} [options.initiatedByUser] - Indicates if the search was initiated by the user.
         */
-        async startSearch ({bbox, startDate, endDate, textValue, selectedOptions}) {
+        async startSearch ({bbox, startDate, endDate, textValue, selectedOptions, initiatedByUser}) {
             const map = mapCollection.getMap("2D"),
                   view = map?.getView(),
                   projectionCode = view?.getProjection()?.getCode(),
@@ -146,13 +173,12 @@ export default {
                     }
                 });
 
-                if (success) {
+                if (success && initiatedByUser) {
                     this.setCurrentTab("tabResults");
                 }
             }
             finally {
                 this.setShowLoadingSpinner(false);
-                this.searchedOnFullExtent = !this.searchInExtent;
             }
         },
         /**
@@ -162,19 +188,26 @@ export default {
          * @returns {void}
          */
         resetForm () {
-            this.searchInExtent = true;
-            this.yearFrom = "";
-            this.yearTo = "";
+            this.searchForm = {
+                searchInExtent: true,
+                yearFrom: "",
+                yearTo: "",
+                selectedRecords: [],
+                searchText: ""
+            };
+            this.activeSearchCriteria = {
+                ...this.searchForm,
+                selectedRecords: []
+            };
+
             Object.keys(this.errorMessages).forEach(key => {
                 this.errorMessages[key] = "";
             });
-            this.selectedRecords = [];
 
             this.setLandRegistryFileFeatures([]);
             this.removeFeaturesFromMap();
             this.updateSelectionLayer({features: [], layerName: "Module/landRegistryFile/layer/selection"});
             this.searchInitiated = false;
-            this.searchText = "";
         },
         /**
          * Validates all search input fields and updates their validation state.
@@ -184,9 +217,9 @@ export default {
         validateInputs () {
             const regexForYear = new RegExp("^[0-9]{4}$"),
                   regexForText = new RegExp(this.searchTextValidationRegex, "u"),
-                  yearFromString = String(this.yearFrom).trim(),
-                  yearToString = String(this.yearTo).trim(),
-                  textToCheck = String(this.searchText).trim();
+                  yearFromString = String(this.searchForm.yearFrom).trim(),
+                  yearToString = String(this.searchForm.yearTo).trim(),
+                  textToCheck = String(this.searchForm.searchText).trim();
 
             Object.keys(this.errorMessages).forEach(key => {
                 this.errorMessages[key] = "";
@@ -218,7 +251,7 @@ export default {
                         fieldname: this.$t("additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel")
                     });
                 }
-                else if (this.yearFrom > this.yearTo) {
+                else if (this.searchForm.yearFrom > this.searchForm.yearTo) {
                     this.errorMessages.yearTo = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearOrder");
                 }
             }
@@ -244,23 +277,45 @@ export default {
          * Prepares the search parameters based on the selected years,
          * map extent, and search mode, then starts the search.
          *
+         * @param {boolean} [initiatedByUser=false] - Indicates if the search was initiated by the user.
          * @returns {void}
          */
-        prepareSearch () {
-            const searchDateFrom = this.yearFrom !== "" ? `${this.yearFrom}-01-01` : false,
-                  searchDateTo = this.yearTo !== "" ? `${this.yearTo}-12-31` : false,
-                  searchExtent = this.searchInExtent
+        prepareSearch (initiatedByUser = false) {
+            const criteria = this.activeSearchCriteria,
+                  searchDateFrom = criteria.yearFrom !== "" ? `${criteria.yearFrom}-01-01` : false,
+                  searchDateTo = criteria.yearTo !== "" ? `${criteria.yearTo}-12-31` : false,
+                  searchInExtent = criteria.searchInExtent,
+                  searchExtent = searchInExtent
                       ? this.getCurrentVisibleMapExtent()
                       : undefined,
-                  searchRecords = this.selectedRecords.length > 0 ? this.selectedRecords : undefined;
+                  searchRecords = criteria.selectedRecords.length > 0 ? criteria.selectedRecords : undefined,
+                  searchText = criteria.searchText;
 
             this.startSearch({
                 bbox: searchExtent,
                 startDate: searchDateFrom,
                 endDate: searchDateTo,
                 selectedOptions: searchRecords,
-                textValue: this.searchText
+                textValue: searchText,
+                initiatedByUser
             });
+        },
+        /**
+         * Initiates the search process when the user clicks the search button.
+         * Validates the inputs and prepares the search if all inputs are valid.
+         *
+         * @returns {void}
+         */
+        initiateSearchByUser () {
+            this.validateInputs();
+
+            if (this.allInputsValid) {
+                this.activeSearchCriteria = {
+                    ...this.searchForm,
+                    selectedRecords: [...this.searchForm.selectedRecords]
+                };
+                this.prepareSearch(true);
+            }
         },
         /**
          * Gets the current map extent and if needed adjusts it for expanded menus
@@ -403,8 +458,8 @@ export default {
                 class="searchModeSwitch"
                 :aria="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
                 :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
-                :checked="searchInExtent"
-                :interaction="(evt) => searchInExtent = evt.target.checked"
+                :checked="searchForm.searchInExtent"
+                :interaction="(evt) => searchForm.searchInExtent = evt.target.checked"
             />
 
             <div class="recordtypeSelectContainer">
@@ -414,7 +469,7 @@ export default {
 
                 <Multiselect
                     id="recordtype-select"
-                    v-model="selectedRecords"
+                    v-model="searchForm.selectedRecords"
                     :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel')"
                     :options="oafParams?.filters?.select?.options"
                     name="recordtype-select"
@@ -438,7 +493,7 @@ export default {
                 <InputText
                     id="searchTextField"
                     key="searchTextField"
-                    v-model="searchText"
+                    v-model="searchForm.searchText"
                     :class-obj="['form-control' + (errorMessages.searchText.length > 0 ? ' is-invalid': ' is-valid')]"
                     :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchPlaceholder')"
                     placeholder=""
@@ -463,7 +518,7 @@ export default {
                     <InputText
                         id="searchYearFrom"
                         key="searchYearFrom"
-                        v-model="yearFrom"
+                        v-model="searchForm.yearFrom"
                         :class-obj="['form-control' + (errorMessages.yearFrom.length > 0 ? ' is-invalid': ' is-valid')]"
                         :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearFromLabel')"
                         placeholder="2023"
@@ -474,7 +529,7 @@ export default {
                     <InputText
                         id="searchYearTo"
                         key="searchYearTo"
-                        v-model="yearTo"
+                        v-model="searchForm.yearTo"
                         :class-obj="['form-control' + (errorMessages.yearTo.length > 0 ? ' is-invalid': ' is-valid')]"
                         :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel')"
                         placeholder="2024"
@@ -500,8 +555,15 @@ export default {
         </div>
 
         <div class="FixedContent buttons-footer">
+            <div class="unsubmitted-search-warning">
+                <p>
+                    <span v-if="showUnsubmittedSearchWarning">
+                        {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.unsubmittedSearchWarning") }}
+                    </span>
+                </p>
+            </div>
             <div class="searchExtentHint">
-                <p v-if="searchInExtent">
+                <p v-if="searchForm.searchInExtent">
                     {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.searchModeInExtent") }}
                 </p>
 
@@ -519,7 +581,7 @@ export default {
                     :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchButtonLabel')"
                     text="Suche"
                     :disabled="!allInputsValid"
-                    @click="prepareSearch()"
+                    @click="initiateSearchByUser()"
                 />
 
                 <FlatButton
@@ -644,6 +706,12 @@ export default {
                     margin-top: 0.75rem;
                 }
             }
+        }
+
+        div.unsubmitted-search-warning p {
+            color: var(--bs-form-invalid-color);
+            white-space: pre-line;
+            text-align: right;
         }
 
         div.searchExtentHint {

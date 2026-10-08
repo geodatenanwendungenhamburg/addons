@@ -1,7 +1,7 @@
 <script>
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import SpinnerItem from "@shared/modules/spinner/components/SpinnerItem.vue";
-import TabContainer from "@shared/modules/tabs/components/TabContainer.vue";
+import TabContainer from "./shared/TabContainer.vue";
 import LandRegistryFileDetails from "./LandRegistryFileDetails.vue";
 import LandRegistryFileResults from "./LandRegistryFileResults.vue";
 import LandRegistryFileSearch from "./LandRegistryFileSearch.vue";
@@ -15,13 +15,15 @@ export default {
     data () {
         return {
             tabWatcherAttached: false,
-            unwatchTabContainer: null
+            unwatchTabContainer: null,
+            resultsBadge: null
         };
     },
     computed: {
         ...mapGetters("Modules/LandRegistryFile", [
             "showLoadingSpinner",
             "getSortedFeatures",
+            "landRegistryFileFeatures",
             "selectedDetailFeatureId"
         ]),
         loadingSpinnerText () {
@@ -45,7 +47,8 @@ export default {
                     label: this.$t("additional:modules.landRegistryFile.tabs.tabResults.label"),
                     component: LandRegistryFileResults,
                     propsForTabContent: {},
-                    renderComponent: true
+                    renderComponent: true,
+                    badge: this.resultsBadge
                 },
                 {
                     id: "tabDetails",
@@ -57,6 +60,24 @@ export default {
                     renderComponent: true
                 }
             ];
+        }
+    },
+    watch: {
+        landRegistryFileFeatures () {
+            const activeTabId = this.$refs.tabContainer?.activeTabIdLocal;
+
+            if (activeTabId === "tabDetails" && !this.selectedDetailFeatureId) {
+                this.$refs.tabContainer?.setCurrentTab("tabResults");
+            }
+
+            if (activeTabId !== "tabResults") {
+                if (this.landRegistryFileFeatures.length > 0) {
+                    this.resultsBadge = this.landRegistryFileFeatures.length;
+                }
+                else {
+                    this.resultsBadge = null;
+                }
+            }
         }
     },
     /**
@@ -111,6 +132,10 @@ export default {
                         tabResults?.scrollToSelectedDetail();
                     }
                 });
+            }
+
+            if (newTabId === "tabResults") {
+                this.resultsBadge = null;
             }
         },
         /**
@@ -205,7 +230,6 @@ export default {
             flex-direction: column;
             position: relative;
             min-height: 0;
-            overflow: hidden;
 
             div.TabContainer {
                 height: unset;

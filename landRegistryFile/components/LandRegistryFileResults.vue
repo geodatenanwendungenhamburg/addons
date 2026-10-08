@@ -3,7 +3,7 @@ import {mapGetters, mapMutations, mapActions} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
-import {TAB_SET_CURRENT} from "@shared/modules/tabs/components/TabContainer.vue";
+import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
