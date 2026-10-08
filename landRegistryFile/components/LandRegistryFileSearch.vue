@@ -565,6 +565,10 @@ export default {
 
         div.searchModeSwitch {
             margin-top: 1rem;
+
+            > * {
+                cursor: pointer;
+            }
         }
 
         div.recordtypeSelectContainer {

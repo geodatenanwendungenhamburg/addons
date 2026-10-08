@@ -167,7 +167,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    #landRegistryFile{
+    #landRegistryFile {
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -236,13 +236,11 @@ export default {
                 gap: 0.5rem;
 
                 &.top-header {
-                    padding-top: 1rem;
-                    padding-bottom: 0.25rem;
+                    padding: 1rem 0.25rem 0.25rem;
                 }
 
                 &.buttons-footer {
-                    padding-top: 0.5rem;
-                    padding-bottom: 0;
+                    padding: 0.5rem 0.25rem 0.25rem;
                 }
 
                 button {
@@ -251,13 +249,24 @@ export default {
             }
 
             div.ScrollableContent {
+                padding: 0.25rem;
                 display: flex;
                 flex-direction: column;
                 flex: 1 1 auto;
                 min-height: 0;
                 overflow-y: auto;
-                padding-right: 0.5rem;
             }
+        }
+
+        :deep(.flat-button:focus-visible),
+        :deep(.action-button:focus-visible) {
+            color: #fff;
+            background-color: #151C27;
+            box-shadow: 0 0 0 0.25rem rgba(60, 95, 148, 0.5);
+        }
+
+        :deep(.form-switch input:focus-visible) {
+            box-shadow: 0 0 0 0.25rem rgba(60, 95, 148, 0.5);
         }
     }
 </style>
