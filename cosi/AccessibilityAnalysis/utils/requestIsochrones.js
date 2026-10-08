@@ -1,5 +1,5 @@
 import axios from "axios";
-import GeoJSON from "ol/format/GeoJSON";
+import {geoJsonCollectionToFeatures} from "@shared/js/utils/convertGeoJSONToFeature.js";
 import splitIntoChunks from "../../utils/array/splitIntoChunks";
 
 /**
@@ -14,7 +14,6 @@ import splitIntoChunks from "../../utils/array/splitIntoChunks";
  */
 async function requestIsochrones (pathType, coordinates, rangeType, rangeArray, abort, baseUrl) {
     const promises = [],
-        format = new GeoJSON(),
         // locations are limited to 5 in the bkg service
         chunks = splitIntoChunks(coordinates, 5),
         baseUrl_ = baseUrl ? baseUrl : "https://api.openrouteservice.org/v2/";
@@ -49,7 +48,7 @@ async function requestIsochrones (pathType, coordinates, rangeType, rangeArray, 
 
         featureCollections.forEach(collection => {
             if (collection) {
-                features.push(...format.readFeatures(collection));
+                features.push(...geoJsonCollectionToFeatures(collection, "EPSG:25832", "EPSG:25832"));
             }
         });
 
