@@ -14,6 +14,8 @@ import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 
+import "vue-multiselect/dist/vue-multiselect.css";
+
 export default {
     name: "LandRegistryFileSearch",
     components: {
@@ -557,8 +559,6 @@ export default {
     </div>
 </template>
 
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
-
 <style lang="scss" scoped>
     #landRegistryFileSearch{
         height: 100%;
@@ -570,6 +570,18 @@ export default {
         div.recordtypeSelectContainer {
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
+
+            :deep(.multiselect__selected) {
+                font-size: 1rem;
+            }
+
+            :deep(.multiselect__tags) {
+                font-size: 1rem;
+            }
+
+            :deep(.multiselect__option) {
+                font-size: 1rem;
+            }
         }
 
         div.searchTextContainer {
