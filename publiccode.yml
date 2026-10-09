@@ -92,7 +92,7 @@ maintenance:
       website: 'https://www.hamburg.de/bsw/landesbetrieb-geoinformation-und-vermessung/'
   type: community
 name: Masterportal Addons
-releaseDate: '2026-09-11'
+releaseDate: '2026-10-09'
 roadmap: 'https://bitbucket.org/geowerkstatt-hamburg/masterportal/src/dev/'
-softwareVersion: 3.26.1
+softwareVersion: 3.27.1
 url: 'https://bitbucket.org/geowerkstatt-hamburg/addons.git'
