@@ -3,15 +3,16 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
-## 2026-10-07 v3.27.0 (LTS)
+## Unreleased - in development
+### __Breaking Changes__
 
 ### Added
 
 ### Changed
-- userTracking: 
-    - Renamed several Matomo actions for clarity (see userTracking/README.md for details).
-    - Matomo events no longer send a numeric "value" (see userTracking/README.md for details).
-    - Page view URLs are now lower-cased consistently to prevent duplicate entries in Matomo caused by casing differences.
+
+### Deprecated
+
+### Removed
 
 ### Fixed
 
