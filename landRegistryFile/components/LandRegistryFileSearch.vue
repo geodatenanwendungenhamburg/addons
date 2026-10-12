@@ -564,7 +564,7 @@ export default {
         height: 100%;
 
         div.searchModeSwitch {
-            margin-top: 1rem;
+            margin: 1rem 0;
 
             > * {
                 cursor: pointer;
@@ -572,19 +572,18 @@ export default {
         }
 
         div.recordtypeSelectContainer {
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
+            margin: 0.5rem 0;
 
-            :deep(.multiselect__selected) {
-                font-size: 1rem;
-            }
-
-            :deep(.multiselect__tags) {
-                font-size: 1rem;
-            }
-
+            :deep(.multiselect__selected),
+            :deep(.multiselect__tags),
             :deep(.multiselect__option) {
                 font-size: 1rem;
+            }
+
+            :deep(.multiselect__input::placeholder),
+            :deep(.multiselect__placeholder) {
+                color: #747474;
+                font-weight: normal;
             }
         }
 

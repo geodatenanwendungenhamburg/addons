@@ -167,8 +167,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-//@import "~variables";
-
 .InputText {
     margin-bottom: 1rem;
 
@@ -176,13 +174,14 @@ export default {
     &::placeholder {
       opacity: 0;
       transition: opacity 0.2s;
+      color: #747474;
     }
 
     &:focus {
       &::placeholder {
         opacity: 1;
-        color: $placeholder-color;
-        -webkit-text-fill-color: $placeholder-color;
+        color: #747474;
+        -webkit-text-fill-color: #747474;
       }
 
       ~ .input-label {
@@ -192,7 +191,7 @@ export default {
   }
 
   .input-label {
-    color: $placeholder-color;
+    color: #747474;
   }
 }
 </style>
