@@ -20,9 +20,10 @@
  * @property {Object} oafParams.filters - The filter configuration for the OAF query.
  * @property {string} oafParams.filters.dateRangeField - The field name for date range filtering.
  * @property {string[]} oafParams.filters.textSearchFields - The field names for text search filtering.
- * @property {Object} oafParams.filters.select - The select filter configuration.
+ * @property {Array<Object>} oafParams.filters.select - The configuration for one or more select filters.
  * @property {string} oafParams.filters.select.field - The field name for select filtering.
  * @property {string[]} oafParams.filters.select.options - The available options for select filtering.
+ * @property {Boolean} oafParams.filters.select.multiple - The flag if multiple select is possible in this select filtering.
  * @property {string} styleConf - The URL to the style configuration for the land registry features.
  * @property {Object} styles - The styles applied to the land registry features.
  * @property {Object[]} tableFields - The configuration for the table fields to display in the results.
@@ -57,17 +58,34 @@ const state = {
         filters: {
             dateRangeField: "",
             textSearchFields: [],
-            select: {
-                field: "",
-                options: [
-                    "Bauaufsichtsakte",
-                    "Straßenakte",
-                    "Grünanlagenakte",
-                    "Naturschutzakte",
-                    "Wasserwirtschaftsakte",
-                    "Kehrakte"
-                ]
-            }
+            select: [
+                {
+                    field: "aktenart",
+                    options: [
+                        "Bauaufsichtsakte",
+                        "Straßenakte",
+                        "Grünanlagenakte",
+                        "Naturschutzakte",
+                        "Wasserwirtschaftsakte",
+                        "Kehrakte"
+                    ],
+                    multiple: true
+                },
+                {
+                    field: "bezirk",
+                    options: [
+                        "Altona",
+                        "Bergedorf",
+                        "Eimsbüttel",
+                        "Hamburg-Mitte",
+                        "Hamburg-Nord",
+                        "Harburg",
+                        "Wandsbek",
+                        "HPA"
+                    ],
+                    multiple: false
+                }
+            ]
         }
     },
     styleConf: "",

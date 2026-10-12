@@ -35,14 +35,14 @@ export default {
                 searchInExtent: true,
                 yearFrom: "",
                 yearTo: "",
-                selectedRecords: [],
+                selectSelections: {},
                 searchText: ""
             },
             activeSearchCriteria: {
                 searchInExtent: true,
                 yearFrom: "",
                 yearTo: "",
-                selectedRecords: [],
+                selectSelections: {},
                 searchText: ""
             },
             errorMessages: {
@@ -104,16 +104,56 @@ export default {
         showUnsubmittedSearchWarning () {
             const form = this.searchForm,
                   active = this.activeSearchCriteria,
-                  selectedRecordsChanged = form.selectedRecords.length !== active.selectedRecords.length ||
-                      form.selectedRecords.some(record => !active.selectedRecords.includes(record));
+                  selectSelectionKeys = new Set([
+                      ...Object.keys(form.selectSelections || {}),
+                      ...Object.keys(active.selectSelections || {})
+                  ]),
+                  selectedSelectionChanged = [...selectSelectionKeys].some(key => {
+                      const formSelection = form.selectSelections?.[key],
+                            activeSelection = active.selectSelections?.[key];
+
+                      if (Array.isArray(formSelection) && Array.isArray(activeSelection)) {
+                          return formSelection.length !== activeSelection.length ||
+                              formSelection.some(value => !activeSelection.includes(value));
+                      }
+
+                      return formSelection !== activeSelection;
+                  });
 
             return this.searchInitiated &&
                 (form.searchInExtent !== active.searchInExtent ||
                     form.yearFrom !== active.yearFrom ||
                     form.yearTo !== active.yearTo ||
                     form.searchText !== active.searchText ||
-                    selectedRecordsChanged);
+                    selectedSelectionChanged);
+        },
+        /**
+         * Returns the configured select filters with a display name resolved
+         * from the OAF schema, falling back to the filter field name.
+         *
+         * @returns {Array<Object>} The select filters with their display names.
+         */
+        selectFilters () {
+            return (this.oafParams?.filters?.select || []).map(select => ({
+                ...select,
+                fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field
+            }));
         }
+    },
+    created () {
+        this.searchForm.selectSelections = Object.fromEntries(
+            (this.oafParams?.filters?.select || []).map(({field, multiple}) => [
+                field,
+                multiple ? [] : null
+            ])
+        );
+
+        this.activeSearchCriteria.selectSelections = Object.fromEntries(
+            (this.oafParams?.filters?.select || []).map(({field, multiple}) => [
+                field,
+                multiple ? [] : null
+            ])
+        );
     },
     activated () {
         this.map = mapCollection.getMap("2D");
@@ -150,10 +190,10 @@ export default {
         * @param {string|null} [options.startDate] - The start date for filtering in YYYY-MM-DD format.
         * @param {string|null} [options.endDate] - The end date for filtering in YYYY-MM-DD format.
         * @param {string|null} [options.textValue] - The text value for text search filtering.
-        * @param {Array<string>|null} [options.selectedOptions] - The selected options for select filtering.
+        * @param {Object|null} [options.selectedFilters] - The selected options for select filtering.
         * @param {boolean} [options.initiatedByUser] - Indicates if the search was initiated by the user.
         */
-        async startSearch ({bbox, startDate, endDate, textValue, selectedOptions, initiatedByUser}) {
+        async startSearch ({bbox, startDate, endDate, textValue, selectedFilters, initiatedByUser}) {
             const map = mapCollection.getMap("2D"),
                   view = map?.getView(),
                   projectionCode = view?.getProjection()?.getCode(),
@@ -168,7 +208,7 @@ export default {
                         startDate: startDate,
                         endDate: endDate,
                         textValue: textValue,
-                        selectedOptions: selectedOptions,
+                        selectedFilters: selectedFilters,
                         bbox: bbox?.join(","),
                         crs
                     }
@@ -193,13 +233,15 @@ export default {
                 searchInExtent: true,
                 yearFrom: "",
                 yearTo: "",
-                selectedRecords: [],
+                selectSelections: {},
                 searchText: ""
             };
-            this.activeSearchCriteria = {
-                ...this.searchForm,
-                selectedRecords: []
-            };
+
+            (this.oafParams?.filters?.select || []).forEach(({field, multiple}) => {
+                this.searchForm.selectSelections[field] = multiple ? [] : null;
+            });
+
+            this.activeSearchCriteria = JSON.parse(JSON.stringify(this.searchForm));
 
             Object.keys(this.errorMessages).forEach(key => {
                 this.errorMessages[key] = "";
@@ -289,16 +331,15 @@ export default {
                   searchExtent = searchInExtent
                       ? this.getCurrentVisibleMapExtent()
                       : undefined,
-                  searchRecords = criteria.selectedRecords.length > 0 ? criteria.selectedRecords : undefined,
                   searchText = criteria.searchText;
 
             this.startSearch({
                 bbox: searchExtent,
                 startDate: searchDateFrom,
                 endDate: searchDateTo,
-                selectedOptions: searchRecords,
                 textValue: searchText,
-                initiatedByUser
+                initiatedByUser,
+                selectedFilters: criteria.selectSelections
             });
         },
         /**
@@ -311,10 +352,7 @@ export default {
             this.validateInputs();
 
             if (this.allInputsValid) {
-                this.activeSearchCriteria = {
-                    ...this.searchForm,
-                    selectedRecords: [...this.searchForm.selectedRecords]
-                };
+                this.activeSearchCriteria = JSON.parse(JSON.stringify(this.searchForm));
                 this.prepareSearch(true);
             }
         },
@@ -453,19 +491,23 @@ export default {
                 :interaction="(evt) => searchForm.searchInExtent = evt.target.checked"
             />
 
-            <div class="recordtypeSelectContainer">
-                <label for="recordtype-select">
-                    {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel") }}
+            <div
+                v-for="item in selectFilters"
+                :key="item.field"
+                class="typeSelectContainer"
+            >
+                <label :for="`type-select-${item.field}`">
+                    {{ item.fieldName }}
                 </label>
 
                 <Multiselect
-                    id="recordtype-select"
-                    v-model="searchForm.selectedRecords"
-                    :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectRecordLabel')"
-                    :options="oafParams?.filters?.select?.options"
-                    name="recordtype-select"
-                    :multiple="true"
-                    :placeholder="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectRecordPlaceholder')"
+                    :id="`type-select-${item.field}`"
+                    v-model="searchForm.selectSelections[item.field]"
+                    :aria-label="item.fieldName"
+                    :options="item.options"
+                    :name="`type-select-${item.field}`"
+                    :multiple="item.multiple"
+                    :placeholder="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectPlaceholder', {fieldName: item.fieldName})"
                     :show-labels="false"
                     open-direction="bottom"
                     :hide-selected="false"
@@ -616,6 +658,10 @@ export default {
     #landRegistryFileSearch{
         height: 100%;
 
+        div.ScrollableContent {
+            overflow-x: hidden;
+        }
+
         div.searchModeSwitch {
             margin: 1rem 0;
 
@@ -624,7 +670,7 @@ export default {
             }
         }
 
-        div.recordtypeSelectContainer {
+        div.typeSelectContainer {
             margin: 0.5rem 0;
 
             :deep(.multiselect__selected),
@@ -648,6 +694,7 @@ export default {
             border-width: 1px;
             border-radius: 5px;
             padding: 1.5rem 1rem 1rem 1rem;
+            margin-bottom: 0.5rem;
 
             div.InputText {
                 margin-bottom: 0;
@@ -662,8 +709,7 @@ export default {
             width: fit-content;
             font-size: 1rem;
             margin: 1rem 1rem -0.7rem 1rem;
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
+            padding: 0 0.5rem;
         }
 
         div.searchYearContainer {

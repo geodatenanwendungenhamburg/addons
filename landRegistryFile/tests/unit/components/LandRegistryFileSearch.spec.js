@@ -17,6 +17,12 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             adresse: {
                 title: "Adresse"
             },
+            aktenart: {
+                title: "Aktenart"
+            },
+            bezirk: {
+                title: "Bezirk"
+            },
             sonstige_anlage: {
                 title: "sonstige Anlage"
             }
@@ -40,12 +46,24 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                                             "adresse",
                                             "geschaeftszeichen"
                                         ],
-                                        select: {
-                                            options: [
-                                                "Bauakte",
-                                                "Straßenakte"
-                                            ]
-                                        }
+                                        select: [
+                                            {
+                                                field: "aktenart",
+                                                options: [
+                                                    "Bauakte",
+                                                    "Straßenakte"
+                                                ],
+                                                multiple: true
+                                            },
+                                            {
+                                                field: "bezirk",
+                                                options: [
+                                                    "Altona",
+                                                    "Wandsbek"
+                                                ],
+                                                multiple: false
+                                            }
+                                        ]
                                     }
                                 },
                                 landRegistryFileFeatures: []
@@ -96,6 +114,17 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
 
     it("should exist", () => {
         expect(wrapper.exists()).to.be.true;
+    });
+
+    it("initializes selections and display names from the configured select filters", () => {
+        expect(wrapper.vm.searchForm.selectSelections).to.deep.equal({
+            aktenart: [],
+            bezirk: null
+        });
+        expect(wrapper.vm.selectFilters.map(({field, fieldName}) => ({field, fieldName}))).to.deep.equal([
+            {field: "aktenart", fieldName: "Aktenart"},
+            {field: "bezirk", fieldName: "Bezirk"}
+        ]);
     });
 
     describe("handle search extent switch", () => {
@@ -207,7 +236,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
         it("should reset form and empty all error hints", () => {
             wrapper.vm.searchForm.yearFrom = "12345";
             wrapper.vm.searchForm.yearTo = "1235";
-            wrapper.vm.searchForm.selectedRecords = ["Bauakte"];
+            wrapper.vm.searchForm.selectSelections.aktenart = ["Bauakte"];
+            wrapper.vm.searchForm.selectSelections.bezirk = "Bergedorf";
             wrapper.vm.validateInputs();
             expect(wrapper.vm.allInputsValid).to.be.false;
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
@@ -218,7 +248,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             expect(wrapper.vm.searchForm.yearTo).to.equal("");
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("");
             expect(wrapper.vm.errorMessages.yearTo).to.equal("");
-            expect(wrapper.vm.searchForm.selectedRecords).to.deep.equal([]);
+            expect(wrapper.vm.searchForm.selectSelections.aktenart).to.deep.equal([]);
+            expect(wrapper.vm.searchForm.selectSelections.bezirk).to.equal(null);
         });
 
         it("should disable search button if form is invalid", async () => {
@@ -298,14 +329,17 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                 searchInExtent: false,
                 yearFrom: "2020",
                 yearTo: "2024",
-                selectedRecords: ["Bauakte"],
+                selectSelections: {
+                    aktenart: ["Bauakte"],
+                    bezirk: null
+                },
                 searchText: "abc"
             };
             let searchWasInitiatedByUser = false;
 
             wrapper.vm.searchForm = {
                 ...submittedCriteria,
-                selectedRecords: [...submittedCriteria.selectedRecords]
+                selectSelections: JSON.parse(JSON.stringify(submittedCriteria.selectSelections))
             };
             wrapper.vm.prepareSearch = initiatedByUser => {
                 searchWasInitiatedByUser = initiatedByUser;
@@ -316,8 +350,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             expect(searchWasInitiatedByUser).to.be.true;
             expect(wrapper.vm.activeSearchCriteria).to.deep.equal(submittedCriteria);
 
-            wrapper.vm.searchForm.selectedRecords.push("Straßenakte");
-            expect(wrapper.vm.activeSearchCriteria.selectedRecords).to.deep.equal(["Bauakte"]);
+            wrapper.vm.searchForm.selectSelections.aktenart.push("Straßenakte");
+            expect(wrapper.vm.activeSearchCriteria.selectSelections.aktenart).to.deep.equal(["Bauakte"]);
         });
 
         it("resets the form and submitted criteria together", async () => {
@@ -325,12 +359,15 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                 searchInExtent: false,
                 yearFrom: "2020",
                 yearTo: "2024",
-                selectedRecords: ["Bauakte"],
+                selectSelections: {
+                    aktenart: ["Bauakte"],
+                    bezirk: null
+                },
                 searchText: "abc"
             };
             wrapper.vm.activeSearchCriteria = {
                 ...wrapper.vm.searchForm,
-                selectedRecords: [...wrapper.vm.searchForm.selectedRecords],
+                selectSelections: JSON.parse(JSON.stringify(wrapper.vm.searchForm.selectSelections)),
                 searchText: "def"
             };
             wrapper.vm.searchInitiated = true;
@@ -344,7 +381,10 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                 searchInExtent: true,
                 yearFrom: "",
                 yearTo: "",
-                selectedRecords: [],
+                selectSelections: {
+                    aktenart: [],
+                    bezirk: null
+                },
                 searchText: ""
             };
 
@@ -355,10 +395,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
 
         it("shows the unsubmitted-search warning when the form differs from submitted criteria", async () => {
             wrapper.vm.searchForm.searchText = "abc";
-            wrapper.vm.activeSearchCriteria = {
-                ...wrapper.vm.searchForm,
-                selectedRecords: [...wrapper.vm.searchForm.selectedRecords]
-            };
+            wrapper.vm.activeSearchCriteria = JSON.parse(JSON.stringify(wrapper.vm.searchForm));
 
             expect(wrapper.vm.showUnsubmittedSearchWarning).to.be.false;
 

@@ -16,7 +16,7 @@ export default {
          * @param {string|null} [payload.params.startDate] - The start date for filtering in YYYY-MM-DD format.
          * @param {string|null} [payload.params.endDate] - The end date for filtering in YYYY-MM-DD format.
          * @param {string|null} [payload.params.textValue] - The text value for text search filtering.
-         * @param {Array<string>|null} [payload.params.selectedOptions] - The selected options for select filtering.
+         * @param {Object|null} [payload.params.selectedFilters] - The selected options for select filtering.
          * @param {Array} [payload.params.bbox] - The bounding box for spatial filtering.
          * @param {string} [payload.params.crs] - The coordinate reference system.
          * @returns {Promise<boolean>} A promise that resolves to true if the query was successful, or false if an error occurred.
@@ -40,19 +40,28 @@ export default {
             filterStrings.push(`(${textFilter})`);
         }
 
-        if (params.selectedOptions) {
-            const select = filters.select;
-            const selectedOptionsStrings = [];
+        if (params.selectedFilters) {
+            const selectedFilters = params.selectedFilters || {};
 
-            params.selectedOptions.forEach(selectedOption => {
-                if (!select.options.includes(selectedOption)) {
-                    return;
+            filters.select.forEach(select => {
+                const selection = selectedFilters[select.field];
+                let selectedValues = [];
+
+                if (select.multiple && Array.isArray(selection)) {
+                    selectedValues = selection;
+                }
+                else if (!select.multiple && selection !== null && selection !== undefined && selection !== "") {
+                    selectedValues = [selection];
                 }
 
-                selectedOptionsStrings.push(`${select.field} = '${selectedOption}'`);
-            });
+                const validValues = selectedValues.filter(value => select.options.includes(value));
 
-            filterStrings.push(`(${selectedOptionsStrings.join(" OR ")})`);
+                if (validValues.length > 0) {
+                    const expressions = validValues.map(value => `${select.field} = '${String(value).replaceAll("'", "''")}'`);
+
+                    filterStrings.push(`(${expressions.join(" OR ")})`);
+                }
+            });
         }
 
         const completeFilterString = filterStrings.join(" AND ");
