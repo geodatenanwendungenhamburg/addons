@@ -31,7 +31,9 @@
  * @property {Object} sorting - The sorting configuration for the results table.
  * @property {string} sorting.columnName - The name of the column to sort by.
  * @property {string} sorting.order - The order of sorting, can be "origin", "asc", or "desc".
- * @property {Boolean} mapFeaturesSelected - Indicates whether any features are currently selected on the map.
+ * @property {Object[]} mapFeaturesSelected - The array of features currently selected on the map.
+ * @property {Boolean} onCenterMap - Indicates whether the map is centered by the click action initiated from the table row.
+ * @property {string|null} mapSelectionSource - The source of the map selection, can be "map" or "table".
  */
 
 const state = {
@@ -77,7 +79,9 @@ const state = {
         columnName: "",
         order: "origin"
     },
-    mapFeaturesSelected: false
+    mapFeaturesSelected: [],
+    onCenterMap: false,
+    mapSelectionSource: null
 };
 
 export default state;

@@ -214,6 +214,11 @@ export default {
             type: Boolean,
             required: false,
             default: false
+        },
+        selectedRowIds: {
+            type: Array,
+            required: false,
+            default: () => []
         }
     },
     emits: ["columnSelected", "rowSelected", "setSortedRows", "removeItem", "rowOnHover", "update:sorting"],
@@ -1448,6 +1453,7 @@ export default {
                 <tr
                     v-for="(item, idx) in editedTable.items"
                     :key="idx"
+                    :class="[selectMode === 'row' ? 'selectable' : '', selectedRow === processedRow(item) || selectedRowIds.includes(item.id) ? 'selected' : '']"
                     @click="selectRow(item)"
                     @mouseenter="selectOnHover(item)"
                     @focus="selectOnHover(item)"
@@ -1782,6 +1788,10 @@ table {
 .selected {
     background-color: $primary;
     border-bottom: 1px solid $light_grey_hover;
+
+    td {
+        background-color: $primary !important;
+    }
 }
 
 .total-button {

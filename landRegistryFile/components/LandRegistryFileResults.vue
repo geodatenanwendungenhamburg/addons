@@ -5,8 +5,6 @@ import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
 import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
@@ -29,7 +27,8 @@ export default {
         return {
             showMoreFields: false,
             scrollPending: false,
-            selectedRowId: null,
+            selectedRowIds: [],
+            mapSelectedRowIds: [],
             currentDatasetsPerPage: 10,
             datasetsPerPage: [10, 25, 50],
             currentPage: 1
@@ -42,7 +41,9 @@ export default {
             "oafSchema",
             "sorting",
             "getSortedFeatures",
-            "showLoadingSpinner"
+            "showLoadingSpinner",
+            "mapFeaturesSelected",
+            "onCenterMap"
         ]),
         ...mapGetters("Menu", [
             "expanded"
@@ -53,24 +54,26 @@ export default {
          */
         tableData () {
             const headers = [
-                      ...this.tableFields
-                          .filter((field) => this.showMoreFields || field.showAlways)
-                          .map((field, index) => ({
-                              name: field.name,
-                              displayName: this.oafSchema?.properties?.[field.name]?.title || field.name,
-                              index
-                          })),
-                      {
-                          name: "actions",
-                          displayName: this.$t("additional:modules.landRegistryFile.tabs.tabResults.actionsHeader"),
-                          index: this.tableFields.length
-                      }
-                  ],
-                  startIndex = (this.currentPage - 1) * this.currentDatasetsPerPage,
-                  items = (this.getSortedFeatures || []).map(feature => ({
-                      ...feature.properties,
-                      id: feature.id
-                  })).slice(startIndex, startIndex + this.currentDatasetsPerPage);
+                ...this.tableFields
+                    .filter((field) => this.showMoreFields || field.showAlways)
+                    .map((field, index) => ({
+                        name: field.name,
+                        displayName: this.oafSchema?.properties?.[field.name]?.title || field.name,
+                        index
+                    })),
+                {
+                    name: "actions",
+                    displayName: this.$t("additional:modules.landRegistryFile.tabs.tabResults.actionsHeader"),
+                    index: this.tableFields.length
+                }
+            ];
+
+            const reorderedFeatures = this.getSortedFeatures || [];
+            const startIndex = (this.currentPage - 1) * this.currentDatasetsPerPage;
+            const items = reorderedFeatures.map(feature => ({
+                ...feature.properties,
+                id: feature.id
+            })).slice(startIndex, startIndex + this.currentDatasetsPerPage);
 
             return {
                 headers,
@@ -98,7 +101,7 @@ export default {
 
             this.scrollPending = true;
             this.performPendingScroll();
-            this.selectedRowId = null;
+            this.selectedRowIds = [];
         },
         showLoadingSpinner (isLoading) {
             if (!isLoading) {
@@ -107,12 +110,37 @@ export default {
         },
         currentDatasetsPerPage () {
             this.currentPage = 1;
+        },
+        mapFeaturesSelected (newFeatures) {
+            if (this.onCenterMap) {
+                return;
+            }
+
+            if (!newFeatures || newFeatures.length === 0) {
+                this.selectedRowIds = [];
+                this.mapSelectedRowIds = [];
+                return;
+            }
+
+            // Extract feature IDs from the map selection
+            this.selectedRowIds = newFeatures.map(feature => feature.getId() || feature.get("featureId"));
+            this.mapSelectedRowIds = this.selectedRowIds;
+
+            this.setSelectedDetailFeatureId(this.selectedRowIds[0]);
+
+            // Jump to first page to show selected features
+            this.currentPage = 1;
+
+            this.scrollPending = true;
+            this.performPendingScroll();
         }
     },
     methods: {
         ...mapMutations("Modules/LandRegistryFile", [
             "setSelectedDetailFeatureId",
-            "setSorting"
+            "setSorting",
+            "setOnCenterMap",
+            "setMapSelectionSource"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
             "updateSelectionLayer"
@@ -129,28 +157,46 @@ export default {
         showMapPosition (row) {
             let feature = null;
 
-            if (this.selectedRowId === row.id) {
-                this.selectedRowId = null;
-            }
-            else {
-                this.selectedRowId = row.id;
+            this.setOnCenterMap(true);
 
-                feature = new Feature({
-                    geometry: new Point([row.utm_rw, row.utm_hw])
+            if (this.mapSelectedRowIds.includes(row.id)) {
+                this.mapSelectedRowIds = this.mapSelectedRowIds.filter(id => id !== row.id);
+
+                const selectionLayer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/selection"),
+                      currentFeatures = selectionLayer?.getSource().getFeatures() || [];
+
+                currentFeatures.forEach(f => {
+                    if (f.getId() === row.id || f.get("featureId") === row.id) {
+                        selectionLayer?.getSource().removeFeature(f);
+                    }
                 });
 
-                const selectionStyle = new Style({
-                    image: new Circle({
-                        radius: 5,
-                        fill: new Fill({color: "#03ffff"})
-                    })
-                });
+                this.setOnCenterMap(false);
 
-                feature.setStyle(selectionStyle);
-                this.zoomToSelectedFeature(feature);
+                return;
             }
 
-            this.updateSelectionLayer({features: feature ? [feature] : [], layerName: "Module/landRegistryFile/layer/selection"});
+            this.setMapSelectionSource("table");
+
+            this.mapSelectedRowIds = [row.id];
+            this.setSelectedDetailFeatureId(row.id);
+
+            const activeLayer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/belegenheiten");
+
+            feature = activeLayer?.getSource().getFeatureById(row.id).clone();
+            feature.setId(row.id);
+
+            const selectionStyle = new Style({
+                image: new Circle({
+                    radius: 5,
+                    fill: new Fill({color: "#03ffff"})
+                })
+            });
+
+            feature.setStyle(selectionStyle);
+            this.zoomToSelectedFeature(feature);
+
+            this.updateSelectionLayer({features: [feature], layerName: "Module/landRegistryFile/layer/selection"});
         },
         /**
          * Sets the selected feature ID and switches to the details tab.
@@ -249,6 +295,8 @@ export default {
                     return;
                 }
 
+                this.setOnCenterMap(true);
+
                 if (view.getZoom() === setZoom) {
                     this.centerVisibleMap(feature.getGeometry().getCoordinates());
                 }
@@ -261,6 +309,11 @@ export default {
                     map.on("moveend", onMoveEnd);
                     view.setZoom(setZoom);
                 }
+
+                setTimeout(() => {
+                    this.setOnCenterMap(false);
+                }, 1000);
+
             }
         },
         /**
@@ -345,6 +398,8 @@ export default {
                 :sortable="true"
                 :sorting="sorting"
                 :manual-sorting="true"
+                :selected-row-ids="mapSelectedRowIds"
+                select-mode="row"
                 @update:sorting="(newSorting) => setSorting(newSorting)"
             >
                 <template #cell-actions="{ row }">
@@ -359,7 +414,7 @@ export default {
                         <IconButton
                             :aria="$t('additional:modules.landRegistryFile.tabs.tabResults.actionsShowPosition')"
                             icon="bi-crosshair"
-                            :class-array="['action-button', row.id === selectedRowId ?'map-selected-button' : '']"
+                            :class-array="['action-button', mapSelectedRowIds.includes(row.id) ?'map-selected-button' : '']"
                             @click.stop="showMapPosition(row)"
                         />
                         <IconButton

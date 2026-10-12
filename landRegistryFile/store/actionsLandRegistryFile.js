@@ -143,6 +143,8 @@ export default {
                     style = createStyle.createStyle(layerStyleObject, olFeature, false, Config.wfsImgPath);
 
                 olFeature.setStyle(style);
+                olFeature.setId(feature.id);
+                olFeature.set("featureId", feature.id); // Store as property backup
 
                 return olFeature;
             });
@@ -187,10 +189,10 @@ export default {
         }
 
         if (!features || features.length === 0) {
-            commit("setMapFeaturesSelected", false);
+            commit("setMapFeaturesSelected", []);
         }
         else {
-            commit("setMapFeaturesSelected", true);
+            commit("setMapFeaturesSelected", features);
         }
 
         let selectionLayer = map.getLayers().getArray().find(l => l.get("name") === layerName);

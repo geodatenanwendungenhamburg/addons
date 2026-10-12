@@ -47,7 +47,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
                                 sorting: {
                                     columnName: "",
                                     order: "origin"
-                                }
+                                },
+                                mapFeaturesSelected: []
                             }),
                             getters: {
                                 getSortedFeatures: state => state.landRegistryFileFeatures,
@@ -55,7 +56,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
                                 selectedDetailFeatureId: state => state.selectedDetailFeatureId,
                                 tableFields: state => state.tableFields,
                                 oafSchema: state => state.oafSchema,
-                                sorting: state => state.sorting
+                                sorting: state => state.sorting,
+                                mapFeaturesSelected: state => state.mapFeaturesSelected
                             },
                             mutations: {
                                 setSelectedDetailFeatureId (state, featureId) {

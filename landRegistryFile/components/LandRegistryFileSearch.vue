@@ -63,7 +63,7 @@ export default {
             "showLoadingSpinner",
             "oafParams",
             "oafSchema",
-            "mapFeaturesSelected"
+            "onCenterMap"
         ]),
         ...mapGetters("Maps", [
             "extent"
@@ -118,7 +118,7 @@ export default {
     activated () {
         this.map = mapCollection.getMap("2D");
         this.moveEndKey = this.map?.on("moveend", () => {
-            if (this.activeSearchCriteria.searchInExtent && this.searchInitiated && !this.mapFeaturesSelected) {
+            if (this.activeSearchCriteria.searchInExtent && this.searchInitiated && !this.onCenterMap) {
                 this.prepareSearch();
             }
         });
@@ -136,7 +136,8 @@ export default {
     methods: {
         ...mapMutations("Modules/LandRegistryFile", [
             "setShowLoadingSpinner",
-            "setLandRegistryFileFeatures"
+            "setLandRegistryFileFeatures",
+            "setMapSelectionSource"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
             "queryOaf",
@@ -401,18 +402,8 @@ export default {
                 }
             );
 
-            const hasClickedFeatures = clickedFeatures.length > 0;
-
-            if (hasClickedFeatures) {
-                this.setLandRegistryFileFeatures(clickedFeatures);
-            }
-
-            else {
-                const features = this.getGeoJsonFeaturesFromLayer("Module/landRegistryFile/layer/belegenheiten");
-
-                this.setLandRegistryFileFeatures(features);
-            }
             this.updateSelectionLayer({features: clickedOlFeatures, layerName: "Module/landRegistryFile/layer/selection"});
+            this.setMapSelectionSource("map");
             this.setCurrentTab("tabResults");
         },
         /**
