@@ -130,13 +130,15 @@ export default {
         /**
          * Returns the configured select filters with a display name resolved
          * from the OAF schema, falling back to the filter field name.
+         * Adds a Map from each option value to its configured color.
          *
-         * @returns {Array<Object>} The select filters with their display names.
+         * @returns {Array<Object>} The select filters with their display names and color mappings.
          */
         selectFilters () {
             return (this.oafParams?.filters?.select || []).map(select => ({
                 ...select,
-                fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field
+                fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field,
+                colorByValue: new Map(select.options.map(option => [option.value, option.color]))
             }));
         }
     },
@@ -504,7 +506,7 @@ export default {
                     :id="`type-select-${item.field}`"
                     v-model="searchForm.selectSelections[item.field]"
                     :aria-label="item.fieldName"
-                    :options="item.options"
+                    :options="item.options.map(option => option.value)"
                     :name="`type-select-${item.field}`"
                     :multiple="item.multiple"
                     :placeholder="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectPlaceholder', {fieldName: item.fieldName})"
@@ -515,7 +517,39 @@ export default {
                     :close-on-select="true"
                     :clear-on-select="false"
                     :internal-search="true"
-                />
+                >
+                    <template #option="{ option }">
+                        <div class="option-wrapper">
+                            <span
+                                v-if="item.colorByValue.get(option)"
+                                class="option-legend"
+                                :style="{
+                                    borderBottomColor: item.colorByValue.get(option)
+                                }"
+                                aria-hidden="true"
+                            />
+                            <span>{{ option }}</span>
+                        </div>
+                    </template>
+                    <template #tag="{ option, remove }">
+                        <span
+                            class="multiselect__tag"
+                            :style="{
+                                backgroundColor: `color-mix(in srgb, ${item.colorByValue.get(option) ?? 'transparent'} 20%, transparent)`,
+                                borderColor: item.colorByValue.get(option)
+                            }"
+                            @mousedown.prevent
+                        >
+                            <span>{{ option }}</span>
+                            <button
+                                type="button"
+                                class="multiselect__tag-icon"
+                                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.removeSelectedRecord', {record: option})"
+                                @click.stop="remove(option)"
+                            />
+                        </span>
+                    </template>
+                </Multiselect>
             </div>
 
             <p class="searchTextFormLabel">
@@ -673,16 +707,85 @@ export default {
         div.typeSelectContainer {
             margin: 0.5rem 0;
 
-            :deep(.multiselect__selected),
-            :deep(.multiselect__tags),
-            :deep(.multiselect__option) {
-                font-size: 1rem;
+            div.option-wrapper {
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+
+                span.option-legend {
+                    width: 0;
+                    height: 0;
+                    border-left: 8px solid transparent;
+                    border-right: 8px solid transparent;
+                    border-bottom: 14px solid transparent;
+                    flex: 0 0 auto;
+                }
             }
 
-            :deep(.multiselect__input::placeholder),
-            :deep(.multiselect__placeholder) {
-                color: #747474;
-                font-weight: normal;
+            :deep(.multiselect) {
+                .multiselect__input,
+                .multiselect__single,
+                .multiselect__placeholder,
+                .multiselect__input::placeholder {
+                    font-size: 1rem;
+                    font-weight: normal;
+                    margin-bottom: 8px;
+                    line-height: 20px;
+                }
+
+                .multiselect__placeholder {
+                    padding: 0 0 0 5px;
+                }
+
+                .multiselect__placeholder,
+                .multiselect__input::placeholder {
+                    color: #747474;
+                }
+
+                .multiselect__selected,
+                .multiselect__option,
+                .multiselect__tags,
+                .multiselect__tag {
+                    font-size: 1rem;
+                    color: black;
+                }
+
+                .multiselect__selected,
+                .multiselect__option {
+                     &:hover,
+                     &.multiselect__option--highlight {
+                        color: white;
+                    }
+                }
+
+                .multiselect__tag {
+                    border: 2px solid;
+                }
+
+                button.multiselect__tag-icon {
+                    border: 0;
+                    padding: 0;
+                    background: transparent;
+                    width: 1.2rem;
+                    height: 1.2rem;
+                    top: calc(50% - 0.6rem);
+                    bottom: auto;
+                    line-height: 1.2rem;
+                    margin-right: 0.2rem;
+
+                    &::after {
+                        color: black;
+                    }
+
+                    &:hover,
+                    &:focus-visible {
+                        background-color: #001B3D;
+
+                        &::after {
+                            color: white;
+                        }
+                    }
+                }
             }
         }
 

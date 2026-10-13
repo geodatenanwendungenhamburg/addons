@@ -47,14 +47,14 @@ export default {
                 const selection = selectedFilters[select.field];
                 let selectedValues = [];
 
-                if (select.multiple && Array.isArray(selection)) {
+                if (select.multiple && Array.isArray(selection) && selection.length > 0) {
                     selectedValues = selection;
                 }
                 else if (!select.multiple && selection !== null && selection !== undefined && selection !== "") {
                     selectedValues = [selection];
                 }
 
-                const validValues = selectedValues.filter(value => select.options.includes(value));
+                const validValues = selectedValues.filter(value => select.options.some(option => option.value === value));
 
                 if (validValues.length > 0) {
                     const expressions = validValues.map(value => `${select.field} = '${String(value).replaceAll("'", "''")}'`);
