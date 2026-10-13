@@ -214,5 +214,81 @@ export default {
         if (features && features.length > 0) {
             selectionLayer.getSource().addFeatures(features);
         }
+    },
+    /**
+     * Loads the tour steps from the configured URL and starts the Shepherd tour.
+     * Button actions in the JSON are resolved to Shepherd methods at runtime.
+     * @returns {Promise<void>} Resolves after the tour has been started.
+     */
+    async startGuidedTour ({state, dispatch}) {
+        const stepsUrl = state.landRegistryFileTourUrl,
+            ShepherdLibrary = window.Shepherd;
+
+        if (!stepsUrl || !ShepherdLibrary?.Tour) {
+            console.warn("The steps-URL or Shepherd are not available.");
+
+            dispatch("Alerting/addSingleAlert", {
+                category: "error",
+                content: "Die Hilfetour ist nicht verfügbar. Bitte nutzen Sie bei Bedarf das Kontaktformular in der linken Seitenspalte.",
+                once: true
+            }, {root: true});
+
+            return;
+        }
+
+        try {
+            const response = await fetch(stepsUrl);
+
+            if (!response.ok) {
+                throw new Error(`Unable to load tour configuration: ${response.status}`);
+            }
+
+            const config = await response.json();
+
+            if (!Array.isArray(config.tourSteps)) {
+                throw new Error("Tour configuration must contain a tourSteps array.");
+            }
+
+            const tour = new ShepherdLibrary.Tour({
+                    useModalOverlay: true,
+                    defaultStepOptions: {
+                        classes: "landregistry-guided-tour",
+                        scrollTo: true
+                    }
+                }),
+                actionHandlers = {
+                    complete: () => tour.complete(),
+                    next: () => tour.next(),
+                    back: () => tour.back(),
+                    restart: () => {
+                        tour.complete();
+                        tour.start();
+                    }
+                },
+                steps = config.tourSteps.map(step => ({
+                    ...step,
+                    buttons: (step.buttons || []).map(button => {
+                        const action = actionHandlers[button.action];
+
+                        if (!action) {
+                            throw new Error(`Unsupported tour action: ${button.action}`);
+                        }
+
+                        return {...button, action};
+                    })
+                }));
+
+            tour.addSteps(steps);
+            tour.start();
+        }
+        catch (error) {
+            dispatch("Alerting/addSingleAlert", {
+                category: "error",
+                content: "Die Hilfetour ist nicht verfügbar. Bitte nutzen Sie bei Bedarf das Kontaktformular in der linken Seitenspalte.",
+                once: true
+            }, {root: true});
+
+            console.error(error);
+        }
     }
 };

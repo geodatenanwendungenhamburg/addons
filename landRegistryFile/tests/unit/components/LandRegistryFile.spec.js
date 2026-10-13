@@ -46,16 +46,19 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFile.spec.js
                             state: () => ({
                                 showLoadingSpinner: false,
                                 landRegistryFileFeatures: landRegistryFileFeatures,
-                                selectedDetailFeatureId: null
+                                selectedDetailFeatureId: null,
+                                autoStartTourUntil: null
                             }),
                             actions: {
-                                queryOafSchema: () => Promise.resolve()
+                                queryOafSchema: () => Promise.resolve(),
+                                startGuidedTour: () => Promise.resolve()
                             },
                             getters: {
                                 showLoadingSpinner: state => state.showLoadingSpinner,
                                 getSortedFeatures: state => state.landRegistryFileFeatures,
                                 landRegistryFileFeatures: state => state.landRegistryFileFeatures,
-                                selectedDetailFeatureId: state => state.selectedDetailFeatureId
+                                selectedDetailFeatureId: state => state.selectedDetailFeatureId,
+                                autoStartTourUntil: state => state.autoStartTourUntil
                             },
                             mutations: {
                                 setShowLoadingSpinner (state, payload) {

@@ -5,6 +5,7 @@ import TabContainer from "./shared/TabContainer.vue";
 import LandRegistryFileDetails from "./LandRegistryFileDetails.vue";
 import LandRegistryFileResults from "./LandRegistryFileResults.vue";
 import LandRegistryFileSearch from "./LandRegistryFileSearch.vue";
+import LandRegistryFileHelp from "./LandRegistryFileHelp.vue";
 
 export default {
     name: "LandRegistryFile",
@@ -24,7 +25,8 @@ export default {
             "showLoadingSpinner",
             "getSortedFeatures",
             "landRegistryFileFeatures",
-            "selectedDetailFeatureId"
+            "selectedDetailFeatureId",
+            "autoStartTourUntil"
         ]),
         loadingSpinnerText () {
             return this.$t("additional:modules.landRegistryFile.loadingSpinnerText.general");
@@ -56,6 +58,15 @@ export default {
                     ref: "tabDetails",
                     label: this.$t("additional:modules.landRegistryFile.tabs.tabDetails.label"),
                     component: LandRegistryFileDetails,
+                    propsForTabContent: {},
+                    renderComponent: true
+                },
+                {
+                    id: "tabHelp",
+                    contentId: "tabHelpContent",
+                    ref: "tabHelp",
+                    label: this.$t("additional:modules.landRegistryFile.tabs.tabHelp.label"),
+                    component: LandRegistryFileHelp,
                     propsForTabContent: {},
                     renderComponent: true
                 }
@@ -93,6 +104,7 @@ export default {
         }
 
         this.queryOafSchema();
+        this.startGuidedTourAutomatically();
     },
     async activated () {
         await this.attachTabWatcher();
@@ -106,7 +118,8 @@ export default {
     },
     methods: {
         ...mapActions("Modules/LandRegistryFile", [
-            "queryOafSchema"
+            "queryOafSchema",
+            "startGuidedTour"
         ]),
         ...mapMutations("Modules/LandRegistryFile", [
             "setShowLoadingSpinner",
@@ -158,6 +171,39 @@ export default {
             this.unwatchTabContainer = tabContainerRef.$watch("activeTabIdLocal", (newTabId, oldTabId) => {
                 this.handleTabChange(tabContainerRef, newTabId, oldTabId);
             });
+        },
+        /**
+         * Starts the guided tour automatically when autoStartTourUntil
+         * contains a valid date later than today.
+         * @returns {void}
+         */
+        startGuidedTourAutomatically () {
+            if (!this.autoStartTourUntil) {
+                return;
+            }
+
+            if (typeof this.autoStartTourUntil !== "string" || !(/^\d{4}-\d{2}-\d{2}$/).test(this.autoStartTourUntil)) {
+                console.warn("Der Wert für 'autoStartTourUntil' ist nicht korrekt konfiguriert [YYYY-MM-DD]");
+                return;
+            }
+
+            const parsedDate = new Date(`${this.autoStartTourUntil}T00:00:00Z`);
+
+            if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== this.autoStartTourUntil) {
+                console.warn("Der Wert für 'autoStartTourUntil' konnte nicht geparst werden [YYYY-MM-DD]");
+                return;
+            }
+
+            const today = new Date(),
+                  todayString = [
+                      today.getFullYear(),
+                      String(today.getMonth() + 1).padStart(2, "0"),
+                      String(today.getDate()).padStart(2, "0")
+                  ].join("-");
+
+            if (this.autoStartTourUntil > todayString) {
+                this.startGuidedTour();
+            }
         }
     }
 };

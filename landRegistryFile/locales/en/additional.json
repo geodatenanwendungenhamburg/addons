@@ -52,6 +52,13 @@
                 "noDetailsMessage": "No details found. Please change your search criteria.",
                 "buttonBack": "Show previous record",
                 "buttonForward": "Show next record"
+              },
+              "tabHelp": {
+                "label": "Help",
+                "backToSearchButtonLabel": "Back to search",
+                "openHelpButtonLabel": "Open help page in Sharepoint",
+                "startTourButtonLabel": "Start guided help tour",
+                "noHelpConfigured": "Currently no explicit help is configured for the 'Digital Land Registry File'."
               }
             },
             "errors": {

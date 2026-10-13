@@ -52,6 +52,13 @@
                 "noDetailsMessage": "Keine Details gefunden. Bitte ändern Sie Ihre Suchkriterien.",
                 "buttonBack": "Vorherige Akte anzeigen",
                 "buttonForward": "Nächste Akte anzeigen"
+              },
+              "tabHelp": {
+                "label": "Hilfe",
+                "backToSearchButtonLabel": "Zurück zur Suche",
+                "openHelpButtonLabel": "Hilfe-Seite im Sharepoint öffnen",
+                "startTourButtonLabel": "Geführte Hilfe-Tour starten",
+                "noHelpConfigured": "Derzeit ist keine gesonderte Hilfe für die 'Digitale Grundstücksakte' definiert."
               }
             },
             "errors": {

@@ -35,6 +35,9 @@
  * @property {Object[]} mapFeaturesSelected - The array of features currently selected on the map.
  * @property {Boolean} onCenterMap - Indicates whether the map is centered by the click action initiated from the table row.
  * @property {string|null} mapSelectionSource - The source of the map selection, can be "map" or "table".
+ * @property {string|null} linkToHelp - Link to the external help page on the Sharepoint.
+ * @property {string|null} landRegistryFileTourUrl - Link to the json formatted steps of the guided tour.
+ * @property {string} autoStartTourUntil - Date until which the guided tour shall start automatically on opening the addon.
  */
 
 const state = {
@@ -99,7 +102,10 @@ const state = {
     },
     mapFeaturesSelected: [],
     onCenterMap: false,
-    mapSelectionSource: null
+    mapSelectionSource: null,
+    linkToHelp: "https://fhhportal.ondataport.de/websites/digitale-grundstuecksakte-hilfe/SitePages/Home.aspx",
+    landRegistryFileTourUrl: "./resources/tour/tour.json",
+    autoStartTourUntil: "2027-03-31"
 };
 
 export default state;
