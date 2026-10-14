@@ -51,7 +51,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFile.spec.js
                             }),
                             actions: {
                                 queryOafSchema: () => Promise.resolve(),
-                                startGuidedTour: () => Promise.resolve()
+                                startGuidedTour: () => Promise.resolve(),
+                                selectFeatureOnMap: () => Promise.resolve()
                             },
                             getters: {
                                 showLoadingSpinner: state => state.showLoadingSpinner,

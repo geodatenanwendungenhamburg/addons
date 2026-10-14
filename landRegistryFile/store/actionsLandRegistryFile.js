@@ -3,6 +3,9 @@ import createStyle from "@masterportal/masterportalapi/src/vectorStyle/createSty
 import GeoJSON from "ol/format/GeoJSON.js";
 import layerCollection from "@core/layers/js/layerCollection.js";
 import layerFactory from "@core/layers/js/layerFactory";
+import Style from "ol/style/Style";
+import Circle from "ol/style/Circle";
+import Fill from "ol/style/Fill";
 
 export default {
     /**
@@ -211,7 +214,7 @@ export default {
         let selectionLayer = map.getLayers().getArray().find(l => l.get("name") === layerName);
 
         if (!selectionLayer) {
-            selectionLayer = await dispatch("Maps/addNewLayerIfNotExists", {layerName: layerName}, {root: true});
+            selectionLayer = await dispatch("Maps/addNewLayerIfNotExists", {layerName: layerName, alwaysOnTop: true}, {root: true});
         }
 
         selectionLayer.getSource().clear();
@@ -294,5 +297,138 @@ export default {
 
             console.error(error);
         }
+    },
+    /**
+     * Selects a feature on the map and zooms to it.
+     * @param {Object} context Vuex action context.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Object} payload Action payload.
+     * @param {string|number} payload.featureId ID of the feature to select.
+     * @param {boolean} payload.zoomToFeature - Whether to zoom to the selected feature.
+     * @returns {void} Dispatches selection and zoom actions if the feature exists.
+     */
+    selectFeatureOnMap ({dispatch}, {featureId, zoomToFeature}) {
+        const activeLayer = mapCollection.getMap("2D")?.getLayers()?.getArray()
+            .find(l => l.get("name") === "Module/landRegistryFile/layer/belegenheiten");
+        const source = activeLayer?.getSource();
+
+        if (!source || source.getFeatures().length === 0) {
+            return;
+        }
+
+        const feature = source?.getFeatureById(featureId);
+
+        if (!feature) {
+            return;
+        }
+
+        const clonedFeature = feature.clone();
+
+        clonedFeature.setId(featureId);
+
+        const selectionStyle = new Style({
+            image: new Circle({
+                radius: 5,
+                fill: new Fill({color: "#03ffff"})
+            })
+        });
+
+        clonedFeature.setStyle(selectionStyle);
+
+        dispatch("updateSelectionLayer", {
+            features: [clonedFeature],
+            layerName: "Module/landRegistryFile/layer/selection"
+        });
+
+        if (zoomToFeature) {
+            dispatch("zoomToSelectedFeature", {feature: clonedFeature});
+        }
+    },
+    /**
+     * Centers the map on the given coordinate, accounting for visible menus.
+     * @param {Object} context - The Vuex action context.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Function} context.rootGetters Vuex rootGetters function.
+     * @param {Object} payload - The action payload.
+     * @param {Array<number>|null} payload.coord - The coordinate to center the map on.
+     * @returns {void}
+     */
+    centerVisibleMap ({dispatch, rootGetters}, payload) {
+        const coordinates = payload.coord;
+        const map = mapCollection.getMap("2D"),
+            pixelAtCoordinates = map?.getPixelFromCoordinate(coordinates);
+
+        if (!map || !pixelAtCoordinates) {
+            return;
+        }
+
+        const rightPadding = rootGetters["Menu/expanded"]("secondaryMenu")
+                ? document.getElementById("mp-menu-secondaryMenu").offsetWidth + 20
+                : 20,
+            leftPadding = rootGetters["Menu/expanded"]("mainMenu")
+                ? document.getElementById("mp-menu-mainMenu").offsetWidth + 20
+                : 20,
+            offset = (rightPadding - leftPadding) / 2,
+            shiftedPixel = [pixelAtCoordinates[0] + offset, pixelAtCoordinates[1]],
+            shiftedCoordinate = map.getCoordinateFromPixel(shiftedPixel);
+
+        dispatch("Maps/setCenter", shiftedCoordinate, {root: true});
+    },
+    /**
+     * Zooms to the selected feature and centers it in the visible map area.
+     * @param {Object} context - The Vuex action context.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Function} context.commit Vuex commit function.
+     * @param {Feature|null} feature - The feature to zoom to.
+     * @returns {void}
+     */
+    zoomToSelectedFeature ({dispatch, commit}, {feature}) {
+        if (feature) {
+            const map = mapCollection.getMap("2D"),
+                view = map?.getView(),
+                setZoom = 7;
+
+            if (!map || !view) {
+                return;
+            }
+
+            commit("setOnCenterMap", true);
+
+            if (view.getZoom() === setZoom) {
+                dispatch("centerVisibleMap", {coord: feature.getGeometry().getCoordinates()});
+            }
+            else {
+                /**
+                 * onMoveEnd centers the map on the feature once the zoom animation has finished.
+                 * @returns {void}
+                 */
+                function onMoveEnd () {
+                    dispatch("centerVisibleMap", {coord: feature.getGeometry().getCoordinates()});
+                    map.un("moveend", onMoveEnd);
+                }
+
+                map.on("moveend", onMoveEnd);
+                view.setZoom(setZoom);
+            }
+
+            setTimeout(() => {
+                commit("setOnCenterMap", false);
+            }, 1000);
+
+        }
+    },
+    /**
+     * Removes the specified feature from the map selection layer.
+     * @param {Object} context - The Vuex action context.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {string|number} featureId - The ID of the feature to deselect.
+     * @returns {void}
+     */
+    deselectFeatureOnMap ({dispatch}, {featureId}) {
+        const layerName = "Module/landRegistryFile/layer/selection",
+            layer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === layerName),
+            remaining = (layer?.getSource().getFeatures() || []).filter(f => f.getId() !== featureId);
+
+        dispatch("updateSelectionLayer", {features: remaining, layerName});
     }
 };

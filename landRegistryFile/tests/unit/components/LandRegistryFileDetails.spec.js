@@ -71,6 +71,9 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
                                 setSelectedDetailFeatureId (state, featureId) {
                                     state.selectedDetailFeatureId = featureId;
                                 }
+                            },
+                            actions: {
+                                selectFeatureOnMap: () => Promise.resolve()
                             }
                         }
                     }

@@ -232,7 +232,8 @@ export default {
         ...mapMutations("Modules/LandRegistryFile", [
             "setShowLoadingSpinner",
             "setLandRegistryFileFeatures",
-            "setMapSelectionSource"
+            "setMapClickedFeatureIds",
+            "setSelectedDetailFeatureId"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
             "queryOaf",
@@ -302,6 +303,7 @@ export default {
             this.removeFeaturesFromMap();
             this.updateSelectionLayer({features: [], layerName: "Module/landRegistryFile/layer/selection"});
             this.searchInitiated = false;
+            this.setMapClickedFeatureIds([]);
         },
         /**
          * Validates all search input fields and updates their validation state.
@@ -422,6 +424,12 @@ export default {
          */
         initiateSearchByUser () {
             this.validateInputs();
+            this.setSelectedDetailFeatureId(null);
+            this.setMapClickedFeatureIds([]);
+
+            if (mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/selection")) {
+                this.updateSelectionLayer({features: [], layerName: "Module/landRegistryFile/layer/selection"});
+            }
 
             if (this.allInputsValid) {
                 this.activeSearchCriteria = JSON.parse(JSON.stringify(this.searchForm));
@@ -502,6 +510,7 @@ export default {
                               })
                           });
 
+                    clonedFeature.setId(feature.getId());
                     clonedFeature.setStyle(clonedFeatureStyle);
                     clickedOlFeatures.push(clonedFeature);
                     return false; // continue iteration, or true to stop after first
@@ -512,8 +521,15 @@ export default {
                 }
             );
 
+            const ids = clickedOlFeatures.map(f => f.getId());
+
+            this.setMapClickedFeatureIds(ids);
             this.updateSelectionLayer({features: clickedOlFeatures, layerName: "Module/landRegistryFile/layer/selection"});
-            this.setMapSelectionSource("map");
+
+            if (ids.length > 0) {
+                this.setSelectedDetailFeatureId(ids[0]);
+            }
+
             this.setCurrentTab("tabResults");
         },
         /**

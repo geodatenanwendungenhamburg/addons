@@ -10,7 +10,7 @@ const getters = {
      * @returns {function(): Array} - A function that returns the sorted features array, or an empty array if features are not available.
      */
     getSortedFeatures: state => {
-        const {landRegistryFileFeatures: features, sorting, mapFeaturesSelected, mapSelectionSource} = state;
+        const {landRegistryFileFeatures: features, sorting, mapClickedFeatureIds} = state;
 
         if (!Array.isArray(features)) {
             return [];
@@ -26,10 +26,9 @@ const getters = {
         }
 
         // Only reorder if selection came from map, not from table button
-        if (mapFeaturesSelected?.length > 0 && mapSelectionSource === "map") {
-            const mapFeaturesSelectedIds = mapFeaturesSelected.map(s => s.get("featureId"));
-            const selectedFeatures = sortedFeatures.filter(f => mapFeaturesSelectedIds.includes(f.id));
-            const nonSelectedFeatures = sortedFeatures.filter(f => !mapFeaturesSelectedIds.includes(f.id));
+        if (mapClickedFeatureIds?.length) {
+            const selectedFeatures = sortedFeatures.filter(f => mapClickedFeatureIds.includes(f.id));
+            const nonSelectedFeatures = sortedFeatures.filter(f => !mapClickedFeatureIds.includes(f.id));
 
             return [...selectedFeatures, ...nonSelectedFeatures];
         }

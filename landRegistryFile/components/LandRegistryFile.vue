@@ -119,7 +119,8 @@ export default {
     methods: {
         ...mapActions("Modules/LandRegistryFile", [
             "queryOafSchema",
-            "startGuidedTour"
+            "startGuidedTour",
+            "selectFeatureOnMap"
         ]),
         ...mapMutations("Modules/LandRegistryFile", [
             "setShowLoadingSpinner",
@@ -134,8 +135,13 @@ export default {
         handleTabChange (tabContainerRef, newTabId, oldTabId) {
             const tabResults = tabContainerRef.$refs.tabResults?.[0];
 
-            if (newTabId === "tabDetails" && !this.selectedDetailFeatureId && this.getSortedFeatures.length > 0) {
-                this.setSelectedDetailFeatureId(this.getSortedFeatures[0].id);
+            if (newTabId === "tabDetails") {
+                if (!this.selectedDetailFeatureId && this.getSortedFeatures.length > 0) {
+                    this.setSelectedDetailFeatureId(this.getSortedFeatures[0].id);
+                }
+                if (this.selectedDetailFeatureId) {
+                    this.selectFeatureOnMap({featureId: this.selectedDetailFeatureId, zoomToFeature: true});
+                }
             }
 
             if (oldTabId === "tabDetails" && newTabId === "tabResults") {

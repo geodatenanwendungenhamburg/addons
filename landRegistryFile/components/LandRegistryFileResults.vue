@@ -4,9 +4,6 @@ import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
-import Style from "ol/style/Style";
-import Circle from "ol/style/Circle";
-import Fill from "ol/style/Fill";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
 import PaginationControl from "@shared/modules/pagination/components/PaginationControl.vue";
 import Multiselect from "vue-multiselect";
@@ -28,7 +25,6 @@ export default {
             showMoreFields: false,
             scrollPending: false,
             selectedRowIds: [],
-            mapSelectedRowIds: [],
             currentDatasetsPerPage: 10,
             datasetsPerPage: [10, 25, 50],
             currentPage: 1
@@ -42,8 +38,7 @@ export default {
             "sorting",
             "getSortedFeatures",
             "showLoadingSpinner",
-            "mapFeaturesSelected",
-            "onCenterMap"
+            "mapFeaturesSelected"
         ]),
         ...mapGetters("Menu", [
             "expanded"
@@ -88,6 +83,9 @@ export default {
             const addLastPage = this.getSortedFeatures.length % this.currentDatasetsPerPage > 0 ? 1 : 0;
 
             return Math.floor(this.getSortedFeatures.length / this.currentDatasetsPerPage) + addLastPage;
+        },
+        mapSelectedRowIds () {
+            return (this.mapFeaturesSelected || []).map(f => f.getId());
         }
     },
     watch: {
@@ -101,7 +99,6 @@ export default {
 
             this.scrollPending = true;
             this.performPendingScroll();
-            this.selectedRowIds = [];
         },
         showLoadingSpinner (isLoading) {
             if (!isLoading) {
@@ -111,39 +108,21 @@ export default {
         currentDatasetsPerPage () {
             this.currentPage = 1;
         },
-        mapFeaturesSelected (newFeatures) {
-            if (this.onCenterMap) {
-                return;
+        mapFeaturesSelected (newValue) {
+            if (!newValue || newValue.length === 0) {
+                this.setMapClickedFeatureIds([]);
             }
-
-            if (!newFeatures || newFeatures.length === 0) {
-                this.selectedRowIds = [];
-                this.mapSelectedRowIds = [];
-                return;
-            }
-
-            // Extract feature IDs from the map selection
-            this.selectedRowIds = newFeatures.map(feature => feature.getId() || feature.get("featureId"));
-            this.mapSelectedRowIds = this.selectedRowIds;
-
-            this.setSelectedDetailFeatureId(this.selectedRowIds[0]);
-
-            // Jump to first page to show selected features
-            this.currentPage = 1;
-
-            this.scrollPending = true;
-            this.performPendingScroll();
         }
     },
     methods: {
         ...mapMutations("Modules/LandRegistryFile", [
             "setSelectedDetailFeatureId",
             "setSorting",
-            "setOnCenterMap",
-            "setMapSelectionSource"
+            "setMapClickedFeatureIds"
         ]),
         ...mapActions("Modules/LandRegistryFile", [
-            "updateSelectionLayer"
+            "selectFeatureOnMap",
+            "deselectFeatureOnMap"
         ]),
         ...mapActions("Maps", [
             "setCenter",
@@ -155,48 +134,13 @@ export default {
          * @returns {void}
          */
         showMapPosition (row) {
-            let feature = null;
-
-            this.setOnCenterMap(true);
-
             if (this.mapSelectedRowIds.includes(row.id)) {
-                this.mapSelectedRowIds = this.mapSelectedRowIds.filter(id => id !== row.id);
-
-                const selectionLayer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/selection"),
-                      currentFeatures = selectionLayer?.getSource().getFeatures() || [];
-
-                currentFeatures.forEach(f => {
-                    if (f.getId() === row.id || f.get("featureId") === row.id) {
-                        selectionLayer?.getSource().removeFeature(f);
-                    }
-                });
-
-                this.setOnCenterMap(false);
-
+                this.deselectFeatureOnMap({featureId: row.id});
                 return;
             }
 
-            this.setMapSelectionSource("table");
-
-            this.mapSelectedRowIds = [row.id];
             this.setSelectedDetailFeatureId(row.id);
-
-            const activeLayer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === "Module/landRegistryFile/layer/belegenheiten");
-
-            feature = activeLayer?.getSource().getFeatureById(row.id).clone();
-            feature.setId(row.id);
-
-            const selectionStyle = new Style({
-                image: new Circle({
-                    radius: 5,
-                    fill: new Fill({color: "#03ffff"})
-                })
-            });
-
-            feature.setStyle(selectionStyle);
-            this.zoomToSelectedFeature(feature);
-
-            this.updateSelectionLayer({features: [feature], layerName: "Module/landRegistryFile/layer/selection"});
+            this.selectFeatureOnMap({featureId: row.id, zoomToFeature: true});
         },
         /**
          * Sets the selected feature ID and switches to the details tab.
@@ -210,6 +154,7 @@ export default {
             }
 
             this.setSelectedDetailFeatureId(row.id);
+            this.selectFeatureOnMap({featureId: row.id, zoomToFeature: true});
             this.setCurrentTab("tabDetails");
         },
         /**
@@ -253,68 +198,6 @@ export default {
 
                 selectedRow?.scrollIntoView({behavior: "smooth", block: "center"});
             });
-        },
-        /** Centers the map on the given coordinate, accounting for visible menus.
-         * @param {Array<number>|null} coord - The coordinate to center the map on.
-         * @returns {void}
-         */
-        centerVisibleMap (coord = null) {
-            const coordinates = coord;
-
-            const map = mapCollection.getMap("2D"),
-                  pixelAtCoordinates = map?.getPixelFromCoordinate(coordinates);
-
-            if (!map || !pixelAtCoordinates) {
-                return;
-            }
-
-            const rightPadding = this.expanded("secondaryMenu")
-                      ? document.getElementById("mp-menu-secondaryMenu").offsetWidth + 20
-                      : 20,
-                  leftPadding = this.expanded("mainMenu")
-                      ? document.getElementById("mp-menu-mainMenu").offsetWidth + 20
-                      : 20,
-                  offset = (rightPadding - leftPadding) / 2,
-                  shiftedPixel = [pixelAtCoordinates[0] + offset, pixelAtCoordinates[1]],
-                  shiftedCoordinate = map.getCoordinateFromPixel(shiftedPixel);
-
-            this.setCenter(shiftedCoordinate);
-        },
-        /**
-         * Zooms to the selected feature and centers it in the visible map area.
-         * @param {Feature|null} feature - The feature to zoom to.
-         * @returns {void}
-         */
-        zoomToSelectedFeature (feature) {
-            if (feature) {
-                const map = mapCollection.getMap("2D"),
-                      view = map?.getView(),
-                      setZoom = 7;
-
-                if (!map || !view) {
-                    return;
-                }
-
-                this.setOnCenterMap(true);
-
-                if (view.getZoom() === setZoom) {
-                    this.centerVisibleMap(feature.getGeometry().getCoordinates());
-                }
-                else {
-                    const onMoveEnd = () => {
-                        this.centerVisibleMap(feature.getGeometry().getCoordinates());
-                        map.un("moveend", onMoveEnd);
-                    };
-
-                    map.on("moveend", onMoveEnd);
-                    view.setZoom(setZoom);
-                }
-
-                setTimeout(() => {
-                    this.setOnCenterMap(false);
-                }, 1000);
-
-            }
         },
         /**
          * Opens the link to the record in ELDORADO by opening it in a new window
