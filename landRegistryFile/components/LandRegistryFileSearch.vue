@@ -48,7 +48,8 @@ export default {
             errorMessages: {
                 yearFrom: "",
                 yearTo: "",
-                searchText: ""
+                searchText: "",
+                needsExtraFilter: ""
             },
             moveEndKey: null,
             map: null,
@@ -140,6 +141,57 @@ export default {
                 fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field,
                 colorByValue: new Map(select.options.map(option => [option.value, option.color]))
             }));
+        },
+        /**
+         * Returns an array of selected filter values with their corresponding field names
+         * and a flag indicating if they require an extra filter.
+         *
+         * @returns {Array<Object>} The selected filter values with field names and extra filter flags.
+         */
+        selectedFilterValues () {
+            return Object.entries(this.searchForm.selectSelections || {}).flatMap(([field, selection]) => {
+
+                let selectedValues = [];
+
+                if (Array.isArray(selection)) {
+                    selectedValues = selection;
+                }
+                else if (selection !== null && selection !== "") {
+                    selectedValues = [selection];
+                }
+
+                const options = this.selectFilters
+                    ?.find(select => select.field === field)?.options || [];
+
+                return selectedValues.map(value => {
+                    const option = options.find(o => o.value === value);
+
+                    return {
+                        field,
+                        value,
+                        needsExtraFilter: option?.needsExtraFilter ?? false
+                    };
+                });
+            });
+        },
+        /**
+         * Checks if there are any error messages in the errorMessages object
+         * other than the "needsExtraFilter" message.
+         *
+         * @returns {boolean} True if there are other error messages, false otherwise.
+         */
+        hasOtherErrorMessage () {
+            return Object.entries(this.errorMessages).some(
+                ([key, message]) => key !== "needsExtraFilter" && message.length > 0
+            );
+        }
+    },
+    watch: {
+        searchForm: {
+            handler () {
+                this.validateInputs();
+            },
+            deep: true
         }
     },
     created () {
@@ -245,10 +297,6 @@ export default {
 
             this.activeSearchCriteria = JSON.parse(JSON.stringify(this.searchForm));
 
-            Object.keys(this.errorMessages).forEach(key => {
-                this.errorMessages[key] = "";
-            });
-
             this.setLandRegistryFileFeatures([]);
             this.removeFeaturesFromMap();
             this.updateSelectionLayer({features: [], layerName: "Module/landRegistryFile/layer/selection"});
@@ -315,6 +363,27 @@ export default {
                             escapeValue: false
                         }
                     });
+                }
+            }
+
+            const selectedValues = this.selectedFilterValues,
+                  fieldsRequiringExtraFilter = new Set(
+                      selectedValues
+                          .filter(value => value.needsExtraFilter === true)
+                          .map(value => value.field)
+                  ),
+                  noIndependentFilters = !selectedValues.some(value => value.needsExtraFilter === false && !fieldsRequiringExtraFilter.has(value.field));
+
+            if (!this.searchForm.searchInExtent && yearFromString === "" && yearToString === "" && textToCheck === "" && noIndependentFilters) {
+                const optionsRequiringAdditionalFilter = selectedValues.filter(v => v.needsExtraFilter === true);
+
+                if (optionsRequiringAdditionalFilter.length > 0) {
+                    this.errorMessages.needsExtraFilter = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.overallSearchOptionNeedsFilter", {
+                        selectedOption: optionsRequiringAdditionalFilter.map(v => v.value).join(", ")
+                    });
+                }
+                else {
+                    this.errorMessages.needsExtraFilter = this.$t("additional:modules.landRegistryFile.tabs.tabSearch.errors.overallSearchNeedsFilter");
                 }
             }
         },
@@ -565,7 +634,6 @@ export default {
                     :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchPlaceholder')"
                     placeholder=""
                     :error-message="errorMessages.searchText"
-                    @input="validateInputs()"
                 />
 
                 <IconButton
@@ -590,7 +658,6 @@ export default {
                         :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearFromLabel')"
                         placeholder="2023"
                         :error-message="errorMessages.yearFrom"
-                        @input="validateInputs()"
                     />
 
                     <InputText
@@ -601,7 +668,6 @@ export default {
                         :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.yearToLabel')"
                         placeholder="2024"
                         :error-message="errorMessages.yearTo"
-                        @input="validateInputs()"
                     />
                 </div>
 
@@ -622,13 +688,18 @@ export default {
         </div>
 
         <div class="FixedContent buttons-footer">
-            <div class="unsubmitted-search-warning">
-                <p>
-                    <span v-if="showUnsubmittedSearchWarning">
-                        {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.unsubmittedSearchWarning") }}
-                    </span>
+            <div
+                class="search-warning"
+            >
+                <p v-if="errorMessages.needsExtraFilter.length > 0 && !hasOtherErrorMessage">
+                    {{ errorMessages.needsExtraFilter }}
+                </p>
+
+                <p v-else-if="showUnsubmittedSearchWarning">
+                    {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.unsubmittedSearchWarning") }}
                 </p>
             </div>
+
             <div class="searchExtentHint">
                 <p v-if="searchForm.searchInExtent">
                     {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.searchModeInExtent") }}
@@ -640,9 +711,7 @@ export default {
             </div>
 
             <div class="FixedContent">
-                <div
-                    class="spacer-div"
-                />
+                <div class="spacer-div" />
                 <FlatButton
                     id="landRegistrySearchButton"
                     :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchButtonLabel')"
@@ -848,7 +917,7 @@ export default {
             }
         }
 
-        div.unsubmitted-search-warning p {
+        div.search-warning p {
             color: var(--bs-form-invalid-color);
             white-space: pre-line;
             text-align: right;

@@ -50,16 +50,16 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                                             {
                                                 field: "aktenart",
                                                 options: [
-                                                    "Bauakte",
-                                                    "Straßenakte"
+                                                    {value: "Bauakte", needsExtraFilter: true},
+                                                    {value: "Straßenakte"}
                                                 ],
                                                 multiple: true
                                             },
                                             {
                                                 field: "bezirk",
                                                 options: [
-                                                    "Altona",
-                                                    "Wandsbek"
+                                                    {value: "Altona"},
+                                                    {value: "Wandsbek"}
                                                 ],
                                                 multiple: false
                                             }
@@ -233,7 +233,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             expect(wrapper.vm.errorMessages.yearTo).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearOrder");
         });
 
-        it("should reset form and empty all error hints", () => {
+        it("should reset form and empty all error hints", async () => {
             wrapper.vm.searchForm.yearFrom = "12345";
             wrapper.vm.searchForm.yearTo = "1235";
             wrapper.vm.searchForm.selectSelections.aktenart = ["Bauakte"];
@@ -243,6 +243,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
 
             wrapper.vm.resetForm();
+            await wrapper.vm.$nextTick();
             expect(wrapper.vm.allInputsValid).to.be.true;
             expect(wrapper.vm.searchForm.yearFrom).to.equal("");
             expect(wrapper.vm.searchForm.yearTo).to.equal("");
@@ -268,6 +269,26 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
 
             await wrapper.vm.$nextTick();
             expect(wrapper.find("#landRegistrySearchButton").attributes("disabled")).to.equal("false");
+        });
+    });
+
+    describe("validate select inputs and set error messages", () => {
+        it("requires an independent filter for overall searches", () => {
+            wrapper.vm.searchForm.searchInExtent = false;
+            wrapper.vm.validateInputs();
+
+            expect(wrapper.vm.errorMessages.needsExtraFilter).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.overallSearchNeedsFilter");
+
+            wrapper.vm.searchForm.selectSelections.aktenart = ["Bauakte"];
+            wrapper.vm.validateInputs();
+
+            expect(wrapper.vm.errorMessages.needsExtraFilter).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.overallSearchOptionNeedsFilter");
+
+            wrapper.vm.searchForm.selectSelections.bezirk = "Altona";
+            wrapper.vm.validateInputs();
+
+            expect(wrapper.vm.errorMessages.needsExtraFilter).to.equal("");
+            expect(wrapper.vm.allInputsValid).to.be.true;
         });
     });
 

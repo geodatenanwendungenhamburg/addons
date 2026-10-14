@@ -30,7 +30,9 @@
                   "errorYearDigit": "Please enter a number with 4 digits for '{{fieldname}}'.",
                   "errorYearBoth": "Please enter both 'From' and 'To' to search by year.",
                   "errorYearOrder": "'To' has to be bigger than or equal to 'From'.",
-                  "errorInvalidChars": "The text contains the following invalid characters: {{invalidChars}}"
+                  "errorInvalidChars": "The text contains the following invalid characters: {{invalidChars}}",
+                  "overallSearchNeedsFilter": "An additional filter is required to search all of Hamburg.",
+                  "overallSearchOptionNeedsFilter": "When '{{selectedOption}}' is selected, an additional filter is required to search all of Hamburg."
                 }
               },
               "tabResults": {

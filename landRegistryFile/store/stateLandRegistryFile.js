@@ -22,7 +22,7 @@
  * @property {string[]} oafParams.filters.textSearchFields - The field names for text search filtering.
  * @property {Array<Object>} oafParams.filters.select - The configuration for one or more select filters.
  * @property {string} oafParams.filters.select.field - The field name for select filtering.
- * @property {Object[]} oafParams.filters.select.options - The available options for select filtering, including their values and colors for the legend, if applicable.
+ * @property {Object[]} oafParams.filters.select.options - The available options for select filtering, including their values, legend colors and and a flag indicating if they require an extra filter.
  * @property {Boolean} oafParams.filters.select.multiple - The flag if multiple select is possible in this select filtering.
  * @property {string} styleConf - The URL to the style configuration for the land registry features.
  * @property {Object} styles - The styles applied to the land registry features.
@@ -65,7 +65,7 @@ const state = {
                 {
                     field: "aktenart",
                     options: [
-                        {value: "Bauaufsichtsakten", color: "#181818"},
+                        {value: "Bauaufsichtsakten", color: "#181818", needsExtraFilter: true},
                         {value: "Straßenakten", color: "#ffee00"},
                         {value: "Grünanlagenakten", color: "#fa0606"},
                         {value: "Naturschutzakten", color: "#3a9705"},
@@ -109,5 +109,3 @@ const state = {
 };
 
 export default state;
-
-

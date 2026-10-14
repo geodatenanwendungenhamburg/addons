@@ -30,7 +30,9 @@
                   "errorYearDigit": "Bitte bei '{{fieldname}}' ein Zahl mit 4 Ziffern eingeben.",
                   "errorYearBoth": "Geben Sie 'Von' und 'Bis' an, um nach Jahrgang zu suchen.",
                   "errorYearOrder": "'Bis' muss größer oder gleich 'Von' sein.",
-                  "errorInvalidChars": "Der Text enthält folgende ungültige Zeichen: {{invalidChars}}"
+                  "errorInvalidChars": "Der Text enthält folgende ungültige Zeichen: {{invalidChars}}",
+                  "overallSearchNeedsFilter": "Für eine Suche in ganz Hamburg ist ein zusätzlicher Filter erforderlich.",
+                  "overallSearchOptionNeedsFilter": "Bei der Auswahl von '{{selectedOption}}' ist für eine Suche in ganz Hamburg ein zusätzlicher Filter erforderlich."
                 }
               },
               "tabResults": {
