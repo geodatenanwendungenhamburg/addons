@@ -2,6 +2,7 @@
 import Card from "../../shared/modules/cards/components/Card.vue";
 import dayjs from "dayjs";
 import DropdownAutocomplete from "../../shared/modules/dropdown/components/DropdownAutocomplete.vue";
+import DropdownSelect from "@shared/modules/dropdown/components/DropdownSelect.vue";
 import FileUpload from "@shared/modules/inputs/components/FileUpload.vue";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import getters from "../store/gettersTemplateAdmin";
@@ -18,6 +19,7 @@ export default {
         Card,
         Draggable: VueDraggableNext,
         DropdownAutocomplete,
+        DropdownSelect,
         FileUpload,
         FlatButton,
         InputText,
@@ -790,9 +792,11 @@ export default {
                 </button>
             </div>
             <div class="row no-gutters mb-4">
-                <Dropdown-Autocomplete
+                <Dropdown-Select
                     v-model="selectedToolLabel"
                     clearable
+                    :multiple="true"
+                    :select-all="true"
                     :items="toolDataList"
                     :label="$t('additional:modules.cosi.templateAdmin.label.tool')"
                 />
