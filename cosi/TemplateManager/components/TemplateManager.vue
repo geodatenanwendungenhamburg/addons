@@ -833,6 +833,8 @@ export default {
             <AccordionItem
                 id="TemplateMangerAccordion"
                 :title="$t('additional:modules.tools.cosi.templateManager.label.manageTemplate')"
+                sub-title="subTitle"
+                :with-border="true"
                 icon="bi bi-clipboard-check"
                 :is-open="true"
             >
