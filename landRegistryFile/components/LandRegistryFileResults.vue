@@ -1,6 +1,5 @@
 <script>
 import {mapGetters, mapMutations, mapActions} from "vuex";
-import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import TableComponent from "./shared/TableComponent.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
@@ -10,15 +9,16 @@ import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
 import PaginationControl from "@shared/modules/pagination/components/PaginationControl.vue";
+import Multiselect from "vue-multiselect";
 
 export default {
     name: "LandRegistryFileResults",
     components: {
-        FlatButton,
         TableComponent,
         IconButton,
         SwitchInput,
-        PaginationControl
+        PaginationControl,
+        Multiselect
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
@@ -373,7 +373,7 @@ export default {
         </div>
         <div
             v-else
-            class="ScrollableContent table-wrapper"
+            class="ScrollableContent table-wrapper results-content"
         >
             <div class="table-info-wrapper">
                 <div>
@@ -429,38 +429,28 @@ export default {
                 </template>
             </TableComponent>
 
-            <PaginationControl
-                v-if="totalNumberOfPages > 1"
-                :current-page="currentPage"
-                :total-pages="totalNumberOfPages"
-                @page-change="pageChange"
-            />
-        </div>
+            <div class="pagination-control-wrapper">
+                <PaginationControl
+                    :current-page="currentPage"
+                    :total-pages="totalNumberOfPages"
+                    @page-change="pageChange"
+                />
 
-        <div class="FixedContent buttons-footer">
-            <FlatButton
-                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabResults.backToSearchButtonLabel')"
-                :text="$t('additional:modules.landRegistryFile.tabs.tabResults.backToSearchButtonLabel')"
-                :secondary="true"
-                @click="setCurrentTab('tabSearch')"
-            />
-
-            <div>
-                <label for="datasetsPerPage">
-                    {{ $t("additional:modules.landRegistryFile.tabs.tabResults.datasetsPerPageLabel") }}
-                </label>
-                <select
-                    id="datasetsPerPage"
-                    v-model.number="currentDatasetsPerPage"
-                >
-                    <option
-                        v-for="datasetCount in datasetsPerPage"
-                        :key="datasetCount"
-                        :value="datasetCount"
-                    >
-                        {{ datasetCount }}
-                    </option>
-                </select>
+                <div class="pagination-settings">
+                    <label for="datasetsPerPage">
+                        {{ $t("additional:modules.landRegistryFile.tabs.tabResults.datasetsPerPageLabel") }}
+                    </label>
+                    <Multiselect
+                        id="datasetsPerPage"
+                        v-model="currentDatasetsPerPage"
+                        class="datasets-per-page-select"
+                        :options="datasetsPerPage"
+                        :searchable="false"
+                        :show-labels="false"
+                        :allow-empty="false"
+                        :close-on-select="true"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -623,20 +613,69 @@ export default {
             }
         }
 
-        div.buttons-footer {
+        div.pagination-control-wrapper {
+            display: flex;
+            flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
 
-            label {
-                font-size: 13px;
-                font-weight: normal;
-                line-height: 17px;
-                color: #646262;
-                margin-right: 0.5rem;
+            :deep(.pagination-controls) {
+                width: auto;
+                margin-inline: auto;
             }
 
-            #datasetsPerPage {
-                padding: 0.2rem;
+            .pagination-settings {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-inline: auto;
+
+                label {
+                    font-size: 13px;
+                    font-weight: normal;
+                    line-height: 17px;
+                    color: #646262;
+                    margin-right: 0.5rem;
+                }
+
+                :deep(.datasets-per-page-select) {
+                    width: 70px;
+
+                    .multiselect__input,
+                    .multiselect__single,
+                    .multiselect__placeholder,
+                    .multiselect__input::placeholder {
+                        font-size: 1rem;
+                        font-weight: normal;
+                        margin-bottom: 8px;
+                        line-height: 20px;
+                    }
+
+                    .multiselect__selected,
+                    .multiselect__option,
+                    .multiselect__tags,
+                    .multiselect__tag {
+                        font-size: 1rem;
+                        color: black;
+                    }
+
+                    .multiselect__option {
+                        &:after,
+                        &--selected,
+                        &--selected:after {
+                            color: black;
+                            background: #F0F0F0 ;
+                        }
+
+                        &--highlight,
+                        &--highlight:after {
+                            color: white;
+                            background: #3C5F94 ;
+                        }
+                    }
+                }
             }
         }
     }

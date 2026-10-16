@@ -127,40 +127,6 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
         ]);
     });
 
-    describe("handle search extent switch", () => {
-        it("form should react on search extent switch", async () => {
-            expect(wrapper.find("input#idSearchInExtentSwitch").exists()).to.be.true;
-
-            expect(wrapper.find("div.buttons-footer > div.searchExtentHint > p").exists()).to.be.true;
-            expect(wrapper.find("div.buttons-footer > div.searchExtentHint > p").text()).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.searchModeInExtent");
-
-            wrapper.find("input#idSearchInExtentSwitch").setChecked(false);
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.find("div.buttons-footer > div.searchExtentHint > p").text()).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.searchModeOverall");
-
-            wrapper.find("input#idSearchInExtentSwitch").setChecked(true);
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.find("div.buttons-footer > div.searchExtentHint > p").text()).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.searchModeInExtent");
-        });
-
-        it("should reset switch on reset form", async () => {
-            expect(wrapper.vm.searchForm.searchInExtent).to.be.true;
-
-            wrapper.find("input#idSearchInExtentSwitch").setChecked(false);
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.vm.searchForm.searchInExtent).to.be.false;
-
-            wrapper.vm.resetForm();
-            await wrapper.vm.$nextTick();
-
-            expect(wrapper.vm.searchForm.searchInExtent).to.be.true;
-            expect(wrapper.find("input#idSearchInExtentSwitch").element.checked).to.be.true;
-        });
-    });
-
     describe("validate year inputs and set error messages", () => {
         it("should detect alphanumerical input and give correct error hints", () => {
             wrapper.vm.validateInputs();
@@ -238,6 +204,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             wrapper.vm.searchForm.yearTo = "1235";
             wrapper.vm.searchForm.selectSelections.aktenart = ["Bauakte"];
             wrapper.vm.searchForm.selectSelections.bezirk = "Bergedorf";
+            wrapper.vm.searchForm.searchInExtent = false;
             wrapper.vm.validateInputs();
             expect(wrapper.vm.allInputsValid).to.be.false;
             expect(wrapper.vm.errorMessages.yearFrom).to.equal("additional:modules.landRegistryFile.tabs.tabSearch.errors.errorYearDigit");
@@ -251,6 +218,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
             expect(wrapper.vm.errorMessages.yearTo).to.equal("");
             expect(wrapper.vm.searchForm.selectSelections.aktenart).to.deep.equal([]);
             expect(wrapper.vm.searchForm.selectSelections.bezirk).to.equal(null);
+            expect(wrapper.vm.searchForm.searchInExtent).to.be.true;
         });
 
         it("should disable search button if form is invalid", async () => {

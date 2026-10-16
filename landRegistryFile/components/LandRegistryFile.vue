@@ -322,9 +322,12 @@ export default {
                 padding: 0.25rem;
                 display: flex;
                 flex-direction: column;
-                flex: 1 1 auto;
                 min-height: 0;
                 overflow-y: auto;
+
+                &.results-content {
+                    overflow-y: hidden;
+                }
             }
         }
 

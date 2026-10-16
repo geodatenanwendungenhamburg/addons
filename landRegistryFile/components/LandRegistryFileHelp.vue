@@ -84,15 +84,6 @@ export default {
                 @click="prepareGuidedTour()"
             />
         </div>
-
-        <div class="FixedContent buttons-footer">
-            <FlatButton
-                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabHelp.backToSearchButtonLabel')"
-                :text="$t('additional:modules.landRegistryFile.tabs.tabHelp.backToSearchButtonLabel')"
-                :secondary="true"
-                @click="setCurrentTab('tabSearch')"
-            />
-        </div>
     </div>
 </template>
 

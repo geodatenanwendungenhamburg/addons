@@ -56,7 +56,8 @@ export default {
             searchInitiated: false,
             showTextSearchInfo: false,
             // eslint-disable-next-line no-useless-escape
-            searchTextValidationRegex: "^[\\p{L}0-9 ,\.\/§()\-]+$"
+            searchTextValidationRegex: "^[\\p{L}0-9 ,\.\/§()\-]+$",
+            focusedSelectField: null
         };
     },
     computed: {
@@ -542,6 +543,11 @@ export default {
             });
 
             return features;
+        },
+        hasSelection (selection) {
+            return Array.isArray(selection)
+                ? selection.length > 0
+                : selection !== null && selection !== "";
         }
     }
 };
@@ -552,25 +558,15 @@ export default {
         id="landRegistryFileSearch"
         class="InnerLayoutFrame"
     >
-        <div class="ScrollableContent">
-            <SwitchInput
-                id="idSearchInExtentSwitch"
-                class="searchModeSwitch"
-                :aria="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
-                :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
-                :checked="searchForm.searchInExtent"
-                :interaction="(evt) => searchForm.searchInExtent = evt.target.checked"
-            />
-
+        <div class="ScrollableContent searchForm">
             <div
                 v-for="item in selectFilters"
                 :key="item.field"
                 class="typeSelectContainer"
+                :class="{
+                    'has-selection': hasSelection(searchForm.selectSelections[item.field])
+                }"
             >
-                <label :for="`type-select-${item.field}`">
-                    {{ item.fieldName }}
-                </label>
-
                 <Multiselect
                     :id="`type-select-${item.field}`"
                     v-model="searchForm.selectSelections[item.field]"
@@ -578,7 +574,7 @@ export default {
                     :options="item.options.map(option => option.value)"
                     :name="`type-select-${item.field}`"
                     :multiple="item.multiple"
-                    :placeholder="$t('additional:modules.landRegistryFile.tabs.tabSearch.selectPlaceholder', {fieldName: item.fieldName})"
+                    placeholder=""
                     :show-labels="false"
                     open-direction="bottom"
                     :hide-selected="false"
@@ -586,6 +582,8 @@ export default {
                     :close-on-select="true"
                     :clear-on-select="false"
                     :internal-search="true"
+                    @open="focusedSelectField = item.field"
+                    @close="focusedSelectField = null"
                 >
                     <template #option="{ option }">
                         <div class="option-wrapper">
@@ -619,11 +617,14 @@ export default {
                         </span>
                     </template>
                 </Multiselect>
-            </div>
 
-            <p class="searchTextFormLabel">
-                {{ $t('additional:modules.landRegistryFile.tabs.tabSearch.textSearchLabel') }}
-            </p>
+                <span
+                    class="multiselect-floating-label"
+                    aria-hidden="true"
+                >
+                    {{ item.fieldName }}
+                </span>
+            </div>
 
             <div class="searchTextContainer">
                 <InputText
@@ -643,10 +644,6 @@ export default {
                     @click="showTextSearchInfo = true"
                 />
             </div>
-
-            <p class="searchYearFormLabel">
-                {{ $t('additional:modules.landRegistryFile.tabs.tabSearch.yearLabel') }}
-            </p>
 
             <div class="searchYearContainer">
                 <div class="searchYearFormInputs">
@@ -685,6 +682,15 @@ export default {
                     {{ errorMessages.yearTo }}
                 </p>
             </div>
+
+            <SwitchInput
+                id="idSearchInExtentSwitch"
+                class="searchModeSwitch"
+                :aria="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
+                :label="$t('additional:modules.landRegistryFile.tabs.tabSearch.searchModeSwitchLabel')"
+                :checked="searchForm.searchInExtent"
+                :interaction="(evt) => searchForm.searchInExtent = evt.target.checked"
+            />
         </div>
 
         <div class="FixedContent buttons-footer">
@@ -697,16 +703,6 @@ export default {
 
                 <p v-else-if="showUnsubmittedSearchWarning">
                     {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.unsubmittedSearchWarning") }}
-                </p>
-            </div>
-
-            <div class="searchExtentHint">
-                <p v-if="searchForm.searchInExtent">
-                    {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.searchModeInExtent") }}
-                </p>
-
-                <p v-else>
-                    {{ $t("additional:modules.landRegistryFile.tabs.tabSearch.searchModeOverall") }}
                 </p>
             </div>
 
@@ -760,21 +756,14 @@ export default {
 <style lang="scss" scoped>
     #landRegistryFileSearch{
         height: 100%;
+        padding-top: 1rem;
 
-        div.ScrollableContent {
-            overflow-x: hidden;
-        }
-
-        div.searchModeSwitch {
-            margin: 1rem 0;
-
-            > * {
-                cursor: pointer;
-            }
+        div.searchForm {
+            gap: 1.5rem;
         }
 
         div.typeSelectContainer {
-            margin: 0.5rem 0;
+            position: relative;
 
             div.option-wrapper {
                 display: flex;
@@ -791,32 +780,55 @@ export default {
                 }
             }
 
+            span.multiselect-floating-label {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 2;
+                padding: 0.75rem;
+                color: #747474;
+                font-size: 1rem;
+                text-align: start;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                pointer-events: none;
+                border: var(--bs-border-width) solid transparent;
+                transform-origin: 0 0;
+                transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+            }
+
+            &.has-selection .multiselect-floating-label,
+            :deep(.multiselect:focus-within) + .multiselect-floating-label {
+                transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+            }
+
+            :deep(.multiselect:focus-within) + .multiselect-floating-label {
+                color: $secondary;
+                z-index: 51;
+            }
+
             :deep(.multiselect) {
+                font-size: 1rem;
+                color: var(--bs-body-color);
+
                 .multiselect__input,
-                .multiselect__single,
-                .multiselect__placeholder,
-                .multiselect__input::placeholder {
+                .multiselect__single {
                     font-size: 1rem;
-                    font-weight: normal;
-                    margin-bottom: 8px;
-                    line-height: 20px;
+                    line-height: 1.25;
+                    margin: 0;
+                    padding: 0;
                 }
 
-                .multiselect__placeholder {
-                    padding: 0 0 0 5px;
-                }
-
-                .multiselect__placeholder,
-                .multiselect__input::placeholder {
-                    color: #747474;
+                .multiselect__tags {
+                    padding: 1.625rem 2.5rem 0.375rem 0.75rem;
+                    border: 1px solid var(--bs-border-color);
                 }
 
                 .multiselect__selected,
                 .multiselect__option,
                 .multiselect__tags,
                 .multiselect__tag {
-                    font-size: 1rem;
-                    color: black;
+                    color: var(--bs-body-color);
                 }
 
                 .multiselect__selected,
@@ -843,7 +855,7 @@ export default {
                     margin-right: 0.2rem;
 
                     &::after {
-                        color: black;
+                        color: var(--bs-body-color);
                     }
 
                     &:hover,
@@ -861,12 +873,6 @@ export default {
         div.searchTextContainer {
             display: flex;
             align-items: center;
-            border: #222;
-            border-style: solid;
-            border-width: 1px;
-            border-radius: 5px;
-            padding: 1.5rem 1rem 1rem 1rem;
-            margin-bottom: 0.5rem;
 
             div.InputText {
                 margin-bottom: 0;
@@ -874,22 +880,7 @@ export default {
             }
         }
 
-        p.searchYearFormLabel,
-        p.searchTextFormLabel {
-            background-color: white;
-            z-index: 1;
-            width: fit-content;
-            font-size: 1rem;
-            margin: 1rem 1rem -0.7rem 1rem;
-            padding: 0 0.5rem;
-        }
-
         div.searchYearContainer {
-            border: #222;
-            border-style: solid;
-            border-width: 1px;
-            border-radius: 5px;
-            padding: 1.5rem 1rem 1rem 1rem;
 
             div.searchYearFormInputs {
                 display: flex;
@@ -923,12 +914,8 @@ export default {
             text-align: right;
         }
 
-        div.searchExtentHint {
-            p {
-                background-color: white;
-                white-space: pre-line;
-                text-align: right;
-            }
+        div.searchModeSwitch > *  {
+            cursor: pointer;
         }
 
         div.spacer-div {

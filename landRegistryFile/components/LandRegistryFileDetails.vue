@@ -1,6 +1,5 @@
 <script>
 import {mapGetters, mapMutations} from "vuex";
-import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
@@ -8,7 +7,6 @@ import {isWebLink} from "@shared/js/utils/urlHelper.js";
 export default {
     name: "LandRegistryFileDetails",
     components: {
-        FlatButton,
         IconButton
     },
     inject: {
@@ -180,23 +178,6 @@ export default {
                     </tr>
                 </table>
             </div>
-        </div>
-
-
-        <div class="FixedContent buttons-footer">
-            <FlatButton
-                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabDetails.backToResultsButtonLabel')"
-                :text="$t('additional:modules.landRegistryFile.tabs.tabDetails.backToResultsButtonLabel')"
-                :secondary="true"
-                @click="setCurrentTab('tabResults')"
-            />
-
-            <FlatButton
-                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabDetails.backToSearchButtonLabel')"
-                :text="$t('additional:modules.landRegistryFile.tabs.tabDetails.backToSearchButtonLabel')"
-                :secondary="true"
-                @click="setCurrentTab('tabSearch')"
-            />
         </div>
     </div>
 </template>

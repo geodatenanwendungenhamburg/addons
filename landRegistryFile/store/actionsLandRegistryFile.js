@@ -110,6 +110,8 @@ export default {
     queryOafSchema ({commit, state, dispatch}) {
         const oafParams = state.oafParams;
 
+        commit("setShowLoadingSpinner", true);
+
         getOAFFeature.getCollectionSchema(oafParams.url, oafParams.collection)
             .then(schema => {
                 commit("setOafSchema", schema);
@@ -120,6 +122,8 @@ export default {
                     category: "error",
                     content: `Fehler beim Abrufen notwendiger Daten für ${oafParams.collection}. Bitte versuchen Sie es erneut.`
                 }, {root: true});
+            }).finally(() => {
+                commit("setShowLoadingSpinner", false);
             });
     },
     /**
