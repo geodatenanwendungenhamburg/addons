@@ -375,12 +375,14 @@ export default {
             v-else
             class="ScrollableContent table-wrapper"
         >
-            <p class="number-of-results-wrapper">
-                {{ $t("additional:modules.landRegistryFile.tabs.tabResults.numberOfResults") }}
-                <span class="number-of-results">{{ getSortedFeatures.length }}</span>
-            </p>
+            <div class="table-info-wrapper">
+                <div>
+                    <span class="number-of-results-label">
+                        {{ $t("additional:modules.landRegistryFile.tabs.tabResults.numberOfResults") }}
+                    </span>
+                    <span class="number-of-results">{{ getSortedFeatures.length }}</span>
+                </div>
 
-            <div class="switch-container">
                 <SwitchInput
                     id="idShowMoreFieldsSwitch"
                     class="showMoreFieldsSwitch"
@@ -478,34 +480,52 @@ export default {
             display: flex;
             gap: 0.25rem;
 
-            p.number-of-results-wrapper {
+            div.table-info-wrapper {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
                 margin-top: 0.5rem;
                 margin-bottom: 0.5rem;
+                flex-wrap: wrap;
+
+                span.number-of-results-label {
+                    margin-right: 0.5rem;
+                }
 
                 span.number-of-results {
                     display: inline-block;
-                    padding: 0.1rem 1rem;
+                    padding: 0.1rem 0.6rem;
                     border: 2px solid $secondary;
                     border-radius: 999px;
                     background: #fff;
-                    font-weight: bold;
                     font-family: $font_family_accent;
-                    margin-left: 1rem;
+                }
+
+                :deep(.showMoreFieldsSwitch) {
+                    display: flex;
+                    align-items: center;
+                    flex-direction: row-reverse;
+                    margin-left: auto;
+                    padding-left: 0;
+
+                    .form-check-input {
+                        margin-left: 0;
+                    }
+
+                    > * {
+                        cursor: pointer;
+                    }
+
+                    .form-check-label {
+                        text-align: right;
+                    }
                 }
             }
 
             :deep(div.fixed) {
                 flex: 1;
-            }
-
-            div.switch-container {
-                display: flex;
-                flex-direction: column;
-                align-items: end;
-
-                .showMoreFieldsSwitch > * {
-                    cursor: pointer;
-                }
             }
 
             div.actions-wrapper {
@@ -514,8 +534,8 @@ export default {
                 gap: 0.25rem;
 
                 :deep(.action-button) {
-                    width: 1.6rem;
-                    height: 1.6rem;
+                    width: 1.8rem;
+                    height: 1.8rem;
                     z-index: 1;
 
                     &.detail-selected-button {
@@ -528,7 +548,7 @@ export default {
                     }
 
                     > i {
-                        font-size: 1.2rem;
+                        font-size: 1.35rem;
                     }
                 }
             }
@@ -581,7 +601,6 @@ export default {
                 td {
                     vertical-align: middle;
                     padding: 0.5rem 0.2rem;
-                    overflow-wrap: anywhere;
                     word-break: normal;
                     hyphens: auto;
 
