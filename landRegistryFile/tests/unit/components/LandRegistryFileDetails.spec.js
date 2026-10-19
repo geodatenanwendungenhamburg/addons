@@ -73,7 +73,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
                                 }
                             },
                             actions: {
-                                selectFeatureOnMap: () => Promise.resolve()
+                                selectFeatureOnMap: ({commit}, {featureId}) => commit("setSelectedDetailFeatureId", featureId)
                             }
                         }
                     }
@@ -99,12 +99,21 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
         }
     });
 
+    /**
+     * Simulates the map selection that determines the displayed detail feature.
+     * @param {string} featureId The ID of the feature to select.
+     * @returns {void}
+     */
+    function selectFeature (featureId) {
+        store.commit("Modules/LandRegistryFile/setSelectedDetailFeatureId", featureId);
+    }
+
     it("should exist", () => {
         expect(wrapper.exists()).to.be.true;
     });
 
     it("when a middle feature is selected, both previous and next buttons should be displayed", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("2");
+        selectFeature("2");
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find("#previous-feature").exists()).to.be.true;
@@ -112,7 +121,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("when the first feature is selected, only the next button should be displayed", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("1");
+        selectFeature("1");
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find("#next-feature").exists()).to.be.true;
@@ -120,7 +129,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("when the last feature is selected, only the previous button should be displayed", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("3");
+        selectFeature("3");
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find("#previous-feature").exists()).to.be.true;
@@ -128,7 +137,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("navigating to the previous feature should set the selected feature id to the previous feature", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("2");
+        selectFeature("2");
 
         wrapper.vm.setPreviousFeature();
         await wrapper.vm.$nextTick();
@@ -137,7 +146,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("navigating to the next feature should set the selected feature id to the next feature", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("2");
+        selectFeature("2");
 
         wrapper.vm.setNextFeature();
         await wrapper.vm.$nextTick();
@@ -146,7 +155,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("navigating to the previous feature when the first feature is selected should do nothing", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("1");
+        selectFeature("1");
 
         wrapper.vm.setPreviousFeature();
         await wrapper.vm.$nextTick();
@@ -155,7 +164,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("navigating to the next feature when the last feature is selected should do nothing", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("3");
+        selectFeature("3");
 
         wrapper.vm.setNextFeature();
         await wrapper.vm.$nextTick();
@@ -164,7 +173,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("when a feature outside the list is selected, both previous and next buttons should not be displayed", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("4");
+        selectFeature("4");
         await wrapper.vm.$nextTick();
 
         expect(wrapper.find("#previous-feature").exists()).to.be.false;
@@ -172,7 +181,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("displays labels from the OAF schema and the selected feature values", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("1");
+        selectFeature("1");
         await wrapper.vm.$nextTick();
 
         const rows = wrapper.findAll("table tr");
@@ -182,7 +191,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("displays the field name as label when the OAF schema does not provide a title", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("1");
+        selectFeature("1");
         await wrapper.vm.$nextTick();
 
         const rows = wrapper.findAll("table tr");
@@ -191,7 +200,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileDetails.
     });
 
     it("does not display fields that are not in detailsFields", async () => {
-        wrapper.vm.setSelectedDetailFeatureId("1");
+        selectFeature("1");
         await wrapper.vm.$nextTick();
 
         const rows = wrapper.findAll("table tr");

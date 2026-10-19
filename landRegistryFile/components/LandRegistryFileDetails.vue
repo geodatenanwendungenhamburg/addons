@@ -1,5 +1,5 @@
 <script>
-import {mapGetters, mapMutations, mapActions} from "vuex";
+import {mapGetters, mapActions} from "vuex";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
@@ -77,9 +77,6 @@ export default {
         }
     },
     methods: {
-        ...mapMutations("Modules/LandRegistryFile", [
-            "setSelectedDetailFeatureId"
-        ]),
         ...mapActions("Modules/LandRegistryFile", [
             "selectFeatureOnMap"
         ]),
@@ -107,12 +104,11 @@ export default {
             this.showFeature(this.nextFeature.id);
         },
         /**
-         * Sets the selected detail feature and selects it on the map.
+         * Selects the feature on the map, which makes it the detail feature.
          * @param {string|number} id - The feature ID.
          * @returns {void}
          */
         showFeature (id) {
-            this.setSelectedDetailFeatureId(id);
             this.selectFeatureOnMap({featureId: id, zoomToFeature: true});
         }
     }

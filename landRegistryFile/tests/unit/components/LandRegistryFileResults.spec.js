@@ -48,7 +48,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
                                     columnName: "",
                                     order: "origin"
                                 },
-                                mapFeaturesSelected: []
+                                mapFeaturesSelected: [],
+                                selectionFromMap: false
                             }),
                             getters: {
                                 getSortedFeatures: state => state.landRegistryFileFeatures,
@@ -57,7 +58,8 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
                                 tableFields: state => state.tableFields,
                                 oafSchema: state => state.oafSchema,
                                 sorting: state => state.sorting,
-                                mapFeaturesSelected: state => state.mapFeaturesSelected
+                                mapFeaturesSelected: state => state.mapFeaturesSelected,
+                                selectionFromMap: state => state.selectionFromMap
                             },
                             mutations: {
                                 setSelectedDetailFeatureId (state, featureId) {
@@ -65,7 +67,7 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
                                 }
                             },
                             actions: {
-                                selectFeatureOnMap: () => Promise.resolve()
+                                selectFeatureOnMap: ({commit}, {featureId}) => commit("setSelectedDetailFeatureId", featureId)
                             }
                         }
                     }
@@ -115,14 +117,14 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileResults.
         expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId2);
     });
 
-    it("calling showDetails with the same featureId should set selectedDetailFeatureId to null in the store", async () => {
+    it("calling showDetails with the same featureId again should keep it selected", async () => {
         const featureId = wrapper.vm.getSortedFeatures[0].id;
 
         await wrapper.vm.showDetails({id: featureId});
         expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId);
 
         await wrapper.vm.showDetails({id: featureId});
-        expect(wrapper.vm.selectedDetailFeatureId).to.be.null;
+        expect(wrapper.vm.selectedDetailFeatureId).to.equal(featureId);
     });
 
     describe("handle pagination on result table", () => {

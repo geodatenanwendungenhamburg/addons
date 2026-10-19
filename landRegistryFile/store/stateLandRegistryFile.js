@@ -28,16 +28,15 @@
  * @property {Object} styles - The styles applied to the land registry features.
  * @property {Object[]} tableFields - The configuration for the table fields to display in the results.
  * @property {string[]} detailsFields - The configuration for the fields to display in the details view of a selected feature.
- * @property {string|null} selectedDetailFeatureId - The selected feature ID for displaying details.
  * @property {Object} sorting - The sorting configuration for the results table.
  * @property {string} sorting.columnName - The name of the column to sort by.
  * @property {string} sorting.order - The order of sorting, can be "origin", "asc", or "desc".
  * @property {Object[]} mapFeaturesSelected - The array of features currently selected on the map.
  * @property {Boolean} onCenterMap - Indicates whether the map is centered by the click action initiated from the table row.
- * @property {string[]|null} mapClickedFeatureIds - The IDs of the features clicked on the map.
  * @property {string|null} linkToHelp - Link to the external help page on the Sharepoint.
  * @property {string|null} landRegistryFileTourUrl - Link to the json formatted steps of the guided tour.
  * @property {string} autoStartTourUntil - Date until which the guided tour shall start automatically on opening the addon.
+ * @property {Boolean} selectionFromMap - Indicates whether a feature is selected from a map click.
  */
 
 const state = {
@@ -95,17 +94,16 @@ const state = {
     styles: {},
     tableFields: [],
     detailsFields: [],
-    selectedDetailFeatureId: null,
     sorting: {
         columnName: "",
         order: "origin"
     },
     mapFeaturesSelected: [],
     onCenterMap: false,
-    mapClickedFeatureIds: [],
     linkToHelp: "https://fhhportal.ondataport.de/websites/digitale-grundstuecksakte-hilfe/SitePages/Home.aspx",
     landRegistryFileTourUrl: "./resources/tour/tour.json",
-    autoStartTourUntil: "2027-03-31"
+    autoStartTourUntil: "2027-03-31",
+    selectionFromMap: false
 };
 
 export default state;

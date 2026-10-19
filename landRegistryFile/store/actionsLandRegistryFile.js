@@ -195,14 +195,17 @@ export default {
      * @param {Function} context.dispatch Vuex dispatch function.
      * @param {Array} features - The OpenLayers features to display as selection.
      * @param {string} layerName - The name of the selection layer.
+     * @param {boolean} fromMap - Indicates if the selection change originated from a map interaction.
      * @returns {Promise<void>} Resolves after the selected features have been added to the layer.
      */
-    async updateSelectionLayer ({commit, dispatch}, {features, layerName}) {
+    async updateSelectionLayer ({commit, dispatch}, {features, layerName, fromMap = false}) {
         const map = mapCollection.getMap("2D");
 
         if (!map) {
             return;
         }
+
+        commit("setSelectionFromMap", fromMap);
 
         if (!features || features.length === 0) {
             commit("setMapFeaturesSelected", []);
@@ -421,14 +424,15 @@ export default {
      * Removes the specified feature from the map selection layer.
      * @param {Object} context - The Vuex action context.
      * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Object} context.state Vuex state object.
      * @param {string|number} featureId - The ID of the feature to deselect.
      * @returns {void}
      */
-    deselectFeatureOnMap ({dispatch}, {featureId}) {
+    deselectFeatureOnMap ({dispatch, state}, {featureId}) {
         const layerName = "Module/landRegistryFile/layer/selection",
             layer = mapCollection.getMap("2D")?.getLayers().getArray().find(l => l.get("name") === layerName),
             remaining = (layer?.getSource().getFeatures() || []).filter(f => f.getId() !== featureId);
 
-        dispatch("updateSelectionLayer", {features: remaining, layerName});
+        dispatch("updateSelectionLayer", {features: remaining, layerName, fromMap: state.selectionFromMap});
     }
 };

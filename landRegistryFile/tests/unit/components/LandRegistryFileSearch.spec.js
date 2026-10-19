@@ -80,9 +80,6 @@ describe("addons/landRegistryFile/tests/unit/components/LandRegistryFileSearch.s
                                 },
                                 setLandRegistryFileFeatures (state, payload) {
                                     state.landRegistryFileFeatures = payload;
-                                },
-                                setSelectedDetailFeatureId (state, featureId) {
-                                    state.selectedDetailFeatureId = featureId;
                                 }
                             },
                             actions: {

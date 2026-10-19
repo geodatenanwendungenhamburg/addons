@@ -123,8 +123,7 @@ export default {
             "selectFeatureOnMap"
         ]),
         ...mapMutations("Modules/LandRegistryFile", [
-            "setShowLoadingSpinner",
-            "setSelectedDetailFeatureId"
+            "setShowLoadingSpinner"
         ]),
         /**
          * Handle tab changes in the TabContainer.
@@ -136,11 +135,10 @@ export default {
             const tabResults = tabContainerRef.$refs.tabResults?.[0];
 
             if (newTabId === "tabDetails") {
-                if (!this.selectedDetailFeatureId && this.getSortedFeatures.length > 0) {
-                    this.setSelectedDetailFeatureId(this.getSortedFeatures[0].id);
-                }
-                if (this.selectedDetailFeatureId) {
-                    this.selectFeatureOnMap({featureId: this.selectedDetailFeatureId, zoomToFeature: true});
+                const featureId = this.selectedDetailFeatureId ?? this.getSortedFeatures[0]?.id;
+
+                if (featureId !== undefined) {
+                    this.selectFeatureOnMap({featureId, zoomToFeature: true});
                 }
             }
 
