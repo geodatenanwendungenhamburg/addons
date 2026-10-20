@@ -9,6 +9,7 @@
 ### Added
 
 ### Changed
+- Replaced native window.open function with xss-safe util function.
 
 ### Deprecated
 

@@ -13,6 +13,7 @@ import {mapGetters, mapMutations, mapActions} from "vuex";
 import mutations from "../store/mutationsDipasProjects";
 import {Point} from "ol/geom";
 import ToolInfo from "../../shared/modules/toolInfo/components/ToolInfo.vue";
+import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
 
 export default {
     name: "DipasProjects",
@@ -311,7 +312,7 @@ export default {
          */
         handleLinkClick (url) {
             if (url) {
-                window.open(url, "_blank", "noopener,noreferrer");
+                openSecuredPopup(url, "_blank", "noopener,noreferrer");
             }
         },
         /**

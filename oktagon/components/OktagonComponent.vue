@@ -3,6 +3,7 @@ import {mapGetters, mapActions, mapMutations} from "vuex";
 import {extractEventCoordinates} from "../../../src/shared/js/utils/extractEventCoordinates.js";
 import findWhereJs from "../../../src/shared/js/utils/findWhereJs.js";
 import layerCollection from "@core/layers/js/layerCollection.js";
+import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup.js";
 
 export default {
     name: "OktagonComponent",
@@ -68,7 +69,7 @@ export default {
         * @returns {void}
         */
         async onSubmit () {
-            window.open(await this.submitURL, "_self");
+            openSecuredPopup(await this.submitURL, "_self");
         },
 
         /**
