@@ -226,16 +226,15 @@ export default {
         }
     },
     /**
-     * Loads the tour steps from the configured URL and starts the Shepherd tour.
-     * Button actions in the JSON are resolved to Shepherd methods at runtime.
+     * Loads the tour steps from the configured URL and starts the driver.js tour.
      * @returns {Promise<void>} Resolves after the tour has been started.
      */
     async startGuidedTour ({state, dispatch}) {
         const stepsUrl = state.landRegistryFileTourUrl,
-            ShepherdLibrary = window.Shepherd;
+            driverTourLibrary = window.driver?.js?.driver;
 
-        if (!stepsUrl || !ShepherdLibrary?.Tour) {
-            console.warn("The steps-URL or Shepherd are not available.");
+        if (!stepsUrl || !driverTourLibrary) {
+            console.warn("The steps-URL or driver.js are not available.");
 
             dispatch("Alerting/addSingleAlert", {
                 category: "error",
@@ -259,37 +258,16 @@ export default {
                 throw new Error("Tour configuration must contain a tourSteps array.");
             }
 
-            const tour = new ShepherdLibrary.Tour({
-                    useModalOverlay: true,
-                    defaultStepOptions: {
-                        classes: "landregistry-guided-tour",
-                        scrollTo: true
-                    }
-                }),
-                actionHandlers = {
-                    complete: () => tour.complete(),
-                    next: () => tour.next(),
-                    back: () => tour.back(),
-                    restart: () => {
-                        tour.complete();
-                        tour.start();
-                    }
-                },
-                steps = config.tourSteps.map(step => ({
+            driverTourLibrary({
+                popoverClass: "landregistry-guided-tour",
+                steps: config.tourSteps.map(({id, ...step}) => ({
                     ...step,
-                    buttons: (step.buttons || []).map(button => {
-                        const action = actionHandlers[button.action];
-
-                        if (!action) {
-                            throw new Error(`Unsupported tour action: ${button.action}`);
-                        }
-
-                        return {...button, action};
-                    })
-                }));
-
-            tour.addSteps(steps);
-            tour.start();
+                    popover: {
+                        ...step.popover,
+                        popoverClass: `landregistry-guided-tour landregistry-tour-${id}`
+                    }
+                }))
+            }).drive();
         }
         catch (error) {
             dispatch("Alerting/addSingleAlert", {

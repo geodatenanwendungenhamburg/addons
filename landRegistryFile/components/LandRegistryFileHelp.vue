@@ -103,26 +103,83 @@ export default {
     }
 </style>
 
-<style>
-    dialog.landregistry-guided-tour {
-        &.shepherd-has-title .shepherd-content .shepherd-header {
-            background-color: white;
+<style lang="scss">
+    .driver-popover.landregistry-guided-tour {
+        font-family: MasterPortalFont, sans-serif;
+        /* driver.js sets inline top/left, so !important is required to keep the popover centered */
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: translate(-50%, -50%);
+
+        .driver-popover-arrow {
+            display: none;
         }
 
-        footer.shepherd-footer {
+        .driver-popover-close-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0 0 .125rem;
+            line-height: 1;
+            font-size: 2rem;
+            color: $black;
+            opacity: .5;
+            transition: opacity .15s ease-in-out;
+
+            &:hover {
+                opacity: .75;
+            }
+
+            &:focus-visible {
+                opacity: 1;
+                border-radius: .5rem;
+                outline: .25rem solid var(--bs-focus-ring-color);
+                outline-offset: -.5rem;
+            }
+        }
+
+        .driver-popover-title {
+            font-family: "MasterPortalFont Bold", sans-serif;
+        }
+
+        .driver-popover-footer {
             justify-content: space-between;
 
-            button.shepherd-button:nth-child(2) {
-                margin-left: 4rem;
+            .driver-popover-navigation-btns button+button {
+                margin-left: auto;
             }
         }
 
-        &[data-shepherd-step-id="Hilfe"] {
-            footer.shepherd-footer {
-                button.shepherd-button:nth-child(2) {
-                    margin-left: 2rem;
-                }
+        .driver-popover-footer button {
+            min-height: 2.5rem;
+            padding: 0 1rem;
+            background-color: $secondary;
+            border: 1px solid $secondary;
+            border-radius: 50px;
+            color: $white;
+            font-family: MasterPortalFont, sans-serif;
+            font-size: 1rem;
+            text-shadow: none;
+
+            &:hover {
+                background-color: $primary;
+                border-color: $primary;
+                color: #001B3D;
             }
+
+            &:active {
+                background-color: $dark_blue;
+                border-color: $dark_blue;
+                color: $white;
+            }
+        }
+
+        .driver-popover-footer button:focus-visible {
+            outline: 3px solid var(--bs-focus-ring-color);
+            outline-offset: 2px;
+            background-color: $dark_blue;
+            color: $white;
         }
     }
 </style>
