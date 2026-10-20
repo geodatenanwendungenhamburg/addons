@@ -7,6 +7,7 @@
 ### __Breaking Changes__
 
 ### Added
+- userTracking: The new Draw tool now also tracks undo, redo, deleting all or single drawn features, download and download format, draw type and interaction changes, changing the unit of squares, and style changes of already drawn features (see userTracking/README.md for details).
 
 ### Changed
 - Replaced native window.open function with xss-safe util function.
@@ -17,6 +18,7 @@
 ### Removed
 
 ### Fixed
+- userTracking: Events for colors and stroke widths of the Draw tool are now debounced separately for fill/stroke and inner/outer, so they no longer cancel each other.
 
 ---
 

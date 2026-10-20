@@ -34,18 +34,19 @@ const drawToolEventTimeouts = new Map();
  * concurrent debounced handlers (e.g. stroke width and text) do not cancel each other's pending timeouts.
  * @param {String} action The Matomo action text describing what happened.
  * @param {Object} params The parameter object.
- * @param {String} params.funcName The name of the calling handler function, used as debounce key and "_source".
+ * @param {String} params.funcName The name of the calling handler function, used as "_source" and, unless "debounceKey" is given, as debounce key.
+ * @param {String} [params.debounceKey] Overrides the debounce key, e.g. to keep events of one handler that happen together apart (fill and stroke color).
  * @param {String} [params.version] The draw tool version (e.g. "2026"), undefined for the legacy tool.
  * @returns {void}
  */
-export function trackDrawToolEventDebounced (action, {funcName, version}) {
-    if (drawToolEventTimeouts.has(funcName)) {
-        clearTimeout(drawToolEventTimeouts.get(funcName));
+export function trackDrawToolEventDebounced (action, {funcName, debounceKey = funcName, version}) {
+    if (drawToolEventTimeouts.has(debounceKey)) {
+        clearTimeout(drawToolEventTimeouts.get(debounceKey));
     }
 
-    drawToolEventTimeouts.set(funcName, setTimeout(() => {
+    drawToolEventTimeouts.set(debounceKey, setTimeout(() => {
         trackDrawToolEvent(action, {funcName, version});
-        drawToolEventTimeouts.delete(funcName);
+        drawToolEventTimeouts.delete(debounceKey);
     }, 500));
 }
 
