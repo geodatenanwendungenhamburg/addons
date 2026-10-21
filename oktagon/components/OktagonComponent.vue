@@ -64,7 +64,8 @@ export default {
             this.setFocusToFirstControl();
         },
         /**
-        * Opens the submit url in the same window
+        * Opens the submit url in the same window.
+        * As it gets opened in the same tab, there's no need to open it through the secured util function openSecuredPopup, hence the eslint disable comment is used.
         * @returns {void}
         */
         async onSubmit () {
