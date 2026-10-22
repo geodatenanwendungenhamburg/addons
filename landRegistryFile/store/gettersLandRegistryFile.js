@@ -1,6 +1,6 @@
 import {generateSimpleGetters} from "@shared/js/utils/generators.js";
 import stateLandRegistryFile from "./stateLandRegistryFile.js";
-import {getAlphanumericalSortedItems} from "../utils/sortFeatures.js";
+import {getSortedFeatures} from "../utils/sortFeatures.js";
 
 const getters = {
     ...generateSimpleGetters(stateLandRegistryFile),
@@ -30,7 +30,7 @@ const getters = {
         let sortedFeatures = features;
 
         if (sorting?.columnName && sorting.order !== "origin") {
-            const sorted = getAlphanumericalSortedItems(features, sorting.columnName);
+            const sorted = getSortedFeatures(features, sorting.columnName);
 
             sortedFeatures = sorting.order === "asc" ? sorted : sorted.reverse();
         }

@@ -6,6 +6,7 @@ import layerFactory from "@core/layers/js/layerFactory";
 import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
+import buildOafFilterString from "../utils/buildOafFilterString";
 
 export default {
     /**
@@ -26,52 +27,11 @@ export default {
          */
     async queryOaf ({commit, state, dispatch}, {params}) {
         const oafParams = state.oafParams,
-            filters = oafParams.filters;
-        const filterStrings = [];
-
-        if (params.startDate && params.endDate) {
-            const dateField = filters.dateRangeField;
-
-            filterStrings.push(`(${dateField} >= DATE('${params.startDate}') AND ${dateField} <= DATE('${params.endDate}'))`);
-        }
-
-        if (params.textValue) {
-            const textFilter = filters.textSearchFields
-                .map(field => `CASEI(${field}) LIKE CASEI('%${params.textValue}%')`)
-                .join(" OR ");
-
-            filterStrings.push(`(${textFilter})`);
-        }
-
-        if (params.selectedFilters) {
-            const selectedFilters = params.selectedFilters || {};
-
-            filters.select.forEach(select => {
-                const selection = selectedFilters[select.field];
-                let selectedValues = [];
-
-                if (select.multiple && Array.isArray(selection) && selection.length > 0) {
-                    selectedValues = selection;
-                }
-                else if (!select.multiple && selection !== null && selection !== undefined && selection !== "") {
-                    selectedValues = [selection];
-                }
-
-                const validValues = selectedValues.filter(value => select.options.some(option => option.value === value));
-
-                if (validValues.length > 0) {
-                    const expressions = validValues.map(value => `${select.field} = '${String(value).replaceAll("'", "''")}'`);
-
-                    filterStrings.push(`(${expressions.join(" OR ")})`);
-                }
-            });
-        }
-
-        const completeFilterString = filterStrings.join(" AND ");
+            filterString = buildOafFilterString(oafParams.filters, params);
 
         const queryParams = {
             limit: 10000,
-            filter: completeFilterString !== "" ? completeFilterString : undefined,
+            filter: filterString !== "" ? filterString : undefined,
             bbox: params.bbox,
             bboxCrs: params.crs,
             filterCrs: params.crs,

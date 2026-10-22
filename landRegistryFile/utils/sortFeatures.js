@@ -10,12 +10,12 @@ function isNumeric (val) {
 }
 
 /**
- * Sorts the features alphanumerical.
+ * Sorts the features alphanumerically.
  * @param {Object[]} features - The features to sort.
  * @param {string} columnName - The column name to sort by.
  * @returns {Object[]} The sorted features.
  */
-export function getAlphanumericalSortedItems (features, columnName) {
+export function getSortedFeatures (features, columnName) {
     const sorted = [...features].sort((a, b) => {
         const va = a.properties?.[columnName],
             vb = b.properties?.[columnName];
