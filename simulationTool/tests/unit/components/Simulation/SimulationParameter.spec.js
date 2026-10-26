@@ -6,6 +6,7 @@ import {vi} from "vitest";
 import SimulationParameter from "../../../../components/Simulation/SimulationParameter.vue";
 import sinon from "sinon";
 import axios from "axios";
+import crs from "@masterportal/masterportalapi/src/crs.js";
 import getOAFFeature from "../../../../../../src/shared/js/api/oaf/getOAFFeature.js";
 import layerCollection from "@core/layers/js/layerCollection.js";
 import layerFactory from "@core/layers/js/layerFactory.js";
@@ -1224,6 +1225,10 @@ describe("addons/SimulationTool/components/Simulation/SimulationParameter.vue", 
         });
 
         describe("loadRequiredOafInputs", () => {
+            beforeEach(() => {
+                crs.registerProjections();
+            });
+
             it("should pass fetched FeatureCollection payload to setRequestBodyInput", async () => {
                 const wrapper = factory.getShallowMount(),
                     setRequestBodyInputSpy = sinon.spy(wrapper.vm, "setRequestBodyInput"),
