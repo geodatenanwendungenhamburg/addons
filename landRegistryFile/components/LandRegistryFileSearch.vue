@@ -7,8 +7,8 @@ import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import ModalItem from "@shared/modules/modals/components/ModalItem.vue";
+import DropdownAutocomplete from "@shared/modules/dropdown/components/DropdownAutocomplete.vue";
 import InputText from "./shared/InputText.vue";
-import Multiselect from "vue-multiselect";
 import GeoJSON from "ol/format/GeoJSON";
 import Style from "ol/style/Style";
 import Circle from "ol/style/Circle";
@@ -22,7 +22,7 @@ export default {
         FlatButton,
         SwitchInput,
         InputText,
-        Multiselect,
+        DropdownAutocomplete,
         IconButton,
         ModalItem
     },
@@ -139,8 +139,7 @@ export default {
         selectFilters () {
             return (this.oafParams?.filters?.select || []).map(select => ({
                 ...select,
-                fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field,
-                colorByValue: new Map(select.options.map(option => [option.value, option.color]))
+                fieldName: this.oafSchema?.properties?.[select.field]?.title || select.field
             }));
         },
         /**
@@ -548,10 +547,20 @@ export default {
 
             return features;
         },
-        hasSelection (selection) {
-            return Array.isArray(selection)
-                ? selection.length > 0
-                : selection !== null && selection !== "";
+        /**
+         * Removes one value from a multiple selection.
+         * @param {string} field - The selected filter field.
+         * @param {*} value - The value to remove.
+         * @returns {void}
+         */
+        removeSelectedItem (field, value) {
+            const selectedValues = this.searchForm.selectSelections[field];
+
+            if (Array.isArray(selectedValues)) {
+                this.searchForm.selectSelections[field] = selectedValues.filter(
+                    selectedValue => selectedValue !== value
+                );
+            }
         }
     }
 };
@@ -567,67 +576,62 @@ export default {
                 v-for="item in selectFilters"
                 :key="item.field"
                 class="typeSelectContainer"
-                :class="{
-                    'has-selection': hasSelection(searchForm.selectSelections[item.field])
-                }"
             >
-                <Multiselect
+                <DropdownAutocomplete
                     :id="`type-select-${item.field}`"
                     v-model="searchForm.selectSelections[item.field]"
-                    :aria-label="item.fieldName"
-                    :options="item.options.map(option => option.value)"
                     :name="`type-select-${item.field}`"
+                    :aria-label="item.fieldName"
+                    :label="item.fieldName"
+                    :items="item.options.map(option => ({
+                        title: option.value,
+                        value: option.value,
+                        color: option.color
+                    }))"
                     :multiple="item.multiple"
-                    placeholder=""
-                    :show-labels="false"
-                    open-direction="bottom"
-                    :hide-selected="false"
-                    :allow-empty="true"
-                    :close-on-select="true"
-                    :clear-on-select="false"
-                    :internal-search="true"
-                    @open="focusedSelectField = item.field"
-                    @close="focusedSelectField = null"
+                    :clearable="true"
                 >
-                    <template #option="{ option }">
-                        <div class="option-wrapper">
-                            <span
-                                v-if="item.colorByValue.get(option)"
-                                class="option-legend"
-                                :style="{
-                                    borderBottomColor: item.colorByValue.get(option)
-                                }"
-                                aria-hidden="true"
-                            />
-                            <span>{{ option }}</span>
-                        </div>
+                    <template #item="{ item: option, props }">
+                        <v-list-item v-bind="props">
+                            <template #title>
+                                <div class="land-registry-file-search__option-wrapper">
+                                    <span
+                                        v-if="option.color"
+                                        class="land-registry-file-search__option-legend"
+                                        :style="{ borderBottomColor: option.color }"
+                                        aria-hidden="true"
+                                    />
+                                    <span>{{ option.title }}</span>
+                                </div>
+                            </template>
+                        </v-list-item>
                     </template>
-                    <template #tag="{ option, remove }">
-                        <span
-                            class="multiselect__tag"
+                    <template
+                        v-if="item.multiple"
+                        #chip="{ props, internalItem }"
+                    >
+                        <v-chip
+                            v-bind="props"
+                            :closable="!$slots.tag"
                             :style="{
-                                backgroundColor: `color-mix(in srgb, ${item.colorByValue.get(option) ?? 'transparent'} 20%, transparent)`,
-                                borderColor: item.colorByValue.get(option)
+                                backgroundColor: internalItem.raw.color
+                                    ? `color-mix(in srgb, ${internalItem.raw.color} 20%, transparent)`
+                                    : undefined,
+                                border: internalItem.raw.color
+                                    ? `2px solid ${internalItem.raw.color}`
+                                    : undefined
                             }"
-                            @mousedown.prevent
                         >
-                            <span>{{ option }}</span>
-                            <button
-                                type="button"
-                                class="multiselect__tag-icon"
-                                :aria-label="$t('additional:modules.landRegistryFile.tabs.tabSearch.removeSelectedRecord', {record: option})"
-                                @click.stop="remove(option)"
-                            />
-                        </span>
+                            <slot
+                                name="tag"
+                                :option="internalItem.raw.value"
+                                :remove="removeSelectedItem"
+                            >
+                                {{ internalItem.title }}
+                            </slot>
+                        </v-chip>
                     </template>
-                </Multiselect>
-
-                <span
-                    class="multiselect-floating-label"
-                    aria-hidden="true"
-                >
-                    {{ item.fieldName }}
-                </span>
+                </DropdownAutocomplete>
             </div>
 
             <div class="searchTextContainer">
@@ -758,6 +762,21 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+    :global(.land-registry-file-search__option-wrapper) {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    :global(.land-registry-file-search__option-legend) {
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 14px solid transparent;
+        flex: 0 0 auto;
+    }
+
     #landRegistryFileSearch{
         height: 100%;
         padding-top: 1rem;
@@ -769,107 +788,14 @@ export default {
         div.typeSelectContainer {
             position: relative;
 
-            div.option-wrapper {
-                display: flex;
-                flex-direction: row;
-                gap: 0.5rem;
-
-                span.option-legend {
-                    width: 0;
-                    height: 0;
-                    border-left: 8px solid transparent;
-                    border-right: 8px solid transparent;
-                    border-bottom: 14px solid transparent;
-                    flex: 0 0 auto;
-                }
-            }
-
-            span.multiselect-floating-label {
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 2;
-                padding: 0.75rem;
-                color: #747474;
-                font-size: 1rem;
-                text-align: start;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                pointer-events: none;
-                border: var(--bs-border-width) solid transparent;
-                transform-origin: 0 0;
-                transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
-            }
-
-            &.has-selection .multiselect-floating-label,
-            :deep(.multiselect:focus-within) + .multiselect-floating-label {
-                transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-            }
-
-            :deep(.multiselect:focus-within) + .multiselect-floating-label {
-                color: $secondary;
-                z-index: 51;
-            }
-
-            :deep(.multiselect) {
-                font-size: 1rem;
-                color: var(--bs-body-color);
-
-                .multiselect__input,
-                .multiselect__single {
-                    font-size: 1rem;
-                    line-height: 1.25;
-                    margin: 0;
-                    padding: 0;
+            :deep(.v-input ) {
+                .v-field__input {
+                    padding-top: 2rem;
+                    padding-bottom: 0.5rem;
                 }
 
-                .multiselect__tags {
-                    padding: 1.625rem 2.5rem 0.375rem 0.75rem;
-                    border: 1px solid var(--bs-border-color);
-                }
-
-                .multiselect__selected,
-                .multiselect__option,
-                .multiselect__tags,
-                .multiselect__tag {
-                    color: var(--bs-body-color);
-                }
-
-                .multiselect__selected,
-                .multiselect__option {
-                     &:hover,
-                     &.multiselect__option--highlight {
-                        color: white;
-                    }
-                }
-
-                .multiselect__tag {
-                    border: 2px solid;
-                }
-
-                button.multiselect__tag-icon {
-                    border: 0;
-                    padding: 0;
-                    background: transparent;
-                    width: 1.2rem;
-                    height: 1.2rem;
-                    top: calc(50% - 0.6rem);
-                    bottom: auto;
-                    line-height: 1.2rem;
-                    margin-right: 0.2rem;
-
-                    &::after {
-                        color: var(--bs-body-color);
-                    }
-
-                    &:hover,
-                    &:focus-visible {
-                        background-color: #001B3D;
-
-                        &::after {
-                            color: white;
-                        }
-                    }
+                .v-chip {
+                    gap: 0.5rem;
                 }
             }
         }

@@ -170,28 +170,33 @@ export default {
 .InputText {
     margin-bottom: 1rem;
 
-  input.form-control {
-    &::placeholder {
-      opacity: 0;
-      transition: opacity 0.2s;
-      color: #747474;
+    .form-control,
+    .input-label {
+        padding-left: 16px;
     }
 
-    &:focus {
-      &::placeholder {
-        opacity: 1;
+    input.form-control {
+        &::placeholder {
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #747474;
+        }
+
+        &:focus {
+            &::placeholder {
+                opacity: 1;
+                color: #747474;
+                -webkit-text-fill-color: #747474;
+            }
+
+            ~ .input-label {
+                color: $secondary;
+            }
+        }
+    }
+
+    .input-label {
         color: #747474;
-        -webkit-text-fill-color: #747474;
-      }
-
-      ~ .input-label {
-        color: $secondary;
-      }
     }
-  }
-
-  .input-label {
-    color: #747474;
-  }
 }
 </style>

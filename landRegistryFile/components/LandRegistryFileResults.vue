@@ -7,7 +7,7 @@ import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
 import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup";
 import PaginationControl from "@shared/modules/pagination/components/PaginationControl.vue";
-import Multiselect from "vue-multiselect";
+import DropdownSelect from "@shared/modules/dropdown/components/DropdownSelect.vue";
 
 export default {
     name: "LandRegistryFileResults",
@@ -16,7 +16,7 @@ export default {
         IconButton,
         SwitchInput,
         PaginationControl,
-        Multiselect
+        DropdownSelect
     },
     inject: {
         setCurrentTab: {from: TAB_SET_CURRENT, default: null}
@@ -299,25 +299,27 @@ export default {
             </TableComponent>
 
             <div class="pagination-control-wrapper">
+                <div class="spacer-div" />
+
                 <PaginationControl
                     :current-page="currentPage"
                     :total-pages="totalNumberOfPages"
                     @page-change="pageChange"
                 />
 
+                <div class="spacer-div" />
+
                 <div class="pagination-settings">
                     <label for="datasetsPerPage">
                         {{ $t("additional:modules.landRegistryFile.tabs.tabResults.datasetsPerPageLabel") }}
                     </label>
-                    <Multiselect
+                    <DropdownSelect
                         id="datasetsPerPage"
                         v-model="currentDatasetsPerPage"
                         class="datasets-per-page-select"
-                        :options="datasetsPerPage"
-                        :searchable="false"
-                        :show-labels="false"
-                        :allow-empty="false"
-                        :close-on-select="true"
+                        :items="datasetsPerPage"
+                        :menu-props="{contentClass: 'land-registry-file-results__menu mp-dropdown-menu'}"
+                        label=""
                     />
                 </div>
             </div>
@@ -326,6 +328,11 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+    :global(.land-registry-file-results__menu .v-list-item) {
+        min-height: 2.25rem;
+        align-items: center;
+    }
+
     #LandRegistryFileResults{
         height: 100%;
         padding-top: 0.5rem;
@@ -480,65 +487,46 @@ export default {
         div.pagination-control-wrapper {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+
+            div.spacer-div {
+                flex: 1;
+            }
 
             :deep(.pagination-controls) {
                 width: auto;
-                margin-inline: auto;
+                flex: 0 0 auto;
             }
 
             .pagination-settings {
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-                margin-inline: auto;
+                flex: 1 1 11.5rem;
+                max-width: max-content;
+                min-width: 0;
 
                 label {
                     font-size: 13px;
                     font-weight: normal;
                     line-height: 17px;
                     color: #646262;
-                    margin-right: 0.5rem;
+                    min-width: 0;
+                    white-space: normal;
+                    hyphens: auto;
                 }
 
-                :deep(.datasets-per-page-select) {
-                    width: 70px;
+                .datasets-per-page-select {
+                    flex: 0 0 auto;
+                }
 
-                    .multiselect__input,
-                    .multiselect__single,
-                    .multiselect__placeholder,
-                    .multiselect__input::placeholder {
-                        font-size: 1rem;
-                        font-weight: normal;
-                        margin-bottom: 8px;
-                        line-height: 20px;
-                    }
-
-                    .multiselect__selected,
-                    .multiselect__option,
-                    .multiselect__tags,
-                    .multiselect__tag {
-                        font-size: 1rem;
-                        color: black;
-                    }
-
-                    .multiselect__option {
-                        &:after,
-                        &--selected,
-                        &--selected:after {
-                            color: black;
-                            background: #F0F0F0 ;
-                        }
-
-                        &--highlight,
-                        &--highlight:after {
-                            color: white;
-                            background: #3C5F94 ;
-                        }
-                    }
+                :deep(.v-field__field) {
+                    height: 2.25rem;
+                    align-items: center;
                 }
             }
         }
