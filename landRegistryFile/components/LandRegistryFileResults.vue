@@ -5,6 +5,7 @@ import IconButton from "@shared/modules/buttons/components/IconButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import SwitchInput from "@shared/modules/checkboxes/components/SwitchInput.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
+import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup";
 import PaginationControl from "@shared/modules/pagination/components/PaginationControl.vue";
 import Multiselect from "vue-multiselect";
 
@@ -190,7 +191,7 @@ export default {
          */
         goToEldorado (row) {
             if (row?.eldorado && isWebLink(row.eldorado)) {
-                window.open(row.eldorado, "_blank", "noopener,noreferrer");
+                openSecuredPopup(row.eldorado, "_blank", "noopener,noreferrer");
             }
             else {
                 console.warn("Der Datensatz hat keinen ELDORADO-Link");

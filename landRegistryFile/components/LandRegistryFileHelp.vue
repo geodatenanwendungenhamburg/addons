@@ -3,6 +3,7 @@ import {mapGetters, mapActions} from "vuex";
 import FlatButton from "@shared/modules/buttons/components/FlatButton.vue";
 import {TAB_SET_CURRENT} from "./shared/TabContainer.vue";
 import {isWebLink} from "@shared/js/utils/urlHelper.js";
+import {openSecuredPopup} from "@shared/js/utils/openSecuredPopup";
 
 export default {
     name: "LandRegistryFileHelp",
@@ -43,7 +44,7 @@ export default {
          */
         openHelpLink () {
             if (this.helpLinkIsValid) {
-                window.open(this.linkToHelp);
+                openSecuredPopup(this.linkToHelp, "_blank");
             }
         },
         /**
