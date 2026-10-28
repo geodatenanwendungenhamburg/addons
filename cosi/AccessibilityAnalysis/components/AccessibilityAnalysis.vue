@@ -6,7 +6,7 @@ import AccordionItem from "@shared/modules/accordion/components/AccordionItem.vu
 import AlertMessage from "../../shared/modules/alerts/components/AlertMessage.vue";
 import {Dropdown} from "bootstrap";
 import ButtonGroup from "../../components/ButtonGroup.vue";
-import BaseCard from "@shared/modules/Cards/BaseCard.vue";
+import BaseCard from "@shared/modules/cards/components/BaseCard.vue";
 import {union} from "@turf/union";
 import {featureCollection as turfFeatureCollection} from "@turf/helpers";
 import {VExpandTransition} from "vuetify/components/transitions";

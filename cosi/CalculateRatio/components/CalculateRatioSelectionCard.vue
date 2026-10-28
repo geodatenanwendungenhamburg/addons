@@ -1,5 +1,5 @@
 <script>
-import BaseCard from "@shared/modules/Cards/BaseCard.vue";
+import BaseCard from "@shared/modules/cards/components/BaseCard.vue";
 import DropdownAutocomplete from "../../shared/modules/dropdown/components/DropdownAutocomplete.vue";
 import InputText from "@shared/modules/inputs/components/InputText.vue";
 

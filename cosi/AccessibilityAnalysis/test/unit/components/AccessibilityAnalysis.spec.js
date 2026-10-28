@@ -4,7 +4,7 @@ import {
 } from "@vue/test-utils";
 // import {config, mount, createLocalVue} from "@vue/test-utils";
 import AccessibilityAnalysisComponent from "../../../components/AccessibilityAnalysis.vue";
-import BaseCard from "@shared/modules/Cards/BaseCard.vue";
+import BaseCard from "@shared/modules/cards/components/BaseCard.vue";
 import {createVuetify} from "vuetify";
 import AccessibilityAnalysis from "../../../store/index";
 import {

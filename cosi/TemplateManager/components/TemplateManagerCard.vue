@@ -1,6 +1,6 @@
 <script>
 import {mapGetters, mapMutations} from "vuex";
-import BaseCard from "../../../../src/shared/modules/Cards/BaseCard.vue";
+import BaseCard from "@shared/modules/cards/components/BaseCard.vue";
 
 export default {
     name: "TemplateManagerCard",
