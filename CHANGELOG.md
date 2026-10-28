@@ -7,12 +7,16 @@
 ### __Breaking Changes__
 
 ### Added
-- userTracking: The new Draw tool now also tracks undo, redo, deleting all or single drawn features, download and download format, draw type and interaction changes, changing the unit of squares, and style changes of already drawn features (see userTracking/README.md for details).
 - landRegistryFile: Added new addon landRegistryFile to allow FHH internal search for historic land registry documents
+- userTracking:
+    - The new Draw tool now also tracks undo, redo, deleting all or single drawn features, download and download format, draw type and interaction changes, changing the unit of squares, and style changes of already drawn features (see userTracking/README.md for details).
+    - Layers added via url params (LAYERS, LAYERIDS, MDID, ...) are now tracked with the event "Added layer via query".
+    - The pageviews send to the matomo server can be limited to the first user navigation.
 
 ### Changed
 - Replaced native window.open function with xss-safe util function.
 - Changed Node.js support: Minimum supported versions are now Node.js **22.23.4** (LTS) and **24.22.1** (LTS). This update is required to address known security vulnerabilities in older Node.js versions.
+- userTracking: The url parameter values are no longer send for the initial pageview, except for {"maps":"2D/3D"}.
 
 ### Deprecated
 

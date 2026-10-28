@@ -1,3 +1,4 @@
+import {rawLayerList} from "@masterportal/masterportalapi/src/index.js";
 import {trackMatomoEvent} from "./trackMatomo";
 
 /**
@@ -85,13 +86,22 @@ export function getDrawToolNameFromVersion (version) {
 
 /**
  * Returns a formatted string with the layer name and ID for the given layer ID.
- * Falls back to "LayerId unknown" when no layerId is provided.
+ * The name is taken from the layer configuration, or from the raw layer list if the layer is not configured in the config.json.
+ * Falls back to "LayerId unknown" when no layerId is provided and to "Layer-name unknown" when no layer name is provided.
  * @param {String} layerId The ID of the layer to look up.
  * @param {Object} store The Vuex store.
  * @returns {String} A string of the form "Layer: <name> (id: <id>)".
  */
 export function getLayerInformation (layerId, store) {
-    return layerId ? `Layer: ${store.getters.layerConfigById(layerId)?.name} (id: ${layerId})` : "LayerId unknown";
+    if (!layerId) {
+        return "LayerId unknown";
+    }
+
+    return `Layer: ${
+        store.getters.layerConfigById(layerId)?.name
+        ?? rawLayerList.getLayerWhere({id: layerId})?.name
+        ?? "Layer-name unknown"
+    } (id: ${layerId})`;
 }
 
 /**
@@ -166,4 +176,59 @@ export function stripBodyParameterFromHref (href) {
     const query = params.toString();
 
     return `${href.slice(0, queryStart)}${query ? `?${query}` : ""}`;
+}
+
+/**
+ * Removes the values of all query parameters, so only the parameter names remain (e.g. "LAYERS=")
+ * which are then sorted alphabetically.
+ * Exception: for parameters listed in "searchParamKeysToKeep" the configured keys of their JSON value are kept.
+ * @param {String} search The query string (with or without leading "?").
+ * @param {Object} [keep] The parts of JSON-values to be kept in the query (e. g. {maps: ["mode"]})
+ * @returns {String} The anonymized query string with leading "?", or "" if there are no parameters.
+ */
+export function anonymizeSearchParams (search, keep) {
+    const keyValuePairs = [];
+
+    new URLSearchParams(search).forEach((value, key) => {
+        keyValuePairs.push([key, getReducedSearchParamValue(key, value, keep)]);
+    });
+
+    keyValuePairs.sort((a, b) => a[0].localeCompare(b[0]));
+
+    return keyValuePairs.length > 0
+        ? `?${keyValuePairs.map(pair => `${pair[0]}=${pair[1]}`).join("&")}`
+        : "";
+}
+
+/**
+ * Reduces a query parameter value to the keys configured in "searchParamKeysToKeep".
+ * @param {String} key The query parameter name.
+ * @param {String} value The decoded query parameter value.
+ * @param {Object} [keep] The parts of JSON-values to be kept in the query (e. g. {maps: ["mode"]})
+ * @returns {String} The reduced JSON string, or "" if nothing is to be kept or the value is no valid JSON object.
+ */
+function getReducedSearchParamValue (key, value, keep) {
+    const funcName = "getReducedSearchParamValue";
+    const keysToKeep = keep ? keep[key.toLowerCase()] : undefined;
+
+    if (!keysToKeep) {
+        return "";
+    }
+
+    try {
+        const parsed = JSON.parse(value),
+            reduced = {};
+
+        keysToKeep.forEach(keyToKeep => {
+            if (parsed?.[keyToKeep] !== undefined) {
+                reduced[keyToKeep] = parsed[keyToKeep];
+            }
+        });
+
+        return Object.keys(reduced).length > 0 ? JSON.stringify(reduced) : "";
+    }
+    catch (error) {
+        console.warn(`${funcName}: could not parse query parameter value`);
+        return "";
+    }
 }

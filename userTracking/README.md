@@ -31,6 +31,7 @@ The following user interactions are tracked as Matomo events automatically.
 |--------|------|---------|---------------|
 | `Added layer via layertree and turned it on` | Layer name and ID | A layer was turned on via the layer tree ("Themen hinzufügen"). | v3.26.0 - v3.26.0 |
 | `Added layer via layertree` | Layer name and ID | A layer was turned on via the layer tree ("Themen hinzufügen"). | v3.27.0 |
+| `Added layer via query` | Layer name and ID | A layer was added via the url params `LAYERS`, `LAYERIDS`, `MAP/LAYERIDS`, `MDID` or `MAP/MDID` (one event per layer, sent together with the first other tracked event, not on page load; layers with `visibility: true` in the config.json are not tracked). | v3.28.0 |
 | `Added layer via search` | Layer name and ID | A layer was added through the search results. | v3.26.0 |
 | `Changed layer-visibility via {source}` | Layer name and ID | A layer's visibility checkbox was toggled (e.g. from the layer tree or layer selection). The value field is `1` (visible) or `0` (hidden). | v3.26.0 - v3.26.0 |
 | `Turned layer-visibility on/off via {source}` | Layer name and ID | A layer's visibility checkbox was toggled (e.g. from the layer tree or layer selection). | v3.27.0 |
