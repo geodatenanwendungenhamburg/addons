@@ -19,6 +19,7 @@
 
 ### Fixed
 - userTracking: Events for colors and stroke widths of the Draw tool are now debounced separately for fill/stroke and inner/outer, so they no longer cancel each other.
+- ToastsElement: Added scoped styles to prevent CSS conflicts with other components.
 
 ---
 
