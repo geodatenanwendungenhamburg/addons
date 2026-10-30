@@ -8,6 +8,7 @@
 
 ### Added
 - userTracking: The new Draw tool now also tracks undo, redo, deleting all or single drawn features, download and download format, draw type and interaction changes, changing the unit of squares, and style changes of already drawn features (see userTracking/README.md for details).
+- landRegistryFile: Added new addon landRegistryFile to allow FHH internal search for historic land registry documents
 
 ### Changed
 - Replaced native window.open function with xss-safe util function.
