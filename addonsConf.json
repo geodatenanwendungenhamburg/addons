@@ -31,6 +31,9 @@
   "streetSmart": {
     "type": "tool"
   },
+  "supersetDashboard": {
+    "type": "tool"
+  },
   "vcOblique": {
     "type": "tool",
     "path": "vcOblique"

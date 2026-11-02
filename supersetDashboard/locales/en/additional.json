@@ -1,0 +1,9 @@
+{
+  "modules": {
+    "supersetDashboard": {
+      "description": "Displays an Apache Superset dashboard",
+      "name": "Superset",
+      "notConfigured": "No Superset dashboard is configured."
+    }
+  }
+}

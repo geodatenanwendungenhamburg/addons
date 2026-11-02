@@ -1,0 +1,14 @@
+{
+    "name": "superset-dashboard",
+    "version": "1.0.0",
+    "description": "superset dashboard",
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://bitbucket.org/geowerkstatt-hamburg/addons.git"
+    },
+    "scripts": {},
+      "dependencies": {
+      "@superset-ui/embedded-sdk": "^0.4.0"
+    }
+  }
