@@ -60,7 +60,8 @@ describe("addons/pvObligation/components/PvObligationWizard.vue", () => {
             target: {
                 classList: {
                     contains: (cls) => cls === "accordion-button" && cls !== "collapsed"
-                }
+                },
+                nodeName: "BUTTON"
             }
         }, 1);
 

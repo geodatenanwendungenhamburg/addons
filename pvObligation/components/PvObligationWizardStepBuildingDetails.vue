@@ -82,37 +82,37 @@ export default {
         /** @override */
         componentFormDataValidate () {
             const errorMessageMissingValue = this.$t("additional:modules.pvObligation.formErrors.genericMissingValue"),
-                errorMessageInvalidValue = this.$t("additional:modules.pvObligation.formErrors.genericInvalidValue"),
-                validations = [
-                    {
-                        field: "propertyOwnerFullName",
-                        error: !this.componentFormData.propertyOwnerFullName.length ? errorMessageMissingValue : null
-                    },
-                    {
-                        field: "street",
-                        error: !this.componentFormData.street.length ? errorMessageMissingValue : null
-                    },
-                    {
-                        field: "postalCode",
-                        error: (() => {
-                            if (!this.componentFormData.postalCode.length) {
-                                return errorMessageMissingValue;
-                            }
-                            if (!(/^\d{5}$/).test(this.componentFormData.postalCode)) {
-                                return errorMessageInvalidValue;
-                            }
-                            return null;
-                        })()
-                    },
-                    {
-                        field: "houseNumber",
-                        error: !this.componentFormData.houseNumber.length ? errorMessageMissingValue : null
-                    },
-                    {
-                        field: "city",
-                        error: !this.componentFormData.city.length ? errorMessageMissingValue : null
-                    }
-                ];
+                  errorMessageInvalidValue = this.$t("additional:modules.pvObligation.formErrors.genericInvalidValue"),
+                  validations = [
+                      {
+                          field: "propertyOwnerFullName",
+                          error: !this.componentFormData.propertyOwnerFullName.length ? errorMessageMissingValue : null
+                      },
+                      {
+                          field: "street",
+                          error: !this.componentFormData.street.length ? errorMessageMissingValue : null
+                      },
+                      {
+                          field: "postalCode",
+                          error: (() => {
+                              if (!this.componentFormData.postalCode.length) {
+                                  return errorMessageMissingValue;
+                              }
+                              if (!(/^\d{5}$/).test(this.componentFormData.postalCode)) {
+                                  return errorMessageInvalidValue;
+                              }
+                              return null;
+                          })()
+                      },
+                      {
+                          field: "houseNumber",
+                          error: !this.componentFormData.houseNumber.length ? errorMessageMissingValue : null
+                      },
+                      {
+                          field: "city",
+                          error: !this.componentFormData.city.length ? errorMessageMissingValue : null
+                      }
+                  ];
 
             validations.forEach(({field, error}) => {
                 this.componentFormErrors[field] = error;
@@ -181,8 +181,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepBuildingDetails {
         margin-top: 0.5rem;
 

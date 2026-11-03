@@ -84,12 +84,11 @@ export default {
         async defineNetArea (payload) {
             const outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
 
-            outlineLayer.setStyle(new Style({
+            outlineLayer?.setStyle(new Style({
                 stroke: new Stroke({color: "rgba(192, 12, 247, 1)", width: 3}),
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            // eslint-disable-next-line
             const areaData = await this.calculateNetAreaAndRestrictedAreas({
                 netArea: this.componentFormData.netRoofArea !== null
                     ? this.componentFormData.netRoofArea
@@ -101,8 +100,8 @@ export default {
                 restrictedAreaItems: this.componentFormData.restrictedListItems ?? []
             });
 
-            this.componentFormData.netRoofArea = areaData.netArea;
-            this.obligatedArea = areaData.obligatedArea;
+            this.componentFormData.netRoofArea = areaData?.netArea;
+            this.obligatedArea = areaData?.obligatedArea;
         },
         async onListItems (listItems) {
             this.componentFormData.restrictedListItems = listItems;
@@ -191,8 +190,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepNetArea{
         margin-top: 0.5rem;
 

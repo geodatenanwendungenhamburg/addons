@@ -80,12 +80,11 @@ export default {
         async defineNetArea (payload) {
             const outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
 
-            outlineLayer.setStyle(new Style({
+            outlineLayer?.setStyle(new Style({
                 stroke: new Stroke({color: "rgba(192, 12, 247, 1)", width: 3}),
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            // eslint-disable-next-line
             const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
                 netArea: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea !== null
                     ? this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea
@@ -193,8 +192,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepNetRestrictedAreas{
         margin-top: 0.5rem;
 

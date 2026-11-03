@@ -59,11 +59,11 @@ export default {
                     this.grossAreaSelection.setActive(true);
 
                     const grossAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
-                            return l.get("id") === "Module/pvObligation/layer/roofArea";
-                        }),
-                        netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
-                            return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
-                        });
+                              return l.get("id") === "Module/pvObligation/layer/roofArea";
+                          }),
+                          netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(l => {
+                              return l.get("id") === "Module/pvObligation/layer/roofArea_pv_suitable";
+                          });
 
                     if (netAreaLayer) {
                         netAreaLayer.setVisible(false);
@@ -98,21 +98,21 @@ export default {
         ]),
         async defineGrossArea (payload) {
             const rgbStroke = this.grossAreaStyle?.polygonStrokeColor?.join(","),
-                strokeColor = `rgb(${rgbStroke})`,
-                rgbFill = this.grossAreaStyle?.polygonFillColor?.join(","),
-                fillColor = `rgba(${rgbFill})`,
-                selectInteraction = new Select({
-                    style: new Style({
-                        stroke: new Stroke({color: strokeColor, width: this.grossAreaStyle?.polygonStrokeWidth || 1}),
-                        fill: new Fill({color: fillColor})
-                    }),
-                    filter: (feature, layer) => {
-                        return layer && layer.get("id") === this.roofLayerId;
-                    }
-                }),
-                outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
+                  strokeColor = `rgb(${rgbStroke})`,
+                  rgbFill = this.grossAreaStyle?.polygonFillColor?.join(","),
+                  fillColor = `rgba(${rgbFill})`,
+                  selectInteraction = new Select({
+                      style: new Style({
+                          stroke: new Stroke({color: strokeColor, width: this.grossAreaStyle?.polygonStrokeWidth || 1}),
+                          fill: new Fill({color: fillColor})
+                      }),
+                      filter: (feature, layer) => {
+                          return layer && layer.get("id") === this.roofLayerId;
+                      }
+                  }),
+                  outlineLayer = await this.addNewLayerIfNotExists({layerName: payload.layerName, alwaysOnTop: true});
 
-            outlineLayer.setStyle(new Style({
+            outlineLayer?.setStyle(new Style({
                 stroke: new Stroke({color: "rgba(12, 247, 227, 1)", width: 3}),
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
@@ -122,7 +122,7 @@ export default {
 
             selectInteraction.on("select", async (e) => {
                 const selectedFeature = e.selected[0],
-                    roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
+                      roofId = selectedFeature ? selectedFeature.get("gebaeude_id") : null;
 
                 // Show confirm modal if another roof is selected and form is not changed(dirty)
                 if (this.selectedRoofId && this.selectedRoofId !== roofId) {
@@ -220,8 +220,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepGrossArea {
         margin-top: 0.5rem;
 

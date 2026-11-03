@@ -7,6 +7,7 @@
 ### __Breaking Changes__
 
 ### Added
+- pvObligation: Added new addon pvObligation to allow users to estimate their roof size thas has to be used for photovoltaik
 
 ### Changed
 

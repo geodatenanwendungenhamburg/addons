@@ -197,8 +197,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     .modal-rounded-dialog {
         border-radius: 0.3em;
     }

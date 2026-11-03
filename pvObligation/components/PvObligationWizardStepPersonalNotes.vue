@@ -48,8 +48,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepPersonalNotes{
         margin-top: 0.5rem;
     }

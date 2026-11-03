@@ -137,7 +137,13 @@ export default {
             return this.wizardSteps.find((step) => step.isOpen)?.component?.name === componentName;
         },
         openWizardStep (event, index) {
-            if (event.target.classList.contains("accordion-button") && !event.target.classList.contains("collapsed")) {
+            let buttonElement = event.target;
+
+            while (buttonElement && buttonElement.nodeName !== "BUTTON") {
+                buttonElement = buttonElement.parentNode;
+            }
+
+            if (buttonElement && buttonElement.classList.contains("accordion-button") && !buttonElement.classList.contains("collapsed")) {
                 this.wizardStepIsValid(
                     this.wizardSteps.find(item => item.isOpen)
                 );
@@ -201,18 +207,18 @@ export default {
         collectFormDataFromWizardSteps () {
             this.wizardSteps.forEach(step => {
                 const refArr = this.$refs[`ref${step.component.name}`],
-                    instance = Array.isArray(refArr) ? refArr[0] : refArr;
+                      instance = Array.isArray(refArr) ? refArr[0] : refArr;
 
                 step.componentFormData = instance?.componentFormData;
             });
         },
         wizardStepIsValid (selectedStep = null) {
             const currentStep = selectedStep ?? this.wizardSteps.find(step => step.isOpen),
-                refArr = this.$refs[`ref${currentStep.component.name}`],
-                instance = Array.isArray(refArr) ? refArr[0] : refArr,
-                stepIsValid = typeof instance?.componentFormDataValidate === "function"
-                    ? instance.componentFormDataValidate()
-                    : true;
+                  refArr = this.$refs[`ref${currentStep.component.name}`],
+                  instance = Array.isArray(refArr) ? refArr[0] : refArr,
+                  stepIsValid = typeof instance?.componentFormDataValidate === "function"
+                      ? instance.componentFormDataValidate()
+                      : true;
 
             currentStep.componentFormDataIsValid = stepIsValid;
 
@@ -221,10 +227,10 @@ export default {
         wizardStepIsDirty () {
             this.wizardSteps.forEach(step => {
                 const refArr = this.$refs[`ref${step.component.name}`],
-                    instance = Array.isArray(refArr) ? refArr[0] : refArr,
-                    stepIsDirty = typeof instance?.checkComponentFormDataIsDirty === "function"
-                        ? instance.checkComponentFormDataIsDirty()
-                        : false;
+                      instance = Array.isArray(refArr) ? refArr[0] : refArr,
+                      stepIsDirty = typeof instance?.checkComponentFormDataIsDirty === "function"
+                          ? instance.checkComponentFormDataIsDirty()
+                          : false;
 
                 step.componentFormDataIsDirty = stepIsDirty;
             });
@@ -240,7 +246,7 @@ export default {
         onResetWizardData () {
             this.wizardSteps.forEach(step => {
                 const refArr = this.$refs[`ref${step.component.name}`],
-                    instance = Array.isArray(refArr) ? refArr[0] : refArr;
+                      instance = Array.isArray(refArr) ? refArr[0] : refArr;
 
                 if (typeof instance?.resetWizardStepData === "function") {
                     instance.resetWizardStepData();
@@ -253,18 +259,20 @@ export default {
         async blockAccordionItemsByDraw () {
             const accordionItems = await document.getElementsByClassName("step");
 
-            accordionItems.forEach(accordionItem => {
-                accordionItem.addEventListener("show.bs.collapse", event => {
-                    if (this.disableAccordion) {
-                        event.preventDefault();
-                    }
+            if (accordionItems && accordionItems.length > 0) {
+                accordionItems.forEach(accordionItem => {
+                    accordionItem.addEventListener("show.bs.collapse", event => {
+                        if (this.disableAccordion) {
+                            event.preventDefault();
+                        }
+                    });
+                    accordionItem.addEventListener("hide.bs.collapse", event => {
+                        if (this.disableAccordion) {
+                            event.preventDefault();
+                        }
+                    });
                 });
-                accordionItem.addEventListener("hide.bs.collapse", event => {
-                    if (this.disableAccordion) {
-                        event.preventDefault();
-                    }
-                });
-            });
+            }
         }
     }
 };
@@ -359,8 +367,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     :deep(.invalid-feedback) {
         display: block;
     }

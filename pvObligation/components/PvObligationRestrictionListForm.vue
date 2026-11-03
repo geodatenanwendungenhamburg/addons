@@ -174,7 +174,7 @@ export default {
             this.removeDrawInteraction();
 
             this.drawState.interaction = new Draw({
-                source: this.drawState.layer.getSource(),
+                source: this.drawState?.layer?.getSource(),
                 type: "Polygon",
                 stopClick: true,
                 style: new Style({
@@ -183,8 +183,8 @@ export default {
                 })
             });
 
-            this.drawState.interaction.on("drawend", this.handleDrawEnd);
-            this.addInteraction(this.drawState.interaction);
+            this.drawState?.interaction.on("drawend", this.handleDrawEnd);
+            this.addInteraction(this.drawState?.interaction);
         },
         /**
          * Creates a modification interaction for map features.
@@ -194,15 +194,15 @@ export default {
             this.removeDrawInteraction();
 
             this.drawState.interaction = new Modify({
-                features: new Collection(this.drawState.layer.getSource().getFeatures().filter(feature => {
+                features: new Collection(this.drawState?.layer.getSource().getFeatures().filter(feature => {
                     return feature.get("id") === this.formData.id;
                 }))
             });
 
-            this.drawState.interaction.on("modifyend", this.handleDrawEnd);
-            this.addInteraction(this.drawState.interaction);
+            this.drawState?.interaction.on("modifyend", this.handleDrawEnd);
+            this.addInteraction(this.drawState?.interaction);
 
-            this.drawState.layer.getSource().getFeatures().forEach(feature => {
+            this.drawState?.layer?.getSource().getFeatures().forEach(feature => {
                 if (feature.get("id") === this.formData.id) {
                     feature.setStyle(new Style({
                         fill: new Fill({color: "rgba(0, 255, 128, 0.2)"}),
@@ -279,14 +279,14 @@ export default {
             });
 
             const netAreaLayer = mapCollection.getMap("2D").getLayers().getArray().find(layer => {
-                    return layer.get("id") === this.pvAreaLayerId;
-                }),
-                netAreaFeatures = netAreaLayer.getSource().getFeatures().filter(feature => {
-                    return feature.get("gebaeude_id") === this.selectedRoofId;
-                }),
-                // Convert OpenLayers feature to GeoJSON for turf processing
-                olGeoJson = new GeoJSON(),
-                drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature);
+                      return layer.get("id") === this.pvAreaLayerId;
+                  }),
+                  netAreaFeatures = netAreaLayer.getSource().getFeatures().filter(feature => {
+                      return feature.get("gebaeude_id") === this.selectedRoofId;
+                  }),
+                  // Convert OpenLayers feature to GeoJSON for turf processing
+                  olGeoJson = new GeoJSON(),
+                  drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature);
 
             netAreaFeatures.forEach(async netAreaFeature => {
                 let intersectionFeature = null;
@@ -303,7 +303,6 @@ export default {
 
                         intersectionFeature = await this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
 
-                        // eslint-disable-next-line one-var
                         const differenceFeature = await this.cutOverlappingFeatures(intersectionFeature, drawFeature);
 
                         if (differenceFeature) {
@@ -317,12 +316,10 @@ export default {
 
                         polyFeature.setGeometry(netAreaFeature.getGeometry().clone());
 
-                        // eslint-disable-next-line one-var
                         const featureGeoJson = olGeoJson.writeFeatureObject(polyFeature);
 
                         intersectionFeature = this.intersectFeature(featureGeoJson, drawFeatureGeoJson);
 
-                        // eslint-disable-next-line one-var
                         const differenceFeature = this.cutOverlappingFeatures(intersectionFeature);
 
                         if (differenceFeature) {
@@ -363,7 +360,7 @@ export default {
             }
 
             await new Promise(resolve => {
-            // Remove the original drawn feature from the layer
+                // Remove the original drawn feature from the layer
                 setTimeout(() => {
                     const source = this.drawState.layer.getSource();
 
@@ -392,7 +389,7 @@ export default {
             }
 
             const olGeoJson = new GeoJSON(),
-                drawFeatures = this.drawState.layer.getSource().getFeatures();
+                  drawFeatures = this.drawState.layer.getSource().getFeatures();
             // Start with the intersection geometry
             let currentGeoJson = olGeoJson.writeFeatureObject(intersectionFeature);
 
@@ -400,7 +397,7 @@ export default {
             for (const feature of drawFeatures) {
                 // Skip the feature if it's the same as the current drawFeature
                 const drawFeatureGeoJson = olGeoJson.writeFeatureObject(drawFeature),
-                    featureGeoJson = olGeoJson.writeFeatureObject(feature);
+                      featureGeoJson = olGeoJson.writeFeatureObject(feature);
 
                 if (booleanEqual(drawFeatureGeoJson, featureGeoJson)) {
                     continue;
@@ -522,7 +519,7 @@ export default {
             }
 
             const area2D = feature.getGeometry().getArea(),
-                area3D = area2D / Math.cos((roofSlope * Math.PI) / 180);
+                  area3D = area2D / Math.cos((roofSlope * Math.PI) / 180);
 
             return {
                 area2D,
@@ -714,8 +711,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationRestrictionListForm{
         border: solid 0.0625rem $light_grey;
         border-radius: 0.5rem;
