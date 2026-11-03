@@ -63,11 +63,11 @@ export default {
             this.$emit("listItems", this.listItems);
 
             const drawLayer = mapCollection.getMap("2D")?.getLayers()?.getArray().find(layer => {
-                    return layer.get("id") === "module/pvObligation/drawLayer";
-                }),
-                keepFeatures = drawLayer?.getSource().getFeatures().filter(feature => {
-                    return feature.get("id") !== itemSelectedEdit.id;
-                });
+                      return layer.get("id") === "module/pvObligation/drawLayer";
+                  }),
+                  keepFeatures = drawLayer?.getSource().getFeatures().filter(feature => {
+                      return feature.get("id") !== itemSelectedEdit.id;
+                  });
 
             drawLayer?.getSource().clear();
 
@@ -199,8 +199,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationRestrictionList{
         span.error {
             color: $light_red;

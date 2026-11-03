@@ -33,8 +33,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     table#PvObligationSimpleTable {
         font-size: 1.125rem;
         border: solid 0.0625rem $light_grey;

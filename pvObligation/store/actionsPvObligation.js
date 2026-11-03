@@ -6,7 +6,6 @@ import {featureCollection} from "@turf/helpers";
 import {transform} from "ol/proj";
 import {createEmpty as createEmptyExtent, extend} from "ol/extent";
 
-/* eslint-disable one-var */
 import pdfMake from "pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import {getFooterSvg} from "../js/getSvg";

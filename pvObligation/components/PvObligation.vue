@@ -45,8 +45,8 @@ export default {
         },
         isMobileDevice () {
             const userAgentCheck = (/Mobi|Android|iPhone|iPad|iPod|Windows Phone/i).test(navigator.userAgent),
-                touchCheck = "ontouchstart" in window || navigator.maxTouchPoints > 0,
-                screenSizeCheck = this.isMobile;
+                  touchCheck = "ontouchstart" in window || navigator.maxTouchPoints > 0,
+                  screenSizeCheck = this.isMobile;
 
             return userAgentCheck || (touchCheck && screenSizeCheck);
         }
@@ -112,8 +112,8 @@ export default {
         },
         async waitForFeaturesToBeLoaded () {
             const promises = [],
-                map = mapCollection.getMap("2D"),
-                layers = map?.getLayers()?.getArray();
+                  map = mapCollection.getMap("2D"),
+                  layers = map?.getLayers()?.getArray();
 
             [this.roofLayerId, this.pvAreaLayerId].forEach(layerId => {
                 promises.push(
@@ -204,8 +204,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligation{
         position: relative;
         display: flex;

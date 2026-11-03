@@ -26,14 +26,17 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
                             namespaced: true,
                             state: {
                                 selectedRoofId: 1,
-                                isDrawing: false
+                                isDrawing: false,
+                                pvAreaLayerId: "123"
                             },
                             getters: {
                                 selectedRoofId: (state) => state.selectedRoofId,
-                                isDrawing: (state) => state.isDrawing
+                                isDrawing: (state) => state.isDrawing,
+                                pvAreaLayerId: (state) => state.pvAreaLayerId
                             },
                             actions: {
                                 dissolveRoofFeaturesAndCalculateArea: sinon.stub().resolves(100),
+                                calculateNetAreaAndRestrictedAreas: sinon.stub(),
                                 zoomToExtendOfSelectedRoof: sinon.stub()
                             },
                             mutations: {
@@ -102,7 +105,6 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        // eslint-disable-next-line
         const tables = wrapper.findAll("table#PvObligationSimpleTable");
 
         expect(tables.length).to.equal(2);
@@ -124,7 +126,6 @@ describe("addons/pvObligation/components/PvObligationWizardStepNetArea.vue", () 
 
         await vm.$nextTick();
 
-        // eslint-disable-next-line
         const tables = wrapper.findAll("table#PvObligationSimpleTable");
 
         expect(tables.length).to.equal(2);

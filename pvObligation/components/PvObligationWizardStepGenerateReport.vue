@@ -75,22 +75,21 @@ export default {
                 fill: new Fill({color: "rgba(0, 0, 0, 0)"})
             }));
 
-            // eslint-disable-next-line
             const stepNetAreaData = await this.calculateNetAreaAndRestrictedAreas({
-                    netArea: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea !== null
-                        ? this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea
-                        : await this.dissolveRoofFeaturesAndCalculateArea({
-                            roofId: this.selectedRoofId,
-                            outlineLayer: outlineLayer,
-                            layerId: this.pvAreaLayerId
-                        }),
-                    restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
-                }),
-                stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
-                    restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetRestrictedAreas?.formData?.restrictedListItems ?? [],
-                    stepNetAreaWithoutRestrictedArea: stepNetAreaData?.netAreaWithoutRestrictedArea,
-                    stepNetAreaDataObligatedArea: stepNetAreaData?.obligatedArea
-                });
+                      netArea: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea !== null
+                          ? this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.netRoofArea
+                          : await this.dissolveRoofFeaturesAndCalculateArea({
+                              roofId: this.selectedRoofId,
+                              outlineLayer: outlineLayer,
+                              layerId: this.pvAreaLayerId
+                          }),
+                      restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetArea?.formData?.restrictedListItems ?? []
+                  }),
+                  stepNetRestrictedAreaData = await this.calculateNetRestrictedAreaAndRestrictedAreas({
+                      restrictedAreaItems: this.wizardStepsFormData?.PvObligationWizardStepNetRestrictedAreas?.formData?.restrictedListItems ?? [],
+                      stepNetAreaWithoutRestrictedArea: stepNetAreaData?.netAreaWithoutRestrictedArea,
+                      stepNetAreaDataObligatedArea: stepNetAreaData?.obligatedArea
+                  });
 
             this.exportPDF({
                 author: this.wizardStepsFormData.PvObligationWizardStepBuildingDetails.formData.propertyOwnerFullName,
@@ -134,8 +133,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-    @import "~variables";
-
     #pvObligationWizardStepGenerateReport{
         margin-top: 0.5rem;
 
