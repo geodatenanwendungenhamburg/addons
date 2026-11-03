@@ -13,6 +13,7 @@ import actionsSupersetDashboard from "./actionsSupersetDashboard.js";
  * @property {String[]} supportedMapModes Map modes in which the module can be used.
  * @property {Boolean} hasMouseMapInteractions If true, other modules with mouse map interactions are deactivated.
  * @property {String} supersetDomain Domain of the Superset instance, e.g. "superset.example.org".
+ * @property {String} appBackendDomain Domain of the App Backend instance, e.g. "appbackend.example.org".
  * @property {String} dashboardUuid UUID of the Superset dashboard to embed.
  * @property {Object[]} statisticLayers List of statistic layers associated with the dashboard.
  * @property {String} statisticLayers.id ID of the statistic layer.
@@ -32,6 +33,7 @@ export const useSupersetDashboardStore = defineStore("supersetDashboard", {
         hasMouseMapInteractions: true,
 
         supersetDomain: "",
+        appBackendDomain: "",
         dashboardUuid: "",
         statisticLayers: [
             {

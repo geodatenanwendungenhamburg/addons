@@ -1,5 +1,5 @@
 <script>
-import {mapState} from "pinia";
+import {mapState, mapActions} from "pinia";
 import {useSupersetDashboardStore} from "../store/supersetDashboardStore.js";
 
 /**
@@ -11,6 +11,21 @@ export default {
     name: "SupersetDashboard",
     computed: {
         ...mapState(useSupersetDashboardStore, [])
+    },
+    async mounted () {
+        let result = "Fehler";
+
+        try {
+            result = await this.fetchGuestTokenFromBackend();
+        }
+        catch (error) {
+            console.error("Fehler: " + error);
+        }
+
+        console.warn("Der Gast-Token lautet: " + result);
+    },
+    methods: {
+        ...mapActions(useSupersetDashboardStore, ["fetchGuestTokenFromBackend"])
     }
 };
 </script>
