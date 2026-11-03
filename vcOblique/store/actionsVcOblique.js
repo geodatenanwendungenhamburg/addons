@@ -76,16 +76,16 @@ function headingToCardinal (heading) {
 
 const actions = {
     /**
-    * InitObliqueView creates a click listener at the map. Creates a listener at the olMap in the oblique application when the oblique aerial images have been moved in the sidebar.
-    * Removes unwanted html elements once the iframe content has been loaded.
-    * Sets the special MapMarker style for the oblique map
-    * @param {Object} param store context
-    * @param {Object} param.commit the commit
-    * @param {Object} param.dispatch the dispatch
-    * @param {Object} param.getters the getters
-    * @param {Object} param.rootGetters the rootGetters
-    * @returns {void}
-    */
+     * InitObliqueView creates a click listener at the map. Creates a listener at the olMap in the oblique application when the oblique aerial images have been moved in the sidebar.
+     * Removes unwanted html elements once the iframe content has been loaded.
+     * Sets the special MapMarker style for the oblique map
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {Object} param.dispatch the dispatch
+     * @param {Object} param.getters the getters
+     * @param {Object} param.rootGetters the rootGetters
+     * @returns {void}
+     */
     initObliqueView ({commit, dispatch, getters, rootGetters}) {
         const iframe = document.getElementById("obliqueIframe");
 
@@ -233,13 +233,13 @@ const actions = {
     },
 
     /**
-    * Unregister the map listener. Resets the mapMarker style. Removes the MapMarker.
-    * @param {Object} param store context
-    * @param {Object} param.commit the commit
-    * @param {Object} param.dispatch the dispatch
-    * @param {Object} param.getters the getters
-    * @returns {void}
-    */
+     * Unregister the map listener. Resets the mapMarker style. Removes the MapMarker.
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {Object} param.dispatch the dispatch
+     * @param {Object} param.getters the getters
+     * @returns {void}
+     */
     resetObliqueViewer ({commit, dispatch, getters}) {
         commit("setCurrentImageName", "");
         const layer = mapMarker.getMapmarkerLayerById("marker_point_layer");
@@ -254,15 +254,15 @@ const actions = {
     },
 
     /**
-    * ObliqueView moves the map marker to the click position and centers the oblique aerial images at the point in the sidebar.
-    * @param {Object} param store context
-    * @param {Object} param.commit the commit
-    * @param {Object} param.dispatch the dispatch
-    * @param {Object} param.getters the getters
-    * @param {Object} param.rootGetters the rootGetters
-    * @param {Array} coordinates the click/center coordinate
-    * @returns {void}
-    */
+     * ObliqueView moves the map marker to the click position and centers the oblique aerial images at the point in the sidebar.
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {Object} param.dispatch the dispatch
+     * @param {Object} param.getters the getters
+     * @param {Object} param.rootGetters the rootGetters
+     * @param {Array} coordinates the click/center coordinate
+     * @returns {void}
+     */
     async obliqueView ({commit, dispatch, getters}, coordinates = []) {
         const vcs = document.getElementById("obliqueIframe")?.contentWindow?.vcs,
             map = getActiveMap(vcs);
@@ -295,15 +295,15 @@ const actions = {
         }
     },
     /**
-    * createObliqueViewerURL gets the initialCenter coordinate and creates the URL for the Oblique Map.
-    * @param {Object} param store context
-    * @param {Object} param.commit the commit
-    * @param {Object} param.dispatch the dispatch
-    * @param {Object} param.getters the getters
-    * @param {Object} param.rootGetters the rootGetters
-    * @param {Number[]} initialCenter the initial center coordinate
-    * @returns {void}
-    */
+     * createObliqueViewerURL gets the initialCenter coordinate and creates the URL for the Oblique Map.
+     * @param {Object} param store context
+     * @param {Object} param.commit the commit
+     * @param {Object} param.dispatch the dispatch
+     * @param {Object} param.getters the getters
+     * @param {Object} param.rootGetters the rootGetters
+     * @param {Number[]} initialCenter the initial center coordinate
+     * @returns {void}
+     */
     createObliqueViewerURL ({commit, dispatch, getters, rootGetters}, initialCenter) {
         if (initialCenter && Array.isArray(initialCenter) && initialCenter.length > 1) {
             const transformedCoordinates = crs.transform(mapCollection.getMapView("2D").getProjection().getCode(), "EPSG:4326", initialCenter),

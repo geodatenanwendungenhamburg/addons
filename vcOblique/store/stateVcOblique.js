@@ -14,7 +14,7 @@
  * @property {String} defaultMapMarkerStyleId contains the default styleId of the mapMarker
  * @property {String} heading contains the heading of the oblique viewer
  * @property {String} serviceId contains the id of the oblique viewer from the rest-services.json
- * */
+ */
 
 const state = {
     description: "additional:modules.vcOblique.description",

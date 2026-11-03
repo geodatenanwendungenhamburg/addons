@@ -237,15 +237,15 @@ export default {
             "updateSelectionLayer"
         ]),
         /**
-        * Runs the queryOaf action with the provided parameters.
-        * @param {Object} options - Query options
-        * @param {Array<Number>|null} [options.bbox] - The bounding box for the filtering.
-        * @param {string|null} [options.startDate] - The start date for filtering in YYYY-MM-DD format.
-        * @param {string|null} [options.endDate] - The end date for filtering in YYYY-MM-DD format.
-        * @param {string|null} [options.textValue] - The text value for text search filtering.
-        * @param {Object|null} [options.selectedFilters] - The selected options for select filtering.
-        * @param {boolean} [options.initiatedByUser] - Indicates if the search was initiated by the user.
-        */
+         * Runs the queryOaf action with the provided parameters.
+         * @param {Object} options - Query options
+         * @param {Array<Number>|null} [options.bbox] - The bounding box for the filtering.
+         * @param {string|null} [options.startDate] - The start date for filtering in YYYY-MM-DD format.
+         * @param {string|null} [options.endDate] - The end date for filtering in YYYY-MM-DD format.
+         * @param {string|null} [options.textValue] - The text value for text search filtering.
+         * @param {Object|null} [options.selectedFilters] - The selected options for select filtering.
+         * @param {boolean} [options.initiatedByUser] - Indicates if the search was initiated by the user.
+         */
         async startSearch ({bbox, startDate, endDate, textValue, selectedFilters, initiatedByUser}) {
             const map = mapCollection.getMap("2D"),
                   view = map?.getView(),

@@ -360,7 +360,7 @@ export default {
     methods: {
         /**
          * Adds data, labels and colors to the chart options.
-          * @returns {void}
+         * @returns {void}
          */
         addChartData () {
             const sorted = this.sortedData(),

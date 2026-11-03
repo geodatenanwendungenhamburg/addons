@@ -56,7 +56,7 @@ function getFormat (filename, selectedFiletype, supportedFiletypes, availableFor
  * Checks for OL-unsupported tags and removes them.
  * Currently unsupported tags are:
  *      - cascadingStyle
-
+ *
  * @param {String} rawSource - KML source as string.
  * @returns {String} Returns raw string KML source without unsupported tags.
  */
@@ -250,7 +250,8 @@ function addLayerToTree (newLayer) {
  * @param {Object} model - the layer from the imported file
  * @param {Object} attrs - the attrs to set
  * @returns {void}
-
+ */
+/*
 function setLayerAttributes (model, attrs) {
     model.set({
         ol_uid: attrs.id,
@@ -268,7 +269,7 @@ function setLayerAttributes (model, attrs) {
         attributeWhiteList: attrs.filterWhiteList
     });
 }
-*/
+ */
 
 /**
  * Styles the new layer
@@ -461,7 +462,7 @@ function checkChunkNode (feature, newLayer, chunk) {
 
     return 1;
 }
-*/
+ */
 
 /**
  * @description Generates colorScale for given length on base color.

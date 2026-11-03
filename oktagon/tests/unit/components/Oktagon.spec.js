@@ -24,7 +24,7 @@ describe("OktagonComponent.vue", () => {
      * Creates a mock Vuex store for Oktagon tests
      * @param {Object} [submitObject={}] - Initial submitObject state
      * @returns {import('vuex').Store} Vuex store instance
-    */
+     */
     function createMockStore (submitObject = {}) {
         return createStore({
             modules: {

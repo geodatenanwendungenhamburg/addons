@@ -950,10 +950,10 @@ export default {
             }
         },
         /**
-        * Computes the slider labels (dates) for RangeSlider, filtered by the current rangeStartDate and rangeEndDate.
-        * If there are more than 500 labels, only the first label and labels ending with "-01" (first of the month) are returned.
-        * @returns {Array} slider labels for RangeSlider
-        */
+         * Computes the slider labels (dates) for RangeSlider, filtered by the current rangeStartDate and rangeEndDate.
+         * If there are more than 500 labels, only the first label and labels ending with "-01" (first of the month) are returned.
+         * @returns {Array} slider labels for RangeSlider
+         */
         sliderLabels () {
             if (!this.rangeStartDate || !this.rangeEndDate) {
                 return [];

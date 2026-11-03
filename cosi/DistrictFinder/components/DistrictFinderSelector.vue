@@ -233,10 +233,10 @@ export default {
             this.setSubLevelSelection(tmpSublLevelSelection);
         },
         /**
-        * Removes the given item from the subLevelSelection.
-        * @param {String} item The item to remove
-        * @returns {void}
-        */
+         * Removes the given item from the subLevelSelection.
+         * @param {String} item The item to remove
+         * @returns {void}
+         */
         removeFromSubLevelSelection (item) {
             const subLevelSelection = [...this.subLevelSelection];
 

@@ -10,21 +10,21 @@ import buildOafFilterString from "../utils/buildOafFilterString";
 
 export default {
     /**
-         * Queries the OAF feature service with the provided parameters.
-         * @param {Object} context - The Vuex context object.
-         * @param {Function} context.commit Vuex commit function.
-         * @param {Object} context.state Vuex module state.
-         * @param {Function} context.dispatch Vuex dispatch function.
-         * @param {Object} payload - The payload containing the query parameters.
-         * @param {Object} payload.params - The values for filtering the OAF query.
-         * @param {string|null} [payload.params.startDate] - The start date for filtering in YYYY-MM-DD format.
-         * @param {string|null} [payload.params.endDate] - The end date for filtering in YYYY-MM-DD format.
-         * @param {string|null} [payload.params.textValue] - The text value for text search filtering.
-         * @param {Object|null} [payload.params.selectedFilters] - The selected options for select filtering.
-         * @param {Array} [payload.params.bbox] - The bounding box for spatial filtering.
-         * @param {string} [payload.params.crs] - The coordinate reference system.
-         * @returns {Promise<boolean>} A promise that resolves to true if the query was successful, or false if an error occurred.
-         */
+     * Queries the OAF feature service with the provided parameters.
+     * @param {Object} context - The Vuex context object.
+     * @param {Function} context.commit Vuex commit function.
+     * @param {Object} context.state Vuex module state.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @param {Object} payload - The payload containing the query parameters.
+     * @param {Object} payload.params - The values for filtering the OAF query.
+     * @param {string|null} [payload.params.startDate] - The start date for filtering in YYYY-MM-DD format.
+     * @param {string|null} [payload.params.endDate] - The end date for filtering in YYYY-MM-DD format.
+     * @param {string|null} [payload.params.textValue] - The text value for text search filtering.
+     * @param {Object|null} [payload.params.selectedFilters] - The selected options for select filtering.
+     * @param {Array} [payload.params.bbox] - The bounding box for spatial filtering.
+     * @param {string} [payload.params.crs] - The coordinate reference system.
+     * @returns {Promise<boolean>} A promise that resolves to true if the query was successful, or false if an error occurred.
+     */
     async queryOaf ({commit, state, dispatch}, {params}) {
         const oafParams = state.oafParams,
             filterString = buildOafFilterString(oafParams.filters, params);
@@ -63,13 +63,13 @@ export default {
         }
     },
     /**
-         * Loads the OAF collection schema and stores it in the module state.
-         * @param {Object} context Vuex action context.
-         * @param {Function} context.commit Vuex commit function.
-         * @param {Object} context.state Vuex module state.
-         * @param {Function} context.dispatch Vuex dispatch function.
-         * @returns {void}
-    */
+     * Loads the OAF collection schema and stores it in the module state.
+     * @param {Object} context Vuex action context.
+     * @param {Function} context.commit Vuex commit function.
+     * @param {Object} context.state Vuex module state.
+     * @param {Function} context.dispatch Vuex dispatch function.
+     * @returns {void}
+     */
     queryOafSchema ({commit, state, dispatch}) {
         const oafParams = state.oafParams;
 

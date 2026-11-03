@@ -69,13 +69,13 @@ function prepareLinRegData (correlation) {
 }
 
 /**
-* @description Passes data to the Chart Generator Tool.
-* @param {Object[]} graphData - the data for all districts
-* @param {String} districtLevelLabel - the label of the districtLevel
-* @param {String} category - the category to get the charts for
-* @param {Number[]} timestamps - the timestamps for the x-Axis
-* @returns {Void} Function returns nothing.
-*/
+ * @description Passes data to the Chart Generator Tool.
+ * @param {Object[]} graphData - the data for all districts
+ * @param {String} districtLevelLabel - the label of the districtLevel
+ * @param {String} category - the category to get the charts for
+ * @param {Number[]} timestamps - the timestamps for the x-Axis
+ * @returns {Void} Function returns nothing.
+ */
 export function generateGraphObj (graphData, districtLevelLabel, category, timestamps) {
     return new ChartDataset({
         id: "ccm",
@@ -92,12 +92,12 @@ export function generateGraphObj (graphData, districtLevelLabel, category, times
 }
 
 /**
-* @description Passes data to the Chart Generator Tool.
-* @param {Object[]} graphData - the data for all districts
-* @param {String} categoryX - the category displayed on the x Axis
-* @param {String} categoryY - the category displayed on the y Axis
-* @returns {Void} Function returns nothing.
-*/
+ * @description Passes data to the Chart Generator Tool.
+ * @param {Object[]} graphData - the data for all districts
+ * @param {String} categoryX - the category displayed on the x Axis
+ * @param {String} categoryY - the category displayed on the y Axis
+ * @returns {Void} Function returns nothing.
+ */
 export function generateScatterGraphObj (graphData, categoryX, categoryY) {
     return new ChartDataset({
         id: "ccm",

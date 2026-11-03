@@ -182,9 +182,9 @@ export default {
     },
 
     /**
-    * resets facility layers' bbox
-    * @returns {void}
-    */
+     * resets facility layers' bbox
+     * @returns {void}
+     */
     resetIsochroneBBox () {
         setBBoxToGeom(this, this.boundingGeometry, layerCollection.getLayers());
     },

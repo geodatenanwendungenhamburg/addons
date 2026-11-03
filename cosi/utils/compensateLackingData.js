@@ -1,10 +1,10 @@
 import {mean, median} from "./math";
 
 /** If parameters of a facility dataset is inconsistent, this function provides the average value from all other facilities.
-* @param {Number[]} dataArray Of Objects containing data to be checked for lacking data sets.
-* @param {String} [strategy="median"] The strategy that will be used for filling in the empty data. Can be "median" or "mean"
-* @returns {Object[]} Array of complete/fixed Data.
-*/
+ * @param {Number[]} dataArray Of Objects containing data to be checked for lacking data sets.
+ * @param {String} [strategy="median"] The strategy that will be used for filling in the empty data. Can be "median" or "mean"
+ * @returns {Object[]} Array of complete/fixed Data.
+ */
 export default function compensateLackingData (dataArray, strategy = "median") {
     const completeData = [],
         incompleteData = [];

@@ -41,7 +41,7 @@ export default {
         value: {
             /**
              * @type {PropType<geojsonPolygon>}
-             * */
+             */
             type: Object,
             default: null
         }

@@ -160,8 +160,8 @@ export default {
     },
     watch: {
         /**
-        * Watcher to check the current component
-        */
+         * Watcher to check the current component
+         */
         currentComponentSide: {
             handler (newVal) {
                 if (newVal === "root" || (newVal === "layerSelection" && this.addLayerButtonSearchActive === true)) {
@@ -185,8 +185,8 @@ export default {
             deep: true
         },
         /**
-        * Watcher to check the searchInputValue for layerSelection module
-        */
+         * Watcher to check the searchInputValue for layerSelection module
+         */
         searchInputValue: {
             handler (value) {
                 if (value === "") {

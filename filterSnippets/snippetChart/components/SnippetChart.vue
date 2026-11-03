@@ -5,18 +5,18 @@ import {translateKeyWithPlausibilityCheck} from "@shared/js/utils/translateKeyWi
 import BarchartItem from "@shared/modules/charts/components/BarchartItem.vue";
 
 /**
-* Snippet Chart
-* @module modules/SnippetChart
-* @vue-data {Boolean} isVisible - true if the component should be rendered.
-* @vue-data {Boolean} isEmpty - true if the data contain only zeroes or no data available.
-* @vue-prop {Object} api - The api.
-* @vue-prop {String|Boolean} title - The title of the chart.
-* @vue-prop {Array} filteredItems - The list of filtered items (ol features).
-* @vue-prop {Object} chartConfig - The config for the chart.
-* @vue-prop {String} alternativeTextForEmptyChart - The text to show if the chart is empty.
-* @vue-prop {Array} subtitle - Array of strings and data keys used to display additional data in the subtitle of the chart.
-* @vue-prop {String} tooltipUnit - String containing unit symbol to append to numbers in tooltip.
-*/
+ * Snippet Chart
+ * @module modules/SnippetChart
+ * @vue-data {Boolean} isVisible - true if the component should be rendered.
+ * @vue-data {Boolean} isEmpty - true if the data contain only zeroes or no data available.
+ * @vue-prop {Object} api - The api.
+ * @vue-prop {String|Boolean} title - The title of the chart.
+ * @vue-prop {Array} filteredItems - The list of filtered items (ol features).
+ * @vue-prop {Object} chartConfig - The config for the chart.
+ * @vue-prop {String} alternativeTextForEmptyChart - The text to show if the chart is empty.
+ * @vue-prop {Array} subtitle - Array of strings and data keys used to display additional data in the subtitle of the chart.
+ * @vue-prop {String} tooltipUnit - String containing unit symbol to append to numbers in tooltip.
+ */
 export default {
     name: "SnippetChart",
     components: {

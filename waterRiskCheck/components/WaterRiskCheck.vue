@@ -273,8 +273,8 @@ export default {
             ];
         },
         /**
-        * Gets the infiltration values to be included in the report depending on the users' answer.
-        * @returns {Object} An object containing the values to use.
+         * Gets the infiltration values to be included in the report depending on the users' answer.
+         * @returns {Object} An object containing the values to use.
          */
         infiltrationValueToUse () {
             return this.pageNamesFromQuestions?.A4_Bestand ?

@@ -276,7 +276,7 @@ const actions = {
      * @param {Array<String>} payload.updatedLayerIds - Array of layer IDs to refresh after saving.
      * @param {String} payload.selectedTransaction - Insert or update, to decide if geomarker is saved or updated.
      * @returns {Promise<{transactionFeature: Object, transactionResponse: Object}>} - feature that we save and response of the request. (Both is actually almost the same and will be changed later.)
-    */
+     */
     async upsertPoint ({dispatch, commit, getters}, {geoMarkerFormValues, selectedTransaction}) {
         const {newGeoMarkerFeature, layerInformation, geoMarkerFeatureSelected, geoMarkerUpdateFeature} = getters,
             layer = layerInformation[0],

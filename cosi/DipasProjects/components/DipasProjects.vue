@@ -214,7 +214,7 @@ export default {
          * Prepares and formats the projects data.
          * @param {ol/Feature[]} features - The project features.
          * @returns {Object} - The project data.
-        */
+         */
         prepareProjects (features) {
             return features.map(feature => {
                 const props = feature.getProperties();
@@ -239,7 +239,7 @@ export default {
          * Gets the formatted properties for the UI card component.
          * @param {Object} project - The project data object to be transformed.
          * @returns {Object} - The project data for card component.
-        */
+         */
         getCardProps (project) {
             return {
                 badgeList: [{

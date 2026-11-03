@@ -462,11 +462,11 @@ export default {
         },
 
         /**
-     * Gets inputs based on menu type and filters.
-     * @param {String|null} [menuType=null] - The menu type to filter by ("primary", "advanced", etc.).
-     * @param {Boolean} [includeObjectProperties=true] - Whether to include object properties.
-     * @returns {Object} Filtered inputs based on criteria.
-     */
+         * Gets inputs based on menu type and filters.
+         * @param {String|null} [menuType=null] - The menu type to filter by ("primary", "advanced", etc.).
+         * @param {Boolean} [includeObjectProperties=true] - Whether to include object properties.
+         * @returns {Object} Filtered inputs based on criteria.
+         */
         getInputsByMenuType (menuType = null, includeObjectProperties = true) {
             const result = {};
 

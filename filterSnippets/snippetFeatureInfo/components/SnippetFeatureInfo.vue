@@ -6,17 +6,17 @@ import beautifyKey from "@shared/js/utils/beautifyKey.js";
 import {translateKeyWithPlausibilityCheck} from "@shared/js/utils/translateKeyWithPlausibilityCheck.js";
 
 /**
-* Snippet Info
-* @module modules/SnippetInfo
-* @vue-prop {Array} attrName - The list of attribute names.
-* @vue-prop {Array} title - The title of the info.
-* @vue-prop {String} layerId - The layer id.
-* @vue-prop {Number} snippetId - The snippet id.
-* @vue-prop {Array} filteredItems - The list of filtered items.
-* @vue-prop {Object} universalSearch - The configured universal search object
-* @vue-prop {Object} beautifiedAttrName - The beautified attribute name
-* @vue-data {Object} featureInfo - (??).
-*/
+ * Snippet Info
+ * @module modules/SnippetInfo
+ * @vue-prop {Array} attrName - The list of attribute names.
+ * @vue-prop {Array} title - The title of the info.
+ * @vue-prop {String} layerId - The layer id.
+ * @vue-prop {Number} snippetId - The snippet id.
+ * @vue-prop {Array} filteredItems - The list of filtered items.
+ * @vue-prop {Object} universalSearch - The configured universal search object
+ * @vue-prop {Object} beautifiedAttrName - The beautified attribute name
+ * @vue-data {Object} featureInfo - (??).
+ */
 export default {
     name: "SnippetFeatureInfo",
     components: {

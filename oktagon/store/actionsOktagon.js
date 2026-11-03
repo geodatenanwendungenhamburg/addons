@@ -4,10 +4,10 @@ import axios from "axios";
 
 export default {
     /**
-    * Adds the coordinate parameters to the submit object.
-    * @param  {Array} coordinate contains clicked coordinates.
-    * @returns {void}
-    */
+     * Adds the coordinate parameters to the submit object.
+     * @param  {Array} coordinate contains clicked coordinates.
+     * @returns {void}
+     */
     addCoordinatesToSubmitObject ({getters, commit}, coordinate) {
         const submitObject = getters.submitObject;
 
@@ -17,9 +17,9 @@ export default {
         commit("setSubmitObject", submitObject);
     },
     /**
-    * Trigger an alert for wrong input Parameters.
-    * @returns {void}
-    */
+     * Trigger an alert for wrong input Parameters.
+     * @returns {void}
+     */
     alertWrongInputParameters ({dispatch}) {
         dispatch("Alerting/addSingleAlert",
             "<strong>" + i18next.t("additional:modules.oktagon.wrongAddressParameter") + "</strong>"
@@ -29,10 +29,10 @@ export default {
         );
     },
     /**
-    * Assembles the address from the URL parameters.
-    * @param {Object} result - The url parameters.
-    * @returns {void}
-    */
+     * Assembles the address from the URL parameters.
+     * @param {Object} result - The url parameters.
+     * @returns {void}
+     */
     createAddress ({dispatch, commit, getters}, result) {
         const searchParams = {
             searchStreets: true
@@ -52,10 +52,10 @@ export default {
         dispatch("startSearch", {searchInput: address, searchParams: searchParams});
     },
     /**
-    * Handles the wms response.
-    * @param {Object} response The wms response.
-    * @returns {void}
-    */
+     * Handles the wms response.
+     * @param {Object} response The wms response.
+     * @returns {void}
+     */
     handleResponse ({dispatch, getters}, response) {
         const result = response.find(element => element.name.toUpperCase() === getters.address);
 
@@ -63,9 +63,9 @@ export default {
     },
 
     /**
-    * Processes the url parameter.
-    * @returns {void}
-    */
+     * Processes the url parameter.
+     * @returns {void}
+     */
     initURLParameter ({dispatch, commit, getters}) {
         const result = {},
             params = new URLSearchParams(window.location.search);
@@ -101,10 +101,10 @@ export default {
 
     },
     /**
-    * Parses the xml response.
-    * @param  {Object} xml contains the response xml.
-    * @returns {void}
-    */
+     * Parses the xml response.
+     * @param  {Object} xml contains the response xml.
+     * @returns {void}
+     */
     parseXML ({getters, commit}, xml) {
         const xmlElements = Array.from(xml.getElementsByTagName("FIELDS")).length > 0 ? Array.from(xml.getElementsByTagName("FIELDS")) : Array.from(xml.getElementsByTagName("app:baubloecke")),
             submitObject = getters.submitObject;
@@ -129,10 +129,10 @@ export default {
         commit("setSubmitObject", submitObject);
     },
     /**
-    * Requests the ALKIS WMS and starts to parse the xml response.
-    * @param  {String} url contains the url.
-    * @returns {void}
-    */
+     * Requests the ALKIS WMS and starts to parse the xml response.
+     * @param  {String} url contains the url.
+     * @returns {void}
+     */
     requestALKISWMS ({dispatch}, url) {
         axios({
             method: "get",
@@ -165,10 +165,10 @@ export default {
             });
     },
     /**
-    * Zooms the map to the address.
-    * @param {Array} coordinates contains the coordinates.
-    * @returns {void}
-    */
+     * Zooms the map to the address.
+     * @param {Array} coordinates contains the coordinates.
+     * @returns {void}
+     */
     zoomToAddress ({dispatch}, coordinates) {
         const coordinatesArray = [];
 

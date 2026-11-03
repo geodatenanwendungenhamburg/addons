@@ -19,7 +19,7 @@ const mutations = {
      * @param {Object} state - The Vuex state object for the VpiDashboard module.
      * @param {any} entry - The entry to be added to the year list.
      * @returns {void}
-    */
+     */
     addYearListEntry (state, entry) {
         state.yearList.push(entry);
     },

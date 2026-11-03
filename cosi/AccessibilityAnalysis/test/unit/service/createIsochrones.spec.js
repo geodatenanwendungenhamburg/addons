@@ -13,6 +13,8 @@ import {setWorkerFactory} from "../../../store/actionsAccessibilityAnalysis.js";
 /**
  * Mock the ORS url
  * @returns {String} the URL
+ */
+/*
 function baseUrl () {
     return "https://csl-lig.hcu-hamburg.de/ors/v2/";
 }

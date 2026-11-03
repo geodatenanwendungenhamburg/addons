@@ -189,7 +189,7 @@ export default {
         /**
          * Handles save-chapter event from StoryCreatorChapter.
          * Appends or replaces the chapter in chapterContent and returns to story view.
-
+         *
          * @param {Object} chapter - The chapter data.
          * @returns {void}
          */
@@ -360,7 +360,7 @@ export default {
          * Gets the photo credit of the chapter overview image. Images embedded in feature content are ignored.
          * @param {Object} val - The chapter object.
          * @return {String} The photo credit.
-        */
+         */
         getChapterOverviewPhotoCredit (val) {
             if (!isObject(val) || !Array.isArray(val?.content)) {
                 return "";

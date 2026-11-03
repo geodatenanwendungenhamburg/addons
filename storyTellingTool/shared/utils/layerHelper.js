@@ -25,9 +25,9 @@ function getVisibleLayerList (layers, excludeLayerId = null) {
 }
 
 /**
-* Creates a layer if it does not yet exist and returns its source.
-* @returns {Object} A vector layer source.
-*/
+ * Creates a layer if it does not yet exist and returns its source.
+ * @returns {Object} A vector layer source.
+ */
 function getLayerSource () {
     if (typeof layerCollection.getLayerById("drawn-story-creator") !== "undefined") {
         return layerCollection.getLayerById("drawn-story-creator").getLayerSource();

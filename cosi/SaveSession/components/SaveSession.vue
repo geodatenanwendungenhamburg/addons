@@ -176,7 +176,7 @@ export default {
         /**
          * Saving the data
          * @returns {void}
-        */
+         */
         save () {
             this.saveDialog = false;
             this.state = serializeState(this.storePaths, this.$store, this.deepFeatures);

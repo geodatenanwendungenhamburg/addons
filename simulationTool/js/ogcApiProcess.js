@@ -8,7 +8,7 @@ import sanitizeConfiguredUrl from "./sanitizeConfiguredUrl.js";
 /**
  * Class representing an OGC API Process.
  * @class OgcApiProcess
-*/
+ */
 export default class OgcApiProcess {
 
     /**
@@ -16,7 +16,7 @@ export default class OgcApiProcess {
      * @constructor
      * @param {string} baseUrl - The base URL of the OGC API. Relative and absolute URLs are supported.
      * @param {string} processId - The ID of the process.
-    */
+     */
     constructor (baseUrl, processId) {
         this.baseUrl = sanitizeConfiguredUrl(baseUrl, {
             enforceTrailingSlash: true,
@@ -26,11 +26,11 @@ export default class OgcApiProcess {
     }
 
     /**
-    * Fetches the process description.
-    * @param {string} accessToken - The access token for authorization.
-    * @throws {Error} If an error occurs while fetching the process description.
-    * @returns {Promise<Object|undefined>} The process description or undefined if an error occurs.
-    */
+     * Fetches the process description.
+     * @param {string} accessToken - The access token for authorization.
+     * @throws {Error} If an error occurs while fetching the process description.
+     * @returns {Promise<Object|undefined>} The process description or undefined if an error occurs.
+     */
     async getDescription (accessToken) {
         try {
             const url = new URL(`processes/${this.processId}`, this.baseUrl),
@@ -53,7 +53,7 @@ export default class OgcApiProcess {
      * @param {ProcessDescription} description - The process description.
      * @param {Object} description.inputs - The inputs of the process.
      * @returns {Object} An object containing the default values for the inputs.
-    */
+     */
     static getInputDefaultsFromDescription (description) {
         const defaultsObject = {};
 
@@ -172,7 +172,7 @@ export default class OgcApiProcess {
      * @param {function} [onProgressUpdate=null] - Optional callback function to handle progress updates.
      * @returns {Promise<Object>} The job results object.
      * @throws {Error} If an error occurs during execution or if the job fails.
-    */
+     */
     async pollJobStatusAndGetResults (accessToken, jobID, pollingInterval = 1000, onProgressUpdate = null) {
         /** @type StatusInfo|undefined*/
         let jobStatus;

@@ -264,7 +264,7 @@ function serializeGeometry (geom) {
 function serializeDrawFeatures (state) {
     state.Tools.Draw.layer = serializeFeatures(state.Tools.Draw.layer?.getSource().getFeatures() || []);
 }
-*/
+ */
 
 /**
  * Serializes tool datasets

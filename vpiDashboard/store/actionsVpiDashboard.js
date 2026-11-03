@@ -12,7 +12,7 @@ const actions = {
      * @param {Object} state the store's state .
      * @param {Function} commit actions commit function.
      * @returns {void}
-     **/
+     */
     getVisitors: async ({state, commit}) => {
         if (state.selectedLocationId && state.selectedLocationId !== "") {
             commit("setLoader", true);
@@ -45,7 +45,7 @@ const actions = {
      * @param {Function} commit actions commit function.
      * @param {String} chartname contains dateFrom and dateTo to define daterange to be requested
      * @returns {void}
-     **/
+     */
     changeChart: ({commit}, chartname) => {
         commit("setChartData", chartname);
     },
@@ -60,7 +60,7 @@ const actions = {
      * @param {Function} commit actions commit function.
      * @param {Function} dispatch mutations dispatch function.
      * @returns {void}
-     **/
+     */
     initSelectInteraction ({state, commit}) {
         const map = mapCollection.getMap("2D");
 

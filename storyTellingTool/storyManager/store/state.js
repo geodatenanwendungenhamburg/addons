@@ -17,7 +17,7 @@
  * @property {Object[]} storyList List entries with story and image assets.
  * @property {Object} subjectLayerCategory - The subject layer category for layer selection.
  * @property {String[]} [toolStoryWhitelist=[]] - List of tool type IDs to show in the StoryCreator tool selector. Empty array means all configured tools are shown.
-* @property {Object[]} currentLayout - The current layout object.
+ * @property {Object[]} currentLayout - The current layout object.
  * @property {Object[]} drawTypeLabels - the array of type and labels.
  * @property {Object[]} selectedDrawType - The selected draw type.
  * @property {Object[]} selectedDrawTypeMain - The main selected draw type.

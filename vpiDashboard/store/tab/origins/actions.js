@@ -6,7 +6,7 @@ const actions = {
      * @param {Object} state the stores state object.
      * @param {Function} commit actions commit object.
      * @returns {void}
-     **/
+     */
     getOriginsCities: async ({state, commit}) => {
         commit("setLoader", true);
 

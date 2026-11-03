@@ -22,7 +22,7 @@ export function download (dataUrl, filename) {
  * @param {Object} json - the json object to download
  * @param {String} filename - the filename of the file
  * @returns {void}
-*/
+ */
 export function downloadJsonToFile (json, filename) {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
 
@@ -34,7 +34,7 @@ export function downloadJsonToFile (json, filename) {
  * @param {String} string - the string to download
  * @param {String} filename - the filename of the file
  * @returns {void}
-*/
+ */
 export function downloadTextToFile (string, filename) {
     const dataStr = "data:text/plain;charset=utf-8," + encodeURI(string);
 
@@ -46,7 +46,7 @@ export function downloadTextToFile (string, filename) {
  * @param {String} string - the string to download
  * @param {String} filename - the filename of the file
  * @returns {void}
-*/
+ */
 export function downloadCsvToFile (string, filename) {
     const dataStr = "data:text/csv;charset=utf-8," + encodeURI(string);
 

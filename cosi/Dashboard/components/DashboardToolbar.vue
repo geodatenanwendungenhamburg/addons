@@ -60,9 +60,9 @@ export default {
         //     return this._statsFeatureFilter.length > 5;
         // },
         /**
-        * Get calculation operator items with localized titles.
-        * @returns {Object[]} Array of calculation operator items.
-        */
+         * Get calculation operator items with localized titles.
+         * @returns {Object[]} Array of calculation operator items.
+         */
         calculationOperatorItems () {
             return [
                 {title: this.$t("additional:modules.tools.cosi.dashboard.tableRowMenu.add"), value: "add"},

@@ -9,7 +9,7 @@ export default {
      * @param {Object} param.dispatch the dispatch
      * @param {Object} param.getters the getters
      * @returns {void}
-    */
+     */
     toggleRasterLayer ({dispatch, getters}) {
         const layerId = getters.wmsRasterLayerId;
 
@@ -26,12 +26,12 @@ export default {
     },
 
     /**
-    * Loads the WFS raster with the params stored in property wfsRasterParams.
-    * On success the features are read.
-    * @param {Object} getters vuex element
-    * @param {Object} dispatch vuex element
-    * @returns {void}
-    */
+     * Loads the WFS raster with the params stored in property wfsRasterParams.
+     * On success the features are read.
+     * @param {Object} getters vuex element
+     * @param {Object} dispatch vuex element
+     * @returns {void}
+     */
     loadWfsRaster ({getters, dispatch}) {
         const params = getters.wfsRasterParams,
             urlParams = {
@@ -67,7 +67,7 @@ export default {
      * @param {Object} commit vuex element
      * @param {Object} data of the wfs response (XML)
      * @returns {void}
-    */
+     */
     readFeatures ({commit}, data) {
         const format = new WFS(),
             features = format.readFeatures(data);
@@ -82,7 +82,7 @@ export default {
      * @param {Object} dispatch vuex element
      * @param {Object} rootState vuex element
      * @returns {void}
-    */
+     */
     async calculateSelectedRasterNames ({getters, dispatch, commit, rootState}) {
         const rasterLayerFeatures = getters.wfsRaster,
             selectedAreaGeoJson = rootState.Modules.GraphicalSelect.selectedAreaGeoJson,
@@ -111,7 +111,7 @@ export default {
      * @param {Object} payload.feature to get the name of the tile
      * @param {Object} payload.rasterNames array to fill with unique names
      * @returns {void}
-    */
+     */
     addFeaturenameToRasternames (context, payload) {
         if (payload.feature && payload.rasterNames) {
             const intersectedRasterName = payload.feature.getProperties().kachel,
@@ -128,7 +128,7 @@ export default {
      * @param {Object} getters vuex element
      * @param {Object} dispatch vuex element
      * @returns {void}
-    */
+     */
     async requestCompressedData ({getters, dispatch}) {
         const params = {};
 

@@ -106,7 +106,7 @@ export default {
             /**
              * gets the selected values of the slider
              * @returns {Array} the selected values
-            */
+             */
             get () {
                 return this.sliderSelectedValues;
             },
@@ -114,7 +114,7 @@ export default {
              * sets the selected values of the slider
              * @param {Array} value the selected values
              * @returns {void}
-            */
+             */
             set (value) {
                 this.setSliderSelectedValues(value);
             }
@@ -122,7 +122,7 @@ export default {
         /**
          * will check if a user interaction is neccessary for this chart type (request of date value will be initiated based on this value)
          * @returns {Boolean} is visitors chart type
-        */
+         */
         isVisitorsChartType () {
             return ["hourly", "daily"].includes(this.selectedChartData);
         },
@@ -154,7 +154,7 @@ export default {
         /**
          * Create the chart data for first overview
          * @returns {void}
-        */
+         */
         async fillInitialChartData () {
             this.dayDatepickerValueChanged(this.dates);
             this.$store.commit("Modules/VpiDashboard/setBarChartMonthlyData", this.currentlySelectedYear);
@@ -167,7 +167,7 @@ export default {
          * define, which chart type shall be displayed
          * @param {String} chartType an be one of "bar" or "line"
          * @returns {void}
-        */
+         */
         setChartType (chartType) {
             this.chartType = chartType;
         },
@@ -176,7 +176,7 @@ export default {
          * if a visitors chart type (urges the user to pick a date / date range before) is selected, the date picker is prepared
          * otherwise the data are selected and the chart change is started
          * @returns {void}
-        */
+         */
         switchChart () {
             this.showDatepicker = false;
             if (this.isVisitorsChartType) {
@@ -190,7 +190,7 @@ export default {
         /**
          * requests the data from the store for those chart data that are static
          * @returns {void}
-        */
+         */
         getCurrentChartsData () {
             switch (this.selectedChartData) {
                 case "dailyoverview":
@@ -224,7 +224,7 @@ export default {
          * when the user selected a date, the data need to be requested from OGC-API and the chart data need to be created
          * @param {String | Array} values can hold a single day or a date range, depending on the selected chart type
          * @returns {void}
-        */
+         */
         async dayDatepickerValueChanged (values) {
             let responses = [];
 
@@ -257,7 +257,7 @@ export default {
          * sets the chart data for both bar and line charts
          * @param {Array} data the data to be used for the charts
          * @returns {void}
-        */
+         */
         setChartData (data) {
             const barChartData = this.createChartData(data, "bar"),
                   lineChartData = this.createChartData(data, "line");
@@ -273,7 +273,7 @@ export default {
         /**
          * updates the slider data based on the currently selected chart data
          * @returns {void}
-        */
+         */
         updateSliderData () {
             this.setSliderData(this.chartdata?.bar?.labels?.map((label, index) => {
                 return {
@@ -287,7 +287,7 @@ export default {
          * @param {Object} responseData the data responded by OGC-API
          * @param {String} chartType can be one of "bar" or "line"
          * @returns {Object} the formatted data to be shown in the chart
-        */
+         */
         createChartData (responseData, chartType) {
             const labels = [],
                   mondayToSaturdayData = [],

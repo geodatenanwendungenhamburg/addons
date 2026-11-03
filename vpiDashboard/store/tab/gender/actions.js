@@ -6,7 +6,7 @@ const actions = {
      * @param {Object} state the store's state and commit object.
      * @param {Function} commit Commit Object
      * @returns {Promise<void>} sets the data in store
-     **/
+     */
     getGendersData: async ({state, commit}) => {
         commit("setLoader", true);
 

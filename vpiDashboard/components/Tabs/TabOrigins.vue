@@ -164,7 +164,7 @@ export default {
         /**
          * Create the chart data for first overview
          * @returns {void}
-        */
+         */
         async fillInitialChartData () {
             this.dayDatepickerValueChanged(this.dates);
             this.getCurrentChartsData();
@@ -173,7 +173,7 @@ export default {
          * define, which chart type shall be displayed
          * @param {String} chartType an be one of "bar" or "line"
          * @returns {void}
-        */
+         */
         setChartType (chartType) {
             this.chartType = chartType;
         },
@@ -191,7 +191,7 @@ export default {
          * if a visitors chart type (urges the user to pick a date / date range before) is selected, the date picker is prepared
          * otherwise the data are selected and the chart change is started
          * @returns {void}
-        */
+         */
         switchChart () {
             this.showDatepicker = false;
             this.dayDatepickerValueChanged(this.dates);
@@ -200,7 +200,7 @@ export default {
         /**
          * get the chart data from the store for the selected year
          * @returns {void}
-        */
+         */
         getCurrentChartsData () {
             switch (this.selectedChartData) {
                 case "monthlyoverview":
@@ -290,7 +290,7 @@ export default {
          * sets the chart data for both bar and line charts
          * @param {Array} features the data to be used for the charts
          * @returns {void}
-        */
+         */
         setChartData (features) {
             const chartData = this.createChartData(features);
 
@@ -304,7 +304,7 @@ export default {
          * the data for chart.js is created, based on
          * @param {Object} responseData the data responded by OGC-API
          * @returns {Object} the formatted data to be shown in the chart
-        */
+         */
         createChartData (responseData) {
             const labels = [],
                   presentation_data = [],

@@ -38,7 +38,7 @@ function getFeatureIds (layerId) {
  * @param {String} gfiTheme name of the gfiTheme
  * @param {String} mouseHoverField name of the field to be shown on mouse hover
  * @returns {Object} Object of geojson layer
-*/
+ */
 function returnGeoJSONLayerObject (name, id, geojson, styleId, parentId, gfiAttributes = "showAll", clusterDistance = undefined, gfiTheme = "default", mouseHoverField = undefined) {
     const layer = {
         type: "layer",

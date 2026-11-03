@@ -1569,17 +1569,17 @@ export default {
         },
 
         /**
-        * Goes back to the previous step
-        * @returns {void}
-        */
+         * Goes back to the previous step
+         * @returns {void}
+         */
         stepperPrev () {
             this.$refs.stepperActions.prev();
         },
 
         /**
-        * Goes to the next step
-        * @returns {void}
-        */
+         * Goes to the next step
+         * @returns {void}
+         */
         stepperNext () {
             this.$refs.stepperActions.next();
         },

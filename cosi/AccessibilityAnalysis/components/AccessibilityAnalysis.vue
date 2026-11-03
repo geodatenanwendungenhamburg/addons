@@ -384,8 +384,8 @@ export default {
         }
     },
     /**
-    * @returns {void}
-    */
+     * @returns {void}
+     */
     created () {
         this.setDefaults();
         this.visibleVectorLayers = this.getVisibleVectorLayers();
@@ -400,9 +400,9 @@ export default {
     },
 
     /**
-   * Put initialize here if mounting occurs after config parsing
-    * @returns {void}
-   */
+     * Put initialize here if mounting occurs after config parsing
+     * @returns {void}
+     */
     mounted () {
         this.baseUrl = this.restServiceById(this.serviceId || this.fallbackServiceId).url + "/v2/";
         this.getLayerById("accessibility-analysis").getLayer().setVisible(true);
@@ -731,10 +731,10 @@ export default {
         },
 
         /**
-        * Sets facilityNames array if the corresponding layer has features.
-        * @param {Object[]} layerList - The list of layers to check for features.
-        * @returns {void}
-        */
+         * Sets facilityNames array if the corresponding layer has features.
+         * @param {Object[]} layerList - The list of layers to check for features.
+         * @returns {void}
+         */
         setFacilityNames: function (layerList) {
             this.facilityNames = [];
 
@@ -1303,7 +1303,7 @@ export default {
         /**
          * Generates an ID to identify the analyses with name and timestamp.
          * @param {String} name - the currently given name.
-          * @returns {String} the generated id.
+         * @returns {String} the generated id.
          */
         generateAnalysisId (name) {
             const idName = name.trim().toLowerCase().replace(/[^a-z0-9]/g, ""),
@@ -1386,7 +1386,7 @@ export default {
         },
 
         /**
-        * Resets the "subject data area" status
+         * Resets the "subject data area" status
          * @param {number} index - The index of data set.
          */
         resetSubjectDataArea (index) {
@@ -1460,7 +1460,7 @@ export default {
          * Closes all other open dropdowns when one is shown.
          * @param {Event} event - The "shown.bs.dropdown" event.
          * @returns {void}
-        */
+         */
         onDropdownShown (event) {
             const current = event.target;
 
@@ -1480,7 +1480,7 @@ export default {
          * @param {number} index - The index of the dataset.
          * @param {string} type - The type of action triggering the snackbar ("confirm" or "reset").
          * @returns {void}
-        */
+         */
         showSnackbar (index, type) {
             const card = this.dataSets[index];
 

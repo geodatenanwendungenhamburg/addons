@@ -145,7 +145,7 @@ export default {
     },
     /**
      * Creates and returns a GeoJSON of all drawn features without GUI.
-
+     *
      * @param {Object} context actions context object
      * @param {Object} payload payload object.
      * @param {String} payload.prmObject An Object which includes the parameters.

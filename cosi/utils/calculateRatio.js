@@ -1,8 +1,8 @@
 /** Calculates the ratio of a set of features.
-* @param {Object[]} dataArray Of Objects containing data to be calculated.
-* @param {String} year Year from which data is to be selected.
-* @returns {Object[]} Array of calculated Data.
-*/
+ * @param {Object[]} dataArray Of Objects containing data to be calculated.
+ * @param {String} year Year from which data is to be selected.
+ * @returns {Object[]} Array of calculated Data.
+ */
 export default function calculateRatio (dataArray, year) {
     const results = [];
 
@@ -20,10 +20,10 @@ export default function calculateRatio (dataArray, year) {
     return calculateTotals(results);
 }
 /** Calculates the extent of a set of features.
-* @param {Object} calcObj pre-transformed dataset.
-* @param {Object} dataset Original dataset from dataArray.
-* @returns {Object} calculated single dataset.
-*/
+ * @param {Object} calcObj pre-transformed dataset.
+ * @param {Object} dataset Original dataset from dataArray.
+ * @returns {Object} calculated single dataset.
+ */
 function calculateSingle (calcObj, dataset) {
     if (isNaN(calcObj.paramA_val) || isNaN(calcObj.paramB_val)) {
         calcObj.relation = 0;
@@ -54,9 +54,9 @@ function calculateSingle (calcObj, dataset) {
     return calcObj;
 }
 /** Calculates total and average values for all single Datasets.
-* @param {Array} results Array of all single dataset.
-* @returns {Array} Updated Array.
-*/
+ * @param {Array} results Array of all single dataset.
+ * @returns {Array} Updated Array.
+ */
 function calculateTotals (results) {
     const filteredResults = results.filter(function (dataset) {
         if (dataset.paramA_val === undefined || dataset.paramB_val === undefined) {

@@ -1,7 +1,6 @@
 /**
  * The state of the searchBar.
  * @module modules/searchBar/store/stateSearchBar
- *
  * @property {String[]} configPaths Path array of possible config locations. First one found will be used
  * @property {String} [currentSide="mainMenu"] Current side of the searchBar.
  * @property {String} [minCharacters=3] Minimum amount of characters required to start a search.
@@ -30,8 +29,7 @@
  * @property {Boolean} [addLayerButtonSearchActive=true] Flag indicating whether the "Add Layer" button search is active.
  * @property {Object} [iconsByActions= { addLayerToTopicTree: "bi-plus-circle", activateLayerInTopicTree: "bi-eye", highlightFeature: "bi-lightbulb", openGetFeatureInfo: "bi-info-circle", setMarker: "bi-geo-alt-fill", zoomToResult: "bi-zoom-in", startRouting: "bi-signpost-2" }] - contains the icons by action names to display on buttons.
  * @property {Object} [lastPickedFeatureId=null] The ID of the last feature that was picked or interacted with by the user.
-
-*/
+ */
 const state = {
     coloredHighlighting3D: {},
     configPaths: [],

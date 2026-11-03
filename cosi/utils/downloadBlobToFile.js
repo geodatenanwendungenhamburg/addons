@@ -3,7 +3,7 @@
  * @param {Blob} blob - the file blob to download
  * @param {String} filename - the default filename
  * @returns {void}
-*/
+ */
 export function downloadBlobToFile (blob, filename) {
     const link = document.createElement("a"),
         url = URL.createObjectURL(blob);

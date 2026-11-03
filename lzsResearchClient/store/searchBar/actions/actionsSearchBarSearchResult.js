@@ -61,7 +61,7 @@ export default {
      * @param {import("ol/Feature").default} feature - OpenLayers feature containing a geometry collection.
      * @param {number[]} coordinates - Fallback coordinates used when no point geometry is found.
      * @returns {number[]} Coordinates of the first point geometry, or the fallback coordinates.
-    */
+     */
     getFirstPointCoordinatesOfGeometryCollection: (feature, coordinates) => {
         const geomCollection = feature.getGeometry(),
             firstPoint = geomCollection.getGeometries().find(geom => geom.getType() === "Point");

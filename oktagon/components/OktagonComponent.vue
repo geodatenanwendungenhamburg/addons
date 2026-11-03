@@ -35,10 +35,10 @@ export default {
         ...mapMutations("Modules/OktagonComponent", ["setSubmitObject"]),
 
         /**
-        * onMapClickOktagon Shows the sidebar with it parameters
-        * @param {Event} evt the click event
-        * @returns {void}
-        */
+         * onMapClickOktagon Shows the sidebar with it parameters
+         * @param {Event} evt the click event
+         * @returns {void}
+         */
         async onMapClickOktagon (evt) {
             if (!this.expanded("secondaryMenu")) {
                 this.toggleMenu("secondaryMenu");
@@ -64,19 +64,19 @@ export default {
             this.setFocusToFirstControl();
         },
         /**
-        * Opens the submit url in the same window.
-        * As it gets opened in the same tab, there's no need to open it through the secured util function openSecuredPopup, hence the eslint disable comment is used.
-        * @returns {void}
-        */
+         * Opens the submit url in the same window.
+         * As it gets opened in the same tab, there's no need to open it through the secured util function openSecuredPopup, hence the eslint disable comment is used.
+         * @returns {void}
+         */
         async onSubmit () {
             // eslint-disable-next-line local/no-window-open
             window.open(await this.submitURL, "_self");
         },
 
         /**
-        * Cancels the current selection and resets everything
-        * @returns {void}
-        */
+         * Cancels the current selection and resets everything
+         * @returns {void}
+         */
         close () {
             this.setSubmitObject({});
             this.removePointMarker();
@@ -85,9 +85,9 @@ export default {
             }
         },
         /**
-        * Sets the focus to the close.
-        * @returns {void}
-        */
+         * Sets the focus to the close.
+         * @returns {void}
+         */
         setFocusToFirstControl () {
             this.$nextTick(() => {
                 if (this.$refs.oktagonSubmitButton) {

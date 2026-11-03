@@ -180,9 +180,9 @@ export default {
         },
 
         /**
-        * Get the simulation configuration for the current simulation.
-        * @returns {Object} The current simulation configuration.
-        */
+         * Get the simulation configuration for the current simulation.
+         * @returns {Object} The current simulation configuration.
+         */
         simulationConfig () {
             return this.simulations.find(simulation => simulation.id === this.currentSimulation.configId);
         },

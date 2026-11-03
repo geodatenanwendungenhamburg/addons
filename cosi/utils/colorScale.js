@@ -66,11 +66,11 @@ export function generateColorScale (values = [0, 1], colorspace = "interpolateBl
 }
 
 /**
-* @description Generates colorScale for given length on base color.
-* @param {String} color color from which colorscale is generated
-* @param {Int} length Number of colors to be generated in colorscale.
-* @returns {Array} ColorScale Array.
-*/
+ * @description Generates colorScale for given length on base color.
+ * @param {String} color color from which colorscale is generated
+ * @param {Int} length Number of colors to be generated in colorscale.
+ * @returns {Array} ColorScale Array.
+ */
 export function generateColorScaleByColor (color, length) {
     const hslColor = hsl(color),
         colorC = String(hslColor);

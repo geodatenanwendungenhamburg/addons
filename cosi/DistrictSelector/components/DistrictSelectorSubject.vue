@@ -583,9 +583,9 @@ export default {
         },
 
         /**
-        * Increments the import reset counter to clear the alert message.
-        * @returns {void}
-        */
+         * Increments the import reset counter to clear the alert message.
+         * @returns {void}
+         */
         clearImportAlert () {
             this.importResetTrigger++;
         }

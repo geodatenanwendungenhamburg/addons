@@ -7,7 +7,7 @@
  * @property {String[]} supportedMapModes list of map modes supported
  * @property {String} description The description that should be shown in the button in the menu.
  * @property {String} name Displayed as title (config-param)
-* @property {String} icon icon next to title (config-param)
+ * @property {String} icon icon next to title (config-param)
  * @property {Boolean} isVisibleInMenu if true, tool is selectable in menu (config-param)
  * @property {Boolean} rasterActive is the rasterLayer active
  * @property {Boolean} alkisAdressesActive is the alkisAdressesLayer active

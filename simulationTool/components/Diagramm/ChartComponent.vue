@@ -36,7 +36,7 @@ export default {
         this.drawChart(this.chartData);
     },
     methods: {
-        /**
+        /*
         drawChart () {
             if (!this.$refs.plotlyChart) {
                 return;
