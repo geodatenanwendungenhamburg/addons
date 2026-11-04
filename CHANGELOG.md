@@ -3,8 +3,7 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
-## Unreleased - in development
-### __Breaking Changes__
+## 2026-11-04 v3.28.0
 
 ### Added
 - landRegistryFile: Added new addon landRegistryFile to allow FHH internal search for historic land registry documents
@@ -17,10 +16,6 @@
 - Replaced native window.open function with xss-safe util function.
 - Changed Node.js support: Minimum supported versions are now Node.js **22.23.4** (LTS) and **24.22.1** (LTS). This update is required to address known security vulnerabilities in older Node.js versions.
 - userTracking: The url parameter values are no longer send for the initial pageview, except for {"maps":"2D/3D"}.
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 - userTracking: Events for colors and stroke widths of the Draw tool are now debounced separately for fill/stroke and inner/outer, so they no longer cancel each other.
