@@ -99,9 +99,8 @@ export default {
             <p
                 v-if="summary"
                 class="mb-2"
-            >
-                {{ summary }}
-            </p>
+                v-html="summary"
+            />
             <!-- <div
                 v-if="url"
                 class="d-flex justify-content-end"

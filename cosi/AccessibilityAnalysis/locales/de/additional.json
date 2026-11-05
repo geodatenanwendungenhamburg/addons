@@ -5,7 +5,7 @@
                 "accessibilityAnalysis": {
                     "areaOutsideMRH": "Für dieses Gebiet können keine Einwohner berechnet werden. Bitte wählen Sie ein Gebiet innerhalb der Metropolregion Hamburg.",
                     "title": "Erreichbarkeitsanalyse",
-                    "description": "Mit diesem Werkzeug können Sie sich auf der Karte Gebiete anzeigen lassen, die von einem ausgewählten Punkt, entlang einer Route oder innerhalb einer festgelegten Entfernung erreichbar sind. Die Erreichbarkeit kann je nach Verkehrsmittel berechnet und als Zeit oder Entfernung in Metern angegeben werden.",
+                    "description": "Mit diesem Werkzeug können Sie sich auf der Karte Gebiete anzeigen lassen, die von einem ausgewählten Punkt, entlang einer Route oder innerhalb einer festgelegten Entfernung erreichbar sind. Die Erreichbarkeit kann je nach Verkehrsmittel berechnet und als Zeit oder Entfernung in Metern angegeben werden. Die Standardgeschwindigkeit zu Fuß beträgt 5 km/h, mit Rollstuhl 4 km/h (vgl. <a href='https://giscience.github.io/openrouteservice/technical-details/travel-speeds/' target='_blank' rel='noopener noreferrer'>Dokumentation (externe Website)</a>).",
                     "dropdownInfo": "Bitte wählen Sie den Modus, in dem Sie arbeiten möchten",
                     "points": "Punkte",
                     "pointMode": "Erreichbarkeit ab einem Referenzpunkt",
