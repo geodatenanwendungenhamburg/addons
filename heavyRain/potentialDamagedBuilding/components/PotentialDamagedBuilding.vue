@@ -362,9 +362,10 @@ export default {
             {{ $t('additional:modules.potentialDamagedBuilding.loginRequired') }}
         </div>
         <template v-else>
-            <p>
-                {{ $t("additional:modules.potentialDamagedBuilding.description") }}
-            </p>
+            <p
+                class="mb-3"
+                v-html=" $t('additional:modules.potentialDamagedBuilding.description') "
+            />
             <h5 class="mt-3">
                 {{ $t("additional:modules.potentialDamagedBuilding.headline.buildingAttributes") }}
             </h5>

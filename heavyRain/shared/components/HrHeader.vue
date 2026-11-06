@@ -28,9 +28,10 @@ export default {
 
 <template lang="html">
     <div>
-        <p class="mb-4">
-            {{ text }}
-        </p>
+        <p
+            class="mb-4"
+            v-html="text"
+        />
         <div
             v-if="showButton"
             class="d-flex justify-content-center"
