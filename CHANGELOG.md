@@ -3,7 +3,7 @@
 
 [Semantic versioning](https://semver.org/spec/v2.0.0.html) is used.
 
-## 2026-11-11 v3.29.0
+## 2026-11-11 v3.30.0
 
 ### Added
 - pvObligation: Added new addon pvObligation to allow users to estimate their roof size thas has to be used for photovoltaik
