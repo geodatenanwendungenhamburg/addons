@@ -43,6 +43,10 @@ mirror_tag_to_github:
     - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/geodatenanwendungenhamburg/addons.git
     - git push github "refs/tags/$CI_COMMIT_TAG:refs/tags/$CI_COMMIT_TAG"
     - git push --force github "refs/tags/$CI_COMMIT_TAG:refs/tags/latest"
+    - |
+      git fetch origin dev
+      git checkout dev
+      git push --force github HEAD:refs/heads/dev
 
 # ===== Custom Pipelines (triggered manually) =====
 
